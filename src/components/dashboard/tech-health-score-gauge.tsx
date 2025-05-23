@@ -5,10 +5,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 
 interface TechHealthScoreGaugeProps {
   score: number // 1-10
-  grade: 'A' | 'B' | 'C' | 'D' | 'F'
+  grade: 'A' | 'B' | 'C' | 'D' | 'F'  // Keeping for backward compatibility
 }
 
-export function TechHealthScoreGauge({ score, grade }: TechHealthScoreGaugeProps) {
+export function TechHealthScoreGauge({ score }: TechHealthScoreGaugeProps) {
   const { tooltip, setTooltip } = useTooltip()
   
   // SVG dimensions and calculations
@@ -25,15 +25,6 @@ export function TechHealthScoreGauge({ score, grade }: TechHealthScoreGaugeProps
   // Calculate the percentage for the gauge (0-100%)
   const percentage = Math.min(Math.max((score / 10), 0), 1)
   const arcValue = percentage * maxValue
-  
-  // Map grade to color
-  const gradeColors = {
-    A: 'text-signal-green',
-    B: 'text-electric-teal',
-    C: 'text-caution-amber',
-    D: 'text-orange-500',
-    F: 'text-risk-red',
-  }
   
   // Calculate rotation angle for the gauge needle
   const needleRotation = percentage * 180 - 90
@@ -74,43 +65,18 @@ export function TechHealthScoreGauge({ score, grade }: TechHealthScoreGaugeProps
           {/* Define gradient for the gauge */}
           <defs>
             <linearGradient id="gauge-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="hsl(var(--destructive))" />
-              <stop offset="40%" stopColor="hsl(var(--caution-amber))" />
-              <stop offset="70%" stopColor="hsl(var(--electric-teal))" />
-              <stop offset="100%" stopColor="hsl(var(--signal-green))" />
+              <stop offset="0%" stopColor="#DC2626" /> {/* Red */}
+              <stop offset="50%" stopColor="#F59E0B" /> {/* Yellow/Amber */}
+              <stop offset="100%" stopColor="#10B981" /> {/* Green */}
             </linearGradient>
           </defs>
-          
-          {/* Score display inside the gauge */}
-          <text
-            x={centerX}
-            y={centerY - 10}
-            fontSize="28"
-            fontWeight="bold"
-            textAnchor="middle"
-            alignmentBaseline="central"
-          >
-            {score.toFixed(1)}
-          </text>
-          
-          <text
-            x={centerX}
-            y={centerY + 15}
-            fontSize="22"
-            fontWeight="semibold"
-            textAnchor="middle"
-            alignmentBaseline="central"
-            className={gradeColors[grade]}
-          >
-            {grade}
-          </text>
           
           {/* Gauge needle */}
           <line
             x1={centerX}
             y1={centerY}
             x2={centerX}
-            y2={centerY - radius + 5}
+            y2={centerY - radius + strokeWidth / 2 + 5} // Points upwards from center before rotation
             stroke="hsl(var(--foreground))"
             strokeWidth="2"
             strokeLinecap="round"
@@ -128,6 +94,11 @@ export function TechHealthScoreGauge({ score, grade }: TechHealthScoreGaugeProps
             strokeWidth="2"
           />
         </svg>
+        
+        {/* Score display below the gauge */}
+        <div className="mt-4 text-center">
+          <span className="text-3xl font-bold">{score.toFixed(1)}</span>
+        </div>
         
         <div className="mt-4 flex w-full justify-between text-xs text-muted-foreground">
           <div>Poor (1-4)</div>
