@@ -1,26 +1,30 @@
+import { useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { 
+  AlertTriangle, 
   ArrowLeft, 
-  Clock, 
+  Bug, 
+  Database, 
   Download, 
   ExternalLink, 
   FileText, 
-  Globe,
+  Globe, 
   Info, 
   Lock, 
+  Network, 
   Server, 
-  ShieldCheck, 
-  Terminal, 
+  Shield, 
+  Clock, 
   ThumbsDown, 
-  ThumbsUp, 
-  Zap 
+  ThumbsUp 
 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Badge } from '@/components/ui/badge'
 import { TechHealthScoreGauge } from '@/components/dashboard/tech-health-score-gauge'
 import { RiskSummaryCards } from '@/components/dashboard/risk-summary-cards'
+import { EvidenceModal } from '@/components/reports/evidence-modal'
 
 // Mock report data
 const reportData = {
@@ -192,9 +196,19 @@ const reportData = {
 
 export default function ReportPage() {
   const { id } = useParams<{ id: string }>()
+  const [evidenceModalOpen, setEvidenceModalOpen] = useState(false)
+  const [activeEvidence, setActiveEvidence] = useState<{
+    evidence: (typeof reportData.risks[0]['evidence'][0]);
+    title: string;
+  } | null>(null)
   
   // In a real app, we would fetch the report data based on the ID
   const report = reportData
+
+  const handleShowEvidence = (evidence: typeof reportData.risks[0]['evidence'][0], title: string) => {
+    setActiveEvidence({ evidence, title })
+    setEvidenceModalOpen(true)
+  }
 
   return (
     <div className="container mx-auto max-w-7xl space-y-6">
@@ -231,7 +245,7 @@ export default function ReportPage() {
           </div>
         </div>
         
-        <Button>
+        <Button className="bg-electric-teal hover:bg-electric-teal/90">
           <Download className="mr-2 h-4 w-4" />
           Export PDF
         </Button>
@@ -298,9 +312,10 @@ export default function ReportPage() {
                         'bg-green-100 text-green-600'
                       }`}>
                         {risk.category === 'security' ? <Lock className="h-5 w-5" /> :
-                         risk.category === 'database' ? <Server className="h-5 w-5" /> :
-                         risk.category === 'devops' ? <Terminal className="h-5 w-5" /> :
-                         <Info className="h-5 w-5" />}
+                         risk.category === 'database' ? <Database className="h-5 w-5" /> :
+                         risk.category === 'devops' ? <Server className="h-5 w-5" /> :
+                         risk.category === 'architecture' ? <Network className="h-5 w-5" /> :
+                         <Bug className="h-5 w-5" />}
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
@@ -316,14 +331,20 @@ export default function ReportPage() {
                         </div>
                         <p className="mt-1 text-sm text-muted-foreground">{risk.description}</p>
                         
-                        {/* Evidence accordion for each finding */}
-                        <div className="mt-2">
-                          <Button variant="outline" size="sm" className="gap-1 text-xs">
-                            <FileText className="h-3 w-3" />
-                            View Evidence
-                          </Button>
-                          {/* For brevity, we're not showing the evidence details here */}
-                        </div>
+                        {/* Evidence button for each finding */}
+                        {risk.evidence && risk.evidence.length > 0 && (
+                          <div className="mt-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="gap-1 text-xs"
+                              onClick={() => handleShowEvidence(risk.evidence[0], risk.title)}
+                            >
+                              <FileText className="h-3 w-3" />
+                              View Evidence
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -437,7 +458,7 @@ export default function ReportPage() {
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <ShieldCheck className={`h-4 w-4 ${
+                            <Shield className={`h-4 w-4 ${
                               vuln.severity === 'critical' ? 'text-red-600 dark:text-red-400' :
                               vuln.severity === 'high' ? 'text-orange-600 dark:text-orange-400' :
                               vuln.severity === 'medium' ? 'text-yellow-600 dark:text-yellow-400' :
@@ -653,7 +674,15 @@ export default function ReportPage() {
         </TabsContent>
       </Tabs>
       
-      {/* Evidence Modal would be added here in a full implementation */}
+      {/* Evidence Modal */}
+      {activeEvidence && (
+        <EvidenceModal
+          isOpen={evidenceModalOpen}
+          onClose={() => setEvidenceModalOpen(false)}
+          evidence={activeEvidence.evidence}
+          title={activeEvidence.title}
+        />
+      )}
     </div>
   )
 }
