@@ -1,5 +1,5 @@
 import { Link, NavLink } from 'react-router-dom'
-import { BarChart3, FileText, Home, List, PanelLeft, Settings, SquarePen } from 'lucide-react'
+import { BarChart3, FileText, Home, List, PanelLeft, Settings, PenSquare as SquarePen } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 
