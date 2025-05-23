@@ -38,7 +38,7 @@ const mockUser = {
     role: 'investor',
   },
   app_metadata: {},
-} as User
+} as unknown as User
 
 // Auth provider component
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
