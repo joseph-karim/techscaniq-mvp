@@ -15,6 +15,7 @@ const RequestScanPage = lazy(() => import('@/pages/scans/request-scan'))
 const ScanDetailsPage = lazy(() => import('@/pages/scans/scan-details'))
 const ReportPage = lazy(() => import('@/pages/reports/report'))
 const AdvisorReviewPage = lazy(() => import('@/pages/advisor/review'))
+const AdvisorQueuePage = lazy(() => import('@/pages/advisor/queue'))
 const SettingsPage = lazy(() => import('@/pages/settings'))
 
 function App() {
@@ -40,6 +41,7 @@ function App() {
           {/* Admin routes */}
           <Route element={<ProtectedRoute requireAdmin><DashboardLayout /></ProtectedRoute>}>
             <Route path="/advisor/review/:id" element={<AdvisorReviewPage />} />
+            <Route path="/advisor/queue" element={<AdvisorQueuePage />} />
           </Route>
           
           {/* Fallback route */}
