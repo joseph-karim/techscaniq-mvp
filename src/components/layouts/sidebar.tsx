@@ -1,7 +1,9 @@
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink, useLocation } from 'react-router-dom'
 import { BarChart3, FileText, Home, List, PanelLeft, Settings, PenSquare as SquarePen } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { useAuth } from '@/lib/auth/mock-auth-provider'
 
 interface SidebarProps {
   collapsed: boolean
@@ -10,6 +12,10 @@ interface SidebarProps {
 }
 
 export function Sidebar({ collapsed, setCollapsed, isAdmin }: SidebarProps) {
+  const location = useLocation()
+  const { user } = useAuth()
+  const pendingReviewCount = isAdmin ? 3 : 0 // Mock pending reviews count
+
   return (
     <aside
       className={cn(
@@ -40,34 +46,45 @@ export function Sidebar({ collapsed, setCollapsed, isAdmin }: SidebarProps) {
             icon={<Home className="h-5 w-5" />}
             label="Dashboard"
             collapsed={collapsed}
+            active={location.pathname === '/dashboard'}
           />
           <NavItem
             to="/scans/request"
             icon={<SquarePen className="h-5 w-5" />}
             label="Request Scan"
             collapsed={collapsed}
+            active={location.pathname === '/scans/request'}
           />
           <NavItem
             to="/reports"
             icon={<FileText className="h-5 w-5" />}
             label="Reports"
             collapsed={collapsed}
+            active={location.pathname.startsWith('/reports')}
           />
           <NavItem
             to="/analytics"
             icon={<BarChart3 className="h-5 w-5" />}
             label="Analytics"
             collapsed={collapsed}
+            active={location.pathname === '/analytics'}
           />
           
           {isAdmin && (
             <>
               <div className={cn('my-4 border-t border-slate-800', collapsed ? 'mx-2' : 'mx-4')} />
+              <div className="px-3 py-2">
+                <p className={collapsed ? 'sr-only' : 'mb-2 text-xs uppercase tracking-wider text-slate-500'}>
+                  Admin
+                </p>
+              </div>
               <NavItem
                 to="/advisor/queue"
                 icon={<List className="h-5 w-5" />}
                 label="Review Queue"
+                badge={pendingReviewCount > 0 ? pendingReviewCount.toString() : undefined}
                 collapsed={collapsed}
+                active={location.pathname.startsWith('/advisor')}
               />
             </>
           )}
@@ -80,7 +97,24 @@ export function Sidebar({ collapsed, setCollapsed, isAdmin }: SidebarProps) {
           icon={<Settings className="h-5 w-5" />}
           label="Settings"
           collapsed={collapsed}
+          active={location.pathname === '/settings'}
         />
+        
+        {!collapsed && (
+          <div className="mt-4 rounded-md bg-slate-800/50 p-3">
+            <div className="flex items-center">
+              <div className="mr-2 h-2 w-2 rounded-full bg-electric-teal"></div>
+              <span className="text-sm font-medium">
+                {user?.user_metadata.role === 'admin' ? 'Admin' : 'Investor'} Mode
+              </span>
+            </div>
+            <p className="mt-1 text-xs text-slate-400">
+              {user?.user_metadata.role === 'admin' 
+                ? 'You have advisor privileges' 
+                : 'Investor view active'}
+            </p>
+          </div>
+        )}
       </div>
     </aside>
   )
@@ -90,17 +124,19 @@ interface NavItemProps {
   to: string
   icon: React.ReactNode
   label: string
+  badge?: string
   collapsed: boolean
+  active: boolean
 }
 
-function NavItem({ to, icon, label, collapsed }: NavItemProps) {
+function NavItem({ to, icon, label, badge, collapsed, active }: NavItemProps) {
   return (
     <NavLink
       to={to}
       className={({ isActive }) =>
         cn(
           'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-          isActive
+          active
             ? 'bg-electric-teal text-white'
             : 'text-slate-400 hover:bg-deep-navy/50 hover:text-white',
           collapsed && 'justify-center px-2'
@@ -108,7 +144,21 @@ function NavItem({ to, icon, label, collapsed }: NavItemProps) {
       }
     >
       {icon}
-      {!collapsed && <span>{label}</span>}
+      {!collapsed && (
+        <>
+          <span className="flex-1">{label}</span>
+          {badge && (
+            <Badge className="h-5 w-5 justify-center rounded-full bg-electric-teal p-0 text-xs">
+              {badge}
+            </Badge>
+          )}
+        </>
+      )}
+      {collapsed && badge && (
+        <Badge className="absolute right-1 top-1 h-4 w-4 justify-center rounded-full bg-electric-teal p-0 text-[10px]">
+          {badge}
+        </Badge>
+      )}
     </NavLink>
   )
 }

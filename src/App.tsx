@@ -1,10 +1,12 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { Suspense, lazy } from 'react'
+import { Suspense, lazy, useEffect, useState } from 'react'
 
 import { AuthProvider } from '@/lib/auth/mock-auth-provider'
 import { ProtectedRoute } from '@/components/auth/protected-route'
 import { DashboardLayout } from '@/components/layouts/dashboard-layout'
 import { Spinner } from '@/components/ui/spinner'
+import { NotificationToast } from '@/components/ui/notification-toast'
+import { useAuth } from '@/lib/auth/mock-auth-provider'
 
 // Lazy load pages for better performance
 const LoginPage = lazy(() => import('@/pages/auth/login'))
@@ -18,9 +20,36 @@ const AdvisorReviewPage = lazy(() => import('@/pages/advisor/review'))
 const AdvisorQueuePage = lazy(() => import('@/pages/advisor/queue'))
 const SettingsPage = lazy(() => import('@/pages/settings'))
 
-function App() {
+function AppContent() {
+  const { user } = useAuth()
+  const [notification, setNotification] = useState<{
+    show: boolean;
+    title: string;
+    message: string;
+    type: 'info' | 'success' | 'warning' | 'error';
+  } | null>(null)
+  
+  // Show a welcome notification when the user logs in
+  useEffect(() => {
+    if (user) {
+      const role = user.user_metadata.role
+      const timer = setTimeout(() => {
+        setNotification({
+          show: true,
+          title: role === 'admin' ? 'Welcome, Admin' : 'Welcome Back',
+          message: role === 'admin' 
+            ? 'You have 3 scans awaiting review in your queue.' 
+            : 'Your latest scan results are ready to view.',
+          type: 'info'
+        })
+      }, 1000)
+      
+      return () => clearTimeout(timer)
+    }
+  }, [user])
+  
   return (
-    <AuthProvider>
+    <>
       <Suspense fallback={<div className="flex h-screen items-center justify-center"><Spinner size="lg" /></div>}>
         <Routes>
           {/* Auth routes */}
@@ -48,6 +77,24 @@ function App() {
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </Suspense>
+
+      {/* Notification toast */}
+      {notification?.show && (
+        <NotificationToast
+          title={notification.title}
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
+        />
+      )}
+    </>
+  )
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
     </AuthProvider>
   )
 }

@@ -32,6 +32,7 @@ type AuthContextType = {
     error: Error | null
     data: { user: MockUser | null }
   }>
+  switchRole: (role: 'investor' | 'admin') => void
 }
 
 // Create a mock investor user
@@ -64,6 +65,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<MockUser | null>(mockInvestorUser)
   const [session, setSession] = useState<MockSession | null>(user ? { user } : null)
   const [isLoading, setIsLoading] = useState<boolean>(false)
+
+  // Function to switch between roles (investor and admin)
+  const switchRole = (role: 'investor' | 'admin') => {
+    const newUser = role === 'admin' ? mockAdminUser : mockInvestorUser
+    setUser(newUser)
+    setSession({ user: newUser })
+  }
 
   // Mock sign in that accepts any credentials in dev mode
   const signIn = async (email: string, password: string) => {
@@ -158,7 +166,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signIn,
     signUp,
     signOut,
-    resetPassword
+    resetPassword,
+    switchRole
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
