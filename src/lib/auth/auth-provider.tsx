@@ -1,102 +1,116 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { createClient, Session, User } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient, type User } from '@supabase/supabase-js'
 
+// Auth context type
 type AuthContextType = {
   user: User | null
-  session: Session | null
-  isLoading: boolean
-  signIn: (email: string, password: string) => Promise<{
-    error: Error | null
-    data: { user: User | null; session: Session | null }
-  }>
-  signUp: (email: string, password: string, name: string, workspaceName: string) => Promise<{
-    error: Error | null
-    data: { user: User | null; session: Session | null }
-  }>
-  signOut: () => Promise<void>
-  resetPassword: (email: string) => Promise<{
-    error: Error | null
-    data: { user: User | null }
-  }>
+  supabase: SupabaseClient | null
+  signIn: (email: string, password: string) => Promise<any>
+  signUp: (email: string, password: string) => Promise<any>
+  signOut: () => Promise<any>
+  loading: boolean
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
+// Create context with default values
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  supabase: null,
+  signIn: async () => ({}),
+  signUp: async () => ({}),
+  signOut: async () => ({}),
+  loading: true,
+})
 
-// Initialize Supabase client
+// Helper to use auth context
+export const useAuth = () => useContext(AuthContext)
+
+// Check if Supabase environment variables are available
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+const isSupabaseConfigured = supabaseUrl && supabaseAnonKey
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Mock user for development
+const mockUser = {
+  id: 'mock-user-id',
+  email: 'user@example.com',
+  user_metadata: {
+    name: 'Test User',
+    role: 'investor',
+  },
+  app_metadata: {},
+} as User
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+// Auth provider component
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
-  const [session, setSession] = useState<Session | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [loading, setLoading] = useState(true)
+  const [supabase, setSupabase] = useState<SupabaseClient | null>(null)
 
   useEffect(() => {
-    // Get session on initial load
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      setIsLoading(false)
-    })
+    // Only create Supabase client if environment variables are available
+    if (isSupabaseConfigured) {
+      const supabaseClient = createClient(supabaseUrl, supabaseAnonKey)
+      setSupabase(supabaseClient)
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      setIsLoading(false)
-    })
+      // Check active sessions and subscribe to auth changes
+      supabaseClient.auth.getSession().then(({ data: { session } }) => {
+        setUser(session?.user || null)
+        setLoading(false)
+      })
 
-    return () => subscription.unsubscribe()
+      const { data: { subscription } } = supabaseClient.auth.onAuthStateChange(
+        (_event, session) => {
+          setUser(session?.user || null)
+        }
+      )
+
+      return () => {
+        subscription.unsubscribe()
+      }
+    } else {
+      // Use mock user for development when Supabase is not configured
+      console.log('Using mock authentication (Supabase not configured)')
+      setUser(mockUser)
+      setLoading(false)
+    }
   }, [])
 
+  // Auth methods with mock implementation when Supabase is not available
   const signIn = async (email: string, password: string) => {
+    if (!isSupabaseConfigured || !supabase) {
+      console.log('Mock sign in:', email)
+      setUser(mockUser)
+      return { data: { user: mockUser }, error: null }
+    }
     return supabase.auth.signInWithPassword({ email, password })
   }
 
-  const signUp = async (email: string, password: string, name: string, workspaceName: string) => {
-    const signUpResult = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          name,
-          workspace_name: workspaceName
-        }
-      }
-    })
-
-    return signUpResult
+  const signUp = async (email: string, password: string) => {
+    if (!isSupabaseConfigured || !supabase) {
+      console.log('Mock sign up:', email)
+      setUser(mockUser)
+      return { data: { user: mockUser }, error: null }
+    }
+    return supabase.auth.signUp({ email, password })
   }
 
   const signOut = async () => {
-    await supabase.auth.signOut()
-  }
-
-  const resetPassword = async (email: string) => {
-    return supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    })
+    if (!isSupabaseConfigured || !supabase) {
+      console.log('Mock sign out')
+      setUser(null)
+      return { error: null }
+    }
+    return supabase.auth.signOut()
   }
 
   const value = {
     user,
-    session,
-    isLoading,
+    supabase,
     signIn,
     signUp,
     signOut,
-    resetPassword
+    loading,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
-}
-
-export function useAuth() {
-  const context = useContext(AuthContext)
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider')
-  }
-  return context
 }
