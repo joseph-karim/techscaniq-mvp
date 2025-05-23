@@ -133,7 +133,7 @@ function NavItem({ to, icon, label, badge, collapsed, active }: NavItemProps) {
   return (
     <NavLink
       to={to}
-      className={({ isActive }) =>
+      className={() =>
         cn(
           'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
           active
