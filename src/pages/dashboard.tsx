@@ -24,7 +24,7 @@ export default function DashboardPage() {
             Welcome to TechScan IQ - AI-powered technical due diligence for investors
           </p>
         </div>
-        <Button asChild>
+        <Button className="bg-electric-teal hover:bg-electric-teal/90" asChild>
           <Link to="/scans/request">
             <PlusCircle className="mr-2 h-4 w-4" /> Request Scan
           </Link>
@@ -50,7 +50,7 @@ export default function DashboardPage() {
               <p className="mb-4 text-muted-foreground">
                 Start your first technical due diligence scan to get insights on your target company's tech stack, architecture, security, and code quality.
               </p>
-              <Button asChild>
+              <Button className="bg-electric-teal hover:bg-electric-teal/90" asChild>
                 <Link to="/scans/request">
                   <PlusCircle className="mr-2 h-4 w-4" /> Request Your First Scan
                 </Link>
@@ -65,7 +65,7 @@ export default function DashboardPage() {
           onValueChange={setActiveTab} 
           className="space-y-4"
         >
-          <TabsList>
+          <TabsList className="bg-slate-100 dark:bg-slate-800/50">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="scans">Recent Scans</TabsTrigger>
             <TabsTrigger value="findings">Key Findings</TabsTrigger>
@@ -73,10 +73,10 @@ export default function DashboardPage() {
           
           <TabsContent value="overview" className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              <Card className="col-span-1">
+              <Card className="col-span-1 border-slate-200 shadow-sm dark:border-slate-800">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Tech Health Score</CardTitle>
-                  <Button variant="link" size="sm" asChild>
+                  <Button variant="link" size="sm" className="text-electric-teal" asChild>
                     <Link to="/reports/latest">
                       View Latest <ArrowRight className="ml-1 h-4 w-4" />
                     </Link>
@@ -87,10 +87,10 @@ export default function DashboardPage() {
                 </CardContent>
               </Card>
               
-              <Card className="col-span-1 md:col-span-2">
+              <Card className="col-span-1 border-slate-200 shadow-sm dark:border-slate-800 md:col-span-2">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Risk Summary</CardTitle>
-                  <Button variant="link" size="sm" asChild>
+                  <Button variant="link" size="sm" className="text-electric-teal" asChild>
                     <Link to="/reports/latest">
                       View Details <ArrowRight className="ml-1 h-4 w-4" />
                     </Link>
@@ -103,7 +103,7 @@ export default function DashboardPage() {
             </div>
             
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              <Card className="col-span-1 md:col-span-2">
+              <Card className="col-span-1 border-slate-200 shadow-sm dark:border-slate-800 md:col-span-2">
                 <CardHeader>
                   <CardTitle>Recent Scans</CardTitle>
                   <CardDescription>Your last 5 technical due diligence scans</CardDescription>
@@ -113,7 +113,7 @@ export default function DashboardPage() {
                 </CardContent>
               </Card>
               
-              <Card className="col-span-1">
+              <Card className="col-span-1 border-slate-200 shadow-sm dark:border-slate-800">
                 <CardHeader>
                   <CardTitle>Key Findings</CardTitle>
                   <CardDescription>Critical insights from recent scans</CardDescription>
@@ -126,7 +126,7 @@ export default function DashboardPage() {
           </TabsContent>
           
           <TabsContent value="scans">
-            <Card>
+            <Card className="border-slate-200 shadow-sm dark:border-slate-800">
               <CardHeader>
                 <CardTitle>All Scans</CardTitle>
                 <CardDescription>A complete history of your technical due diligence scans</CardDescription>
@@ -138,7 +138,7 @@ export default function DashboardPage() {
           </TabsContent>
           
           <TabsContent value="findings">
-            <Card>
+            <Card className="border-slate-200 shadow-sm dark:border-slate-800">
               <CardHeader>
                 <CardTitle>All Findings</CardTitle>
                 <CardDescription>Comprehensive list of findings across all scans</CardDescription>

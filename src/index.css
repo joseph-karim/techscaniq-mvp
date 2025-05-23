@@ -1,51 +1,90 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@700,500,400&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
+    /* Base colors */
     --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    --foreground: 222 47% 11%;
+    
+    /* Card */
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 222 47% 11%;
+    
+    /* Popover */
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 221.2 83.2% 53.3%;
+    --popover-foreground: 222 47% 11%;
+    
+    /* Primary - Deep Navy */
+    --primary: 215 72% 15%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
+    
+    /* Secondary - Slate Gray */
+    --secondary: 214 20% 69%;
+    --secondary-foreground: 222 47% 11%;
+    
+    /* Muted */
+    --muted: 214 32% 91%;
+    --muted-foreground: 215 16% 47%;
+    
+    /* Accent - Electric Teal */
+    --accent: 173 58% 39%;
+    --accent-foreground: 0 0% 98%;
+    
+    /* Destructive - Risk Red */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    
+    /* Border & Inputs */
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 215 72% 15%;
+    
+    /* Border Radius */
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 240 10% 3.9%;
+    /* Base colors */
+    --background: 215 72% 10%;
     --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
+    
+    /* Card */
+    --card: 215 72% 13%;
     --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
+    
+    /* Popover */
+    --popover: 215 72% 13%;
     --popover-foreground: 0 0% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    
+    /* Primary - Lighter in dark mode */
+    --primary: 215 72% 60%;
+    --primary-foreground: 215 72% 8%;
+    
+    /* Secondary - Darker Slate */
+    --secondary: 215 25% 27%;
+    --secondary-foreground: 0 0% 98%;
+    
+    /* Muted */
+    --muted: 215 25% 20%;
+    --muted-foreground: 215 20% 65%;
+    
+    /* Accent - Brighter Teal in dark mode */
+    --accent: 173 58% 45%;
+    --accent-foreground: 0 0% 100%;
+    
+    /* Destructive */
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
+    --destructive-foreground: 0 0% 98%;
+    
+    /* Border & Inputs */
+    --border: 215 28% 17%;
+    --input: 215 28% 17%;
+    --ring: 173 58% 45%;
   }
 }
 
@@ -54,7 +93,53 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  /* Custom styling for the application */
+  h1, h2, h3, h4, h5, h6 {
+    @apply tracking-tight;
+  }
+  
+  /* Grid pattern background for subtle texture */
+  .bg-grid-pattern {
+    background-size: 40px 40px;
+    background-image:
+      linear-gradient(to right, rgba(11, 30, 64, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(11, 30, 64, 0.05) 1px, transparent 1px);
+  }
+}
+
+/* Custom components & utility classes */
+@layer components {
+  .tech-health-gauge {
+    background: conic-gradient(
+      #DC2626 0deg,
+      #DC2626 36deg,
+      #F59E0B 36deg,
+      #F59E0B 72deg,
+      #FCD34D 72deg,
+      #FCD34D 108deg,
+      #A3E635 108deg,
+      #A3E635 144deg,
+      #10B981 144deg,
+      #10B981 180deg
+    );
+  }
+  
+  .glassmorphism {
+    @apply bg-white/80 dark:bg-deep-navy/80 backdrop-blur-md;
+  }
+  
+  .code-lines-bg {
+    background-size: 20px 20px;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      rgba(20, 184, 166, 0.05) 0px,
+      rgba(20, 184, 166, 0.05) 1px,
+      transparent 1px,
+      transparent 20px
+    );
   }
 }

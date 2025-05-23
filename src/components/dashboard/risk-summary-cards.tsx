@@ -8,7 +8,7 @@ const riskData = [
     count: 1, 
     icon: Zap, 
     label: 'Critical', 
-    color: 'text-red-500 bg-red-50 dark:bg-red-950 dark:text-red-300',
+    color: 'text-risk-red bg-red-50 dark:bg-red-950/30 dark:text-red-400',
     description: 'Key vulnerability in payment system'
   },
   { 
@@ -16,7 +16,7 @@ const riskData = [
     count: 3, 
     icon: AlertTriangle, 
     label: 'High', 
-    color: 'text-orange-500 bg-orange-50 dark:bg-orange-950 dark:text-orange-300',
+    color: 'text-orange-500 bg-orange-50 dark:bg-orange-950/30 dark:text-orange-400',
     description: 'Security and data concerns'
   },
   { 
@@ -24,7 +24,7 @@ const riskData = [
     count: 8, 
     icon: Bug, 
     label: 'Medium', 
-    color: 'text-yellow-500 bg-yellow-50 dark:bg-yellow-950 dark:text-yellow-300',
+    color: 'text-caution-amber bg-yellow-50 dark:bg-yellow-950/30 dark:text-yellow-400',
     description: 'Performance and scaling issues'
   },
   { 
@@ -32,7 +32,7 @@ const riskData = [
     count: 15, 
     icon: Info, 
     label: 'Low', 
-    color: 'text-green-500 bg-green-50 dark:bg-green-950 dark:text-green-300',
+    color: 'text-signal-green bg-green-50 dark:bg-green-950/30 dark:text-green-400',
     description: 'Technical debt and minor bugs'
   },
 ]
@@ -63,7 +63,7 @@ function RiskCard({ risk }: RiskCardProps) {
   
   return (
     <div className={cn(
-      'flex flex-col items-center justify-between rounded-lg border p-3',
+      'flex flex-col items-center justify-between rounded-lg border border-slate-200 p-3 shadow-sm transition-all hover:shadow-md dark:border-slate-800',
       risk.count === 0 ? 'border-gray-200 bg-gray-50 text-gray-500 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400' : ''
     )}>
       <div className="flex w-full items-center justify-between">

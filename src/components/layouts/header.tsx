@@ -27,7 +27,7 @@ export function Header({ user }: HeaderProps) {
     .slice(0, 2)
 
   return (
-    <header className="border-b bg-background">
+    <header className="border-b border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-deep-navy">
       <div className="flex h-16 items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" className="md:hidden">
@@ -36,26 +36,26 @@ export function Header({ user }: HeaderProps) {
           </Button>
           <Link to="/dashboard" className="hidden items-center gap-2 md:flex">
             <img src="/favicon.svg" alt="TechScan IQ" className="h-8 w-8" />
-            <span className="text-lg font-bold">TechScan IQ</span>
+            <span className="text-lg font-bold text-deep-navy dark:text-white">TechScan IQ</span>
           </Link>
         </div>
         
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" className="text-slate-600 hover:bg-slate-100 hover:text-deep-navy dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white">
             <HelpCircle className="h-5 w-5" />
             <span className="sr-only">Help</span>
           </Button>
           
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" className="text-slate-600 hover:bg-slate-100 hover:text-deep-navy dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white">
             <Bell className="h-5 w-5" />
             <span className="sr-only">Notifications</span>
           </Button>
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-2">
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback>{initials}</AvatarFallback>
+              <Button variant="ghost" className="flex items-center gap-2 text-slate-600 hover:bg-slate-100 hover:text-deep-navy dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white">
+                <Avatar className="h-8 w-8 border border-slate-200 dark:border-slate-700">
+                  <AvatarFallback className="bg-electric-teal/10 text-electric-teal">{initials}</AvatarFallback>
                 </Avatar>
                 <div className="hidden items-center gap-1 md:flex">
                   <span className="text-sm font-medium">{displayName}</span>
