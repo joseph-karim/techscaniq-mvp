@@ -1,4 +1,3 @@
-import React from 'react';
 import { Gauge } from 'lucide-react'
 import { useTooltip } from '@/hooks/use-tooltip'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'

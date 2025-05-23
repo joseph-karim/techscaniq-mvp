@@ -12,7 +12,7 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
 } from '@/components/ui/dropdown-menu'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { MockUser } from '@/lib/auth/mock-auth-provider'
 import { useToast } from '@/hooks/use-toast'
 import { Badge } from '@/components/ui/badge'
