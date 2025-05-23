@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { AlertCircle, CheckCircle2 } from 'lucide-react'
-import { useAuth } from '@/lib/auth/auth-provider'
+import { useAuth } from '@/lib/auth/mock-auth-provider'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import {
@@ -32,7 +32,7 @@ export default function ForgotPasswordPage() {
   const form = useForm<ForgotPasswordForm>({
     resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
-      email: '',
+      email: 'investor@example.com',
     },
   })
 
@@ -84,6 +84,11 @@ export default function ForgotPasswordPage() {
                   If an account exists with {form.getValues('email')}, you will receive a password reset link shortly.
                 </AlertDescription>
               </Alert>
+
+              <div className="mt-2 rounded-md bg-yellow-50 p-2 text-xs text-yellow-800">
+                <p><strong>Demo Mode:</strong> No email will be sent. This is just a simulation.</p>
+              </div>
+
               <Button variant="outline" className="w-full" asChild>
                 <Link to="/login">Back to Login</Link>
               </Button>
@@ -110,6 +115,10 @@ export default function ForgotPasswordPage() {
                     </FormItem>
                   )}
                 />
+
+                <div className="mb-4 rounded-md bg-yellow-50 p-2 text-xs text-yellow-800">
+                  <p><strong>Demo Mode:</strong> Enter any valid email address and click "Send Reset Link".</p>
+                </div>
 
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? 'Sending...' : 'Send Reset Link'}

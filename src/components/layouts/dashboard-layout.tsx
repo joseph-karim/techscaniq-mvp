@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Outlet } from 'react-router-dom'
-import { useAuth } from '@/lib/auth/auth-provider'
+import { useAuth } from '@/lib/auth/mock-auth-provider'
 import { Header } from '@/components/layouts/header'
 import { Sidebar } from '@/components/layouts/sidebar'
 

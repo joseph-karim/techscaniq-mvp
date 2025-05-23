@@ -1,15 +1,6 @@
-import { User } from '@supabase/supabase-js'
-import { 
-  Bell, 
-  ChevronDown, 
-  HelpCircle, 
-  LogOut, 
-  Menu, 
-  Settings, 
-  User as UserIcon 
-} from 'lucide-react'
+import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Settings, User as UserIcon } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { useAuth } from '@/lib/auth/auth-provider'
+import { useAuth } from '@/lib/auth/mock-auth-provider'
 import { Button } from '@/components/ui/button'
 import { 
   DropdownMenu, 
@@ -19,9 +10,10 @@ import {
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { MockUser } from '@/lib/auth/mock-auth-provider'
 
 interface HeaderProps {
-  user: User
+  user: MockUser
 }
 
 export function Header({ user }: HeaderProps) {

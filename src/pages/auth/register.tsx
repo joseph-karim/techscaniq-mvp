@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { AlertCircle } from 'lucide-react'
-import { useAuth } from '@/lib/auth/auth-provider'
+import { useAuth } from '@/lib/auth/mock-auth-provider'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import {
@@ -36,10 +36,10 @@ export default function RegisterPage() {
   const form = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      name: '',
-      email: '',
-      password: '',
-      workspaceName: '',
+      name: 'Demo User',
+      email: 'demo@example.com',
+      password: 'password123',
+      workspaceName: 'Demo Capital',
     },
   })
 
@@ -55,6 +55,7 @@ export default function RegisterPage() {
         return
       }
       
+      // In the mock version, we just pretend the email was sent
       setEmailSent(true)
     } catch (err) {
       setError('An unexpected error occurred')
@@ -75,6 +76,9 @@ export default function RegisterPage() {
                 We've sent a confirmation link to <span className="font-medium">{form.getValues('email')}</span>.
                 Please check your inbox and click the link to complete your registration.
               </p>
+              <div className="mt-2 rounded-md bg-yellow-50 p-2 text-xs text-yellow-800">
+                <p><strong>Demo Mode:</strong> No email will be sent. Just click below to continue.</p>
+              </div>
               <Button
                 variant="outline"
                 className="mt-4 w-full"
@@ -107,6 +111,10 @@ export default function RegisterPage() {
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
+
+          <div className="mb-4 rounded-md bg-yellow-50 p-2 text-xs text-yellow-800">
+            <p><strong>Demo Mode:</strong> Form pre-filled for testing. Submit with any valid data.</p>
+          </div>
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
