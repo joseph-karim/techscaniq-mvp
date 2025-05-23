@@ -62,7 +62,7 @@ export function TechHealthScoreGauge({ score }: TechHealthScoreGaugeProps) {
             className="transition-all duration-500 ease-in-out"
           />
           
-          {/* Define gradient for the gauge */}
+          {/* Define gradient for the gauge - RED on left, GREEN on right */}
           <defs>
             <linearGradient id="gauge-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#DC2626" /> {/* Red */}

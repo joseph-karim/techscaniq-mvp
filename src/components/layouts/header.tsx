@@ -15,6 +15,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { MockUser } from '@/lib/auth/mock-auth-provider'
 import { useToast } from '@/hooks/use-toast'
+import { Badge } from '@/components/ui/badge'
 
 interface HeaderProps {
   user: MockUser
@@ -156,6 +157,3 @@ export function Header({ user }: HeaderProps) {
     </header>
   )
 }
-
-// Missing Badge component import
-import { Badge } from '@/components/ui/badge'
