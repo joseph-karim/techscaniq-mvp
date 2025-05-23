@@ -150,7 +150,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setSession(null)
   }
 
-  const resetPassword = async (email: string) => {
+  const resetPassword = async (_: string) => {
     await new Promise(resolve => setTimeout(resolve, 500)) // Fake delay
     
     return {

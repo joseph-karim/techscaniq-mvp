@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { 
   Activity, 
-  ArrowRight, 
   Calendar, 
   CheckCircle2, 
   Clock, 
