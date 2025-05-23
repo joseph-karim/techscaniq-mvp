@@ -9,6 +9,7 @@ import { RiskSummaryCards } from '@/components/dashboard/risk-summary-cards'
 import { RecentScansTable } from '@/components/dashboard/recent-scans-table'
 import { KeyFindings } from '@/components/dashboard/key-findings'
 import { useAuth } from '@/lib/auth/mock-auth-provider'
+import { Badge } from '@/components/ui/badge'
 
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState('overview')
