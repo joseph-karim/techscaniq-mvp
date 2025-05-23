@@ -1,0 +1,128 @@
+---
+description: Apply these rules when creating the project
+globs:
+alwaysApply: true
+---
+## Project Overview
+
+* **Type:** SaaS Platform
+* **Description:** TechScan IQ is a SaaS platform designed to provide rapid and affordable technical due diligence for early-stage investors. It combines AI-powered analysis with human expertise to deliver actionable insights on startups.
+* **Primary Goal:** Provide rapid and affordable technical due diligence with actionable, thesis-driven insights.
+
+## Project Structure
+
+### Framework-Specific Routing
+
+* **Directory Rules:**
+    * React Router 6: `src/routes/` with `createBrowserRouter` for nested routes and data loaders.
+    * Example 1: Next.js 14 (App Router) → `app/[route]/page.tsx` conventions
+    * Example 2: Next.js (Pages Router) → `pages/[route].tsx` pattern
+    * Example 3: React Router 6 → `src/routes/` with `createBrowserRouter`
+
+### Core Directories
+
+* **Versioned Structure:**
+    * `src/routes`: React Router v6 route modules with `loader`/`action` files.
+    * `src/components`: Shadcn UI + Tailwind reusable UI components.
+    * `src/lib`: TypeScript utilities, Supabase client, API wrappers.
+    * `src/assets`: Static assets (images, icons, fonts).
+    * `netlify/functions`: Netlify serverless functions for API endpoints.
+
+### Key Files
+
+* **Stack-Versioned Patterns:**
+    * `src/main.tsx`: Vite entry point with React `StrictMode`.
+    * `vite.config.ts`: Vite 4 configuration with path aliases.
+    * `tailwind.config.ts`: Tailwind CSS 3 JIT and purge settings.
+    * `src/routes/index.tsx`: React Router root layout.
+    * `src/routes/dashboard.tsx`: Dashboard page.
+    * `src/routes/report/$id.tsx`: Dynamic report view.
+    * `netlify/functions/api-scans-create.ts`: POST `/api/scans/create` implementation.
+    * `netlify/functions/api-scans-[id].ts`: Dynamic functions for `/api/scans/:id` endpoints.
+
+## Tech Stack Rules
+
+* **Version Enforcement:**
+    * vite@4: Use ES modules; no CommonJS.
+    * react@18: Enforce Hooks; use `StrictMode`.
+    * react-router@6: Use `createBrowserRouter`; no `<Switch>`.
+    * typescript@5: `strict` mode, `noImplicitAny`, `strictNullChecks`.
+    * tailwindcss@3: JIT mode; purge unused classes in production.
+    * shadcn/ui@latest: Use `cva` for variants; no inline styles.
+    * @supabase/supabase-js@2: Enforce Row-Level Security; typed client.
+    * netlify-cli@latest: Functions in `netlify/functions`; named exports.
+
+## PRD Compliance
+
+* **Non-Negotiable:**
+    * "Authentication: Supabase Auth (email/password and SSO). Isolated multi-tenant workspaces.": Enforce row-level security policies per tenant.
+    * "PDF Export: Customizable headers/footers, cover pages, branding.": Integrate a PDF generation library (e.g., `pdf-lib`) with templated header/footer support.
+    * "Notifications: Push notifications on human review completion (to Investor) and scan completion (to Admin).": Use Netlify functions and Supabase real-time for notifications.
+    * "Quality Assurance: Linter, basic tests, CI/CD.": Enforce ESLint, Prettier, Vitest, and GitHub Actions for CI.
+
+## App Flow Integration
+
+* **Stack-Aligned Flow:**
+    * React Router 6 Auth Flow → `src/routes/auth/login.tsx` uses form actions with Supabase Auth.
+    * React Router 6 Dashboard Flow → `src/routes/dashboard.tsx` with loader fetching `/api/scans/:id/report`.
+    * Netlify Functions → `netlify/functions/api-scans-create.ts` invoked by client POST `/api/scans/create`.
+    * Dynamic Report Route → `src/routes/report/$id.tsx` uses loader to fetch `GET /api/scans/:id/report`.
+
+## Best Practices
+
+* Vite.js
+    * Use path aliases in `tsconfig.json` and `vite.config.ts`.
+    * Enable HMR and error overlays.
+    * Keep configuration minimal; leverage official plugins (`@vitejs/plugin-react`).
+* Tailwind CSS
+    * Enable JIT mode and purge unused classes in `tailwind.config.ts`.
+    * Define design tokens for color palette.
+    * Use `@apply` for shared utility groups.
+* TypeScript
+    * Enforce `strict` compiler options.
+    * Define typed interfaces for all API contracts.
+    * Use runtime schemas (`zod`) for request/response validation.
+* React Router 6
+    * Use data loaders and actions for server interactions.
+    * Organize nested routes under `src/routes/`.
+    * Lazy-load route modules with `React.lazy` and `Suspense`.
+* Shadcn UI
+    * Utilize `cva` for consistent variant styling.
+    * Compose low-level primitives into high-level components.
+    * Centralize component variants; avoid inline class duplication.
+* Supabase
+    * Use row-level security for multi-tenant isolation.
+    * Create typed client using generics.
+    * Leverage real-time subscriptions for notifications.
+* Netlify Functions
+    * Place functions in `netlify/functions` directory.
+    * Mirror REST endpoints with function names.
+    * Use environment variables declared in `netlify.toml`.
+
+## Rules
+
+* Derive folder/file patterns directly from `techStackDoc` versions.
+* If React Router 6: Enforce `src/routes/` directory with nested route folders and loader/action files.
+* If Vite.js: Use `src/main.tsx` as entry point; rely on Vite defaults for `index.html`.
+* If Shadcn UI: Enforce use of `cva`; prohibit inline style overrides.
+* Never mix routing patterns from different frameworks (e.g., no `pages/` folder when using React Router).
+
+## Rules Metrics
+
+Before starting the project development, create a metrics file in the root of the project called `cursor_metrics.md`.
+
+### Instructions:
+* Each time a cursor rule is used as context, update `cursor_metrics.md`.
+* Use the following format for `cursor_metrics.md`:
+
+# Rules Metrics
+
+## Usage
+The number of times rules is used as context
+
+* react-router-6.mdc: 0
+* vite-config.mdc: 0
+* tailwindcss-purge.mdc: 0
+* supabase-rls.mdc: 0
+* netlify-functions.mdc: 0
+* …other rules
