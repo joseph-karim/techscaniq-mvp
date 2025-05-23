@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { Suspense, lazy } from 'react'
 
-import { AuthProvider } from '@/lib/auth/auth-provider'
+import { AuthProvider } from '@/lib/auth/mock-auth-provider'
 import { ProtectedRoute } from '@/components/auth/protected-route'
 import { DashboardLayout } from '@/components/layouts/dashboard-layout'
 import { Spinner } from '@/components/ui/spinner'

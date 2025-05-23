@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { AlertCircle } from 'lucide-react'
-import { useAuth } from '@/lib/auth/auth-provider'
+import { useAuth } from '@/lib/auth/mock-auth-provider'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import {
@@ -33,8 +33,8 @@ export default function LoginPage() {
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: '',
-      password: '',
+      email: 'investor@example.com', // Pre-filled for demo purposes
+      password: 'password123',       // Pre-filled for demo purposes
     },
   })
 
@@ -77,6 +77,9 @@ export default function LoginPage() {
               <p className="text-sm text-muted-foreground">
                 Enter your credentials to access your account
               </p>
+              <div className="mt-2 rounded-md bg-yellow-50 p-2 text-xs text-yellow-800">
+                <p><strong>Demo Mode:</strong> Use any email/password. Type "admin" in the email for admin access.</p>
+              </div>
             </div>
 
             {error && (
