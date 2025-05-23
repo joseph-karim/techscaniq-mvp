@@ -1,4 +1,4 @@
-import { AlertTriangle, Bug, Info, Shield, Zap } from 'lucide-react'
+import { AlertTriangle, Bug, Info, Zap } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 // Mock risk data
