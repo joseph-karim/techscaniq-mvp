@@ -1,4 +1,5 @@
-import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Settings, User as UserIcon } from 'lucide-react'
+import { useState } from 'react'
+import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Settings, User as UserIcon, UserCog } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/lib/auth/mock-auth-provider'
 import { Button } from '@/components/ui/button'
@@ -7,17 +8,23 @@ import {
   DropdownMenuContent, 
   DropdownMenuItem, 
   DropdownMenuSeparator, 
-  DropdownMenuTrigger 
+  DropdownMenuTrigger,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
 } from '@/components/ui/dropdown-menu'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { MockUser } from '@/lib/auth/mock-auth-provider'
+import { useToast } from '@/hooks/use-toast'
 
 interface HeaderProps {
   user: MockUser
 }
 
 export function Header({ user }: HeaderProps) {
-  const { signOut } = useAuth()
+  const { signOut, switchRole } = useAuth()
+  const { toast } = useToast()
+  const [notificationsCount, setNotificationsCount] = useState(2)
+  
   const displayName = user.user_metadata?.name || user.email || 'User'
   const initials = displayName
     .split(' ')
@@ -25,6 +32,27 @@ export function Header({ user }: HeaderProps) {
     .join('')
     .toUpperCase()
     .slice(0, 2)
+  
+  const currentRole = user.user_metadata?.role || 'investor'
+
+  const handleRoleSwitch = (role: string) => {
+    switchRole(role as 'investor' | 'admin')
+    
+    toast({
+      title: "Profile Switched",
+      description: `You are now using the ${role === 'investor' ? 'Investor' : 'Admin'} profile.`,
+      duration: 3000,
+    })
+  }
+
+  const handleNotificationClick = () => {
+    setNotificationsCount(0)
+    toast({
+      title: "Notifications Cleared",
+      description: "You have read all notifications.",
+      duration: 3000,
+    })
+  }
 
   return (
     <header className="border-b border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-deep-navy">
@@ -46,8 +74,18 @@ export function Header({ user }: HeaderProps) {
             <span className="sr-only">Help</span>
           </Button>
           
-          <Button variant="ghost" size="icon" className="text-slate-600 hover:bg-slate-100 hover:text-deep-navy dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="relative text-slate-600 hover:bg-slate-100 hover:text-deep-navy dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+            onClick={handleNotificationClick}
+          >
             <Bell className="h-5 w-5" />
+            {notificationsCount > 0 && (
+              <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-risk-red text-[10px] text-white">
+                {notificationsCount}
+              </span>
+            )}
             <span className="sr-only">Notifications</span>
           </Button>
           
@@ -67,8 +105,31 @@ export function Header({ user }: HeaderProps) {
               <div className="px-2 py-1.5">
                 <p className="text-sm font-medium">{displayName}</p>
                 <p className="text-xs text-muted-foreground">{user.email}</p>
+                <div className="mt-1 flex items-center gap-1">
+                  <Badge className="bg-electric-teal text-[10px] px-1.5 py-0 h-4 rounded-sm font-normal">
+                    {currentRole === 'investor' ? 'Investor' : 'Admin'}
+                  </Badge>
+                  <span className="text-xs text-muted-foreground">{user.user_metadata?.workspace_name}</span>
+                </div>
               </div>
               <DropdownMenuSeparator />
+              
+              <DropdownMenuRadioGroup value={currentRole} onValueChange={handleRoleSwitch}>
+                <div className="px-2 py-1 text-xs font-semibold text-muted-foreground">
+                  SWITCH PROFILE
+                </div>
+                <DropdownMenuRadioItem value="investor" className="gap-2">
+                  <UserIcon className="h-4 w-4" />
+                  <span>Investor</span>
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="admin" className="gap-2">
+                  <UserCog className="h-4 w-4" />
+                  <span>Admin</span>
+                </DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+
+              <DropdownMenuSeparator />
+              
               <DropdownMenuItem asChild>
                 <Link to="/settings" className="flex w-full cursor-pointer">
                   <UserIcon className="mr-2 h-4 w-4" />
@@ -95,3 +156,6 @@ export function Header({ user }: HeaderProps) {
     </header>
   )
 }
+
+// Missing Badge component import
+import { Badge } from '@/components/ui/badge'
