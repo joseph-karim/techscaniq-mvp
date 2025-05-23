@@ -13,21 +13,21 @@ export function Sidebar({ collapsed, setCollapsed, isAdmin }: SidebarProps) {
   return (
     <aside
       className={cn(
-        'bg-card transition-all duration-300',
+        'bg-deep-navy text-white transition-all duration-300',
         collapsed ? 'w-16' : 'w-64',
-        'fixed inset-y-0 left-0 z-10 hidden flex-col border-r md:flex'
+        'fixed inset-y-0 left-0 z-10 hidden flex-col border-r border-slate-800 md:flex'
       )}
     >
-      <div className="flex h-16 items-center justify-between border-b px-4">
+      <div className="flex h-16 items-center justify-between border-b border-slate-800 px-4">
         <Link to="/dashboard" className={cn('flex items-center gap-2', collapsed && 'justify-center')}>
           <img src="/favicon.svg" alt="TechScan IQ" className="h-8 w-8" />
-          {!collapsed && <span className="text-lg font-bold">TechScan IQ</span>}
+          {!collapsed && <span className="text-lg font-bold text-white">TechScan IQ</span>}
         </Link>
         <Button 
           variant="ghost" 
           size="icon" 
           onClick={() => setCollapsed(!collapsed)}
-          className="hidden md:flex"
+          className="hidden text-slate-400 hover:text-white hover:bg-slate-800 md:flex"
         >
           <PanelLeft className={cn('h-5 w-5 transition-transform', collapsed && 'rotate-180')} />
         </Button>
@@ -62,7 +62,7 @@ export function Sidebar({ collapsed, setCollapsed, isAdmin }: SidebarProps) {
           
           {isAdmin && (
             <>
-              <div className={cn('my-4 border-t', collapsed ? 'mx-2' : 'mx-4')} />
+              <div className={cn('my-4 border-t border-slate-800', collapsed ? 'mx-2' : 'mx-4')} />
               <NavItem
                 to="/advisor/queue"
                 icon={<List className="h-5 w-5" />}
@@ -74,7 +74,7 @@ export function Sidebar({ collapsed, setCollapsed, isAdmin }: SidebarProps) {
         </nav>
       </div>
       
-      <div className="border-t p-4">
+      <div className="border-t border-slate-800 p-4">
         <NavItem
           to="/settings"
           icon={<Settings className="h-5 w-5" />}
@@ -101,8 +101,8 @@ function NavItem({ to, icon, label, collapsed }: NavItemProps) {
         cn(
           'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
           isActive
-            ? 'bg-primary text-primary-foreground'
-            : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+            ? 'bg-electric-teal text-white'
+            : 'text-slate-400 hover:bg-deep-navy/50 hover:text-white',
           collapsed && 'justify-center px-2'
         )
       }

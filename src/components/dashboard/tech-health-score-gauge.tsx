@@ -15,11 +15,11 @@ export function TechHealthScoreGauge({ score, grade }: TechHealthScoreGaugeProps
   
   // Map grade to color
   const gradeColors = {
-    A: 'text-green-500',
-    B: 'text-green-400',
-    C: 'text-yellow-500',
+    A: 'text-signal-green',
+    B: 'text-electric-teal',
+    C: 'text-caution-amber',
     D: 'text-orange-500',
-    F: 'text-red-500',
+    F: 'text-risk-red',
   }
   
   // Calculate rotation angle for the gauge needle
@@ -42,12 +42,12 @@ export function TechHealthScoreGauge({ score, grade }: TechHealthScoreGaugeProps
                 clipPath: `polygon(50% 50%, 50% 0%, ${percentage > 50 ? '100% 0%' : `${50 + percentage}% 0%`}, ${percentage > 50 ? `${50 + (percentage - 50) / 2}% ${(percentage - 50) / 2}%` : '50% 50%'})` 
               }}
             >
-              <div className="h-full w-full bg-gradient-to-r from-red-500 via-yellow-500 to-green-500" />
+              <div className="h-full w-full tech-health-gauge" />
             </div>
             
             {/* Gauge center and needle */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="flex h-24 w-24 flex-col items-center justify-center rounded-full bg-background text-center shadow-md">
+              <div className="flex h-24 w-24 flex-col items-center justify-center rounded-full bg-white text-center shadow-md dark:bg-deep-navy">
                 <span className="text-3xl font-bold">{score.toFixed(1)}</span>
                 <span className={`text-xl font-semibold ${gradeColors[grade]}`}>{grade}</span>
               </div>
@@ -68,7 +68,7 @@ export function TechHealthScoreGauge({ score, grade }: TechHealthScoreGaugeProps
         <Tooltip open={tooltip !== null}>
           <TooltipTrigger asChild>
             <button 
-              className="mt-4 flex items-center text-sm text-primary"
+              className="mt-4 flex items-center text-sm text-electric-teal hover:underline"
               onMouseEnter={() => setTooltip('methodology')}
               onMouseLeave={() => setTooltip(null)}
             >

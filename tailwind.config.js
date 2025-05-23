@@ -45,17 +45,22 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // Custom colors for TechScan IQ
-        "trust-blue": "#2563eb",
-        "risk-red": "#dc2626",
-        "caution-amber": "#f59e0b",
-        "signal-green": "#10b981",
-        "neutral-gray": "#6b7280",
+        // TechScan IQ Brand Colors
+        "deep-navy": "#0B1E40", // Primary background
+        "slate-gray": "#64748B", // Secondary background, borders
+        "electric-teal": "#14B8A6", // Primary accent
+        "signal-green": "#10B981", // Success states
+        "risk-red": "#DC2626", // Error states, critical risk
+        "caution-amber": "#F59E0B", // Warnings, caution badges
+        "neutral-gray": "#6B7280", // Disabled states, placeholder text
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      fontFamily: {
+        sans: ["Inter", "Satoshi", "IBM Plex Sans", "system-ui", "sans-serif"],
       },
       keyframes: {
         "accordion-down": {
