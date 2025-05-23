@@ -74,7 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   // Mock sign in that accepts any credentials in dev mode
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, _password: string) => {
     setIsLoading(true)
     
     await new Promise(resolve => setTimeout(resolve, 500)) // Fake delay
@@ -107,7 +107,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const signUp = async (email: string, password: string, name: string, workspaceName: string) => {
+  const signUp = async (email: string, _password: string, name: string, workspaceName: string) => {
     setIsLoading(true)
     
     await new Promise(resolve => setTimeout(resolve, 800)) // Fake delay
