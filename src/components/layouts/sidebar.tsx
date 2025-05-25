@@ -4,6 +4,19 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useAuth } from '@/lib/auth/mock-auth-provider'
+import { getNavigationRoutes } from '@/routes'
+
+// Icon mapping for routes
+const iconMap = {
+  'Dashboard': Home,
+  'Request Scan': SquarePen,
+  'Reports': FileText,
+  'Analytics': BarChart3,
+  'Portfolio Companies': Building2,
+  'Thesis Tracking': TrendingUp,
+  'Review Queue': List,
+  'Settings': Settings,
+}
 
 interface SidebarProps {
   collapsed: boolean
@@ -17,6 +30,9 @@ export function Sidebar({ collapsed, setCollapsed, isAdmin }: SidebarProps) {
   const userRole = user?.user_metadata?.role
   const isPE = userRole === 'pe'
   const pendingReviewCount = isAdmin ? 3 : 0 // Mock pending reviews count
+  
+  // Get navigation routes based on user role
+  const navigationRoutes = getNavigationRoutes(userRole)
 
   return (
     <aside
@@ -43,36 +59,29 @@ export function Sidebar({ collapsed, setCollapsed, isAdmin }: SidebarProps) {
       
       <div className="flex-1 overflow-auto">
         <nav className="space-y-1 px-2 py-4">
-          <NavItem
-            to="/dashboard"
-            icon={<Home className="h-5 w-5" />}
-            label="Dashboard"
-            collapsed={collapsed}
-            active={location.pathname === '/dashboard'}
-          />
-          <NavItem
-            to="/scans/request"
-            icon={<SquarePen className="h-5 w-5" />}
-            label="Request Scan"
-            collapsed={collapsed}
-            active={location.pathname === '/scans/request'}
-          />
-          <NavItem
-            to="/reports"
-            icon={<FileText className="h-5 w-5" />}
-            label="Reports"
-            collapsed={collapsed}
-            active={location.pathname.startsWith('/reports')}
-          />
-          <NavItem
-            to="/analytics"
-            icon={<BarChart3 className="h-5 w-5" />}
-            label="Analytics"
-            collapsed={collapsed}
-            active={location.pathname === '/analytics'}
-          />
+          {/* Main navigation routes (non-role-specific) */}
+          {navigationRoutes
+            .filter(route => !route.requirePE && !route.requireAdmin)
+            .map((route) => {
+              const IconComponent = iconMap[route.label as keyof typeof iconMap] || FileText
+              const isActive = route.path === '/dashboard' 
+                ? location.pathname === '/dashboard'
+                : location.pathname.startsWith(route.path)
+              
+              return (
+                <NavItem
+                  key={route.path}
+                  to={route.path}
+                  icon={<IconComponent className="h-5 w-5" />}
+                  label={route.label || ''}
+                  collapsed={collapsed}
+                  active={isActive}
+                />
+              )
+            })}
           
-          {isPE && (
+          {/* PE Section */}
+          {isPE && navigationRoutes.some(route => route.requirePE) && (
             <>
               <div className={cn('my-4 border-t border-slate-800', collapsed ? 'mx-2' : 'mx-4')} />
               <div className="px-3 py-2">
@@ -80,24 +89,28 @@ export function Sidebar({ collapsed, setCollapsed, isAdmin }: SidebarProps) {
                   Private Equity
                 </p>
               </div>
-              <NavItem
-                to="/pe/portfolio"
-                icon={<Building2 className="h-5 w-5" />}
-                label="Portfolio Companies"
-                collapsed={collapsed}
-                active={location.pathname.startsWith('/pe/portfolio')}
-              />
-              <NavItem
-                to="/pe/thesis-tracking"
-                icon={<TrendingUp className="h-5 w-5" />}
-                label="Thesis Tracking"
-                collapsed={collapsed}
-                active={location.pathname.startsWith('/pe/thesis-tracking')}
-              />
+              {navigationRoutes
+                .filter(route => route.requirePE)
+                .map((route) => {
+                  const IconComponent = iconMap[route.label as keyof typeof iconMap] || Building2
+                  const isActive = location.pathname.startsWith(route.path)
+                  
+                  return (
+                    <NavItem
+                      key={route.path}
+                      to={route.path}
+                      icon={<IconComponent className="h-5 w-5" />}
+                      label={route.label || ''}
+                      collapsed={collapsed}
+                      active={isActive}
+                    />
+                  )
+                })}
             </>
           )}
           
-          {isAdmin && (
+          {/* Admin Section */}
+          {isAdmin && navigationRoutes.some(route => route.requireAdmin) && (
             <>
               <div className={cn('my-4 border-t border-slate-800', collapsed ? 'mx-2' : 'mx-4')} />
               <div className="px-3 py-2">
@@ -105,14 +118,24 @@ export function Sidebar({ collapsed, setCollapsed, isAdmin }: SidebarProps) {
                   Admin
                 </p>
               </div>
-              <NavItem
-                to="/advisor/queue"
-                icon={<List className="h-5 w-5" />}
-                label="Review Queue"
-                badge={pendingReviewCount > 0 ? pendingReviewCount.toString() : undefined}
-                collapsed={collapsed}
-                active={location.pathname.startsWith('/advisor')}
-              />
+              {navigationRoutes
+                .filter(route => route.requireAdmin)
+                .map((route) => {
+                  const IconComponent = iconMap[route.label as keyof typeof iconMap] || List
+                  const isActive = location.pathname.startsWith(route.path)
+                  
+                  return (
+                    <NavItem
+                      key={route.path}
+                      to={route.path}
+                      icon={<IconComponent className="h-5 w-5" />}
+                      label={route.label || ''}
+                      collapsed={collapsed}
+                      active={isActive}
+                      badge={route.label === 'Review Queue' && pendingReviewCount > 0 ? pendingReviewCount.toString() : undefined}
+                    />
+                  )
+                })}
             </>
           )}
         </nav>
