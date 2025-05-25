@@ -3,6 +3,8 @@ import { ExecutiveSummary } from '@/components/pe/enhanced-report/sections/Execu
 import { StackEvolutionTimeline } from '@/components/pe/enhanced-report/sections/StackEvolutionTimeline'
 import { TechnicalLeadership } from '@/components/pe/enhanced-report/sections/TechnicalLeadership'
 import { StackArchitecture } from '@/components/pe/enhanced-report/sections/StackArchitecture'
+import { CloudVendorDependencies } from '@/components/pe/enhanced-report/sections/CloudVendorDependencies'
+import { CodeQualityDevOps } from '@/components/pe/enhanced-report/sections/CodeQualityDevOps'
 
 // Mock data for demonstration
 const mockReportData = {
@@ -432,6 +434,249 @@ const mockReportData = {
       'Potential WebRTC scaling bottlenecks for enterprise adoption',
       'Database performance degradation under high write loads'
     ]
+  },
+  cloudVendorDependencies: {
+    companyName: 'Ring4',
+    overallRiskScore: 72,
+    totalMonthlySpend: '$18,500',
+    vendorCount: 12,
+    dependencies: [
+      {
+        name: 'Amazon Web Services (AWS)',
+        category: 'infrastructure' as const,
+        criticality: 'critical' as const,
+        description: 'Primary cloud infrastructure provider hosting all core services, databases, and compute resources',
+        monthlySpend: '$8,200',
+        contractTerms: 'Pay-as-you-go, no long-term commitment',
+        riskLevel: 'medium' as const,
+        alternatives: ['Google Cloud Platform', 'Microsoft Azure', 'DigitalOcean'],
+        migrationComplexity: 'high' as const,
+        dataExposure: 'extensive' as const
+      },
+      {
+        name: 'Twilio',
+        category: 'communication' as const,
+        criticality: 'critical' as const,
+        description: 'Core telephony services providing voice calling, SMS, and phone number provisioning',
+        monthlySpend: '$4,800',
+        contractTerms: 'Monthly billing, volume discounts',
+        riskLevel: 'high' as const,
+        alternatives: ['Vonage', 'Plivo', 'MessageBird'],
+        migrationComplexity: 'medium' as const,
+        dataExposure: 'extensive' as const
+      },
+      {
+        name: 'Stripe',
+        category: 'payment' as const,
+        criticality: 'high' as const,
+        description: 'Payment processing for subscription billing and one-time purchases',
+        monthlySpend: '$1,200',
+        contractTerms: 'Transaction-based pricing, no monthly fees',
+        riskLevel: 'low' as const,
+        alternatives: ['PayPal', 'Square', 'Braintree'],
+        migrationComplexity: 'low' as const,
+        dataExposure: 'moderate' as const
+      },
+      {
+        name: 'SendGrid',
+        category: 'communication' as const,
+        criticality: 'medium' as const,
+        description: 'Email delivery service for transactional emails and notifications',
+        monthlySpend: '$320',
+        contractTerms: 'Monthly subscription with volume tiers',
+        riskLevel: 'low' as const,
+        alternatives: ['Mailgun', 'Amazon SES', 'Postmark'],
+        migrationComplexity: 'low' as const,
+        dataExposure: 'limited' as const
+      },
+      {
+        name: 'Datadog',
+        category: 'analytics' as const,
+        criticality: 'medium' as const,
+        description: 'Application performance monitoring and infrastructure observability',
+        monthlySpend: '$890',
+        contractTerms: 'Annual contract with monthly billing',
+        riskLevel: 'low' as const,
+        alternatives: ['New Relic', 'Grafana', 'Prometheus'],
+        migrationComplexity: 'medium' as const,
+        dataExposure: 'moderate' as const
+      }
+    ],
+    riskAssessment: {
+      singlePointsOfFailure: [
+        'AWS outage would impact entire platform availability',
+        'Twilio service disruption would disable all calling features',
+        'Single region deployment creates geographic risk'
+      ],
+      vendorConcentrationRisk: 'Ring4 has moderate vendor concentration risk with heavy dependence on AWS and Twilio representing 70% of total vendor spend. While both are industry leaders, this concentration could impact negotiating power and create operational risk.',
+      dataPrivacyRisks: [
+        'Customer call data processed by Twilio in multiple jurisdictions',
+        'Payment data handled by Stripe with PCI compliance requirements',
+        'User analytics data shared with Datadog for monitoring'
+      ],
+      costOptimizationOpportunities: [
+        'AWS Reserved Instances could reduce infrastructure costs by 20-30%',
+        'Twilio volume discounts available at higher usage tiers',
+        'Email service consolidation could reduce SendGrid costs'
+      ]
+    },
+    recommendations: [
+      'Implement multi-cloud strategy for critical workloads',
+      'Negotiate enterprise contracts with key vendors for better pricing',
+      'Establish vendor performance SLAs and monitoring',
+      'Create detailed vendor exit strategies for critical dependencies',
+      'Implement data residency controls for compliance requirements'
+    ],
+    contingencyPlans: {
+      criticalVendorFailure: [
+        'Maintain hot standby infrastructure on secondary cloud provider',
+        'Pre-negotiated emergency contracts with alternative telephony providers',
+        'Automated failover procedures for critical services'
+      ],
+      costEscalation: [
+        'Usage monitoring and alerting for unexpected cost spikes',
+        'Pre-approved alternative vendors for cost-sensitive services',
+        'Reserved capacity planning to lock in pricing'
+      ],
+      dataBreachResponse: [
+        'Immediate vendor notification and assessment procedures',
+        'Customer communication plan for data exposure incidents',
+        'Legal and compliance review process for vendor breaches'
+      ]
+    }
+  },
+  codeQualityDevOps: {
+    companyName: 'Ring4',
+    overallScore: 76,
+    codeQualityScore: 78,
+    devOpsMaturityScore: 82,
+    technicalDebtScore: 68,
+    codeMetrics: [
+      {
+        name: 'Code Coverage',
+        value: '78%',
+        score: 78,
+        benchmark: '>80%',
+        trend: 'improving' as const,
+        status: 'good' as const
+      },
+      {
+        name: 'Cyclomatic Complexity',
+        value: '6.2 avg',
+        score: 72,
+        benchmark: '<10',
+        trend: 'stable' as const,
+        status: 'good' as const
+      },
+      {
+        name: 'Technical Debt Ratio',
+        value: '18%',
+        score: 68,
+        benchmark: '<15%',
+        trend: 'declining' as const,
+        status: 'fair' as const
+      },
+      {
+        name: 'Code Duplication',
+        value: '8%',
+        score: 85,
+        benchmark: '<10%',
+        trend: 'improving' as const,
+        status: 'excellent' as const
+      },
+      {
+        name: 'Security Hotspots',
+        value: '12',
+        score: 75,
+        benchmark: '<10',
+        trend: 'stable' as const,
+        status: 'good' as const
+      }
+    ],
+    devOpsPractices: [],
+    technicalDebt: [
+      {
+        category: 'Legacy Authentication Service',
+        severity: 'high' as const,
+        description: 'Legacy authentication service using outdated JWT implementation with security vulnerabilities',
+        estimatedEffort: '3-4 weeks',
+        businessImpact: 'Security risk and potential compliance issues'
+      },
+      {
+        category: 'Database Query Optimization',
+        severity: 'medium' as const,
+        description: 'Several database queries lack proper indexing causing performance degradation under load',
+        estimatedEffort: '1-2 weeks',
+        businessImpact: 'Slower response times during peak usage'
+      },
+      {
+        category: 'Frontend Bundle Size',
+        severity: 'medium' as const,
+        description: 'React application bundle size is larger than optimal, affecting initial load times',
+        estimatedEffort: '1 week',
+        businessImpact: 'Reduced user experience on slower connections'
+      },
+      {
+        category: 'API Documentation',
+        severity: 'low' as const,
+        description: 'Internal API documentation is outdated and incomplete',
+        estimatedEffort: '2 weeks',
+        businessImpact: 'Slower developer onboarding and integration'
+      }
+    ],
+    testingStrategy: {
+      unitTestCoverage: 78,
+      integrationTestCoverage: 65,
+      e2eTestCoverage: 45,
+      testAutomation: true,
+      performanceTesting: false,
+      securityTesting: true
+    },
+    cicdPipeline: {
+      automatedBuilds: true,
+      automatedTesting: true,
+      automatedDeployment: true,
+      rollbackCapability: true,
+      environmentParity: false,
+      deploymentFrequency: '2-3 times per week',
+      leadTime: '2-4 hours',
+      mttr: '15 minutes'
+    },
+    codebaseHealth: {
+      languageDistribution: [
+        { name: 'TypeScript', percentage: 45, quality: 'excellent' },
+        { name: 'JavaScript', percentage: 30, quality: 'good' },
+        { name: 'Python', percentage: 15, quality: 'good' },
+        { name: 'SQL', percentage: 10, quality: 'fair' }
+      ],
+      dependencyManagement: 'Good dependency management with regular updates and security scanning',
+      securityVulnerabilities: [
+        { severity: 'critical', count: 0 },
+        { severity: 'high', count: 2 },
+        { severity: 'medium', count: 8 },
+        { severity: 'low', count: 15 }
+      ],
+      performanceBottlenecks: [
+        'Database connection pooling needs optimization',
+        'React component re-rendering in call interface',
+        'WebRTC connection establishment latency',
+        'Large payload sizes in API responses'
+      ]
+    },
+    recommendations: [
+      'Implement comprehensive performance testing in CI/CD pipeline',
+      'Upgrade legacy authentication service to modern standards',
+      'Establish environment parity between staging and production',
+      'Implement automated security scanning in development workflow',
+      'Create comprehensive API documentation with examples',
+      'Optimize database queries and implement proper indexing'
+    ],
+    riskFactors: [
+      'Legacy authentication service poses security risks',
+      'Limited performance testing may miss scalability issues',
+      'Technical debt accumulation could slow feature development',
+      'Incomplete environment parity may cause production issues'
+    ]
   }
 }
 
@@ -469,11 +714,18 @@ export default function EnhancedPEReportPage() {
         {/* Stack Architecture & Infrastructure */}
         <StackArchitecture data={mockReportData.stackArchitecture} />
 
+        {/* Cloud & Vendor Dependencies */}
+        <CloudVendorDependencies data={mockReportData.cloudVendorDependencies} />
+
+        {/* Code Quality & DevOps Maturity */}
+        <CodeQualityDevOps data={mockReportData.codeQualityDevOps} />
+
         {/* Additional sections would follow the same pattern */}
         <div className="rounded-lg border border-dashed p-12 text-center">
           <p className="text-lg text-muted-foreground">
-            Additional 12+ detailed sections would appear here,
-            <br />each with collapsible content and progressive disclosure
+            Additional 8+ detailed sections would appear here,
+            <br />including AI Models & Automation, Data Architecture, Revenue Attribution,
+            <br />Disaster Recovery, Peer Benchmarking, and Final Narrative Summary
           </p>
         </div>
       </div>
