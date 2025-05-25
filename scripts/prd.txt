@@ -1,0 +1,151 @@
+TechScan IQ – SaaS Technical Due Diligence Platform
+
+PROJECT OVERVIEW:
+TechScan IQ is a SaaS platform designed to streamline and democratize technical due diligence for early-stage investors. By combining an AI-driven analysis engine with a structured human-in-the-loop review, the platform turns complex assessments of startups' technology stacks, architecture, security, and code quality into clear, actionable intelligence.
+
+KEY PROBLEMS SOLVED:
+1. Speed – Traditional technical reviews are too slow for fast-moving deals
+2. Cost – Smaller investors often can't afford full-service engineering audits  
+3. Relevance – Generic reports rarely map to an investor's unique thesis
+4. Clarity – Non-engineering stakeholders struggle to interpret highly technical findings
+
+SUCCESS CRITERIA:
+- First scan turnaround under 10 minutes of AI processing + human review in 24 hours
+- Investor satisfaction: ≥ 90% positive feedback on report clarity
+- Adoption: 50 paying scans in first quarter post-launch
+
+CORE FEATURES:
+
+1. Authentication & Multi-Tenant Workspace
+   - Supabase-powered email/password + SSO authentication
+   - Isolated data per organization with row-level security
+   - Two roles: Investor and Admin
+
+2. Interactive Dashboard
+   - Tech Health Score gauge with confidence indicators
+   - Risk cards color-coded by severity (Critical/red, High/orange, Medium/yellow, Low/green)
+   - Key findings summary and scan history
+
+3. Scan Request Form
+   - Company information input (name, website URL)
+   - Thesis-driven tags (multi-select predefined options)
+   - Custom criteria text areas (200-character limit)
+   - Industry and tech stack preferences
+
+4. AI Analysis Engine (Ensemble Approach)
+   - Claude-3 for thesis alignment analysis
+   - GPT-4 for code quality assessment
+   - Gemini-Pro for architecture evaluation
+   - Diffbot + Crawl4ai for evidence scraping and data collection
+
+5. Risk Assessment Module
+   - Color-coded risk cards with severity badges
+   - Business impact descriptions
+   - "View Evidence" functionality with detailed breakdowns
+
+6. Architecture Analysis
+   - Interactive block diagram with clickable components
+   - Component details on click with risk overlays
+   - Exportable architecture images
+
+7. Security & Compliance
+   - Vulnerability list with CVSS scores
+   - GDPR/SOC2 compliance checklist
+   - Data practices summary
+   - Security posture radar chart
+
+8. Code Quality & DevOps
+   - CI/CD pipeline maturity score
+   - Pipeline flow visualization
+   - Technical debt flags and recommendations
+   - Test coverage summary and analysis
+
+9. Evidence & Citation System
+   - Source attribution with timestamps
+   - Confidence scores for each finding
+   - Hover preview functionality
+   - Full evidence modal with detailed sources
+   - AI/human verification status indicators
+
+10. Advisor Review Workflow
+    - Split-screen AI vs. advisor view
+    - Inline annotation and comment system
+    - Approve/moderate/flag actions
+    - Bulk approval capabilities for efficiency
+
+11. Notifications System
+    - Push notifications when scans complete (to Admin)
+    - Alerts when human review finishes (to Investor)
+    - Real-time status updates
+
+12. PDF Export & Reporting
+    - White-label report generation
+    - Customizable headers, footers, and cover pages
+    - Branded export functionality
+
+TECH STACK:
+
+Frontend:
+- Vite + React + TypeScript
+- Tailwind CSS for styling
+- Shadcn UI component library
+- Cursor IDE for AI-powered development
+
+Backend & Database:
+- Supabase (PostgreSQL, Auth, Functions)
+- Netlify Functions for serverless endpoints
+- Row-level security for multi-tenancy
+
+AI & Data Processing:
+- Claude-3, GPT-4, Gemini-Pro APIs
+- Diffbot and Crawl4ai for web scraping
+- JSONB fields in Supabase for evidence storage
+
+DevOps & CI/CD:
+- Netlify automated deployments
+- ESLint and Prettier for code quality
+- Unit, integration, and E2E tests (Playwright/Jest)
+- GitHub Actions for CI pipeline
+
+PDF Generation:
+- Puppeteer or PDFKit for serverless export
+
+DESIGN SYSTEM:
+- Primary colors: Deep navy + slate gray
+- Accent colors: Electric teal, signal green
+- Typography: Inter, Satoshi, IBM Plex Sans
+- Minimal grid-based UI with glassmorphism effects
+- WCAG 2.1 AA compliance for accessibility
+
+USER FLOW:
+1. Investor signs up via email/password or SSO
+2. Completes onboarding wizard for workspace setup
+3. Lands on dashboard with Tech Health Score gauge
+4. Clicks "Request Scan" and fills out company details and thesis criteria
+5. System queues AI analysis and scraping jobs
+6. Admin receives notification when AI draft is ready
+7. Admin reviews in split-screen interface, adds annotations, approves/flags sections
+8. Investor receives notification when review is complete
+9. Investor views final report with interactive elements
+10. Investor can export branded PDF for sharing
+
+NON-FUNCTIONAL REQUIREMENTS:
+- Performance: Dashboard loads < 2 seconds, API responses < 500ms
+- Security: Data encrypted at rest and in transit, RBAC implementation
+- Usability: WCAG 2.1 AA compliance, responsive mobile-first design
+- Maintainability: 80%+ code coverage, enforced linting and formatting
+- Reliability: 99.5% uptime SLA with automated health checks
+
+CONSTRAINTS:
+- AI Model Availability: Rely on API access to Claude-3, GPT-4, Gemini-Pro
+- Supabase Limits: Keep within free/tier limits initially
+- User Load: Expect < 100 concurrent users at launch
+- No GitHub/Jira/AWS integration in V1
+
+OUT OF SCOPE (V1):
+- Integrations with GitHub, Jira, AWS, Docker registries
+- Tiered subscription plans, free trials, volume discounts
+- Advanced compliance certifications (SOC2 audit readiness)
+- Real-time collaboration features (chat, shared annotations)
+- Mobile-native apps (responsive web only)
+- On-premise or self-hosted deployments 

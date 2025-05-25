@@ -18,6 +18,9 @@ const ScanDetailsPage = lazy(() => import('@/pages/scans/scan-details'))
 const ReportPage = lazy(() => import('@/pages/reports/report'))
 const AdvisorReviewPage = lazy(() => import('@/pages/advisor/review'))
 const AdvisorQueuePage = lazy(() => import('@/pages/advisor/queue'))
+const PortfolioPage = lazy(() => import('@/pages/pe/portfolio'))
+const ThesisTrackingPage = lazy(() => import('@/pages/pe/thesis-tracking'))
+const EnhancedPEReportPage = lazy(() => import('@/pages/pe/enhanced-report'))
 const SettingsPage = lazy(() => import('@/pages/settings'))
 
 function AppContent() {
@@ -71,6 +74,13 @@ function AppContent() {
           <Route element={<ProtectedRoute requireAdmin><DashboardLayout /></ProtectedRoute>}>
             <Route path="/advisor/review/:id" element={<AdvisorReviewPage />} />
             <Route path="/advisor/queue" element={<AdvisorQueuePage />} />
+          </Route>
+          
+          {/* PE routes */}
+          <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+            <Route path="/pe/portfolio" element={<PortfolioPage />} />
+            <Route path="/pe/thesis-tracking" element={<ThesisTrackingPage />} />
+            <Route path="/pe/reports/:id" element={<EnhancedPEReportPage />} />
           </Route>
           
           {/* Fallback route */}

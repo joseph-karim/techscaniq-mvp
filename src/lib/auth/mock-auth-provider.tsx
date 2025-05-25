@@ -6,7 +6,7 @@ export interface MockUser {
   email: string
   user_metadata: {
     name?: string
-    role: 'investor' | 'admin'
+    role: 'investor' | 'admin' | 'pe'
     workspace_name?: string
   }
 }
@@ -32,7 +32,7 @@ type AuthContextType = {
     error: Error | null
     data: { user: MockUser | null }
   }>
-  switchRole: (role: 'investor' | 'admin') => void
+  switchRole: (role: 'investor' | 'admin' | 'pe') => void
 }
 
 // Create a mock investor user
@@ -57,6 +57,17 @@ const mockAdminUser: MockUser = {
   }
 }
 
+// Create a mock PE user
+const mockPEUser: MockUser = {
+  id: '123e4567-e89b-12d3-a456-426614174002',
+  email: 'pe@example.com',
+  user_metadata: {
+    name: 'Sarah PE Analyst',
+    role: 'pe',
+    workspace_name: 'Blackstone Growth',
+  }
+}
+
 // Create the context
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
@@ -66,9 +77,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<MockSession | null>(user ? { user } : null)
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
-  // Function to switch between roles (investor and admin)
-  const switchRole = (role: 'investor' | 'admin') => {
-    const newUser = role === 'admin' ? mockAdminUser : mockInvestorUser
+  // Function to switch between roles (investor, admin, and pe)
+  const switchRole = (role: 'investor' | 'admin' | 'pe') => {
+    let newUser: MockUser
+    if (role === 'admin') {
+      newUser = mockAdminUser
+    } else if (role === 'pe') {
+      newUser = mockPEUser
+    } else {
+      newUser = mockInvestorUser
+    }
     setUser(newUser)
     setSession({ user: newUser })
   }
@@ -85,6 +103,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Simple logic to determine which mock user to use
       if (email.includes('admin')) {
         mockUser = mockAdminUser
+      } else if (email.includes('pe')) {
+        mockUser = mockPEUser
       } else {
         mockUser = mockInvestorUser
       }

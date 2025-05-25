@@ -1,5 +1,5 @@
 import { Link, NavLink, useLocation } from 'react-router-dom'
-import { BarChart3, FileText, Home, List, PanelLeft, Settings, PenSquare as SquarePen } from 'lucide-react'
+import { BarChart3, FileText, Home, List, PanelLeft, Settings, PenSquare as SquarePen, Building2, TrendingUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -14,6 +14,8 @@ interface SidebarProps {
 export function Sidebar({ collapsed, setCollapsed, isAdmin }: SidebarProps) {
   const location = useLocation()
   const { user } = useAuth()
+  const userRole = user?.user_metadata?.role
+  const isPE = userRole === 'pe'
   const pendingReviewCount = isAdmin ? 3 : 0 // Mock pending reviews count
 
   return (
@@ -70,6 +72,31 @@ export function Sidebar({ collapsed, setCollapsed, isAdmin }: SidebarProps) {
             active={location.pathname === '/analytics'}
           />
           
+          {isPE && (
+            <>
+              <div className={cn('my-4 border-t border-slate-800', collapsed ? 'mx-2' : 'mx-4')} />
+              <div className="px-3 py-2">
+                <p className={collapsed ? 'sr-only' : 'mb-2 text-xs uppercase tracking-wider text-slate-500'}>
+                  Private Equity
+                </p>
+              </div>
+              <NavItem
+                to="/pe/portfolio"
+                icon={<Building2 className="h-5 w-5" />}
+                label="Portfolio Companies"
+                collapsed={collapsed}
+                active={location.pathname.startsWith('/pe/portfolio')}
+              />
+              <NavItem
+                to="/pe/thesis-tracking"
+                icon={<TrendingUp className="h-5 w-5" />}
+                label="Thesis Tracking"
+                collapsed={collapsed}
+                active={location.pathname.startsWith('/pe/thesis-tracking')}
+              />
+            </>
+          )}
+          
           {isAdmin && (
             <>
               <div className={cn('my-4 border-t border-slate-800', collapsed ? 'mx-2' : 'mx-4')} />
@@ -105,12 +132,15 @@ export function Sidebar({ collapsed, setCollapsed, isAdmin }: SidebarProps) {
             <div className="flex items-center">
               <div className="mr-2 h-2 w-2 rounded-full bg-electric-teal"></div>
               <span className="text-sm font-medium">
-                {user?.user_metadata.role === 'admin' ? 'Admin' : 'Investor'} Mode
+                {user?.user_metadata.role === 'admin' ? 'Admin' : 
+                 user?.user_metadata.role === 'pe' ? 'PE' : 'Investor'} Mode
               </span>
             </div>
             <p className="mt-1 text-xs text-slate-400">
               {user?.user_metadata.role === 'admin' 
                 ? 'You have advisor privileges' 
+                : user?.user_metadata.role === 'pe'
+                ? 'Private equity view active'
                 : 'Investor view active'}
             </p>
           </div>
