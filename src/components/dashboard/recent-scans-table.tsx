@@ -99,7 +99,7 @@ export function RecentScansTable({ showAll = false }: RecentScansTableProps) {
                   disabled={scan.status !== 'complete'}
                   asChild
                 >
-                  <Link to={`/reports/${scan.id}`}>
+                  <Link to={`/pe/reports/${scan.id}`}>
                     <FileText className="mr-2 h-4 w-4" />
                     View Report
                   </Link>

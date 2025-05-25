@@ -230,7 +230,7 @@ export default function AdvisorQueuePage() {
                               </Button>
                             ) : scan.status === 'complete' ? (
                               <Button variant="outline" size="sm" asChild>
-                                <Link to={`/reports/${scan.id}`}>
+                                <Link to={`/pe/reports/${scan.id}`}>
                                   View Report
                                 </Link>
                               </Button>
