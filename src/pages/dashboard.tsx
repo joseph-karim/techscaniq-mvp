@@ -140,11 +140,11 @@ export default function DashboardPage() {
                 <Card className="col-span-1 border-slate-200 shadow-sm dark:border-slate-800">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">Tech Health Score</CardTitle>
-                    <Button variant="link" size="sm" className="text-electric-teal" asChild>
-                      <Link to="/pe/reports/scan-1">
-                        View Latest <ArrowRight className="ml-1 h-4 w-4" />
-                      </Link>
-                    </Button>
+                                          <Button variant="link" size="sm" className="text-electric-teal" asChild>
+                        <Link to="/reports/scan-1">
+                          View Latest <ArrowRight className="ml-1 h-4 w-4" />
+                        </Link>
+                      </Button>
                   </CardHeader>
                   <CardContent>
                     <TechHealthScoreGauge score={7.8} grade="B" />
@@ -155,7 +155,7 @@ export default function DashboardPage() {
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">Risk Summary</CardTitle>
                     <Button variant="link" size="sm" className="text-electric-teal" asChild>
-                      <Link to="/pe/reports/scan-1">
+                      <Link to="/reports/scan-1">
                         View Details <ArrowRight className="ml-1 h-4 w-4" />
                       </Link>
                     </Button>

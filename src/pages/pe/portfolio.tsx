@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Building2, TrendingUp, AlertTriangle, CheckCircle, Clock, BarChart3, FileText, Settings } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -243,11 +244,19 @@ export default function PortfolioPage() {
                       </div>
                       <div className="flex space-x-2">
                         <Button variant="outline" size="sm" asChild>
-                          <a href={`/pe/reports/${company.id}`}>
+                          <Link to={`/portfolio/${company.id}/scan`}>
                             <BarChart3 className="mr-2 h-4 w-4" />
-                            View Report
-                          </a>
+                            View Scan
+                          </Link>
                         </Button>
+                        {company.id === 1 && (
+                          <Button variant="outline" size="sm" asChild>
+                            <Link to={`/portfolio/${company.id}/deep-dive`}>
+                              <FileText className="mr-2 h-4 w-4" />
+                              Deep Dive
+                            </Link>
+                          </Button>
+                        )}
                         <Button variant="outline" size="sm">
                           <Settings className="mr-2 h-4 w-4" />
                           Manage
