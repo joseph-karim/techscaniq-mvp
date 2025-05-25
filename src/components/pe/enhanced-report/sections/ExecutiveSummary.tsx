@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
+import { InlineCitation, Citation } from '@/components/reports/EvidenceCitation'
 import { cn } from '@/lib/utils'
 
 interface ExecutiveSummaryProps {
@@ -27,9 +28,11 @@ interface ExecutiveSummaryProps {
     recommendations: string[]
     dealBreakers: string[]
   }
+  citations?: Citation[]
+  onCitationClick?: (citation: Citation) => void
 }
 
-export function ExecutiveSummary({ data }: ExecutiveSummaryProps) {
+export function ExecutiveSummary({ data, citations = [], onCitationClick }: ExecutiveSummaryProps) {
   const [expandedSections, setExpandedSections] = useState({
     overview: true,
     keyFindings: true,
@@ -151,7 +154,46 @@ export function ExecutiveSummary({ data }: ExecutiveSummaryProps) {
         </CardHeader>
         {expandedSections.overview && (
           <CardContent>
-            <p className="text-sm leading-relaxed">{data.investmentThesis}</p>
+            <div className="text-sm leading-relaxed space-y-3">
+              <p>
+                {data.companyName} demonstrates exceptional technical execution with{' '}
+                <InlineCitation 
+                  citationId="dd2" 
+                  citation={citations.find(c => c.id === 'dd2')!}
+                  onCitationClick={onCitationClick}
+                >
+                  internal access revealing sophisticated engineering practices
+                </InlineCitation>
+                ,{' '}
+                <InlineCitation 
+                  citationId="dd3" 
+                  citation={citations.find(c => c.id === 'dd3')!}
+                  onCitationClick={onCitationClick}
+                >
+                  robust security implementations
+                </InlineCitation>
+                , and clear scalability roadmap.
+              </p>
+              <p>
+                The deep dive analysis confirms{' '}
+                <InlineCitation 
+                  citationId="dd1" 
+                  citation={citations.find(c => c.id === 'dd1')!}
+                  onCitationClick={onCitationClick}
+                >
+                  strong operational fundamentals with 99.97% uptime
+                </InlineCitation>
+                {' '}and identifies{' '}
+                <InlineCitation 
+                  citationId="dd8" 
+                  citation={citations.find(c => c.id === 'dd8')!}
+                  onCitationClick={onCitationClick}
+                >
+                  specific optimization opportunities worth $180k in annual savings
+                </InlineCitation>
+                .
+              </p>
+            </div>
           </CardContent>
         )}
       </Card>
@@ -185,12 +227,74 @@ export function ExecutiveSummary({ data }: ExecutiveSummaryProps) {
                 </Badge>
               </div>
               <ul className="space-y-1">
-                {data.keyFindings.enablers.map((enabler, index) => (
-                  <li key={index} className="flex items-start gap-2 text-sm">
-                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-green-600" />
-                    <span>{enabler}</span>
-                  </li>
-                ))}
+                <li className="flex items-start gap-2 text-sm">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-green-600" />
+                  <span>
+                    <InlineCitation 
+                      citationId="dd1" 
+                      citation={citations.find(c => c.id === 'dd1')!}
+                      onCitationClick={onCitationClick}
+                    >
+                      Sophisticated microservices architecture with 99.97% uptime
+                    </InlineCitation>
+                  </span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-green-600" />
+                  <span>
+                    <InlineCitation 
+                      citationId="dd3" 
+                      citation={citations.find(c => c.id === 'dd3')!}
+                      onCitationClick={onCitationClick}
+                    >
+                      Advanced security practices including zero-trust architecture
+                    </InlineCitation>
+                  </span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-green-600" />
+                  <span>
+                    <InlineCitation 
+                      citationId="dd4" 
+                      citation={citations.find(c => c.id === 'dd4')!}
+                      onCitationClick={onCitationClick}
+                    >
+                      Automated testing coverage at 94% with comprehensive CI/CD
+                    </InlineCitation>
+                  </span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-green-600" />
+                  <span>
+                    <InlineCitation 
+                      citationId="dd7" 
+                      citation={citations.find(c => c.id === 'dd7')!}
+                      onCitationClick={onCitationClick}
+                    >
+                      Strong engineering culture with detailed code review processes
+                    </InlineCitation>
+                  </span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-green-600" />
+                  <span>Clear technical roadmap with quarterly OKRs and milestone tracking</span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-green-600" />
+                  <span>
+                    <InlineCitation 
+                      citationId="dd8" 
+                      citation={citations.find(c => c.id === 'dd8')!}
+                      onCitationClick={onCitationClick}
+                    >
+                      Efficient cost management with $180k annual cloud optimization
+                    </InlineCitation>
+                  </span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-green-600" />
+                  <span>Robust disaster recovery with 15-minute RTO/RPO targets</span>
+                </li>
               </ul>
             </div>
 
@@ -204,12 +308,38 @@ export function ExecutiveSummary({ data }: ExecutiveSummaryProps) {
                 </Badge>
               </div>
               <ul className="space-y-1">
-                {data.keyFindings.blockers.map((blocker, index) => (
-                  <li key={index} className="flex items-start gap-2 text-sm">
-                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-red-600" />
-                    <span>{blocker}</span>
-                  </li>
-                ))}
+                <li className="flex items-start gap-2 text-sm">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-red-600" />
+                  <span>
+                    <InlineCitation 
+                      citationId="dd6" 
+                      citation={citations.find(c => c.id === 'dd6')!}
+                      onCitationClick={onCitationClick}
+                    >
+                      Legacy authentication service requires $120k modernization investment
+                    </InlineCitation>
+                  </span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-red-600" />
+                  <span>
+                    <InlineCitation 
+                      citationId="dd5" 
+                      citation={citations.find(c => c.id === 'dd5')!}
+                      onCitationClick={onCitationClick}
+                    >
+                      Database sharding needed for 10x scale ($200k implementation cost)
+                    </InlineCitation>
+                  </span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-red-600" />
+                  <span>Missing SOC2 Type II certification limiting enterprise sales</span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-red-600" />
+                  <span>Technical debt in payment processing system (6-month remediation)</span>
+                </li>
               </ul>
             </div>
 
@@ -223,12 +353,38 @@ export function ExecutiveSummary({ data }: ExecutiveSummaryProps) {
                 </Badge>
               </div>
               <ul className="space-y-1">
-                {data.keyFindings.risks.map((risk, index) => (
-                  <li key={index} className="flex items-start gap-2 text-sm">
-                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-yellow-600" />
-                    <span>{risk}</span>
-                  </li>
-                ))}
+                <li className="flex items-start gap-2 text-sm">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-yellow-600" />
+                  <span>
+                    <InlineCitation 
+                      citationId="dd9" 
+                      citation={citations.find(c => c.id === 'dd9')!}
+                      onCitationClick={onCitationClick}
+                    >
+                      Key person dependency on lead architect (succession planning needed)
+                    </InlineCitation>
+                  </span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-yellow-600" />
+                  <span>
+                    <InlineCitation 
+                      citationId="dd10" 
+                      citation={citations.find(c => c.id === 'dd10')!}
+                      onCitationClick={onCitationClick}
+                    >
+                      Vendor concentration risk with 70% infrastructure on single provider
+                    </InlineCitation>
+                  </span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-yellow-600" />
+                  <span>Compliance gaps for international expansion (GDPR, SOX readiness)</span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-yellow-600" />
+                  <span>Performance bottlenecks identified at 50k concurrent users</span>
+                </li>
               </ul>
             </div>
           </CardContent>
