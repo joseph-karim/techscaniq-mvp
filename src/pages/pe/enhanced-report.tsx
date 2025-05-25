@@ -2,6 +2,7 @@ import { PEReportLayout } from '@/components/pe/enhanced-report/PEReportLayout'
 import { ExecutiveSummary } from '@/components/pe/enhanced-report/sections/ExecutiveSummary'
 import { StackEvolutionTimeline } from '@/components/pe/enhanced-report/sections/StackEvolutionTimeline'
 import { TechnicalLeadership } from '@/components/pe/enhanced-report/sections/TechnicalLeadership'
+import { StackArchitecture } from '@/components/pe/enhanced-report/sections/StackArchitecture'
 
 // Mock data for demonstration
 const mockReportData = {
@@ -263,6 +264,174 @@ const mockReportData = {
       'Limited bench strength in senior engineering roles',
       'Potential scaling challenges without additional technical leadership'
     ]
+  },
+  stackArchitecture: {
+    companyName: 'Ring4',
+    architecturePattern: 'Microservices with API Gateway',
+    overallScore: 78,
+    scalabilityAssessment: 'Ring4 employs a modern microservices architecture that demonstrates good scalability patterns. The system is built on cloud-native principles with containerized services, API gateway for traffic management, and distributed data storage. While the architecture supports current scale (700k+ users), some components may require optimization for 10x growth.',
+    components: [
+      {
+        name: 'API Gateway',
+        type: 'infrastructure' as const,
+        technology: 'Kong/Nginx',
+        description: 'Central entry point for all client requests, handles routing, authentication, and rate limiting',
+        scalabilityScore: 85,
+        reliabilityScore: 90,
+        securityScore: 88,
+        concerns: ['Single point of failure without proper redundancy', 'Rate limiting may need tuning for peak loads'],
+        strengths: ['Centralized security policies', 'Excellent monitoring and logging', 'Built-in load balancing']
+      },
+      {
+        name: 'User Service',
+        type: 'backend' as const,
+        technology: 'Node.js + Express',
+        description: 'Handles user authentication, profile management, and account operations',
+        scalabilityScore: 75,
+        reliabilityScore: 82,
+        securityScore: 85,
+        concerns: ['Session management could be optimized', 'Database queries need optimization'],
+        strengths: ['Clean API design', 'Good error handling', 'Comprehensive logging']
+      },
+      {
+        name: 'Communication Engine',
+        type: 'backend' as const,
+        technology: 'WebRTC + Node.js',
+        description: 'Core service handling voice calls, SMS, and video conferencing functionality',
+        scalabilityScore: 88,
+        reliabilityScore: 85,
+        securityScore: 90,
+        concerns: ['WebRTC peer connection limits', 'Media server scaling complexity'],
+        strengths: ['Low latency design', 'Built-in encryption', 'Efficient resource usage']
+      },
+      {
+        name: 'React Frontend',
+        type: 'frontend' as const,
+        technology: 'React 18 + TypeScript',
+        description: 'Modern web application with responsive design and real-time updates',
+        scalabilityScore: 80,
+        reliabilityScore: 78,
+        securityScore: 75,
+        concerns: ['Bundle size optimization needed', 'Some legacy components need refactoring'],
+        strengths: ['Modern tech stack', 'Good component architecture', 'TypeScript adoption']
+      },
+      {
+        name: 'PostgreSQL Cluster',
+        type: 'database' as const,
+        technology: 'PostgreSQL 14',
+        description: 'Primary database with read replicas for user data, call logs, and configuration',
+        scalabilityScore: 82,
+        reliabilityScore: 88,
+        securityScore: 92,
+        concerns: ['Write scaling limitations', 'Complex queries need optimization'],
+        strengths: ['ACID compliance', 'Excellent backup strategy', 'Strong encryption at rest']
+      },
+      {
+        name: 'Redis Cache',
+        type: 'database' as const,
+        technology: 'Redis 6',
+        description: 'In-memory cache for session data, rate limiting, and real-time features',
+        scalabilityScore: 90,
+        reliabilityScore: 85,
+        securityScore: 80,
+        concerns: ['Memory usage monitoring needed', 'Persistence configuration'],
+        strengths: ['Excellent performance', 'Built-in clustering', 'Versatile data structures']
+      }
+    ],
+    infrastructureMetrics: [
+      {
+        name: 'API Response Time',
+        value: '95ms',
+        score: 85,
+        benchmark: '<100ms',
+        status: 'good' as const,
+        trend: 'stable' as const
+      },
+      {
+        name: 'System Uptime',
+        value: '99.8%',
+        score: 95,
+        benchmark: '99.9%',
+        status: 'excellent' as const,
+        trend: 'improving' as const
+      },
+      {
+        name: 'Database Query Performance',
+        value: '45ms avg',
+        score: 78,
+        benchmark: '<50ms',
+        status: 'good' as const,
+        trend: 'stable' as const
+      },
+      {
+        name: 'Error Rate',
+        value: '0.12%',
+        score: 92,
+        benchmark: '<0.1%',
+        status: 'good' as const,
+        trend: 'improving' as const
+      },
+      {
+        name: 'Concurrent Users',
+        value: '12,000',
+        score: 88,
+        benchmark: '15,000',
+        status: 'good' as const,
+        trend: 'stable' as const
+      }
+    ],
+    cloudStrategy: {
+      provider: 'AWS',
+      multiCloud: false,
+      hybridCloud: false,
+      cloudNativeScore: 85,
+      vendorLockRisk: 'medium' as const
+    },
+    dataFlow: {
+      description: 'Ring4 follows a clean data flow pattern with API gateway routing requests to appropriate microservices. User data flows through the User Service, while communication data is processed by the Communication Engine. Real-time features utilize WebSocket connections with Redis for state management.',
+      bottlenecks: [
+        'Database write operations during peak hours',
+        'WebRTC signaling server under high concurrent load',
+        'File upload processing for voicemail attachments'
+      ],
+      optimizations: [
+        'Implemented connection pooling for database access',
+        'Added CDN for static asset delivery',
+        'Optimized Redis usage for session management',
+        'Introduced async processing for non-critical operations'
+      ]
+    },
+    scalingChallenges: {
+      current: [
+        'Database write scaling with increasing user base',
+        'WebRTC media server capacity planning',
+        'Cross-region latency for international users'
+      ],
+      anticipated: [
+        '10x user growth requiring horizontal scaling',
+        'Enterprise features demanding higher SLA requirements',
+        'Compliance requirements for different geographic regions'
+      ],
+      mitigationStrategies: [
+        'Implement database sharding strategy',
+        'Deploy multi-region WebRTC infrastructure',
+        'Introduce event-driven architecture for better decoupling',
+        'Implement comprehensive monitoring and auto-scaling'
+      ]
+    },
+    recommendations: [
+      'Implement database sharding to handle write scaling',
+      'Add comprehensive monitoring and alerting across all services',
+      'Introduce circuit breakers for external service dependencies',
+      'Implement blue-green deployment strategy for zero-downtime updates',
+      'Add automated performance testing in CI/CD pipeline'
+    ],
+    riskFactors: [
+      'Single cloud provider dependency creates vendor lock-in risk',
+      'Limited disaster recovery testing and documentation',
+      'Potential WebRTC scaling bottlenecks for enterprise adoption',
+      'Database performance degradation under high write loads'
+    ]
   }
 }
 
@@ -297,10 +466,13 @@ export default function EnhancedPEReportPage() {
         {/* Technical Leadership Analysis */}
         <TechnicalLeadership data={mockReportData.technicalLeadership} />
 
+        {/* Stack Architecture & Infrastructure */}
+        <StackArchitecture data={mockReportData.stackArchitecture} />
+
         {/* Additional sections would follow the same pattern */}
         <div className="rounded-lg border border-dashed p-12 text-center">
           <p className="text-lg text-muted-foreground">
-            Additional 15+ detailed sections would appear here,
+            Additional 12+ detailed sections would appear here,
             <br />each with collapsible content and progressive disclosure
           </p>
         </div>
