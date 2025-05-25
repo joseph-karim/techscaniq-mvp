@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Settings, User as UserIcon, UserCog } from 'lucide-react'
+import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Settings, User as UserIcon, UserCog, Building2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/lib/auth/mock-auth-provider'
 import { Button } from '@/components/ui/button'
@@ -37,11 +37,13 @@ export function Header({ user }: HeaderProps) {
   const currentRole = user.user_metadata?.role || 'investor'
 
   const handleRoleSwitch = (role: string) => {
-    switchRole(role as 'investor' | 'admin')
+    switchRole(role as 'investor' | 'admin' | 'pe')
+    
+    const roleDisplayName = role === 'investor' ? 'Investor' : role === 'admin' ? 'Admin' : 'Private Equity'
     
     toast({
       title: "Profile Switched",
-      description: `You are now using the ${role === 'investor' ? 'Investor' : 'Admin'} profile.`,
+      description: `You are now using the ${roleDisplayName} profile.`,
       duration: 3000,
     })
   }
@@ -108,7 +110,7 @@ export function Header({ user }: HeaderProps) {
                 <p className="text-xs text-muted-foreground">{user.email}</p>
                 <div className="mt-1 flex items-center gap-1">
                   <Badge className="bg-electric-teal text-[10px] px-1.5 py-0 h-4 rounded-sm font-normal">
-                    {currentRole === 'investor' ? 'Investor' : 'Admin'}
+                    {currentRole === 'investor' ? 'Investor' : currentRole === 'admin' ? 'Admin' : 'PE'}
                   </Badge>
                   <span className="text-xs text-muted-foreground">{user.user_metadata?.workspace_name}</span>
                 </div>
@@ -126,6 +128,10 @@ export function Header({ user }: HeaderProps) {
                 <DropdownMenuRadioItem value="admin" className="gap-2">
                   <UserCog className="h-4 w-4" />
                   <span>Admin</span>
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="pe" className="gap-2">
+                  <Building2 className="h-4 w-4" />
+                  <span>Private Equity</span>
                 </DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
 
