@@ -87,7 +87,7 @@ export function KeyFindings({ showAll = false }: KeyFindingsProps) {
         return (
           <Link 
             key={finding.id} 
-            to={`/reports/${finding.scanId}?finding=${finding.id}`}
+            to={`/pe/reports/${finding.scanId}?finding=${finding.id}`}
             className="block"
           >
             <div className="flex items-center rounded-lg border p-3 transition-colors hover:bg-muted/50">

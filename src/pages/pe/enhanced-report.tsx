@@ -1,6 +1,7 @@
 import { PEReportLayout } from '@/components/pe/enhanced-report/PEReportLayout'
 import { ExecutiveSummary } from '@/components/pe/enhanced-report/sections/ExecutiveSummary'
 import { StackEvolutionTimeline } from '@/components/pe/enhanced-report/sections/StackEvolutionTimeline'
+import { TechnicalLeadership } from '@/components/pe/enhanced-report/sections/TechnicalLeadership'
 
 // Mock data for demonstration
 const mockReportData = {
@@ -178,6 +179,90 @@ const mockReportData = {
       majorPivot: '2019 - SMB focus shift',
       currentState: '2024 - Mature SaaS platform'
     }
+  },
+  technicalLeadership: {
+    companyName: 'Ring4',
+    overallAssessment: 'Ring4\'s technical leadership demonstrates strong domain expertise in telecommunications and cloud infrastructure. The founding team brings complementary skills in software engineering and business development, though the organization would benefit from additional senior technical leadership as it scales.',
+    teamSize: 12,
+    leadershipScore: 78,
+    founders: [
+      {
+        name: 'Alex Botteri',
+        role: 'CEO & Co-Founder',
+        tenure: '12+ years',
+        background: 'Experienced telecommunications entrepreneur with deep technical background in VoIP and cloud communications. Previously founded and scaled telecom startups, bringing both technical vision and business acumen to Ring4.',
+        strengths: [
+          'Deep telecommunications domain expertise',
+          'Product vision and strategic planning',
+          'Fundraising and business development',
+          'Technical architecture understanding'
+        ],
+        experience: {
+          years: 15,
+          companies: ['Ring4', 'Previous telecom startups', 'Enterprise software'],
+          domains: ['VoIP', 'Cloud Communications', 'SaaS', 'Mobile Apps']
+        },
+        education: 'Computer Science degree, entrepreneurship background',
+        confidence: 90,
+        riskLevel: 'low' as const
+      },
+      {
+        name: 'Ferreol de Soras',
+        role: 'CTO & Co-Founder',
+        tenure: '12+ years',
+        background: 'Technical co-founder with strong engineering background in distributed systems and real-time communications. Responsible for Ring4\'s technical architecture and engineering team leadership.',
+        strengths: [
+          'Distributed systems architecture',
+          'Real-time communications expertise',
+          'Engineering team leadership',
+          'Scalability and performance optimization'
+        ],
+        experience: {
+          years: 12,
+          companies: ['Ring4', 'Cloud infrastructure companies', 'Telecom vendors'],
+          domains: ['WebRTC', 'Cloud Infrastructure', 'Microservices', 'Real-time Systems']
+        },
+        education: 'Engineering degree, specialized in telecommunications',
+        confidence: 85,
+        riskLevel: 'low' as const
+      }
+    ],
+    keyTechnicalLeaders: [],
+    leadershipGaps: [
+      {
+        area: 'Senior Engineering Leadership',
+        severity: 'important' as const,
+        description: 'Limited senior engineering leadership beyond founders. As the team scales, additional technical leadership will be needed to manage growing engineering complexity.',
+        recommendation: 'Hire VP of Engineering or Senior Engineering Manager with experience scaling technical teams in SaaS environments.',
+        timeframe: '6-12 months'
+      },
+      {
+        area: 'Security & Compliance Expertise',
+        severity: 'critical' as const,
+        description: 'Lack of dedicated security leadership may limit enterprise adoption and compliance capabilities (SOC2, HIPAA, etc.).',
+        recommendation: 'Bring in security-focused technical leader or consultant to establish formal security practices and compliance frameworks.',
+        timeframe: '3-6 months'
+      },
+      {
+        area: 'Data & Analytics Leadership',
+        severity: 'nice-to-have' as const,
+        description: 'Limited data science and analytics capabilities may constrain product intelligence and AI feature development.',
+        recommendation: 'Consider hiring data engineering or analytics leader to unlock AI-driven features and business intelligence.',
+        timeframe: '12-18 months'
+      }
+    ],
+    recommendations: [
+      'Establish formal technical advisory board with telecommunications and SaaS scaling expertise',
+      'Implement structured engineering career progression to retain and attract senior talent',
+      'Create technical mentorship programs to develop internal leadership pipeline',
+      'Establish formal architecture review processes as team grows',
+      'Invest in engineering management training for current technical leads'
+    ],
+    riskFactors: [
+      'Heavy dependence on founder technical knowledge',
+      'Limited bench strength in senior engineering roles',
+      'Potential scaling challenges without additional technical leadership'
+    ]
   }
 }
 
@@ -209,17 +294,8 @@ export default function EnhancedPEReportPage() {
         {/* Stack Evolution Timeline */}
         <StackEvolutionTimeline data={mockReportData.stackEvolution} />
 
-        {/* Detailed Analysis Sections */}
-        <section id="technical-leadership" className="space-y-6">
-          <div className="border-b pb-4">
-            <h2 className="text-2xl font-bold">Founding Team & Technical Leadership</h2>
-            <p className="text-muted-foreground">Deep dive into team capabilities and gaps</p>
-          </div>
-          
-          <div className="rounded-lg border bg-muted/20 p-8 text-center">
-            <p className="text-muted-foreground">Team Analysis Component</p>
-          </div>
-        </section>
+        {/* Technical Leadership Analysis */}
+        <TechnicalLeadership data={mockReportData.technicalLeadership} />
 
         {/* Additional sections would follow the same pattern */}
         <div className="rounded-lg border border-dashed p-12 text-center">
