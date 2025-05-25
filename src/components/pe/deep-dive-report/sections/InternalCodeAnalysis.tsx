@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
+import { InlineCitation, Citation } from '@/components/reports/EvidenceCitation'
 import { cn } from '@/lib/utils'
 
 interface InternalCodeAnalysisProps {
@@ -74,9 +75,11 @@ interface InternalCodeAnalysisProps {
     }
     recommendations: string[]
   }
+  citations?: Citation[]
+  onCitationClick?: (citation: Citation) => void
 }
 
-export function InternalCodeAnalysis({ data }: InternalCodeAnalysisProps) {
+export function InternalCodeAnalysis({ data, citations = [], onCitationClick }: InternalCodeAnalysisProps) {
   const [expandedSections, setExpandedSections] = useState({
     overview: true,
     languages: false,
@@ -129,7 +132,14 @@ export function InternalCodeAnalysis({ data }: InternalCodeAnalysisProps) {
       <div>
         <h2 className="text-2xl font-bold">Internal Code Analysis</h2>
         <p className="text-muted-foreground">
-          Comprehensive analysis of {data.companyName}'s codebase with full repository access
+          Comprehensive analysis of {data.companyName}'s codebase with{' '}
+          <InlineCitation 
+            citationId="dd2" 
+            citation={citations.find(c => c.id === 'dd2')!}
+            onCitationClick={onCitationClick}
+          >
+            full repository access
+          </InlineCitation>
         </p>
       </div>
 
