@@ -7,6 +7,8 @@ import { DashboardLayout } from '@/components/layouts/dashboard-layout'
 import { Spinner } from '@/components/ui/spinner'
 import { NotificationToast } from '@/components/ui/notification-toast'
 import { useAuth } from '@/lib/auth/mock-auth-provider'
+const PEReportPage = lazy(() => import('@/pages/pe/enhanced-report'))
+const DeepDivePEReportPage = lazy(() => import('@/pages/pe/deep-dive-report'))
 
 // Lazy load pages for better performance
 const LoginPage = lazy(() => import('@/pages/auth/login'))
@@ -20,7 +22,7 @@ const AdvisorReviewPage = lazy(() => import('@/pages/advisor/review'))
 const AdvisorQueuePage = lazy(() => import('@/pages/advisor/queue'))
 const PortfolioPage = lazy(() => import('@/pages/pe/portfolio'))
 const ThesisTrackingPage = lazy(() => import('@/pages/pe/thesis-tracking'))
-const EnhancedPEReportPage = lazy(() => import('@/pages/pe/enhanced-report'))
+
 const SettingsPage = lazy(() => import('@/pages/settings'))
 
 function AppContent() {
@@ -80,7 +82,8 @@ function AppContent() {
           <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
             <Route path="/pe/portfolio" element={<PortfolioPage />} />
             <Route path="/pe/thesis-tracking" element={<ThesisTrackingPage />} />
-            <Route path="/pe/reports/:id" element={<EnhancedPEReportPage />} />
+            <Route path="/pe/reports/:id" element={<PEReportPage />} />
+            <Route path="/pe/deep-dive-reports/:id" element={<DeepDivePEReportPage />} />
           </Route>
           
           {/* Fallback route */}

@@ -728,6 +728,41 @@ export default function EnhancedPEReportPage() {
             <br />Disaster Recovery, Peer Benchmarking, and Final Narrative Summary
           </p>
         </div>
+
+        {/* Deep Dive Report Access */}
+        <div className="rounded-lg border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-blue-50 p-8">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-3 h-3 bg-purple-600 rounded-full animate-pulse"></div>
+                <h3 className="text-xl font-bold text-purple-900">Deep Dive Analysis Available</h3>
+              </div>
+              <p className="text-purple-700 mb-4">
+                Access comprehensive internal analysis with repo access, infrastructure deep dive, 
+                and detailed technical assessments beyond publicly available information.
+              </p>
+              <div className="flex flex-wrap gap-2 mb-4">
+                <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">Internal Code Analysis</span>
+                <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">Infrastructure Deep Dive</span>
+                <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">Team Process Analysis</span>
+                <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">Financial Metrics</span>
+                <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">Compliance Audit</span>
+              </div>
+            </div>
+            <div className="ml-6">
+              <a 
+                href="/pe/deep-dive-reports/ring4-2025"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                <span className="font-semibold">Access Deep Dive Report</span>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </a>
+              <p className="text-xs text-purple-600 mt-2 text-center">PE Users Only</p>
+            </div>
+          </div>
+        </div>
       </div>
     </PEReportLayout>
   )
