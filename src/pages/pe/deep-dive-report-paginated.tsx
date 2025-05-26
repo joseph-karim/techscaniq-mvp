@@ -961,28 +961,27 @@ export default function DeepDiveReportPaginated() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="flex">
-        {/* Navigation Sidebar */}
-        <DeepDiveNavigation 
+    // Main container for the deep dive report page content
+    <div className="flex flex-col lg:flex-row h-full bg-white dark:bg-gray-900">
+      {/* Report Section Navigation (Internal Sidebar for the deep dive page) */}
+      <DeepDiveNavigation 
+        currentSection={currentSection}
+        onSectionChange={setCurrentSection}
+        // Adjusted classes: not fixed, normal flow, specific width, and scroll if needed
+        className="w-full lg:w-72 lg:h-full lg:border-r border-b lg:border-b-0 dark:border-gray-700 p-4 shrink-0 overflow-y-auto"
+      />
+      
+      {/* Main Report Content Area */}
+      <div className="flex-1 overflow-y-auto p-6">
+        <Breadcrumbs 
+          items={breadcrumbItems}
           currentSection={currentSection}
-          onSectionChange={setCurrentSection}
-          className="fixed left-0 top-16 h-[calc(100vh-4rem)] overflow-y-auto z-40"
+          analystReviews={analystReviews}
         />
         
-        {/* Main Content */}
-        <div className="flex-1 ml-80 pt-16">
-          {/* Breadcrumbs */}
-          <Breadcrumbs 
-            items={breadcrumbItems}
-            currentSection={currentSection}
-            analystReviews={analystReviews}
-          />
-          
-          {/* Section Content */}
-          <div className="bg-white dark:bg-gray-900 min-h-[calc(100vh-4rem)]">
-            {renderCurrentSection()}
-          </div>
+        {/* Section Content rendered here */}
+        <div className="mt-6">
+          {renderCurrentSection()}
         </div>
       </div>
     </div>

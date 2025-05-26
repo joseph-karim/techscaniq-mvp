@@ -165,64 +165,63 @@ export const routeConfig: RouteConfig[] = [
   }
 ]
 
-// Helper function to get navigation routes
-export const getNavigationRoutes = (userRole?: string): RouteConfig[] => {
-  const collectNavRoutes = (routes: RouteConfig[]): RouteConfig[] => {
-    const navRoutes: RouteConfig[] = []
-    
-    routes.forEach(route => {
-      // Check if this route should be shown in navigation
-      if (route.showInNav) {
-        // Check role requirements
-        const hasPermission = 
-          (!route.requireAdmin || userRole === 'admin') &&
-          (!route.requirePE || userRole === 'pe')
-        
-        if (hasPermission) {
-          navRoutes.push({
-            ...route,
-            // For nested routes, we need to construct the full path
-            path: route.path.startsWith('/') ? route.path : `/${route.path}`
-          })
-        }
-      }
-      
-      // Recursively check children
-      if (route.children) {
-        const childNavRoutes = collectNavRoutes(route.children).map(child => ({
-          ...child,
-          // Construct full path for child routes
-          path: child.path.startsWith('/') ? child.path : 
-                route.path === '/' ? `/${child.path}` : `/${route.path}/${child.path}`.replace('//', '/')
-        }))
-        navRoutes.push(...childNavRoutes)
-      }
-    })
-    
-    return navRoutes
-  }
-  
-  return collectNavRoutes(routeConfig)
-}
-
 // Helper function to flatten routes for React Router
 export const flattenRoutes = (routes: RouteConfig[]): RouteConfig[] => {
-  const flattened: RouteConfig[] = []
-  
+  const flattened: RouteConfig[] = [];
   const flatten = (routeList: RouteConfig[], parentPath = '') => {
     routeList.forEach(route => {
-      const fullPath = parentPath + route.path
+      let currentParentPath = parentPath;
+      // Ensure parentPath ends with a slash if it's not empty and not already '/',
+      // and route.path is not absolute and not empty.
+      if (currentParentPath && currentParentPath !== '/' && !currentParentPath.endsWith('/') && route.path && !route.path.startsWith('/')) {
+        currentParentPath += '/';
+      }
+
+      let fullPath = route.path?.startsWith('/') 
+        ? route.path 
+        : (currentParentPath + (route.path || '')).replace(/\/\//g, '/');
+
+      if (fullPath !== '/' && fullPath.endsWith('/') && route.path !== '') { // Don't remove trailing slash if path was empty (root child)
+        fullPath = fullPath.slice(0, -1);
+      }
+      if (fullPath === '' && parentPath === '/' && route.path === '') { // Handles the Navigate component at root
+         fullPath = '/';
+      } else if (fullPath === '' && parentPath === '' && route.path === '') {
+         fullPath = '/';
+      }
+
       flattened.push({
         ...route,
-        path: fullPath
-      })
-      
+        path: fullPath,
+      });
+
       if (route.children) {
-        flatten(route.children, fullPath === '/' ? '' : fullPath + '/')
+        flatten(route.children, fullPath === '/' && route.path === '' ? '/' : fullPath) // Pass '/' if it's a root layout child, otherwise fullPath
       }
-    })
-  }
-  
-  flatten(routes)
-  return flattened
-} 
+    });
+  };
+  flatten(routes);
+  return flattened;
+};
+
+// Updated helper function to get navigation routes
+export const getNavigationRoutes = (userRole?: string): RouteConfig[] => {
+  const allFlattenedRoutes = flattenRoutes(routeConfig); // Step 1: Flatten all routes
+  const navRoutes: RouteConfig[] = [];
+
+  allFlattenedRoutes.forEach(route => {
+    // Step 2: Filter based on showInNav and permissions
+    if (route.showInNav) {
+      const hasPermission =
+        (!route.requireAdmin || userRole === 'admin') &&
+        (!route.requirePE || userRole === 'pe');
+
+      if (hasPermission) {
+        // The path is already absolute and correct from flattenRoutes
+        navRoutes.push(route);
+      }
+    }
+  });
+
+  return navRoutes; // Step 3: Return the filtered list
+}; 

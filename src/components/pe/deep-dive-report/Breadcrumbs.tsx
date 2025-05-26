@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { ChevronRight, FileText, Eye, User } from 'lucide-react'
 
 interface BreadcrumbItem {
@@ -29,16 +30,21 @@ export function Breadcrumbs({ items, currentSection, analystReviews }: Breadcrum
           {items.map((item, index) => (
             <div key={index} className="flex items-center">
               {index > 0 && <ChevronRight className="h-4 w-4 text-gray-400 mx-2" />}
-              <div className={`flex items-center gap-1 ${
-                item.current 
-                  ? 'text-blue-600 font-medium' 
-                  : item.href 
-                    ? 'text-gray-600 hover:text-blue-600 cursor-pointer' 
+              {item.href && !item.current ? (
+                <Link to={item.href} className={`flex items-center gap-1 text-gray-600 hover:text-blue-600 cursor-pointer`}>
+                  {item.icon}
+                  <span>{item.label}</span>
+                </Link>
+              ) : (
+                <div className={`flex items-center gap-1 ${
+                  item.current 
+                    ? 'text-blue-600 font-medium' 
                     : 'text-gray-400'
-              }`}>
-                {item.icon}
-                <span>{item.label}</span>
-              </div>
+                }`}>
+                  {item.icon}
+                  <span>{item.label}</span>
+                </div>
+              )}
             </div>
           ))}
         </nav>
