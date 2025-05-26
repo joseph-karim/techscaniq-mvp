@@ -29,8 +29,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
@@ -107,8 +105,6 @@ export function EvidenceModal({
     }
   }
 
-
-
   const getConfidenceBadgeColor = (confidence: number) => {
     if (confidence >= 90) return 'bg-green-100 text-green-800 border-green-200'
     if (confidence >= 70) return 'bg-yellow-100 text-yellow-800 border-yellow-200'
@@ -136,8 +132,9 @@ export function EvidenceModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] w-[95vw] flex flex-col p-0 gap-0 overflow-hidden">
-        <DialogHeader className="px-6 py-4 border-b bg-gray-50">
+      <DialogContent className="max-w-4xl h-[85vh] p-0 gap-0">
+        {/* Fixed Header */}
+        <DialogHeader className="px-6 py-4 border-b bg-gray-50 flex-shrink-0">
           <DialogTitle className="flex items-center text-xl">
             <Brain className="mr-2 h-5 w-5 text-blue-600" />
             Evidence Analysis
@@ -147,9 +144,10 @@ export function EvidenceModal({
           </DialogDescription>
         </DialogHeader>
         
-        <div className="flex-1 overflow-hidden px-6">
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-hidden">
           <Tabs defaultValue="overview" className="h-full flex flex-col">
-            <TabsList className="mx-auto mb-4">
+            <TabsList className="mx-6 mt-4 mb-2 flex-shrink-0">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="evidence">Evidence Sources</TabsTrigger>
               <TabsTrigger value="reasoning">Analysis & Reasoning</TabsTrigger>
@@ -163,9 +161,10 @@ export function EvidenceModal({
               </TabsTrigger>
             </TabsList>
             
-            <div className="flex-1 overflow-auto">
+            {/* Tab Content - Scrollable */}
+            <div className="flex-1 overflow-y-auto px-6 pb-6">
               {/* Overview Tab */}
-              <TabsContent value="overview" className="h-full m-0 overflow-auto">
+              <TabsContent value="overview" className="mt-0">
                 <div className="space-y-6">
                   {/* Main Claim */}
                   <Card>
@@ -255,7 +254,7 @@ export function EvidenceModal({
               </TabsContent>
 
               {/* Evidence Sources Tab */}
-              <TabsContent value="evidence" className="h-full m-0 overflow-auto">
+              <TabsContent value="evidence" className="mt-0">
                 <div className="space-y-4">
                   {citation.evidence.map((evidence) => (
                     <Card key={evidence.id} className="border-l-4 border-l-blue-500">
@@ -320,23 +319,6 @@ export function EvidenceModal({
                             </div>
                           )}
 
-                          {/* Metadata */}
-                          {evidence.metadata && (
-                            <div className="mb-4">
-                              <h4 className="font-medium mb-2">Source Details:</h4>
-                              <div className="grid grid-cols-2 gap-2 text-sm">
-                                {Object.entries(evidence.metadata).map(([key, value]) => (
-                                  <div key={key} className="flex justify-between">
-                                    <span className="text-muted-foreground capitalize">
-                                      {key.replace(/([A-Z])/g, ' $1').toLowerCase()}:
-                                    </span>
-                                    <span className="font-medium">{value}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
                           {/* Actions */}
                           <div className="flex gap-2">
                             {evidence.url && (
@@ -366,7 +348,7 @@ export function EvidenceModal({
               </TabsContent>
 
               {/* Reasoning Tab */}
-              <TabsContent value="reasoning" className="h-full m-0 overflow-auto">
+              <TabsContent value="reasoning" className="mt-0">
                 <div className="space-y-6">
                   <Card>
                     <CardHeader>
@@ -441,7 +423,7 @@ export function EvidenceModal({
               </TabsContent>
 
               {/* Notes & Corrections Tab */}
-              <TabsContent value="notes" className="h-full m-0 overflow-auto">
+              <TabsContent value="notes" className="mt-0">
                 <div className="space-y-4">
                   {/* Add Note Section */}
                   <Card>
@@ -504,41 +486,27 @@ export function EvidenceModal({
 
                   {/* Existing Notes */}
                   {notes.length > 0 && (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Previous Notes & Corrections</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          {notes.map((note) => (
-                            <div key={note.id} className="border rounded-lg p-4">
-                              <div className="flex items-start justify-between mb-2">
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium">{note.author}</span>
-                                  <div className={cn("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold", getNoteTypeColor(note.type))}>
-                                    {note.type.replace('_', ' ')}
-                                  </div>
-                                  <div className={cn("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold", getStatusColor(note.status))}>
-                                    {note.status}
-                                  </div>
-                                </div>
-                                <span className="text-sm text-muted-foreground">
-                                  {new Date(note.timestamp).toLocaleDateString()}
+                    <div className="space-y-3">
+                      <h3 className="font-medium">Previous Notes & Corrections</h3>
+                      {notes.map((note) => (
+                        <Card key={note.id}>
+                          <CardContent className="p-4">
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium">{note.author}</span>
+                                <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold", getNoteTypeColor(note.type))}>
+                                  {note.type.replace('_', ' ')}
+                                </span>
+                                <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold", getStatusColor(note.status))}>
+                                  {note.status}
                                 </span>
                               </div>
-                              <p className="text-sm leading-relaxed">{note.content}</p>
+                              <span className="text-xs text-muted-foreground">{note.timestamp}</span>
                             </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-
-                  {notes.length === 0 && !isAddingNote && (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p>No notes or corrections yet.</p>
-                      <p className="text-sm">Be the first to add insights or corrections.</p>
+                            <p className="text-sm leading-relaxed">{note.content}</p>
+                          </CardContent>
+                        </Card>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -547,7 +515,8 @@ export function EvidenceModal({
           </Tabs>
         </div>
         
-        <div className="flex justify-end gap-2 pt-4 px-6 pb-4 border-t bg-gray-50">
+        {/* Fixed Footer */}
+        <div className="flex justify-end gap-2 p-4 border-t bg-gray-50 flex-shrink-0">
           <Button variant="outline" onClick={onClose}>
             <X className="mr-1 h-4 w-4" />
             Close
