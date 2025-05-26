@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { DeepDiveNavigation, deepDiveSections } from '@/components/pe/deep-dive-report/DeepDiveNavigation'
 import { Breadcrumbs } from '@/components/pe/deep-dive-report/Breadcrumbs'
-import { EvidenceCitation, Citation } from '@/components/reports/EvidenceCitation'
+import { Citation } from '@/components/reports/EvidenceCitation'
+import { EvidenceModal } from '@/components/reports/EvidenceModal'
 import { ExecutiveSummary } from '@/components/pe/enhanced-report/sections/ExecutiveSummary'
 import { StackEvolutionTimeline } from '@/components/pe/enhanced-report/sections/StackEvolutionTimeline'
 import { TechnicalLeadership } from '@/components/pe/enhanced-report/sections/TechnicalLeadership'
@@ -754,18 +755,13 @@ const deepDiveMockData = {
 export default function DeepDiveReportPaginated() {
   const [currentSection, setCurrentSection] = useState('executive-summary')
   const [selectedCitation, setSelectedCitation] = useState<Citation | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
   
   const currentSectionData = deepDiveSections.find(section => section.id === currentSection)
 
   const handleCitationClick = (citation: Citation) => {
     setSelectedCitation(citation)
-    // Scroll to citation details
-    setTimeout(() => {
-      const element = document.getElementById('citation-details')
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      }
-    }, 100)
+    setIsModalOpen(true)
   }
   
   const breadcrumbItems = [
@@ -800,14 +796,6 @@ export default function DeepDiveReportPaginated() {
               citations={deepDiveCitations}
               onCitationClick={handleCitationClick}
             />
-            
-            {/* Citation Details */}
-            {selectedCitation && (
-              <div id="citation-details">
-                <h3 className="text-lg font-semibold mb-4">Citation Details</h3>
-                <EvidenceCitation citation={selectedCitation} />
-              </div>
-            )}
           </div>
         )
       case 'stack-evolution':
@@ -862,14 +850,6 @@ export default function DeepDiveReportPaginated() {
               citations={deepDiveCitations}
               onCitationClick={handleCitationClick}
             />
-            
-            {/* Citation Details */}
-            {selectedCitation && (
-              <div id="citation-details">
-                <h3 className="text-lg font-semibold mb-4">Citation Details</h3>
-                <EvidenceCitation citation={selectedCitation} />
-              </div>
-            )}
           </div>
         )
       case 'infrastructure-deep-dive':
@@ -984,6 +964,24 @@ export default function DeepDiveReportPaginated() {
           {renderCurrentSection()}
         </div>
       </div>
+
+      {/* Evidence Modal */}
+      {selectedCitation && (
+        <EvidenceModal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false)
+            setSelectedCitation(null)
+          }}
+          citation={selectedCitation}
+          notes={[]}
+          onAddNote={(note) => {
+            console.log('New note added:', note)
+          }}
+          userRole="pe_user"
+          userName="Demo User"
+        />
+      )}
     </div>
   )
 } 

@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { ScanReportNavigation, scanReportSections } from '@/components/reports/ScanReportNavigation'
 import { Breadcrumbs } from '@/components/pe/deep-dive-report/Breadcrumbs'
-import { EvidenceCitation, InlineCitation, Citation } from '@/components/reports/EvidenceCitation'
+import { InlineCitation, Citation } from '@/components/reports/EvidenceCitation'
+import { EvidenceModal } from '@/components/reports/EvidenceModal'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
@@ -398,6 +399,7 @@ export default function ScanReportPaginated() {
   const { id } = useParams()
   const [currentSection, setCurrentSection] = useState('executive-summary')
   const [selectedCitation, setSelectedCitation] = useState<Citation | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
   
   const currentSectionData = scanReportSections.find(section => section.id === currentSection)
   
@@ -425,13 +427,7 @@ export default function ScanReportPaginated() {
 
   const handleCitationClick = (citation: Citation) => {
     setSelectedCitation(citation)
-    // Scroll to citation details
-    setTimeout(() => {
-      const element = document.getElementById('citation-details')
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      }
-    }, 100)
+    setIsModalOpen(true)
   }
 
   const renderCurrentSection = () => {
@@ -514,13 +510,7 @@ export default function ScanReportPaginated() {
               </CardContent>
             </Card>
 
-            {/* Citation Details */}
-            {selectedCitation && (
-              <div id="citation-details">
-                <h3 className="text-lg font-semibold mb-4">Citation Details</h3>
-                <EvidenceCitation citation={selectedCitation} />
-              </div>
-            )}
+
           </div>
         )
 
@@ -1681,6 +1671,24 @@ export default function ScanReportPaginated() {
           {renderCurrentSection()}
         </div>
       </div>
+
+      {/* Evidence Modal */}
+      {selectedCitation && (
+        <EvidenceModal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false)
+            setSelectedCitation(null)
+          }}
+          citation={selectedCitation}
+          notes={[]}
+          onAddNote={(note) => {
+            console.log('New note added:', note)
+          }}
+          userRole="pe_user"
+          userName="Demo User"
+        />
+      )}
     </div>
   );
 } 
