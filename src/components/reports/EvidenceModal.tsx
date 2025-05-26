@@ -132,7 +132,7 @@ export function EvidenceModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl h-[85vh] p-0 gap-0">
+      <DialogContent className="max-w-4xl h-[85vh] p-0 gap-0 w-[90vw]">
         {/* Fixed Header */}
         <DialogHeader className="px-6 py-4 border-b bg-gray-50 flex-shrink-0">
           <DialogTitle className="flex items-center text-xl">

@@ -23,7 +23,34 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { TechHealthScoreGauge } from '@/components/dashboard/tech-health-score-gauge'
 import { RiskSummaryCards } from '@/components/dashboard/risk-summary-cards'
-import { EvidenceModal } from '@/components/reports/evidence-modal'
+import { EvidenceModal } from '@/components/reports/EvidenceModal'
+import { InlineCitation, Citation } from '@/components/reports/EvidenceCitation'
+
+// Mock citation data
+const mockCitations: Citation[] = [
+  {
+    id: 'citation-1',
+    claim: 'Multiple API endpoints lack proper authentication and authorization controls, exposing sensitive customer data to potential unauthorized access.',
+    evidence: [
+      {
+        id: 'evidence-1',
+        type: 'web',
+        title: 'API Documentation Analysis',
+        source: 'API Documentation - api.acme-cloud.example.com',
+        url: 'https://api.acme-cloud.example.com/v1/docs',
+        excerpt: 'Documentation reveals several endpoints with "auth: optional" configuration, including user data endpoints.',
+        metadata: {
+          confidence: 95
+        }
+      }
+    ],
+    reasoning: 'The API documentation clearly shows multiple endpoints with optional authentication, which creates significant security vulnerabilities.',
+    confidence: 95,
+    analyst: 'TechScan AI',
+    reviewDate: '2023-04-09T10:15:32Z',
+    methodology: 'Automated API documentation analysis and endpoint security assessment.'
+  }
+]
 
 // Mock report data
 const reportData = {
@@ -196,17 +223,41 @@ const reportData = {
 export default function ReportPage() {
   const { id } = useParams<{ id: string }>()
   const [evidenceModalOpen, setEvidenceModalOpen] = useState(false)
-  const [activeEvidence, setActiveEvidence] = useState<{
-    evidence: (typeof reportData.risks[0]['evidence'][0]);
-    title: string;
-  } | null>(null)
+  const [activeCitation, setActiveCitation] = useState<Citation | null>(null)
   
   // In a real app, we would fetch the report data based on the ID
   const report = reportData
 
-  const handleShowEvidence = (evidence: typeof reportData.risks[0]['evidence'][0], title: string) => {
-    setActiveEvidence({ evidence, title })
+  const handleCitationClick = (citation: Citation) => {
+    setActiveCitation(citation)
     setEvidenceModalOpen(true)
+  }
+
+  const handleShowEvidence = (evidence: typeof reportData.risks[0]['evidence'][0], title: string) => {
+    // Convert old evidence format to new citation format for compatibility
+    const citation: Citation = {
+      id: 'legacy-citation',
+      claim: title,
+      evidence: [
+        {
+          id: 'legacy-evidence',
+          type: 'web',
+          title: title,
+          source: evidence.source,
+          url: evidence.url,
+          excerpt: evidence.content,
+          metadata: {
+            confidence: evidence.confidence * 100
+          }
+        }
+      ],
+      reasoning: 'Legacy evidence converted to new citation format.',
+      confidence: evidence.confidence * 100,
+      analyst: 'TechScan AI',
+      reviewDate: evidence.timestamp,
+      methodology: 'Legacy evidence analysis.'
+    }
+    handleCitationClick(citation)
   }
 
   return (
@@ -328,7 +379,23 @@ export default function ReportPage() {
                             {risk.severity.toUpperCase()}
                           </Badge>
                         </div>
-                        <p className="mt-1 text-sm text-muted-foreground">{risk.description}</p>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {risk.id === 'finding-1' ? (
+                            <>
+                              Multiple API endpoints lack proper authentication and authorization controls, exposing{' '}
+                              <InlineCitation 
+                                citationId="1" 
+                                citation={mockCitations[0]} 
+                                onCitationClick={handleCitationClick}
+                              >
+                                sensitive customer data to potential unauthorized access
+                              </InlineCitation>. 
+                              This represents a critical security vulnerability that could lead to data breaches.
+                            </>
+                          ) : (
+                            risk.description
+                          )}
+                        </p>
                         
                         {/* Evidence button for each finding */}
                         {risk.evidence && risk.evidence.length > 0 && (
@@ -674,12 +741,20 @@ export default function ReportPage() {
       </Tabs>
       
       {/* Evidence Modal */}
-      {activeEvidence && (
+      {activeCitation && (
         <EvidenceModal
           isOpen={evidenceModalOpen}
-          onClose={() => setEvidenceModalOpen(false)}
-          evidence={activeEvidence.evidence}
-          title={activeEvidence.title}
+          onClose={() => {
+            setEvidenceModalOpen(false)
+            setActiveCitation(null)
+          }}
+          citation={activeCitation}
+          notes={[]}
+          onAddNote={(note) => {
+            console.log('New note added:', note)
+          }}
+          userRole="pe_user"
+          userName="Demo User"
         />
       )}
     </div>
