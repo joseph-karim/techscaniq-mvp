@@ -21,6 +21,7 @@ const SettingsPage = lazy(() => import('@/pages/settings'))
 const AnalyticsPage = lazy(() => import('@/pages/analytics'))
 const ReportsListPage = lazy(() => import('@/pages/reports/reports-list'))
 
+
 // Route configuration interface
 export interface RouteConfig {
   path: string
@@ -109,6 +110,7 @@ export const routeConfig: RouteConfig[] = [
         label: 'Settings',
         showInNav: true
       },
+
       
       // PE-specific routes
       {
