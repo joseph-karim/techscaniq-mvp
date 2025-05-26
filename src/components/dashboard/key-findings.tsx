@@ -87,7 +87,7 @@ export function KeyFindings({ showAll = false }: KeyFindingsProps) {
         return (
           <Link 
             key={finding.id} 
-            to={`/pe/reports/${finding.scanId}?finding=${finding.id}`}
+            to={`/reports/${finding.scanId}?finding=${finding.id}`}
             className="block"
           >
             <div className="flex items-center rounded-lg border p-3 transition-colors hover:bg-muted/50">
@@ -110,7 +110,7 @@ export function KeyFindings({ showAll = false }: KeyFindingsProps) {
       })}
       
       {!showAll && (
-        <Link to="/findings" className="block text-center text-sm text-primary hover:underline">
+        <Link to="/reports" className="block text-center text-sm text-primary hover:underline">
           View all findings
         </Link>
       )}
