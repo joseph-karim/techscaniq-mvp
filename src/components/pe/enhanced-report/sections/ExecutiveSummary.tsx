@@ -8,10 +8,11 @@ import {
   DollarSign
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { InlineCitation, Citation } from '@/components/reports/EvidenceCitation'
+import { EvidenceModal } from '@/components/reports/EvidenceModal'
 import { cn } from '@/lib/utils'
 
 interface ExecutiveSummaryProps {
@@ -39,6 +40,14 @@ export function ExecutiveSummary({ data, citations = [], onCitationClick }: Exec
     recommendations: false,
     dealBreakers: false
   })
+  const [selectedCitation, setSelectedCitation] = useState<Citation | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const handleCitationClick = (citation: Citation) => {
+    setSelectedCitation(citation)
+    setIsModalOpen(true)
+    onCitationClick?.(citation)
+  }
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections(prev => ({
@@ -78,9 +87,9 @@ export function ExecutiveSummary({ data, citations = [], onCitationClick }: Exec
                 <p className={cn("text-3xl font-bold", getScoreColor(data.overallScore))}>
                   {data.overallScore}%
                 </p>
-                <Badge variant="outline" className="mt-1">
+                <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold mt-1">
                   Grade: {getScoreGrade(data.overallScore)}
-                </Badge>
+                </span>
               </div>
               <div className={cn(
                 "rounded-full p-3",
@@ -160,7 +169,7 @@ export function ExecutiveSummary({ data, citations = [], onCitationClick }: Exec
                 <InlineCitation 
                   citationId="dd2" 
                   citation={citations.find(c => c.id === 'dd2')!}
-                  onCitationClick={onCitationClick}
+                  onCitationClick={handleCitationClick}
                 >
                   internal access revealing sophisticated engineering practices
                 </InlineCitation>
@@ -222,9 +231,9 @@ export function ExecutiveSummary({ data, citations = [], onCitationClick }: Exec
               <div className="mb-2 flex items-center gap-2">
                 <CheckCircle className="h-4 w-4 text-green-600" />
                 <h4 className="font-medium text-green-600">Enablers</h4>
-                <Badge variant="outline" className="bg-green-50">
+                <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-green-50">
                   {data.keyFindings.enablers.length}
-                </Badge>
+                </span>
               </div>
               <ul className="space-y-1">
                 <li className="flex items-start gap-2 text-sm">
@@ -303,9 +312,9 @@ export function ExecutiveSummary({ data, citations = [], onCitationClick }: Exec
               <div className="mb-2 flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 text-red-600" />
                 <h4 className="font-medium text-red-600">Blockers</h4>
-                <Badge variant="outline" className="bg-red-50">
+                <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-red-50">
                   {data.keyFindings.blockers.length}
-                </Badge>
+                </span>
               </div>
               <ul className="space-y-1">
                 <li className="flex items-start gap-2 text-sm">
@@ -348,9 +357,9 @@ export function ExecutiveSummary({ data, citations = [], onCitationClick }: Exec
               <div className="mb-2 flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 text-yellow-600" />
                 <h4 className="font-medium text-yellow-600">Key Risks</h4>
-                <Badge variant="outline" className="bg-yellow-50">
+                <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-yellow-50">
                   {data.keyFindings.risks.length}
-                </Badge>
+                </span>
               </div>
               <ul className="space-y-1">
                 <li className="flex items-start gap-2 text-sm">
@@ -413,7 +422,7 @@ export function ExecutiveSummary({ data, citations = [], onCitationClick }: Exec
             <ul className="space-y-2">
               {data.recommendations.map((recommendation, index) => (
                 <li key={index} className="flex items-start gap-2">
-                  <Badge className="mt-0.5">{index + 1}</Badge>
+                  <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold mt-0.5">{index + 1}</span>
                   <span className="text-sm">{recommendation}</span>
                 </li>
               ))}
@@ -464,6 +473,22 @@ export function ExecutiveSummary({ data, citations = [], onCitationClick }: Exec
           View Key Insights <ChevronDown className="ml-2 h-4 w-4" />
         </Button>
       </div>
+
+      {/* Evidence Modal */}
+      {selectedCitation && (
+        <EvidenceModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          citation={selectedCitation}
+          onAddNote={(note) => {
+            // Handle note addition - could be passed up to parent component
+            console.log('New note added:', note)
+          }}
+          notes={[]} // Could be passed from parent component
+          userRole="pe_user"
+          userName="PE Investor"
+        />
+      )}
     </div>
   )
 } 
