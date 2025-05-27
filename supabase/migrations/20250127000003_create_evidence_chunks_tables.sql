@@ -1,3 +1,7 @@
+-- Enable required extensions
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "vector";
+
 -- Create evidence chunks table for segmented content
 CREATE TABLE IF NOT EXISTS evidence_chunks (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -41,7 +45,7 @@ CREATE TABLE IF NOT EXISTS citation_candidates (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     
     -- Foreign key to chunks
-    FOREIGN KEY (chunk_id) REFERENCES evidence_chunks(chunk_id) ON DELETE CASCADE
+    CONSTRAINT fk_chunk_id FOREIGN KEY (collection_id, chunk_id) REFERENCES evidence_chunks(collection_id, chunk_id) ON DELETE CASCADE
 );
 
 -- Create structured citations table (final citations used in reports)
@@ -211,7 +215,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- RLS Policies
+-- Simple RLS Policies (without user_roles)
 ALTER TABLE evidence_chunks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE citation_candidates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE structured_citations ENABLE ROW LEVEL SECURITY;
@@ -223,9 +227,7 @@ CREATE POLICY "Chunks follow collection permissions"
     USING (
         collection_id IN (
             SELECT id FROM evidence_collections
-            WHERE created_by = auth.uid() OR auth.uid() IN (
-                SELECT user_id FROM user_roles WHERE role IN ('admin', 'pe_user')
-            )
+            WHERE created_by = auth.uid()
         )
     );
 
@@ -236,9 +238,7 @@ CREATE POLICY "Citation candidates follow collection permissions"
     USING (
         collection_id IN (
             SELECT id FROM evidence_collections
-            WHERE created_by = auth.uid() OR auth.uid() IN (
-                SELECT user_id FROM user_roles WHERE role IN ('admin', 'pe_user')
-            )
+            WHERE created_by = auth.uid()
         )
     );
 
@@ -248,14 +248,10 @@ CREATE POLICY "Structured citations viewable by authenticated"
     TO authenticated
     USING (true);
 
-CREATE POLICY "PE users can manage structured citations"
+CREATE POLICY "Authenticated users can manage structured citations"
     ON structured_citations FOR ALL
     TO authenticated
-    USING (
-        auth.uid() IN (
-            SELECT user_id FROM user_roles WHERE role IN ('admin', 'pe_user')
-        )
-    );
+    USING (true);
 
 -- Grant permissions
 GRANT ALL ON evidence_chunks TO authenticated;

@@ -171,7 +171,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- RLS Policies
+-- Simple RLS Policies (without user_roles)
 ALTER TABLE evidence_collections ENABLE ROW LEVEL SECURITY;
 ALTER TABLE evidence_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE report_citations ENABLE ROW LEVEL SECURITY;
@@ -181,14 +181,17 @@ ALTER TABLE evidence_search_history ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view their own evidence collections"
     ON evidence_collections FOR SELECT
     TO authenticated
-    USING (created_by = auth.uid() OR auth.uid() IN (
-        SELECT user_id FROM user_roles WHERE role IN ('admin', 'pe_user')
-    ));
+    USING (created_by = auth.uid());
 
 CREATE POLICY "Users can create evidence collections"
     ON evidence_collections FOR INSERT
     TO authenticated
     WITH CHECK (created_by = auth.uid());
+
+CREATE POLICY "Users can update their own collections"
+    ON evidence_collections FOR UPDATE
+    TO authenticated
+    USING (created_by = auth.uid());
 
 -- Policies for evidence items (follow collection permissions)
 CREATE POLICY "Evidence items follow collection permissions"
@@ -197,26 +200,20 @@ CREATE POLICY "Evidence items follow collection permissions"
     USING (
         collection_id IN (
             SELECT id FROM evidence_collections
-            WHERE created_by = auth.uid() OR auth.uid() IN (
-                SELECT user_id FROM user_roles WHERE role IN ('admin', 'pe_user')
-            )
+            WHERE created_by = auth.uid()
         )
     );
 
--- Policies for citations
+-- Policies for citations (viewable by all authenticated users)
 CREATE POLICY "Citations are viewable by authenticated users"
     ON report_citations FOR SELECT
     TO authenticated
     USING (true);
 
-CREATE POLICY "PE users can manage citations"
-    ON report_citations FOR ALL
+CREATE POLICY "Authenticated users can create citations"
+    ON report_citations FOR INSERT
     TO authenticated
-    USING (
-        auth.uid() IN (
-            SELECT user_id FROM user_roles WHERE role IN ('admin', 'pe_user')
-        )
-    );
+    WITH CHECK (true);
 
 -- Policies for search history (follow collection permissions)
 CREATE POLICY "Search history follows collection permissions"
@@ -225,17 +222,9 @@ CREATE POLICY "Search history follows collection permissions"
     USING (
         collection_id IN (
             SELECT id FROM evidence_collections
-            WHERE created_by = auth.uid() OR auth.uid() IN (
-                SELECT user_id FROM user_roles WHERE role IN ('admin', 'pe_user')
-            )
+            WHERE created_by = auth.uid()
         )
     );
-
--- Triggers for updated_at
-CREATE TRIGGER update_evidence_collections_updated_at
-    BEFORE UPDATE ON evidence_collections
-    FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at();
 
 -- Grant permissions
 GRANT ALL ON evidence_collections TO authenticated;
