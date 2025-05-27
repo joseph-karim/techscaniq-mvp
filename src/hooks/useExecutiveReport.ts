@@ -423,12 +423,12 @@ export function useExecutiveReport(): UseExecutiveReportReturn {
 
       setProgress('Report saved successfully!')
       
-      // If this report is linked to a scan request, update it
+      // If this report is linked to a scan request, update it to awaiting_review
       if (requestScanId && savedReport) {
         await supabase
           .from('scan_requests')
           .update({
-            status: 'complete',
+            status: 'awaiting_review',
             executive_report_id: savedReport.id,
             executive_report_data: report,
             executive_report_generated_at: new Date().toISOString()

@@ -256,6 +256,12 @@ export default function AdvisorQueuePage() {
                                     Review Now
                                   </Link>
                                 </Button>
+                              ) : scan.status === 'in_review' ? (
+                                <Button size="sm" variant="outline" asChild>
+                                  <Link to={`/advisor/review/${scan.id}`}>
+                                    Continue Review
+                                  </Link>
+                                </Button>
                               ) : scan.status === 'complete' ? (
                                 <Button variant="outline" size="sm" asChild>
                                   <Link to={`/reports/${scan.id}`}>
@@ -284,6 +290,9 @@ export default function AdvisorQueuePage() {
                                   </DropdownMenuItem>
                                   <DropdownMenuItem onClick={() => updateScanStatus(scan.id, 'awaiting_review')}>
                                     Set to Awaiting Review
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => updateScanStatus(scan.id, 'in_review')}>
+                                    Set to In Review
                                   </DropdownMenuItem>
                                   <DropdownMenuItem onClick={() => updateScanStatus(scan.id, 'complete')}>
                                     Set to Complete
@@ -331,6 +340,13 @@ function ScanStatusBadge({ status }: ScanStatusBadgeProps) {
         <Badge variant="outline" className="gap-1 text-electric-teal">
           <Clock className="h-3 w-3" />
           Awaiting Review
+        </Badge>
+      )
+    case 'in_review':
+      return (
+        <Badge variant="outline" className="gap-1 text-orange-500">
+          <Clock className="h-3 w-3" />
+          In Review
         </Badge>
       )
     case 'complete':
