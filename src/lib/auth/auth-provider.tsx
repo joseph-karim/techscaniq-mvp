@@ -8,7 +8,9 @@ type AuthContextType = {
   signIn: (email: string, password: string) => Promise<any>
   signUp: (email: string, password: string, name?: string, workspaceName?: string, role?: string) => Promise<any>
   signOut: () => Promise<any>
+  resetPassword: (email: string) => Promise<any>
   loading: boolean
+  isLoading: boolean
 }
 
 // Create context with default values
@@ -18,7 +20,9 @@ const AuthContext = createContext<AuthContextType>({
   signIn: async () => ({}),
   signUp: async () => ({}),
   signOut: async () => ({}),
+  resetPassword: async () => ({}),
   loading: true,
+  isLoading: true,
 })
 
 // Helper to use auth context
@@ -152,13 +156,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return supabase.auth.signOut()
   }
 
+  const resetPassword = async (email: string) => {
+    if (!isSupabaseConfigured || !supabase) {
+      console.log('Mock reset password:', email)
+      return { data: null, error: null }
+    }
+    return supabase.auth.resetPasswordForEmail(email)
+  }
+
   const value = {
     user,
     supabase,
     signIn,
     signUp,
     signOut,
+    resetPassword,
     loading,
+    isLoading: loading,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
