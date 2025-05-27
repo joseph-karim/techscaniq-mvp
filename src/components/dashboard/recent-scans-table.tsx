@@ -3,54 +3,38 @@ import { AlertCircle, CheckCircle2, Clock, FileText, Hourglass } from 'lucide-re
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { formatDate } from '@/lib/utils'
-
-// Mock scan data
-const scanData = [
-  {
-    id: 'scan-1',
-    company: 'Acme Cloud Technologies',
-    status: 'complete',
-    date: '2023-04-10T14:23:53Z',
-    score: 7.8,
-  },
-  {
-    id: 'scan-2',
-    company: 'DevSecOps Solutions',
-    status: 'awaiting_review',
-    date: '2023-04-05T09:15:22Z',
-    score: null,
-  },
-  {
-    id: 'scan-3',
-    company: 'Fast Deploy Systems',
-    status: 'processing',
-    date: '2023-04-03T16:45:11Z',
-    score: null,
-  },
-  {
-    id: 'scan-4',
-    company: 'BlockSafe Crypto',
-    status: 'complete',
-    date: '2023-03-28T11:32:45Z',
-    score: 5.4,
-  },
-  {
-    id: 'scan-5',
-    company: 'AI Insights Ltd',
-    status: 'complete',
-    date: '2023-03-20T14:12:33Z',
-    score: 8.2,
-  },
-];
+import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabaseClient'
+import { Scan } from '@/types'
 
 interface RecentScansTableProps {
   showAll?: boolean
 }
 
 export function RecentScansTable({ showAll = false }: RecentScansTableProps) {
-  // If not showing all, limit to 5 scans
-  const displayedScans = showAll ? scanData : scanData.slice(0, 5)
-  
+  const [scans, setScans] = useState<Scan[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchScans() {
+      setLoading(true)
+      const { data, error } = await supabase
+        .from('scans')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(showAll ? 100 : 5)
+      if (error) {
+        setScans([])
+      } else {
+        setScans(data || [])
+      }
+      setLoading(false)
+    }
+    fetchScans()
+  }, [showAll])
+
+  if (loading) return <div>Loading...</div>
+
   return (
     <div className="overflow-hidden rounded-md border">
       <table className="w-full">
@@ -66,31 +50,21 @@ export function RecentScansTable({ showAll = false }: RecentScansTableProps) {
               Date
             </th>
             <th className="whitespace-nowrap px-4 py-3 text-left text-sm font-medium text-muted-foreground">
-              Score
-            </th>
-            <th className="whitespace-nowrap px-4 py-3 text-left text-sm font-medium text-muted-foreground">
               Actions
             </th>
           </tr>
         </thead>
         <tbody>
-          {displayedScans.map((scan) => (
+          {scans.map((scan) => (
             <tr key={scan.id} className="border-t">
               <td className="px-4 py-3">
-                <div className="font-medium">{scan.company}</div>
+                <div className="font-medium">{scan.company_id}</div>
               </td>
               <td className="px-4 py-3">
                 <ScanStatusBadge status={scan.status} />
               </td>
               <td className="px-4 py-3 text-muted-foreground">
-                {formatDate(scan.date)}
-              </td>
-              <td className="px-4 py-3">
-                {scan.score !== null ? (
-                  <div className="font-medium">{scan.score.toFixed(1)}</div>
-                ) : (
-                  <div className="text-muted-foreground">—</div>
-                )}
+                {formatDate(scan.created_at)}
               </td>
               <td className="px-4 py-3">
                 <Button 

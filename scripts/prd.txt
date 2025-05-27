@@ -1,3 +1,91 @@
+Product Requirements Document: TechScanIQ Executive Report Generation System Enhancements
+
+Project Overview:
+TechScanIQ currently has a basic working implementation with three microservices (website-scanner, tech-intelligence, report-orchestrator) and frontend components for displaying executive technology assessment reports. This PRD outlines enhancements to evolve the system from its current state into a comprehensive, production-ready platform that matches the strategic vision.
+
+Current State:
+- Working website scanner service that detects technologies and infrastructure
+- Tech intelligence service using Gemini AI for analysis
+- Report orchestrator that coordinates services
+- Frontend components: QuickScanForm, Dashboard, and Report display pages
+- Basic data storage in scan_reports table
+
+Strategic Vision:
+Build a robust, evidence-based executive report generation system that automatically collects real data about target companies and synthesizes executive-ready reports with full traceability and human review capabilities.
+
+Key Requirements:
+
+1. Enhanced Data Collection Services
+- Integrate additional external APIs for comprehensive data gathering
+- Add security scanning capabilities (SSL Labs, security headers)
+- Implement company intelligence gathering (team, funding, market data)
+- Add historical analysis capabilities for tracking technology evolution
+- Create caching layer to optimize API usage and costs
+
+2. Advanced AI Analysis Engine
+- Implement multi-turn, tool-using AI approach with function calling
+- Enable iterative data gathering where AI can request additional information
+- Add evidence citation system linking every claim to source data
+- Support multi-model ensemble for specialized analysis
+- Implement confidence scoring for all findings
+
+3. Evidence Management System
+- Store all raw evidence with timestamps and source metadata
+- Create citation tracking system for report transparency
+- Build evidence browsing UI for reviewing source materials
+- Implement data validation and quality control mechanisms
+- Add source verification and cross-referencing capabilities
+
+4. Human-in-the-Loop Review System
+- Create advisor dashboard for expert report review
+- Implement side-by-side comparison with evidence viewing
+- Add editing and annotation capabilities
+- Track all human edits for continuous improvement
+- Build approval workflow before report publication
+
+5. Enhanced Frontend Integration
+- Utilize existing report display components (risk cards, charts, etc.)
+- Add evidence modal for viewing citations inline
+- Implement progress tracking for long-running analyses
+- Create batch processing interface for multiple companies
+- Add export capabilities (PDF generation with branding)
+
+6. Investment Thesis Alignment
+- Capture investor criteria and priorities
+- Score companies against specific thesis points
+- Identify enablers and blockers for investment
+- Generate overall alignment percentage
+- Provide detailed explanations for each criterion
+
+7. Scalability and Performance
+- Implement proper rate limiting for external APIs
+- Add job queueing for asynchronous processing
+- Create monitoring and alerting system
+- Optimize for sub-10 minute report generation
+- Build fault-tolerant architecture with graceful degradation
+
+8. Continuous Learning System
+- Log all AI outputs and human corrections
+- Build feedback collection mechanisms
+- Implement prompt refinement based on usage patterns
+- Create knowledge base update process
+- Track report quality metrics over time
+
+Technical Constraints:
+- Must integrate with existing Supabase backend
+- Use existing frontend components and styling
+- Maintain compatibility with current edge function architecture
+- Work within Gemini API capabilities and rate limits
+- Respect third-party API terms of service
+
+Success Criteria:
+- Generate comprehensive executive reports with real data in under 10 minutes
+- Every claim in reports traceable to verified evidence
+- 90%+ accuracy in technology detection and analysis
+- Support for batch processing of multiple companies
+- Human review capability with full audit trail
+- Scalable to hundreds of concurrent report generations
+
 TechScan IQ – SaaS Technical Due Diligence Platform
 
 PROJECT OVERVIEW:
