@@ -248,12 +248,19 @@ export function useExecutiveReport(): UseExecutiveReportReturn {
       // Call the Supabase Edge Function
       setProgress('Analyzing company and gathering public information...')
       
-      const { data, error: functionError } = await supabase.functions.invoke('generate-executive-report', {
+      const { data, error: functionError } = await supabase.functions.invoke('report-orchestrator-v3', {
         body: {
-          investorProfile: params.investorProfile,
-          targetCompany: params.targetCompany,
-          contextDocs: params.contextDocs,
-          apiKey: params.apiKey || import.meta.env.VITE_GOOGLE_API_KEY
+          company: {
+            name: params.targetCompany.name,
+            website: params.targetCompany.website
+          },
+          investorProfile: params.investorProfile ? {
+            firmName: params.investorProfile.firmName,
+            website: params.investorProfile.website,
+            thesis: params.contextDocs
+          } : undefined,
+          analysisDepth: 'comprehensive',
+          focusAreas: ['technical', 'security', 'team', 'financial', 'market']
         }
       })
 
@@ -261,21 +268,135 @@ export function useExecutiveReport(): UseExecutiveReportReturn {
         throw new Error(functionError.message)
       }
 
-      if (!data?.success) {
-        throw new Error(data?.error || 'Failed to generate report')
+      if (!data) {
+        throw new Error('Failed to generate report')
       }
 
       setProgress('Report generated successfully! Saving to database...')
       
+      // Transform the response to match our ComprehensiveReport format
+      const report: ComprehensiveReport = {
+        id: data.reportId,
+        companyName: data.company,
+        websiteUrl: params.targetCompany.website,
+        scanDate: data.generatedAt,
+        reportType: 'executive',
+        
+        executiveSummary: {
+          overallAssessment: data.executiveSummary,
+          keyFindings: data.sections.technologyStack.findings.map((f: any) => f.claim),
+          strategicRecommendations: data.sections.technologyStack.recommendations || [],
+          techHealthScore: {
+            score: data.investmentScore,
+            grade: data.investmentScore >= 80 ? 'A' : data.investmentScore >= 60 ? 'B' : 'C',
+            confidence: data.metadata.confidenceScore
+          },
+          riskSummary: {
+            critical: 0,
+            high: 0,
+            medium: 0,
+            low: 0
+          }
+        },
+        
+        technologyOverview: {
+          stackSummary: data.sections.technologyStack.summary,
+          primaryTechnologies: [],
+          architecturePattern: 'Modern',
+          deploymentModel: 'Cloud',
+          scalabilityAssessment: data.sections.infrastructure.summary
+        },
+        
+        stackEvolution: [],
+        technicalLeadership: {
+          founders: [],
+          teamAssessment: data.sections.teamCulture.summary
+        },
+        
+        codeAnalysis: {
+          overallQuality: 0,
+          publicRepositories: 0,
+          languageDistribution: [],
+          openSourceContributions: false,
+          codePatterns: [],
+          estimatedTechnicalDebt: 'Unknown'
+        },
+        
+        infrastructureAnalysis: {
+          hostingProvider: 'Unknown',
+          deploymentRegions: [],
+          certificatesAndCompliance: [],
+          performanceMetrics: {},
+          scalingCapabilities: data.sections.infrastructure.summary
+        },
+        
+        securityAnalysis: {
+          overallSecurityScore: 0,
+          sslCertificate: true,
+          securityHeaders: [],
+          authenticationMethods: [],
+          dataProtection: data.sections.security.summary,
+          vulnerabilities: []
+        },
+        
+        aiCapabilities: {
+          hasAI: false,
+          aiFeatures: [],
+          aiReadiness: 0,
+          potentialAIApplications: []
+        },
+        
+        integrations: {
+          totalIntegrations: 0,
+          categories: [],
+          apiAvailability: false,
+          webhooksSupport: false
+        },
+        
+        competitiveAnalysis: {
+          marketPosition: data.sections.marketPosition.summary,
+          competitors: [],
+          differentiators: [],
+          marketTrends: []
+        },
+        
+        financialIndicators: {
+          estimatedTechSpend: 'Unknown',
+          techSpendAsPercentage: 'Unknown',
+          costOptimizationOpportunities: [],
+          revenueEnablingTech: []
+        },
+        
+        sourceLog: data.evidence.items.map((item: any) => ({
+          insightArea: item.type,
+          insight: item.content.summary || item.content.raw.substring(0, 200),
+          source: item.source.query || 'Direct analysis',
+          url: item.source.url,
+          confidence: item.metadata.confidence,
+          timestamp: new Date().toISOString()
+        })),
+        
+        recommendations: {
+          immediate: [],
+          shortTerm: [],
+          longTerm: [],
+          investmentDecision: data.investmentRationale
+        },
+        
+        generatedAt: data.generatedAt,
+        modelUsed: 'Gemini 2.0 + Jina AI',
+        context: params.targetCompany.assessmentContext || 'general'
+      }
+      
       // Save the report to Supabase database
       const reportToSave = {
-        company_name: data.report.companyName,
-        website_url: data.report.websiteUrl,
-        report_type: data.report.reportType,
+        company_name: report.companyName,
+        website_url: report.websiteUrl,
+        report_type: report.reportType,
         investor_name: params.investorProfile?.firmName || null,
         assessment_context: params.targetCompany.assessmentContext || 'general',
-        report_data: data.report,
-        token_usage: data.tokenUsage,
+        report_data: report,
+        token_usage: null,
         created_at: new Date().toISOString()
       }
 
@@ -291,7 +412,7 @@ export function useExecutiveReport(): UseExecutiveReportReturn {
       }
 
       setProgress('Report saved successfully!')
-      return data.report as ComprehensiveReport
+      return report
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred'
