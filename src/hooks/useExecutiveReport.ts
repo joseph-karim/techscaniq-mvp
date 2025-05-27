@@ -245,6 +245,16 @@ export function useExecutiveReport(): UseExecutiveReportReturn {
     setProgress('Initializing report generation...')
 
     try {
+      // Update scan request status to processing if this is linked to a scan
+      const urlParams = new URLSearchParams(window.location.search)
+      const requestScanId = urlParams.get('scanId')
+      if (requestScanId) {
+        await supabase
+          .from('scan_requests')
+          .update({ status: 'processing' })
+          .eq('id', requestScanId)
+      }
+
       // Call the Supabase Edge Function
       setProgress('Analyzing company and gathering public information...')
       
@@ -414,17 +424,16 @@ export function useExecutiveReport(): UseExecutiveReportReturn {
       setProgress('Report saved successfully!')
       
       // If this report is linked to a scan request, update it
-      const searchParams = new URLSearchParams(window.location.search)
-      const scanId = searchParams.get('scanId')
-      if (scanId && savedReport) {
+      if (requestScanId && savedReport) {
         await supabase
           .from('scan_requests')
           .update({
+            status: 'complete',
             executive_report_id: savedReport.id,
             executive_report_data: report,
             executive_report_generated_at: new Date().toISOString()
           })
-          .eq('id', scanId)
+          .eq('id', requestScanId)
       }
       
       return report

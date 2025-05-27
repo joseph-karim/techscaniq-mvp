@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Clock, Filter, Search } from 'lucide-react'
+import { Clock, Filter, Search, MoreHorizontal } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { formatDate } from '@/lib/utils'
 
 interface ScanRequest {
@@ -24,10 +25,31 @@ interface ScanRequest {
 }
 
 export default function AdvisorQueuePage() {
-  const [activeTab, setActiveTab] = useState('awaiting_review')
+  const [activeTab, setActiveTab] = useState('pending')
   const [searchQuery, setSearchQuery] = useState('')
   const [scanRequests, setScanRequests] = useState<ScanRequest[]>([])
   const [loading, setLoading] = useState(true)
+  
+  // Update scan status
+  const updateScanStatus = async (scanId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('scan_requests')
+        .update({ status: newStatus })
+        .eq('id', scanId)
+      
+      if (error) throw error
+      
+      // Update local state
+      setScanRequests(prev => 
+        prev.map(scan => 
+          scan.id === scanId ? { ...scan, status: newStatus } : scan
+        )
+      )
+    } catch (error) {
+      console.error('Error updating scan status:', error)
+    }
+  }
   
   // Fetch scan requests from database
   useEffect(() => {
@@ -115,14 +137,15 @@ export default function AdvisorQueuePage() {
       </div>
       
       <Tabs 
-        defaultValue="awaiting_review" 
+        defaultValue="pending" 
         value={activeTab}
         onValueChange={setActiveTab}
         className="space-y-4"
       >
         <TabsList className="bg-slate-100 dark:bg-slate-800/50">
-          <TabsTrigger value="awaiting_review">Awaiting Review</TabsTrigger>
+          <TabsTrigger value="pending">Pending</TabsTrigger>
           <TabsTrigger value="processing">Processing</TabsTrigger>
+          <TabsTrigger value="awaiting_review">Awaiting Review</TabsTrigger>
           <TabsTrigger value="complete">Completed</TabsTrigger>
           <TabsTrigger value="all">All Scans</TabsTrigger>
         </TabsList>
@@ -130,18 +153,20 @@ export default function AdvisorQueuePage() {
         <TabsContent value={activeTab} className="space-y-4">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle>
-                {activeTab === 'awaiting_review' && 'Scans Awaiting Review'}
-                {activeTab === 'processing' && 'Scans In Processing'}
-                {activeTab === 'complete' && 'Completed Scans'}
-                {activeTab === 'all' && 'All Scans'}
-              </CardTitle>
-              <CardDescription>
-                {activeTab === 'awaiting_review' && 'AI analysis complete - ready for advisor review'}
-                {activeTab === 'processing' && 'AI analysis in progress - not yet ready for review'}
-                {activeTab === 'complete' && 'Scans that have been reviewed and published'}
-                {activeTab === 'all' && 'All scan requests across all statuses'}
-              </CardDescription>
+                          <CardTitle>
+              {activeTab === 'pending' && 'Pending Scan Requests'}
+              {activeTab === 'processing' && 'Scans In Processing'}
+              {activeTab === 'awaiting_review' && 'Scans Awaiting Review'}
+              {activeTab === 'complete' && 'Completed Scans'}
+              {activeTab === 'all' && 'All Scans'}
+            </CardTitle>
+            <CardDescription>
+              {activeTab === 'pending' && 'New scan requests ready for report generation'}
+              {activeTab === 'processing' && 'Reports currently being generated'}
+              {activeTab === 'awaiting_review' && 'AI analysis complete - ready for advisor review'}
+              {activeTab === 'complete' && 'Scans that have been reviewed and published'}
+              {activeTab === 'all' && 'All scan requests across all statuses'}
+            </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="overflow-hidden rounded-md border">
@@ -218,23 +243,54 @@ export default function AdvisorQueuePage() {
                             )}
                           </td>
                           <td className="px-4 py-3">
-                            {scan.status === 'awaiting_review' ? (
-                              <Button size="sm" className="bg-electric-teal hover:bg-electric-teal/90" asChild>
-                                <Link to={`/advisor/review/${scan.id}`}>
-                                  Review Now
-                                </Link>
-                              </Button>
-                            ) : scan.status === 'complete' ? (
-                              <Button variant="outline" size="sm" asChild>
-                                <Link to={`/reports/${scan.id}`}>
-                                  View Report
-                                </Link>
-                              </Button>
-                            ) : (
-                              <Button variant="outline" size="sm" disabled>
-                                Processing
-                              </Button>
-                            )}
+                            <div className="flex gap-2">
+                              {scan.status === 'pending' ? (
+                                <Button size="sm" className="bg-electric-teal hover:bg-electric-teal/90" asChild>
+                                  <Link to={`/reports/generate?scanId=${scan.id}&company=${encodeURIComponent(scan.company_name)}&website=${encodeURIComponent(scan.website_url)}&requestor=${encodeURIComponent(scan.requestor_name)}&organization=${encodeURIComponent(scan.organization_name)}`}>
+                                    Generate Report
+                                  </Link>
+                                </Button>
+                              ) : scan.status === 'awaiting_review' ? (
+                                <Button size="sm" className="bg-electric-teal hover:bg-electric-teal/90" asChild>
+                                  <Link to={`/advisor/review/${scan.id}`}>
+                                    Review Now
+                                  </Link>
+                                </Button>
+                              ) : scan.status === 'complete' ? (
+                                <Button variant="outline" size="sm" asChild>
+                                  <Link to={`/reports/${scan.id}`}>
+                                    View Report
+                                  </Link>
+                                </Button>
+                              ) : (
+                                <Button variant="outline" size="sm" disabled>
+                                  Processing
+                                </Button>
+                              )}
+                              
+                              {/* Status management dropdown */}
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={() => updateScanStatus(scan.id, 'pending')}>
+                                    Set to Pending
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => updateScanStatus(scan.id, 'processing')}>
+                                    Set to Processing
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => updateScanStatus(scan.id, 'awaiting_review')}>
+                                    Set to Awaiting Review
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => updateScanStatus(scan.id, 'complete')}>
+                                    Set to Complete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
                           </td>
                         </tr>
                       ))
