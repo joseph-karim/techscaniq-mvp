@@ -3,7 +3,7 @@ import { BarChart3, TrendingUp, Users, Clock, Target, PieChart, LineChart, Activ
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
-import { useAuth } from '@/lib/auth/mock-auth-provider'
+import { useAuth } from '@/lib/auth/auth-provider'
 
 export default function AnalyticsPage() {
   const [activeTab, setActiveTab] = useState('overview')

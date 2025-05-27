@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useAuth } from '@/lib/auth/mock-auth-provider'
+import { useAuth } from '@/lib/auth/auth-provider'
 import { supabase } from '@/lib/supabaseClient'
 import { formatDate } from '@/lib/utils'
 

@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { AlertCircle } from 'lucide-react'
-import { useAuth } from '@/lib/auth/mock-auth-provider'
+import { useAuth } from '@/lib/auth/auth-provider'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import {
@@ -50,7 +50,34 @@ export default function LoginPage() {
         return
       }
       
-      navigate('/dashboard')
+      navigate('/')
+    } catch (err) {
+      setError('An unexpected error occurred')
+      console.error(err)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  async function handleQuickLogin(role: 'investor' | 'admin' | 'pe') {
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const roleEmails = {
+        investor: 'investor@example.com',
+        admin: 'admin@example.com',
+        pe: 'pe@example.com'
+      }
+      
+      const { error } = await signIn(roleEmails[role], 'password123')
+      
+      if (error) {
+        setError(error.message || 'Failed to sign in')
+        return
+      }
+      
+      navigate('/')
     } catch (err) {
       setError('An unexpected error occurred')
       console.error(err)
@@ -78,7 +105,7 @@ export default function LoginPage() {
                 Enter your credentials to access your account
               </p>
               <div className="mt-2 rounded-md bg-yellow-50 p-2 text-xs text-yellow-800">
-                <p><strong>Demo Mode:</strong> Use any email/password. Type "admin" in the email for admin access.</p>
+                <p><strong>Demo Mode:</strong> Use quick login buttons below or any email/password.</p>
               </div>
             </div>
 
@@ -143,6 +170,39 @@ export default function LoginPage() {
                 </Button>
               </form>
             </Form>
+
+            <div className="mt-4 space-y-2">
+              <div className="text-center text-xs text-muted-foreground">Quick Demo Login</div>
+              <div className="grid grid-cols-3 gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs"
+                  onClick={() => handleQuickLogin('investor')}
+                  disabled={isLoading}
+                >
+                  Investor
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs"
+                  onClick={() => handleQuickLogin('admin')}
+                  disabled={isLoading}
+                >
+                  Admin
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs"
+                  onClick={() => handleQuickLogin('pe')}
+                  disabled={isLoading}
+                >
+                  PE
+                </Button>
+              </div>
+            </div>
 
             <div className="mt-4 text-center text-sm">
               Don't have an account?{' '}

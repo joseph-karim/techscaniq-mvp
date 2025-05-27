@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Settings, User as UserIcon, UserCog, Building2 } from 'lucide-react'
+import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Settings, User as UserIcon } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { useAuth } from '@/lib/auth/mock-auth-provider'
+import { useAuth } from '@/lib/auth/auth-provider'
 import { Button } from '@/components/ui/button'
 import { 
   DropdownMenu, 
@@ -9,44 +9,31 @@ import {
   DropdownMenuItem, 
   DropdownMenuSeparator, 
   DropdownMenuTrigger,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
+
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { MockUser } from '@/lib/auth/mock-auth-provider'
 import { useToast } from '@/hooks/use-toast'
 import { Badge } from '@/components/ui/badge'
+import type { User } from '@supabase/supabase-js'
 
 interface HeaderProps {
-  user: MockUser
+  user: User
 }
 
 export function Header({ user }: HeaderProps) {
-  const { signOut, switchRole } = useAuth()
+  const { signOut } = useAuth()
   const { toast } = useToast()
   const [notificationsCount, setNotificationsCount] = useState(2)
   
   const displayName = user.user_metadata?.name || user.email || 'User'
   const initials = displayName
     .split(' ')
-    .map(name => name[0])
+    .map((name: string) => name[0])
     .join('')
     .toUpperCase()
     .slice(0, 2)
   
   const currentRole = user.user_metadata?.role || 'investor'
-
-  const handleRoleSwitch = (role: string) => {
-    switchRole(role as 'investor' | 'admin' | 'pe')
-    
-    const roleDisplayName = role === 'investor' ? 'Investor' : role === 'admin' ? 'Admin' : 'Private Equity'
-    
-    toast({
-      title: "Profile Switched",
-      description: `You are now using the ${roleDisplayName} profile.`,
-      duration: 3000,
-    })
-  }
 
   const handleNotificationClick = () => {
     setNotificationsCount(0)
@@ -115,26 +102,6 @@ export function Header({ user }: HeaderProps) {
                   <span className="text-xs text-muted-foreground">{user.user_metadata?.workspace_name}</span>
                 </div>
               </div>
-              <DropdownMenuSeparator />
-              
-              <DropdownMenuRadioGroup value={currentRole} onValueChange={handleRoleSwitch}>
-                <div className="px-2 py-1 text-xs font-semibold text-muted-foreground">
-                  SWITCH PROFILE
-                </div>
-                <DropdownMenuRadioItem value="investor" className="gap-2">
-                  <UserIcon className="h-4 w-4" />
-                  <span>Investor</span>
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="admin" className="gap-2">
-                  <UserCog className="h-4 w-4" />
-                  <span>Admin</span>
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="pe" className="gap-2">
-                  <Building2 className="h-4 w-4" />
-                  <span>Private Equity</span>
-                </DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-
               <DropdownMenuSeparator />
               
               <DropdownMenuItem asChild>

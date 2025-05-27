@@ -6,7 +6,7 @@ type AuthContextType = {
   user: User | null
   supabase: SupabaseClient | null
   signIn: (email: string, password: string) => Promise<any>
-  signUp: (email: string, password: string) => Promise<any>
+  signUp: (email: string, password: string, name?: string, workspaceName?: string, role?: string) => Promise<any>
   signOut: () => Promise<any>
   loading: boolean
 }
@@ -79,19 +79,68 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signIn = async (email: string, password: string) => {
     if (!isSupabaseConfigured || !supabase) {
       console.log('Mock sign in:', email)
-      setUser(mockUser)
-      return { data: { user: mockUser }, error: null }
+      
+      // Determine role based on email for demo purposes
+      let role = 'investor'
+      let name = 'Demo User'
+      let workspaceName = 'Demo Workspace'
+      
+      if (email.includes('admin')) {
+        role = 'admin'
+        name = 'Admin User'
+        workspaceName = 'TechScan IQ Admin'
+      } else if (email.includes('pe')) {
+        role = 'pe'
+        name = 'PE Partner'
+        workspaceName = 'Private Equity Firm'
+      } else if (email.includes('investor')) {
+        role = 'investor'
+        name = 'Investor'
+        workspaceName = 'Venture Capital'
+      }
+      
+      const mockUserWithRole = {
+        ...mockUser,
+        email,
+        user_metadata: {
+          name,
+          role,
+          workspace_name: workspaceName,
+        },
+      }
+      
+      setUser(mockUserWithRole)
+      return { data: { user: mockUserWithRole }, error: null }
     }
     return supabase.auth.signInWithPassword({ email, password })
   }
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string, name?: string, workspaceName?: string, role?: string) => {
     if (!isSupabaseConfigured || !supabase) {
-      console.log('Mock sign up:', email)
-      setUser(mockUser)
-      return { data: { user: mockUser }, error: null }
+      console.log('Mock sign up:', email, { name, workspaceName, role })
+      const mockUserWithMetadata = {
+        ...mockUser,
+        email,
+        user_metadata: {
+          name: name || 'Test User',
+          role: role || 'investor',
+          workspace_name: workspaceName || 'Test Workspace',
+        },
+      }
+      setUser(mockUserWithMetadata)
+      return { data: { user: mockUserWithMetadata }, error: null }
     }
-    return supabase.auth.signUp({ email, password })
+    return supabase.auth.signUp({ 
+      email, 
+      password,
+      options: {
+        data: {
+          name,
+          workspace_name: workspaceName,
+          role: role || 'investor',
+        }
+      }
+    })
   }
 
   const signOut = async () => {
