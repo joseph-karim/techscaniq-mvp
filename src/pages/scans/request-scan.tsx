@@ -2,7 +2,10 @@ import { useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useNavigate } from 'react-router-dom'
 import { AlertCircle, CheckCircle2, Globe, Info } from 'lucide-react'
+import { supabase } from '@/lib/supabaseClient'
+import { useAuth } from '@/lib/auth/mock-auth-provider'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -31,6 +34,8 @@ const requestScanSchema = z.object({
 type RequestScanForm = z.infer<typeof requestScanSchema>
 
 export default function RequestScanPage() {
+  const navigate = useNavigate()
+  const { user } = useAuth()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -53,15 +58,32 @@ export default function RequestScanPage() {
     setSuccess(false)
     
     try {
-      // In a real app, this would call the API to create a scan
-      console.log('Submitting scan request:', data)
-      
-      // Simulate API call with a delay
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      // Create the scan request in the database
+      const { data: scanRequest, error: dbError } = await supabase
+        .from('scan_requests')
+        .insert({
+          company_name: data.companyName,
+          website_url: data.websiteUrl,
+          requested_by: user?.id,
+          requestor_name: user?.user_metadata?.name || user?.email || 'Unknown',
+          organization_name: user?.user_metadata?.workspace_name || 'Unknown Organization',
+          status: 'pending',
+          sections: [],
+          risks: []
+        })
+        .select()
+        .single()
+
+      if (dbError) throw dbError
       
       // Success
       setSuccess(true)
       form.reset()
+      
+      // Navigate to the scan details page after a short delay
+      setTimeout(() => {
+        navigate(`/scans/${scanRequest.id}`)
+      }, 2000)
     } catch (err) {
       setError('Failed to submit scan request. Please try again.')
       console.error(err)
