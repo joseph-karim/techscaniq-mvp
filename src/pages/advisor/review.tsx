@@ -413,7 +413,7 @@ export default function AdvisorReviewPage() {
             variant="outline" 
             onClick={() => {
               // Navigate to executive report generation with scan data
-              navigate(`/admin/generate-executive-report?scanId=${id}&company=${encodeURIComponent(scanData.company)}&website=${encodeURIComponent(scanData.websiteUrl)}&requestor=${encodeURIComponent(scanData.user)}&organization=${encodeURIComponent(scanData.organization)}`)
+              navigate(`/reports/generate?scanId=${id}&company=${encodeURIComponent(scanData.company)}&website=${encodeURIComponent(scanData.websiteUrl)}&requestor=${encodeURIComponent(scanData.user)}&organization=${encodeURIComponent(scanData.organization)}`)
             }}
           >
             <FileText className="mr-2 h-4 w-4" />
