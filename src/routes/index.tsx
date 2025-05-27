@@ -20,6 +20,7 @@ const DeepDivePEReportPaginated = lazy(() => import('@/pages/pe/deep-dive-report
 const SettingsPage = lazy(() => import('@/pages/settings'))
 const AnalyticsPage = lazy(() => import('@/pages/analytics'))
 const ReportsListPage = lazy(() => import('@/pages/reports/reports-list'))
+const GenerateExecutiveReport = lazy(() => import('@/pages/reports/GenerateExecutiveReport'))
 
 
 // Route configuration interface
@@ -163,6 +164,13 @@ export const routeConfig: RouteConfig[] = [
         label: 'Review',
         requireAdmin: true,
         showInNav: false
+      },
+      {
+        path: 'admin/generate-executive-report',
+        element: <GenerateExecutiveReport />,
+        label: 'Generate Executive Report',
+        requireAdmin: true,
+        showInNav: true
       }
     ]
   },

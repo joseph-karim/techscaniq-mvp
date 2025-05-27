@@ -11,7 +11,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useExecutiveReport } from '@/hooks/useExecutiveReport'
 import { Building2, Target, FileText, Loader2, AlertCircle } from 'lucide-react'
 
-export function GenerateExecutiveReport() {
+export default function GenerateExecutiveReport() {
   const navigate = useNavigate()
   const { generateReport, loading, error, progress } = useExecutiveReport()
   
