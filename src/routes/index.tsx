@@ -21,6 +21,7 @@ const SettingsPage = lazy(() => import('@/pages/settings'))
 const AnalyticsPage = lazy(() => import('@/pages/analytics'))
 const ReportsListPage = lazy(() => import('@/pages/reports/reports-list'))
 const GenerateExecutiveReport = lazy(() => import('@/pages/reports/GenerateExecutiveReport'))
+const ViewReportPage = lazy(() => import('@/pages/reports/view-report'))
 
 
 // Route configuration interface
@@ -95,7 +96,7 @@ export const routeConfig: RouteConfig[] = [
       },
       {
         path: 'reports/:id',
-        element: <ScanReportPaginated />,
+        element: <ViewReportPage />,
         label: 'Report Details',
         showInNav: false
       },

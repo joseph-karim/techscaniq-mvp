@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { FileText, Search, Calendar, Building2, BarChart3, Eye, Download } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -7,70 +7,24 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useAuth } from '@/lib/auth/mock-auth-provider'
+import { supabase } from '@/lib/supabaseClient'
+import { formatDate } from '@/lib/utils'
 
-// Mock reports data
-const mockReports = [
-  {
-    id: 'scan-1',
-    title: 'TechFlow Solutions - Technical Due Diligence',
-    company: 'TechFlow Solutions',
-    type: 'Technical Scan',
-    status: 'completed',
-    date: '2024-01-15',
-    healthScore: 85,
-    findings: 12,
-    criticalIssues: 2,
-    description: 'Comprehensive technical assessment covering architecture, security, and scalability'
-  },
-  {
-    id: 'scan-2',
-    title: 'DataVault Inc - Security Assessment',
-    company: 'DataVault Inc',
-    type: 'Security Scan',
-    status: 'completed',
-    date: '2024-01-10',
-    healthScore: 72,
-    findings: 18,
-    criticalIssues: 5,
-    description: 'Focused security evaluation with emphasis on data protection and compliance'
-  },
-  {
-    id: 'scan-3',
-    title: 'SecureNet Systems - Architecture Review',
-    company: 'SecureNet Systems',
-    type: 'Architecture Scan',
-    status: 'completed',
-    date: '2024-01-08',
-    healthScore: 91,
-    findings: 8,
-    criticalIssues: 1,
-    description: 'Deep dive into system architecture and scalability patterns'
-  },
-  {
-    id: 'scan-4',
-    title: 'CloudFirst Analytics - Infrastructure Audit',
-    company: 'CloudFirst Analytics',
-    type: 'Infrastructure Scan',
-    status: 'in-progress',
-    date: '2024-01-20',
-    healthScore: null,
-    findings: null,
-    criticalIssues: null,
-    description: 'Cloud infrastructure assessment and optimization recommendations'
-  },
-  {
-    id: 'scan-5',
-    title: 'DevOps Pro - CI/CD Pipeline Review',
-    company: 'DevOps Pro',
-    type: 'DevOps Scan',
-    status: 'pending',
-    date: '2024-01-22',
-    healthScore: null,
-    findings: null,
-    criticalIssues: null,
-    description: 'Evaluation of development operations and deployment processes'
-  }
-]
+interface ScanRequest {
+  id: string
+  company_name: string
+  website_url: string
+  status: string
+  created_at: string
+  requestor_name: string
+  organization_name: string
+  ai_confidence: number | null
+  tech_health_score: number | null
+  tech_health_grade: string | null
+  sections: any[]
+  risks: any[]
+  published_at: string | null
+}
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -92,18 +46,46 @@ const getHealthScoreColor = (score: number | null) => {
 export default function ReportsListPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
-  const [typeFilter, setTypeFilter] = useState('all')
+  const [scanRequests, setScanRequests] = useState<ScanRequest[]>([])
+  const [loading, setLoading] = useState(true)
   const { user } = useAuth()
   const userRole = user?.user_metadata?.role
   const isPE = userRole === 'pe'
-
-  const filteredReports = mockReports.filter(report => {
-    const matchesSearch = report.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         report.company.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = statusFilter === 'all' || report.status === statusFilter
-    const matchesType = typeFilter === 'all' || report.type === typeFilter
+  const isAdmin = userRole === 'admin'
+  
+  // Fetch scan requests
+  useEffect(() => {
+    async function fetchScanRequests() {
+      try {
+        let query = supabase.from('scan_requests').select('*')
+        
+        // Filter based on user role
+        if (!isAdmin) {
+          // Regular users only see their own requests
+          query = query.eq('requested_by', user?.id)
+        }
+        
+        const { data, error } = await query.order('created_at', { ascending: false })
+        
+        if (error) throw error
+        
+        setScanRequests(data || [])
+      } catch (error) {
+        console.error('Error fetching scan requests:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
     
-    return matchesSearch && matchesStatus && matchesType
+    fetchScanRequests()
+  }, [user, isAdmin])
+
+  const filteredReports = scanRequests.filter(scan => {
+    const matchesSearch = scan.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         scan.organization_name.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesStatus = statusFilter === 'all' || scan.status === statusFilter
+    
+    return matchesSearch && matchesStatus
   })
 
   return (
@@ -156,19 +138,7 @@ export default function ReportsListPage() {
                   <SelectItem value="pending">Pending</SelectItem>
                 </SelectContent>
               </Select>
-              <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="Technical Scan">Technical</SelectItem>
-                  <SelectItem value="Security Scan">Security</SelectItem>
-                  <SelectItem value="Architecture Scan">Architecture</SelectItem>
-                  <SelectItem value="Infrastructure Scan">Infrastructure</SelectItem>
-                  <SelectItem value="DevOps Scan">DevOps</SelectItem>
-                </SelectContent>
-              </Select>
+
             </div>
           </div>
         </CardContent>
@@ -176,7 +146,13 @@ export default function ReportsListPage() {
 
       {/* Reports Grid */}
       <div className="grid gap-4">
-        {filteredReports.length === 0 ? (
+        {loading ? (
+          <Card>
+            <CardContent className="flex h-32 items-center justify-center">
+              <p className="text-muted-foreground">Loading reports...</p>
+            </CardContent>
+          </Card>
+        ) : filteredReports.length === 0 ? (
           <Card>
             <CardContent className="flex h-32 items-center justify-center">
               <div className="text-center">
@@ -188,62 +164,69 @@ export default function ReportsListPage() {
             </CardContent>
           </Card>
         ) : (
-          filteredReports.map((report) => (
-            <Card key={report.id} className="hover:shadow-md transition-shadow">
+          filteredReports.map((scan) => (
+            <Card key={scan.id} className="hover:shadow-md transition-shadow">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="space-y-1">
-                    <CardTitle className="text-xl">{report.title}</CardTitle>
+                    <CardTitle className="text-xl">{scan.company_name} - Technical Due Diligence</CardTitle>
                     <CardDescription className="flex items-center gap-2">
                       <Building2 className="h-4 w-4" />
-                      {report.company}
+                      {scan.organization_name}
                       <span className="text-muted-foreground">•</span>
                       <Calendar className="h-4 w-4" />
-                      {new Date(report.date).toLocaleDateString()}
+                      {formatDate(scan.created_at)}
                     </CardDescription>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge className={getStatusColor(report.status)}>
-                      {report.status.charAt(0).toUpperCase() + report.status.slice(1)}
+                    <Badge className={getStatusColor(scan.status)}>
+                      {scan.status === 'complete' ? 'Completed' : 
+                       scan.status === 'in_review' ? 'In Review' :
+                       scan.status === 'awaiting_review' ? 'Awaiting Review' :
+                       scan.status === 'processing' ? 'Processing' :
+                       scan.status.charAt(0).toUpperCase() + scan.status.slice(1)}
                     </Badge>
-                    <Badge variant="outline">{report.type}</Badge>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <p className="text-sm text-muted-foreground">{report.description}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Technical assessment covering architecture, security, and scalability
+                  </p>
                   
-                  {report.status === 'completed' && (
+                  {scan.status === 'complete' && (
                     <div className="grid grid-cols-3 gap-4 rounded-lg border p-3">
                       <div className="text-center">
-                        <div className={`text-2xl font-bold ${getHealthScoreColor(report.healthScore)}`}>
-                          {report.healthScore}%
+                        <div className={`text-2xl font-bold ${getHealthScoreColor(scan.tech_health_score)}`}>
+                          {scan.tech_health_score || 'N/A'}
                         </div>
                         <p className="text-xs text-muted-foreground">Health Score</p>
                       </div>
                       <div className="text-center">
-                        <div className="text-2xl font-bold">{report.findings}</div>
-                        <p className="text-xs text-muted-foreground">Total Findings</p>
+                        <div className="text-2xl font-bold">{scan.tech_health_grade || '-'}</div>
+                        <p className="text-xs text-muted-foreground">Grade</p>
                       </div>
                       <div className="text-center">
-                        <div className={`text-2xl font-bold ${report.criticalIssues && report.criticalIssues > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                          {report.criticalIssues}
+                        <div className={`text-2xl font-bold ${scan.ai_confidence && scan.ai_confidence > 80 ? 'text-green-600' : 'text-yellow-600'}`}>
+                          {scan.ai_confidence || '-'}%
                         </div>
-                        <p className="text-xs text-muted-foreground">Critical Issues</p>
+                        <p className="text-xs text-muted-foreground">AI Confidence</p>
                       </div>
                     </div>
                   )}
 
-                  {report.status === 'in-progress' && (
+                  {(scan.status === 'processing' || scan.status === 'awaiting_review' || scan.status === 'in_review') && (
                     <div className="rounded-lg border p-3 text-center">
                       <div className="text-sm text-muted-foreground">
-                        Scan in progress... Results will be available soon.
+                        {scan.status === 'processing' ? 'Scan in progress... Results will be available soon.' :
+                         scan.status === 'awaiting_review' ? 'Analysis complete. Waiting for advisor review.' :
+                         'Currently under review by technical advisor.'}
                       </div>
                     </div>
                   )}
 
-                  {report.status === 'pending' && (
+                  {scan.status === 'pending' && (
                     <div className="rounded-lg border p-3 text-center">
                       <div className="text-sm text-muted-foreground">
                         Scan request submitted. Processing will begin shortly.
@@ -253,13 +236,13 @@ export default function ReportsListPage() {
 
                   <div className="flex items-center justify-between pt-2">
                     <div className="text-sm text-muted-foreground">
-                      Report ID: {report.id}
+                      Requested by: {scan.requestor_name}
                     </div>
                     <div className="flex gap-2">
-                      {report.status === 'completed' && (
+                      {scan.status === 'complete' && (
                         <>
                           <Button variant="outline" size="sm" asChild>
-                            <Link to={`/reports/${report.id}`}>
+                            <Link to={`/reports/${scan.id}`}>
                               <Eye className="mr-2 h-4 w-4" />
                               View Report
                             </Link>
@@ -270,13 +253,15 @@ export default function ReportsListPage() {
                           </Button>
                         </>
                       )}
-                      {report.status === 'in-progress' && (
-                        <Button variant="outline" size="sm" disabled>
-                          <BarChart3 className="mr-2 h-4 w-4" />
-                          Processing...
+                      {(scan.status === 'processing' || scan.status === 'awaiting_review' || scan.status === 'in_review') && (
+                        <Button variant="outline" size="sm" asChild>
+                          <Link to={`/reports/${scan.id}`}>
+                            <BarChart3 className="mr-2 h-4 w-4" />
+                            View Status
+                          </Link>
                         </Button>
                       )}
-                      {report.status === 'pending' && (
+                      {scan.status === 'pending' && (
                         <Button variant="outline" size="sm" disabled>
                           <Calendar className="mr-2 h-4 w-4" />
                           Queued

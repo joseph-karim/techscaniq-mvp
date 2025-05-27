@@ -400,7 +400,7 @@ export function useExecutiveReport(): UseExecutiveReportReturn {
         created_at: new Date().toISOString()
       }
 
-      const { error: saveError } = await supabase
+      const { data: savedReport, error: saveError } = await supabase
         .from('scan_reports')
         .insert(reportToSave)
         .select()
@@ -412,6 +412,21 @@ export function useExecutiveReport(): UseExecutiveReportReturn {
       }
 
       setProgress('Report saved successfully!')
+      
+      // If this report is linked to a scan request, update it
+      const searchParams = new URLSearchParams(window.location.search)
+      const scanId = searchParams.get('scanId')
+      if (scanId && savedReport) {
+        await supabase
+          .from('scan_requests')
+          .update({
+            executive_report_id: savedReport.id,
+            executive_report_data: report,
+            executive_report_generated_at: new Date().toISOString()
+          })
+          .eq('id', scanId)
+      }
+      
       return report
 
     } catch (err) {

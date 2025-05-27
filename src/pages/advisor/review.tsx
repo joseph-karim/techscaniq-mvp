@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { supabase } from '@/lib/supabaseClient'
 import { 
   AlertTriangle, 
   ArrowLeft, 
@@ -218,19 +219,92 @@ export default function AdvisorReviewPage() {
   const navigate = useNavigate()
   const { toast } = useToast()
   
-  // In a real app, we would fetch the scan data based on the ID
-  const scanData = mockScanData
-
-  const [reviewData, setReviewData] = useState(scanData.sections.map(section => ({
-    ...section,
-    reviewerNotes: section.reviewerNotes,
-    status: section.status,
-    edited: false,
-  })))
+  const [scanData, setScanData] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
   
-  const [activeSection, setActiveSection] = useState(reviewData[0]?.id)
+  // Fetch scan request data
+  useEffect(() => {
+    async function fetchScanRequest() {
+      if (!id) return
+      
+      try {
+        const { data, error } = await supabase
+          .from('scan_requests')
+          .select('*')
+          .eq('id', id)
+          .single()
+        
+        if (error) throw error
+        
+        // Transform database data to match component expectations
+        setScanData({
+          id: data.id,
+          company: data.company_name,
+          websiteUrl: data.website_url,
+          status: data.status,
+          date: data.created_at,
+          user: data.requestor_name,
+          organization: data.organization_name,
+          aiConfidence: data.ai_confidence || 0,
+          techHealthScore: {
+            score: data.tech_health_score || 0,
+            grade: data.tech_health_grade || 'N/A',
+            ai_generated_score: data.tech_health_score || 0,
+          },
+          sections: data.sections || mockScanData.sections,
+          risks: data.risks || mockScanData.risks,
+        })
+        
+        // Update status to in_review if it's awaiting_review
+        if (data.status === 'awaiting_review') {
+          await supabase
+            .from('scan_requests')
+            .update({ 
+              status: 'in_review',
+              review_started_at: new Date().toISOString()
+            })
+            .eq('id', id)
+        }
+      } catch (error) {
+        console.error('Error fetching scan request:', error)
+        toast({
+          title: "Error",
+          description: "Failed to load scan request",
+          variant: "destructive"
+        })
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchScanRequest()
+  }, [id, toast])
+  
+  if (loading) {
+    return <div className="flex items-center justify-center h-64">Loading...</div>
+  }
+  
+  if (!scanData) {
+    return <div className="flex items-center justify-center h-64">Scan request not found</div>
+  }
+
+  const [reviewData, setReviewData] = useState<any[]>([])
+  const [activeSection, setActiveSection] = useState<string>('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showPublishDialog, setShowPublishDialog] = useState(false)
+  
+  // Initialize reviewData when scanData loads
+  useEffect(() => {
+    if (scanData?.sections) {
+      setReviewData(scanData.sections.map((section: any) => ({
+        ...section,
+        reviewerNotes: section.reviewerNotes || '',
+        status: section.status || 'pending',
+        edited: false,
+      })))
+      setActiveSection(scanData.sections[0]?.id || '')
+    }
+  }, [scanData])
   
   const handleSectionUpdate = (sectionId: string, updates: Partial<typeof reviewData[0]>) => {
     setReviewData(prevData => 
@@ -257,23 +331,46 @@ export default function AdvisorReviewPage() {
     })
   }
   
-  const handlePublishReport = () => {
+  const handlePublishReport = async () => {
     setIsSubmitting(true)
     
-    // Simulate API call delay
-    setTimeout(() => {
+    try {
+      // Update the scan request with the published status and final data
+      const { error } = await supabase
+        .from('scan_requests')
+        .update({
+          status: 'complete',
+          published_at: new Date().toISOString(),
+          sections: reviewData,
+          tech_health_score: scanData.techHealthScore.score,
+          tech_health_grade: scanData.techHealthScore.grade,
+          reviewer_notes: reviewData.map((section: any) => section.reviewerNotes).filter(Boolean).join('\n\n')
+        })
+        .eq('id', id)
+      
+      if (error) throw error
+      
       toast({
         title: "Report published successfully!",
         description: "The investor has been notified that their report is ready.",
       })
-      setIsSubmitting(false)
+      
       setShowPublishDialog(false)
       
       // Navigate back to queue page after publishing
       setTimeout(() => {
         navigate('/advisor/queue')
       }, 1500)
-    }, 2000)
+    } catch (error) {
+      console.error('Error publishing report:', error)
+      toast({
+        title: "Error",
+        description: "Failed to publish report. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
   
   const activeSectionData = reviewData.find(section => section.id === activeSection)
@@ -312,6 +409,17 @@ export default function AdvisorReviewPage() {
         </div>
         
         <div className="flex flex-col gap-2 sm:flex-row">
+          <Button 
+            variant="outline" 
+            onClick={() => {
+              // Navigate to executive report generation with scan data
+              navigate(`/admin/generate-executive-report?scanId=${id}&company=${encodeURIComponent(scanData.company)}&website=${encodeURIComponent(scanData.websiteUrl)}&requestor=${encodeURIComponent(scanData.user)}&organization=${encodeURIComponent(scanData.organization)}`)
+            }}
+          >
+            <FileText className="mr-2 h-4 w-4" />
+            Generate Executive Report
+          </Button>
+          
           <Button variant="outline" onClick={handleApproveAll}>
             <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
             Approve All Sections
@@ -340,8 +448,8 @@ export default function AdvisorReviewPage() {
                 <div className="space-y-2 rounded-md border bg-muted/50 p-3 text-sm">
                   <div><strong>Company:</strong> {scanData.company}</div>
                   <div><strong>Tech Health Score:</strong> {scanData.techHealthScore.score} ({scanData.techHealthScore.grade})</div>
-                  <div><strong>Critical Risks:</strong> {scanData.risks.filter(r => r.severity === 'critical').length}</div>
-                  <div><strong>High Risks:</strong> {scanData.risks.filter(r => r.severity === 'high').length}</div>
+                  <div><strong>Critical Risks:</strong> {scanData.risks.filter((r: any) => r.severity === 'critical').length}</div>
+                  <div><strong>High Risks:</strong> {scanData.risks.filter((r: any) => r.severity === 'high').length}</div>
                 </div>
                 
                 {!canPublish && (
@@ -476,8 +584,8 @@ export default function AdvisorReviewPage() {
               <h3 className="mb-2 text-sm font-medium">Key Risks</h3>
               <div className="space-y-1">
                 {scanData.risks
-                  .filter(risk => risk.severity === 'critical' || risk.severity === 'high')
-                  .map((risk) => (
+                  .filter((risk: any) => risk.severity === 'critical' || risk.severity === 'high')
+                  .map((risk: any) => (
                     <div 
                       key={risk.id}
                       className="flex items-center rounded-md px-2 py-1.5 text-xs hover:bg-muted/50"
@@ -670,7 +778,7 @@ export default function AdvisorReviewPage() {
         </CardHeader>
         <CardContent>
           <Accordion type="multiple" className="w-full">
-            {scanData.risks.map((risk) => (
+            {scanData.risks.map((risk: any) => (
               <AccordionItem key={risk.id} value={risk.id}>
                 <AccordionTrigger className="hover:no-underline">
                   <div className="flex flex-1 items-center">

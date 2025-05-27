@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,7 +13,15 @@ import { Building2, Target, FileText, Loader2, AlertCircle } from 'lucide-react'
 
 export default function GenerateExecutiveReport() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { generateReport, loading, error, progress } = useExecutiveReport()
+  
+  // Get scan data from URL params if coming from review page
+  const scanId = searchParams.get('scanId')
+  const companyFromScan = searchParams.get('company')
+  const websiteFromScan = searchParams.get('website')
+  const requestorFromScan = searchParams.get('requestor')
+  const organizationFromScan = searchParams.get('organization')
   
   const [investorProfile, setInvestorProfile] = useState({
     firmName: '',
@@ -34,6 +42,23 @@ export default function GenerateExecutiveReport() {
   
   const [contextDocs, setContextDocs] = useState('')
   const [apiKey, setApiKey] = useState('')
+  
+  // Pre-fill form if coming from scan review
+  useEffect(() => {
+    if (companyFromScan && websiteFromScan) {
+      setTargetCompany({
+        name: companyFromScan,
+        website: websiteFromScan,
+        assessmentContext: 'diligence'
+      })
+    }
+    if (organizationFromScan) {
+      setInvestorProfile(prev => ({
+        ...prev,
+        firmName: organizationFromScan
+      }))
+    }
+  }, [companyFromScan, websiteFromScan, organizationFromScan])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -51,8 +76,20 @@ export default function GenerateExecutiveReport() {
     })
     
     if (report) {
-      // Navigate to the report view - using the scan report route structure
-      navigate(`/reports/${report.id}`)
+      // If this was generated from a scan request, navigate back to review
+      if (scanId) {
+        // In a real app, we would save the report to the scan request here
+        // For now, navigate back to the review page
+        navigate(`/advisor/review/${scanId}`, {
+          state: { 
+            executiveReportGenerated: true,
+            reportId: report.id 
+          }
+        })
+      } else {
+        // Otherwise navigate to the report view
+        navigate(`/reports/${report.id}`)
+      }
     }
   }
 
@@ -63,6 +100,14 @@ export default function GenerateExecutiveReport() {
         <p className="text-muted-foreground">
           Create a comprehensive investor-aligned technology assessment using AI
         </p>
+        {scanId && (
+          <Alert className="mt-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Generating report for scan request <strong>#{scanId}</strong> from {requestorFromScan}
+            </AlertDescription>
+          </Alert>
+        )}
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">

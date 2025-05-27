@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Clock, Filter, Search } from 'lucide-react'
+import { supabase } from '@/lib/supabaseClient'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -9,77 +10,66 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { formatDate } from '@/lib/utils'
 
-// Mock scan queue data
-const scanQueueData = [
-  {
-    id: 'scan-2',
-    company: 'DevSecOps Solutions',
-    status: 'awaiting_review',
-    date: '2023-04-05T09:15:22Z',
-    user: 'John Investor',
-    organization: 'Acme Capital',
-    aiConfidence: 87,
-  },
-  {
-    id: 'scan-6',
-    company: 'FinTech Express',
-    status: 'awaiting_review',
-    date: '2023-04-02T14:30:10Z',
-    user: 'Sarah Wilson',
-    organization: 'Wilson Ventures',
-    aiConfidence: 92,
-  },
-  {
-    id: 'scan-7',
-    company: 'DataViz Pro',
-    status: 'awaiting_review',
-    date: '2023-04-01T10:45:33Z',
-    user: 'Michael Chen',
-    organization: 'East Valley Partners',
-    aiConfidence: 79,
-  },
-  {
-    id: 'scan-3',
-    company: 'Fast Deploy Systems',
-    status: 'processing',
-    date: '2023-04-03T16:45:11Z',
-    user: 'John Investor',
-    organization: 'Acme Capital',
-    aiConfidence: null,
-  },
-  {
-    id: 'scan-8',
-    company: 'Cloud Security Labs',
-    status: 'processing',
-    date: '2023-03-30T09:12:45Z',
-    user: 'Lisa Johnson',
-    organization: 'Johnson Family Office',
-    aiConfidence: null,
-  },
-  {
-    id: 'scan-1',
-    company: 'Acme Cloud Technologies',
-    status: 'complete',
-    date: '2023-04-10T14:23:53Z',
-    user: 'John Investor',
-    organization: 'Acme Capital',
-    aiConfidence: 94,
-    reviewedBy: 'Admin User',
-    reviewDate: '2023-04-10T16:30:00Z',
-  },
-]
+interface ScanRequest {
+  id: string
+  company_name: string
+  website_url: string
+  status: string
+  created_at: string
+  requestor_name: string
+  organization_name: string
+  ai_confidence: number | null
+  reviewed_by?: string
+  review_completed_at?: string
+}
 
 export default function AdvisorQueuePage() {
   const [activeTab, setActiveTab] = useState('awaiting_review')
   const [searchQuery, setSearchQuery] = useState('')
+  const [scanRequests, setScanRequests] = useState<ScanRequest[]>([])
+  const [loading, setLoading] = useState(true)
+  
+  // Fetch scan requests from database
+  useEffect(() => {
+    async function fetchScanRequests() {
+      try {
+        const { data, error } = await supabase
+          .from('scan_requests')
+          .select('*')
+          .order('created_at', { ascending: false })
+        
+        if (error) throw error
+        
+        setScanRequests(data || [])
+      } catch (error) {
+        console.error('Error fetching scan requests:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchScanRequests()
+    
+    // Set up realtime subscription
+    const subscription = supabase
+      .channel('scan_requests')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'scan_requests' }, () => {
+        fetchScanRequests()
+      })
+      .subscribe()
+    
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [])
   
   // Filter scans based on active tab and search query
-  const filteredScans = scanQueueData.filter(scan => {
+  const filteredScans = scanRequests.filter(scan => {
     const matchesTab = activeTab === 'all' || scan.status === activeTab
     const matchesSearch = searchQuery === '' || 
-      scan.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      scan.user.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      scan.organization.toLowerCase().includes(searchQuery.toLowerCase())
+      scan.company_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      scan.requestor_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      scan.organization_name.toLowerCase().includes(searchQuery.toLowerCase())
     
     return matchesTab && matchesSearch
   })
@@ -179,7 +169,13 @@ export default function AdvisorQueuePage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredScans.length === 0 ? (
+                    {loading ? (
+                      <tr>
+                        <td colSpan={6} className="px-4 py-10 text-center">
+                          <p className="text-muted-foreground">Loading scan requests...</p>
+                        </td>
+                      </tr>
+                    ) : filteredScans.length === 0 ? (
                       <tr>
                         <td colSpan={6} className="px-4 py-10 text-center">
                           <p className="text-muted-foreground">No scans found matching your criteria</p>
@@ -189,33 +185,33 @@ export default function AdvisorQueuePage() {
                       filteredScans.map((scan) => (
                         <tr key={scan.id} className="border-t">
                           <td className="px-4 py-3">
-                            <div className="font-medium">{scan.company}</div>
-                            <div className="text-xs text-muted-foreground">{scan.organization}</div>
+                            <div className="font-medium">{scan.company_name}</div>
+                            <div className="text-xs text-muted-foreground">{scan.organization_name}</div>
                           </td>
-                          <td className="px-4 py-3 text-sm">{scan.user}</td>
+                          <td className="px-4 py-3 text-sm">{scan.requestor_name}</td>
                           <td className="px-4 py-3 text-sm">
                             <div className="flex items-center">
                               <Clock className="mr-1 h-3.5 w-3.5 text-muted-foreground" />
-                              <span className="text-muted-foreground">{formatDate(scan.date)}</span>
+                              <span className="text-muted-foreground">{formatDate(scan.created_at)}</span>
                             </div>
                           </td>
                           <td className="px-4 py-3">
                             <ScanStatusBadge status={scan.status} />
                           </td>
                           <td className="px-4 py-3">
-                            {scan.aiConfidence !== null ? (
+                            {scan.ai_confidence !== null ? (
                               <div className="flex items-center">
                                 <div className="h-2 w-full max-w-24 overflow-hidden rounded-full bg-muted">
                                   <div 
                                     className={`h-full ${
-                                      scan.aiConfidence >= 90 ? 'bg-signal-green' :
-                                      scan.aiConfidence >= 75 ? 'bg-electric-teal' :
-                                      scan.aiConfidence >= 60 ? 'bg-caution-amber' : 'bg-risk-red'
+                                      scan.ai_confidence >= 90 ? 'bg-signal-green' :
+                                      scan.ai_confidence >= 75 ? 'bg-electric-teal' :
+                                      scan.ai_confidence >= 60 ? 'bg-caution-amber' : 'bg-risk-red'
                                     }`}
-                                    style={{ width: `${scan.aiConfidence}%` }}
+                                    style={{ width: `${scan.ai_confidence}%` }}
                                   />
                                 </div>
-                                <span className="ml-2 text-xs font-medium">{scan.aiConfidence}%</span>
+                                <span className="ml-2 text-xs font-medium">{scan.ai_confidence}%</span>
                               </div>
                             ) : (
                               <span className="text-xs text-muted-foreground">—</span>
@@ -230,7 +226,7 @@ export default function AdvisorQueuePage() {
                               </Button>
                             ) : scan.status === 'complete' ? (
                               <Button variant="outline" size="sm" asChild>
-                                <Link to={`/pe/reports/${scan.id}`}>
+                                <Link to={`/reports/${scan.id}`}>
                                   View Report
                                 </Link>
                               </Button>
