@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { createClient, type SupabaseClient, type User } from '@supabase/supabase-js'
+import { type SupabaseClient, type User } from '@supabase/supabase-js'
+import { supabase as mainSupabaseClient } from '@/lib/supabase'
 
 // Auth context type
 type AuthContextType = {
@@ -53,16 +54,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     // Only create Supabase client if environment variables are available
     if (isSupabaseConfigured) {
-      const supabaseClient = createClient(supabaseUrl, supabaseAnonKey)
-      setSupabase(supabaseClient)
+      setSupabase(mainSupabaseClient)
 
       // Check active sessions and subscribe to auth changes
-      supabaseClient.auth.getSession().then(({ data: { session } }) => {
+      mainSupabaseClient.auth.getSession().then(({ data: { session } }) => {
         setUser(session?.user ?? null)
         setLoading(false)
       })
 
-      const { data: { subscription } } = supabaseClient.auth.onAuthStateChange(
+      const { data: { subscription } } = mainSupabaseClient.auth.onAuthStateChange(
         (_event, session) => {
           setUser(session?.user ?? null)
         }
