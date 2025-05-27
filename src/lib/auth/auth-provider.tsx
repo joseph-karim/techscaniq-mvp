@@ -33,6 +33,13 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 const isSupabaseConfigured = supabaseUrl && supabaseAnonKey
 
+// Debug logging for environment variables
+console.log('Supabase Config Debug:', {
+  url: supabaseUrl ? 'SET' : 'MISSING',
+  key: supabaseAnonKey ? 'SET' : 'MISSING',
+  configured: isSupabaseConfigured
+})
+
 // Mock user for development
 const mockUser = {
   id: 'mock-user-id',
