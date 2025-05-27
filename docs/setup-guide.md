@@ -15,9 +15,11 @@ VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key-here
 
 # API Keys
-VITE_GOOGLE_API_KEY=AIzaSyAe_5W79eXtN85frFNPLnblme9qTrBgdN4
-JINA_API_KEY=jina_1ff7bfb297b8417b8843c5605cbbf1ac2FsB2J962WmU1BXdg33WouvTvAgR
+VITE_GOOGLE_API_KEY=your-google-api-key-here
+JINA_API_KEY=your-jina-api-key-here
 ```
+
+⚠️ **SECURITY WARNING**: Never commit real API keys to version control. Always use placeholder values in documentation and ensure your `.env` files are properly gitignored.
 
 ## Step 2: Supabase Setup
 
@@ -64,8 +66,8 @@ supabase functions deploy tech-intelligence --no-verify-jwt
 supabase functions deploy report-orchestrator-v3 --no-verify-jwt
 
 # Set secrets
-supabase secrets set GOOGLE_API_KEY=AIzaSyAe_5W79eXtN85frFNPLnblme9qTrBgdN4
-supabase secrets set JINA_API_KEY=jina_1ff7bfb297b8417b8843c5605cbbf1ac2FsB2J962WmU1BXdg33WouvTvAgR
+supabase secrets set GOOGLE_API_KEY=your-google-api-key-here
+supabase secrets set JINA_API_KEY=your-jina-api-key-here
 ```
 
 ## Step 5: Frontend Setup
