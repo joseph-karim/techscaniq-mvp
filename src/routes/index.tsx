@@ -96,6 +96,12 @@ export const routeConfig: RouteConfig[] = [
         showInNav: true
       },
       {
+        path: 'reports/generate',
+        element: <GenerateExecutiveReport />,
+        label: 'Generate Report',
+        showInNav: false
+      },
+      {
         path: 'reports/:id',
         element: <ViewReportPage />,
         label: 'Report Details',
@@ -166,13 +172,6 @@ export const routeConfig: RouteConfig[] = [
         label: 'Review',
         requireAdmin: true,
         showInNav: false
-      },
-      {
-        path: 'admin/generate-executive-report',
-        element: <GenerateExecutiveReport />,
-        label: 'Generate Executive Report',
-        requireAdmin: true,
-        showInNav: true
       }
     ]
   },
