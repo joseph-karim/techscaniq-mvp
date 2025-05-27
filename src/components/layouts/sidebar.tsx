@@ -3,7 +3,7 @@ import { BarChart3, FileText, Home, List, PanelLeft, Settings, PenSquare as Squa
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { useAuth } from '@/lib/auth/mock-auth-provider'
+import { useAuth } from '@/lib/auth/auth-provider'
 import { getNavigationRoutes } from '@/routes'
 
 // Icon mapping for routes

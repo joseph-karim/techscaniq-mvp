@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { AlertCircle } from 'lucide-react'
-import { useAuth } from '@/lib/auth/mock-auth-provider'
+import { useAuth } from '@/lib/auth/auth-provider'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import {
@@ -16,12 +16,14 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 const registerSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters' }),
   email: z.string().email({ message: 'Please enter a valid email address' }),
   password: z.string().min(8, { message: 'Password must be at least 8 characters' }),
   workspaceName: z.string().min(2, { message: 'Organization name must be at least 2 characters' }),
+  role: z.enum(['investor', 'admin', 'pe'], { message: 'Please select a role' }),
 })
 
 type RegisterForm = z.infer<typeof registerSchema>
@@ -40,6 +42,7 @@ export default function RegisterPage() {
       email: 'demo@example.com',
       password: 'password123',
       workspaceName: 'Demo Capital',
+      role: 'investor' as const,
     },
   })
 
@@ -48,7 +51,7 @@ export default function RegisterPage() {
     setError(null)
 
     try {
-      const { error } = await signUp(data.email, data.password, data.name, data.workspaceName)
+      const { error } = await signUp(data.email, data.password, data.name, data.workspaceName, data.role)
       
       if (error) {
         setError(error.message || 'Failed to sign up')
@@ -189,6 +192,29 @@ export default function RegisterPage() {
                         {...field}
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="role"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Role</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoading}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select your role" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="investor">Investor</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                        <SelectItem value="pe">Private Equity</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}

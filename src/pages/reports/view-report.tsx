@@ -9,7 +9,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Textarea } from '@/components/ui/textarea'
 import { Separator } from '@/components/ui/separator'
 import { ArrowLeft, Building2, Calendar, FileText, MessageSquare, Shield, Server, Code, AlertTriangle, Send } from 'lucide-react'
-import { useAuth } from '@/lib/auth/mock-auth-provider'
+import { useAuth } from '@/lib/auth/auth-provider'
 import { formatDate } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
 

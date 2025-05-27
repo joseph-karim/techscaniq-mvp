@@ -2,6 +2,7 @@ import { lazy } from 'react'
 import { Navigate } from 'react-router-dom'
 import { ProtectedRoute } from '@/components/auth/protected-route'
 import { DashboardLayout } from '@/components/layouts/dashboard-layout'
+import { RoleBasedRedirect } from '@/components/auth/role-based-redirect'
 
 // Lazy load pages for better performance
 const LoginPage = lazy(() => import('@/pages/auth/login'))
@@ -67,7 +68,7 @@ export const routeConfig: RouteConfig[] = [
     children: [
       {
         path: '',
-        element: <Navigate to="/dashboard" replace />,
+        element: <RoleBasedRedirect />,
         showInNav: false
       },
       {

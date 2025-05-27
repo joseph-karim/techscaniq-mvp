@@ -1,9 +1,9 @@
 import { Suspense, useEffect, useState } from 'react'
 
-import { AuthProvider } from '@/lib/auth/mock-auth-provider'
+import { AuthProvider } from '@/lib/auth/auth-provider'
 import { Spinner } from '@/components/ui/spinner'
 import { NotificationToast } from '@/components/ui/notification-toast'
-import { useAuth } from '@/lib/auth/mock-auth-provider'
+import { useAuth } from '@/lib/auth/auth-provider'
 import { AppRoutes } from '@/routes/AppRoutes'
 
 function AppContent() {
