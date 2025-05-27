@@ -240,34 +240,43 @@ async function storeCitations(report: ComprehensiveReport): Promise<void> {
 }
 
 Deno.serve(async (req) => {
+  const requestId = crypto.randomUUID()
+  const logPrefix = `[report-orchestrator-v3][${requestId}]`
   if (req.method === 'OPTIONS') {
+    console.log(`${logPrefix} OPTIONS preflight`)
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
     const request: OrchestratorRequest = await req.json()
     const startTime = Date.now()
-    
-    console.log(`Starting comprehensive report generation for ${request.company.name}`)
+    console.log(`${logPrefix} Request received for company: ${request.company?.name} (${request.company?.website})`)
     
     // Step 1: Collect evidence using Jina AI
+    console.log(`${logPrefix} [1/3] Collecting evidence...`)
     const evidenceData = await collectEvidence(
       request.company, 
       request.analysisDepth || 'comprehensive'
     )
+    console.log(`${logPrefix} [1/3] Evidence collection complete. Evidence count: ${evidenceData?.evidence?.length ?? 0}`)
     
     // Step 2: Analyze with Gemini
+    console.log(`${logPrefix} [2/3] Analyzing with Gemini...`)
     const report = await analyzeWithGemini(
       request.company,
       evidenceData,
       request.investorProfile
     )
+    console.log(`${logPrefix} [2/3] Gemini analysis complete. Investment score: ${report.investmentScore}`)
     
     // Step 3: Store citations for traceability
+    console.log(`${logPrefix} [3/3] Storing citations...`)
     await storeCitations(report)
+    console.log(`${logPrefix} [3/3] Citations stored.`)
     
     // Update metadata
     report.metadata.processingTime = Date.now() - startTime
+    console.log(`${logPrefix} Report generation complete in ${report.metadata.processingTime}ms`)
     
     return new Response(
       JSON.stringify(report),
@@ -280,7 +289,7 @@ Deno.serve(async (req) => {
     )
     
   } catch (error) {
-    console.error('Orchestrator error:', error)
+    console.error(`[report-orchestrator-v3][ERROR]`, error && error.stack ? error.stack : error)
     return new Response(
       JSON.stringify({ 
         success: false, 
