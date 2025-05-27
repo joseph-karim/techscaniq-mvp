@@ -41,7 +41,6 @@ export default function GenerateExecutiveReport() {
   })
   
   const [contextDocs, setContextDocs] = useState('')
-  const [apiKey, setApiKey] = useState('')
   
   // Pre-fill form if coming from scan review
   useEffect(() => {
@@ -71,8 +70,7 @@ export default function GenerateExecutiveReport() {
           .length > 0 ? investorProfile.supplementalLinks : undefined
       },
       targetCompany,
-      contextDocs: contextDocs || undefined,
-      apiKey: apiKey || undefined
+      contextDocs: contextDocs || undefined
     })
     
     if (report) {
@@ -267,19 +265,7 @@ export default function GenerateExecutiveReport() {
               />
             </div>
             
-            <div>
-              <Label htmlFor="apiKey">Google API Key (Optional)</Label>
-              <Input
-                id="apiKey"
-                type="password"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder="Your Google API key (if not configured in environment)"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Leave blank to use the default API key
-              </p>
-            </div>
+
           </CardContent>
         </Card>
 
