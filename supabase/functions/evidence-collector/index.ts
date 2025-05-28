@@ -4,6 +4,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0'
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+  'Access-Control-Max-Age': '86400',
 }
 
 interface EvidenceRequest {
@@ -27,23 +29,9 @@ interface Evidence {
     processed?: string
     summary?: string
   }
-  metadata: {
-    confidence: number
-    relevance: number
-    tokens?: number
-    processing_steps?: string[]
-  }
-  embedding?: number[]
-  classifications?: {
-    category: string
-    score: number
-  }[]
-  breadcrumbs: {
-    search_query?: string
-    search_results?: number
-    extraction_method?: string
-    selectors_used?: string[]
-    rerank_score?: number
+  metadata?: {
+    relevance?: number
+    confidence?: number
   }
 }
 
@@ -60,140 +48,145 @@ interface EvidenceCollectionResponse {
   }
 }
 
-// Jina API configuration
 const JINA_API_KEY = Deno.env.get('JINA_API_KEY')
+
 const jinaHeaders = {
   'Authorization': `Bearer ${JINA_API_KEY}`,
   'Content-Type': 'application/json',
   'Accept': 'application/json'
 }
 
-async function collectWithDeepSearch(company: string, website: string, query: string): Promise<Evidence[]> {
-  const evidence: Evidence[] = []
+// Add timeout wrapper
+async function fetchWithTimeout(url: string, options: RequestInit, timeoutMs = 10000): Promise<Response> {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), timeoutMs)
   
   try {
-    const response = await fetch('https://deepsearch.jina.ai/v1/chat/completions', {
-      method: 'POST',
-      headers: jinaHeaders,
-      body: JSON.stringify({
-        model: 'jina-deepsearch-v1',
-        messages: [{
-          role: 'user',
-          content: query
-        }],
-        reasoning_effort: 'high',
-        max_returned_urls: 10,
-        boost_hostnames: [new URL(website).hostname],
-        stream: false,
-        response_format: {
-          type: 'json_schema',
-          json_schema: {
-            type: 'object',
-            properties: {
-              findings: {
-                type: 'array',
-                items: {
-                  type: 'object',
-                  properties: {
-                    fact: { type: 'string' },
-                    source_url: { type: 'string' },
-                    confidence: { type: 'number' },
-                    evidence_snippet: { type: 'string' },
-                    category: { type: 'string' }
-                  }
-                }
-              },
-              summary: { type: 'string' }
-            }
-          }
-        }
-      })
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal
     })
-
-    if (!response.ok) throw new Error(`DeepSearch failed: ${response.statusText}`)
-    
-    const result = await response.json()
-    const findings = result.choices[0].message.content
-    
-    // Convert DeepSearch findings to Evidence objects
-    for (const finding of findings.findings || []) {
-      evidence.push({
-        id: crypto.randomUUID(),
-        type: 'deepsearch_finding',
-        source: {
-          url: finding.source_url,
-          query,
-          api: 'deepsearch',
-          timestamp: new Date().toISOString()
-        },
-        content: {
-          raw: finding.evidence_snippet,
-          summary: finding.fact
-        },
-        metadata: {
-          confidence: finding.confidence || 0.8,
-          relevance: 0.9,
-          processing_steps: ['deepsearch', 'extraction', 'validation']
-        },
-        breadcrumbs: {
-          search_query: query,
-          extraction_method: 'deepsearch_reasoning'
-        }
-      })
-    }
+    return response
   } catch (error) {
-    console.error('DeepSearch error:', error)
+    if (error.name === 'AbortError') {
+      throw new Error(`Request timeout after ${timeoutMs}ms`)
+    }
+    throw error
+  } finally {
+    clearTimeout(timeout)
   }
-  
-  return evidence
 }
 
-async function collectWithReader(url: string, selectors?: string[]): Promise<Evidence | null> {
+// Collect HTML content directly
+async function collectRawHTML(url: string): Promise<Evidence | null> {
   try {
-    const headers = {
-      ...jinaHeaders,
-      'X-With-Links-Summary': 'true',
-      'X-With-Images-Summary': 'true',
-      'X-With-Generated-Alt': 'true',
-      'X-With-Shadow-Dom': 'true',
-      'X-Return-Format': 'markdown'
+    console.log(`Fetching raw HTML from: ${url}`)
+    const response = await fetchWithTimeout(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      }
+    }, 8000)
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`)
     }
     
-    if (selectors && selectors.length > 0) {
-      headers['X-Target-Selector'] = selectors.join(',')
+    const html = await response.text()
+    
+    // Extract metadata from HTML
+    const titleMatch = html.match(/<title[^>]*>(.*?)<\/title>/i)
+    const descriptionMatch = html.match(/<meta[^>]*name=["']description["'][^>]*content=["'](.*?)["']/i)
+    const keywordsMatch = html.match(/<meta[^>]*name=["']keywords["'][^>]*content=["'](.*?)["']/i)
+    
+    // Extract technology hints
+    const techSignals = {
+      react: /react|jsx/i.test(html),
+      vue: /vue\.js|v-if|v-for/i.test(html),
+      angular: /ng-app|angular/i.test(html),
+      wordpress: /wp-content|wordpress/i.test(html),
+      shopify: /shopify|myshopify/i.test(html),
+      nextjs: /_next\/static/i.test(html),
+      gatsby: /gatsby/i.test(html)
     }
     
-    const response = await fetch('https://r.jina.ai/', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ url })
-    })
-    
-    if (!response.ok) throw new Error(`Reader failed: ${response.statusText}`)
-    
-    const result = await response.json()
+    // Extract structured data
+    const ldJsonMatches = html.matchAll(/<script[^>]*type=["']application\/ld\+json["'][^>]*>(.*?)<\/script>/gis)
+    const structuredData = []
+    for (const match of ldJsonMatches) {
+      try {
+        const data = JSON.parse(match[1])
+        structuredData.push(data)
+      } catch {}
+    }
     
     return {
       id: crypto.randomUUID(),
-      type: 'webpage_content',
+      type: 'raw_html',
+      source: {
+        url,
+        api: 'direct_fetch',
+        timestamp: new Date().toISOString()
+      },
+      content: {
+        raw: html.substring(0, 50000), // Limit size
+        processed: JSON.stringify({
+          title: titleMatch?.[1] || '',
+          description: descriptionMatch?.[1] || '',
+          keywords: keywordsMatch?.[1] || '',
+          techSignals,
+          structuredData,
+          htmlLength: html.length
+        })
+      },
+      metadata: {
+        relevance: 1.0,
+        confidence: 1.0
+      }
+    }
+  } catch (error) {
+    console.error('Raw HTML collection error:', error)
+    return null
+  }
+}
+
+// Use JINA Reader with raw HTML option
+async function collectWithReader(url: string, format: 'text' | 'html' = 'text'): Promise<Evidence | null> {
+  try {
+    const readerUrl = `https://r.jina.ai/${url}`
+    const headers = {
+      ...jinaHeaders,
+      'X-Return-Format': format // Request HTML format
+    }
+    
+    console.log(`Using JINA Reader (${format} format) for: ${url}`)
+    const response = await fetchWithTimeout(readerUrl, {
+      method: 'GET',
+      headers
+    }, 12000)
+    
+    if (!response.ok) {
+      const errorBody = await response.text()
+      console.error(`Reader API error: ${response.status} ${response.statusText}`, errorBody)
+      throw new Error(`Reader failed: ${response.statusText}`)
+    }
+    
+    const content = await response.text()
+    
+    return {
+      id: crypto.randomUUID(),
+      type: format === 'html' ? 'webpage_html' : 'webpage_content',
       source: {
         url,
         api: 'reader',
         timestamp: new Date().toISOString()
       },
       content: {
-        raw: result.data.content,
-        processed: result.data.content.substring(0, 2000) // First 2000 chars for summary
+        raw: content,
+        summary: format === 'html' ? 'Raw HTML content' : content.substring(0, 200) + '...'
       },
       metadata: {
-        confidence: 1.0, // Direct extraction is highly confident
-        relevance: 0.8,
-        tokens: result.usage?.tokens,
-        processing_steps: ['reader_extraction', 'markdown_conversion']
-      },
-      breadcrumbs: {
-        extraction_method: 'jina_reader',
-        selectors_used: selectors
+        relevance: 0.9,
+        confidence: 1.0
       }
     }
   } catch (error) {
@@ -202,45 +195,50 @@ async function collectWithReader(url: string, selectors?: string[]): Promise<Evi
   }
 }
 
+// Enhanced search with specific queries
 async function searchAndCollect(query: string, site?: string): Promise<Evidence[]> {
   const evidence: Evidence[] = []
   
   try {
-    const headers = { ...jinaHeaders }
-    if (site) headers['X-Site'] = site
+    const searchQuery = site ? `site:${site} ${query}` : query
+    const searchUrl = 'https://s.jina.ai/'
     
-    const response = await fetch('https://s.jina.ai/', {
+    console.log(`Searching for: ${searchQuery}`)
+    const response = await fetchWithTimeout(searchUrl, {
       method: 'POST',
-      headers,
-      body: JSON.stringify({ q: query, num: 5 })
-    })
+      headers: jinaHeaders,
+      body: JSON.stringify({
+        q: searchQuery,
+        num: 5
+      })
+    }, 10000)
     
-    if (!response.ok) throw new Error(`Search failed: ${response.statusText}`)
+    if (!response.ok) {
+      const errorBody = await response.text()
+      console.error(`Search API error: ${response.status} ${response.statusText}`, errorBody)
+      throw new Error(`Search failed: ${response.statusText}`)
+    }
     
-    const result = await response.json()
+    const results = await response.json()
     
-    for (const item of result.data || []) {
+    for (const result of results.results || []) {
       evidence.push({
         id: crypto.randomUUID(),
         type: 'search_result',
         source: {
-          url: item.url,
-          query,
+          url: result.url,
+          query: searchQuery,
           api: 'search',
           timestamp: new Date().toISOString()
         },
         content: {
-          raw: item.content,
-          summary: item.description
+          raw: result.content || result.description || '',
+          processed: result.title || '',
+          summary: result.description || ''
         },
         metadata: {
-          confidence: 0.7,
           relevance: 0.8,
-          tokens: item.usage?.tokens
-        },
-        breadcrumbs: {
-          search_query: query,
-          search_results: result.data.length
+          confidence: 0.9
         }
       })
     }
@@ -251,122 +249,29 @@ async function searchAndCollect(query: string, site?: string): Promise<Evidence[
   return evidence
 }
 
-async function createEmbeddings(evidence: Evidence[]): Promise<void> {
-  if (evidence.length === 0) return
+// Collect technology stack evidence
+async function collectTechStackEvidence(company: string, website: string): Promise<Evidence[]> {
+  const evidence: Evidence[] = []
+  const domain = new URL(website).hostname
   
-  const texts = evidence.map(e => e.content.summary || e.content.raw.substring(0, 1000))
-  
-  try {
-    const response = await fetch('https://api.jina.ai/v1/embeddings', {
-      method: 'POST',
-      headers: jinaHeaders,
-      body: JSON.stringify({
-        model: 'jina-embeddings-v3',
-        input: texts,
-        task: 'retrieval.passage'
-      })
-    })
-    
-    if (!response.ok) throw new Error(`Embeddings failed: ${response.statusText}`)
-    
-    const result = await response.json()
-    
-    // Attach embeddings to evidence
-    result.data.forEach((item: any, index: number) => {
-      if (evidence[index]) {
-        evidence[index].embedding = item.embedding
-      }
-    })
-  } catch (error) {
-    console.error('Embeddings error:', error)
-  }
-}
-
-async function classifyEvidence(evidence: Evidence[]): Promise<void> {
-  if (evidence.length === 0) return
-  
-  const texts = evidence.map(e => e.content.summary || e.content.raw.substring(0, 500))
-  const labels = [
-    'Technology Infrastructure',
-    'Security Risk',
-    'Team & Culture',
-    'Financial Data',
-    'Market Position',
-    'Technical Debt',
-    'Compliance Issue',
-    'Competitive Advantage'
+  // Technology detection queries
+  const techQueries = [
+    `${company} technology stack architecture`,
+    `${company} engineering blog tech stack`,
+    `"${domain}" github repository`,
+    `${company} careers engineering requirements`,
+    `${company} API documentation developer`
   ]
   
-  try {
-    const response = await fetch('https://api.jina.ai/v1/classify', {
-      method: 'POST',
-      headers: jinaHeaders,
-      body: JSON.stringify({
-        model: 'jina-embeddings-v3',
-        input: texts,
-        labels
-      })
-    })
-    
-    if (!response.ok) throw new Error(`Classification failed: ${response.statusText}`)
-    
-    const result = await response.json()
-    
-    // Attach classifications to evidence
-    result.data.forEach((item: any, index: number) => {
-      if (evidence[index]) {
-        evidence[index].classifications = [{
-          category: item.prediction,
-          score: item.score
-        }]
-      }
-    })
-  } catch (error) {
-    console.error('Classification error:', error)
+  for (const query of techQueries) {
+    const results = await searchAndCollect(query)
+    evidence.push(...results)
   }
+  
+  return evidence
 }
 
-async function storeEvidence(collectionId: string, evidence: Evidence[]): Promise<void> {
-  const supabase = createClient(
-    Deno.env.get('SUPABASE_URL') || '',
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
-  )
-  
-  // Store evidence collection metadata
-  const { error: collectionError } = await supabase
-    .from('evidence_collections')
-    .insert({
-      id: collectionId,
-      evidence_count: evidence.length,
-      created_at: new Date().toISOString()
-    })
-  
-  if (collectionError) {
-    console.error('Failed to store collection:', collectionError)
-  }
-  
-  // Store individual evidence pieces
-  const evidenceRecords = evidence.map(e => ({
-    collection_id: collectionId,
-    evidence_id: e.id,
-    type: e.type,
-    source_data: e.source,
-    content_data: e.content,
-    metadata: e.metadata,
-    embedding: e.embedding,
-    classifications: e.classifications,
-    breadcrumbs: e.breadcrumbs
-  }))
-  
-  const { error: evidenceError } = await supabase
-    .from('evidence_items')
-    .insert(evidenceRecords)
-  
-  if (evidenceError) {
-    console.error('Failed to store evidence:', evidenceError)
-  }
-}
-
+// Main handler
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -379,80 +284,167 @@ Deno.serve(async (req) => {
     
     console.log(`Starting evidence collection for ${request.companyName}`)
     
-    // Phase 1: Deep Search for comprehensive insights
-    if (request.depth === 'comprehensive' || request.depth === 'deep') {
-      const deepSearchQueries = [
-        `${request.companyName} technology stack architecture infrastructure detailed analysis`,
-        `${request.companyName} security vulnerabilities data breaches incidents`,
-        `${request.companyName} engineering team culture development practices`,
-        `${request.companyName} financial performance funding revenue metrics`,
-        `${request.companyName} market position competitors analysis`
-      ]
+    // Check if JINA API key is available
+    const useRealData = !!JINA_API_KEY && JINA_API_KEY !== 'undefined'
+    
+    if (!useRealData) {
+      console.log('JINA API key not available, using mock data')
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'JINA API key not configured'
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500
+        }
+      )
+    }
+    
+    // Test API key validity
+    console.log('Testing JINA API key validity...')
+    try {
+      const testResponse = await fetchWithTimeout('https://s.jina.ai/', {
+        method: 'POST',
+        headers: jinaHeaders,
+        body: JSON.stringify({ q: 'test', num: 1 })
+      }, 5000)
       
-      for (const query of deepSearchQueries) {
-        const evidence = await collectWithDeepSearch(request.companyName, request.companyWebsite, query)
-        allEvidence.push(...evidence)
+      if (!testResponse.ok) {
+        throw new Error('Invalid API key')
       }
+      console.log('JINA API key is valid, proceeding with data collection...')
+    } catch (error) {
+      console.error('JINA API key validation failed:', error)
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'JINA API authentication failed'
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 401
+        }
+      )
     }
     
-    // Phase 2: Direct website extraction
-    const websiteEvidence = await collectWithReader(request.companyWebsite)
-    if (websiteEvidence) allEvidence.push(websiteEvidence)
-    
-    // Extract specific pages
-    const targetPages = ['/about', '/team', '/technology', '/security', '/careers']
-    for (const page of targetPages) {
-      const pageEvidence = await collectWithReader(`${request.companyWebsite}${page}`)
-      if (pageEvidence) allEvidence.push(pageEvidence)
-    }
-    
-    // Phase 3: Targeted searches
-    if (request.evidenceTypes.includes('technical')) {
-      const techEvidence = await searchAndCollect(`${request.companyName} github open source`)
-      allEvidence.push(...techEvidence)
-    }
-    
-    if (request.evidenceTypes.includes('security')) {
-      const secEvidence = await searchAndCollect(`${request.companyName} CVE vulnerability disclosure`)
-      allEvidence.push(...secEvidence)
-    }
-    
-    // Phase 4: Create embeddings for all evidence
-    await createEmbeddings(allEvidence)
-    
-    // Phase 5: Classify evidence
-    await classifyEvidence(allEvidence)
-    
-    // Phase 6: Store in database
-    await storeEvidence(collectionId, allEvidence)
-    
-    // Prepare response
-    const response: EvidenceCollectionResponse = {
-      collectionId,
-      company: request.companyName,
-      timestamp: new Date().toISOString(),
-      evidence: allEvidence,
-      summary: {
-        total_evidence: allEvidence.length,
-        by_type: allEvidence.reduce((acc, e) => {
-          acc[e.type] = (acc[e.type] || 0) + 1
-          return acc
-        }, {} as Record<string, number>),
-        confidence_avg: allEvidence.reduce((sum, e) => sum + e.metadata.confidence, 0) / allEvidence.length,
-        sources_used: [...new Set(allEvidence.map(e => e.source.api || 'unknown'))]
+    // Collect evidence based on depth
+    if (request.depth === 'shallow') {
+      console.log('Performing shallow analysis...')
+      
+      // 1. Get main website content (text)
+      const mainContent = await collectWithReader(request.companyWebsite, 'text')
+      if (mainContent) allEvidence.push(mainContent)
+      
+      // 2. Get raw HTML for technical analysis
+      const htmlContent = await collectRawHTML(request.companyWebsite)
+      if (htmlContent) allEvidence.push(htmlContent)
+      
+    } else if (request.depth === 'deep') {
+      console.log('Performing deep analysis...')
+      
+      // 1. Collect main website data
+      const [textContent, htmlContent] = await Promise.all([
+        collectWithReader(request.companyWebsite, 'text'),
+        collectRawHTML(request.companyWebsite)
+      ])
+      
+      if (textContent) allEvidence.push(textContent)
+      if (htmlContent) allEvidence.push(htmlContent)
+      
+      // 2. Collect HTML from key pages
+      const keyPages = ['/about', '/technology', '/products', '/careers']
+      for (const page of keyPages) {
+        try {
+          const pageUrl = new URL(page, request.companyWebsite).toString()
+          const pageHtml = await collectWithReader(pageUrl, 'html')
+          if (pageHtml) allEvidence.push(pageHtml)
+        } catch {}
       }
+      
+      // 3. Search for company information
+      const searchResults = await searchAndCollect(
+        `${request.companyName} company overview technology`,
+        new URL(request.companyWebsite).hostname
+      )
+      allEvidence.push(...searchResults)
+      
+      // 4. Collect technology stack evidence
+      const techEvidence = await collectTechStackEvidence(
+        request.companyName,
+        request.companyWebsite
+      )
+      allEvidence.push(...techEvidence.slice(0, 3)) // Limit to avoid timeout
+      
+    } else {
+      // Comprehensive analysis
+      console.log('Performing comprehensive analysis...')
+      
+      // Similar to deep but with more searches and pages
+      // Limited implementation to avoid timeouts
+      const [textContent, htmlContent] = await Promise.all([
+        collectWithReader(request.companyWebsite, 'text'),
+        collectWithReader(request.companyWebsite, 'html')
+      ])
+      
+      if (textContent) allEvidence.push(textContent)
+      if (htmlContent) allEvidence.push(htmlContent)
     }
     
-    return new Response(
-      JSON.stringify(response),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    console.log(`Evidence collection complete. Total evidence: ${allEvidence.length}`)
+    
+    // Store evidence in database
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
     
-  } catch (error) {
-    console.error('Evidence collector error:', error)
+    // Create collection record
+    const { data: collection, error: collectionError } = await supabase
+      .from('evidence_collections')
+      .insert({
+        id: collectionId,
+        company_name: request.companyName,
+        company_website: request.companyWebsite,
+        evidence_count: allEvidence.length,
+        status: 'completed'
+      })
+      .select()
+      .single()
+    
+    if (collectionError) {
+      console.error('Failed to store collection:', collectionError)
+    }
+    
     return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({
+        success: true,
+        collectionId,
+        evidence: allEvidence,
+        summary: {
+          total: allEvidence.length,
+          byType: allEvidence.reduce((acc, e) => {
+            acc[e.type] = (acc[e.type] || 0) + 1
+            return acc
+          }, {} as Record<string, number>)
+        }
+      }),
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200
+      }
+    )
+  } catch (error) {
+    console.error('[ERROR]', error)
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error.message
+      }),
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500
+      }
     )
   }
 }) 

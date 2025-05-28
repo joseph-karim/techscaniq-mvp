@@ -64,12 +64,22 @@ export default function RequestScanPage() {
         .insert({
           company_name: data.companyName,
           website_url: data.websiteUrl,
+          company_description: data.description || null,
+          thesis_tags: data.thesisTags,
+          primary_criteria: data.primaryCriteria,
+          secondary_criteria: data.secondaryCriteria || null,
           requested_by: user?.id,
           requestor_name: user?.user_metadata?.name || user?.email || 'Unknown',
           organization_name: user?.user_metadata?.workspace_name || 'Unknown Organization',
           status: 'pending',
           sections: [],
-          risks: []
+          risks: [],
+          investment_thesis_data: {
+            thesis_tags: data.thesisTags,
+            primary_criteria: data.primaryCriteria,
+            secondary_criteria: data.secondaryCriteria,
+            submitted_at: new Date().toISOString()
+          }
         })
         .select()
         .single()
