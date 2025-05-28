@@ -377,7 +377,7 @@ export const mockEvidenceItems: DemoEvidenceItem[] = [
 
 // Ring4 Comprehensive Report (Real Data Enhanced)
 // Deep dive mock data for Ring4
-const deepDiveMockData = {
+const deepDiveMockDataInternal = {
   executiveSummary: {
     investmentThesis: 'Ring4 demonstrates exceptional technical execution with internal access revealing sophisticated engineering practices, robust security implementations, and clear scalability roadmap. The deep dive analysis confirms strong operational fundamentals and identifies specific optimization opportunities worth $2.3M in annual savings.',
     keyFindings: {
@@ -593,13 +593,13 @@ export const mockRing4Report: DemoStandardReport = {
     },
     executiveSummaryHighlights: {
       title: "Executive Summary Highlights",
-      summary: deepDiveMockData?.executiveSummary?.investmentThesis ?? "Key findings from the deep dive technical assessment.",
+      summary: deepDiveMockDataInternal?.executiveSummary?.investmentThesis ?? "Key findings from the deep dive technical assessment.",
       findings: [
-        ...(deepDiveMockData?.executiveSummary?.keyFindings?.enablers || []).map((item: string, index: number) => ({ text: item, category: 'Enabler', evidence_ids: [`dd_exec_enabler_${index}`] })),
-        ...(deepDiveMockData?.executiveSummary?.keyFindings?.blockers || []).map((item: string, index: number) => ({ text: item, severity: 'medium', category: 'Blocker', evidence_ids: [`dd_exec_blocker_${index}`] })),
+        ...(deepDiveMockDataInternal?.executiveSummary?.keyFindings?.enablers || []).map((item: string, index: number) => ({ text: item, category: 'Enabler', evidence_ids: [`dd_exec_enabler_${index}`] })),
+        ...(deepDiveMockDataInternal?.executiveSummary?.keyFindings?.blockers || []).map((item: string, index: number) => ({ text: item, severity: 'medium', category: 'Blocker', evidence_ids: [`dd_exec_blocker_${index}`] })),
       ],
-      risks: (deepDiveMockData?.executiveSummary?.keyFindings?.risks || []).map((item: string, index: number) => ({ text: item, severity: 'high', evidence_ids: [`dd_exec_risk_${index}`] })),
-      recommendations: (deepDiveMockData?.executiveSummary?.recommendations || []).map((item: string, index: number) => ({ text: item, evidence_ids: [`dd_exec_rec_${index}`] })) // Ensure this maps from deepDiveMockData.executiveSummary.recommendations
+      risks: (deepDiveMockDataInternal?.executiveSummary?.keyFindings?.risks || []).map((item: string, index: number) => ({ text: item, severity: 'high', evidence_ids: [`dd_exec_risk_${index}`] })),
+      recommendations: (deepDiveMockDataInternal?.executiveSummary?.recommendations || []).map((item: string, index: number) => ({ text: item, evidence_ids: [`dd_exec_rec_${index}`] })) // Ensure this maps from deepDiveMockDataInternal.executiveSummary.recommendations
     }
   },
   evidence_collection_id: 'col-ring4-20240115',
@@ -736,6 +736,558 @@ export const mockDemoReports: Record<string, DemoStandardReport> = {
   // Add more as we create them
 };
 
+// FutureTech Inc. Comprehensive Report (AI/SaaS focus)
+export const mockFutureTechReport: DemoStandardReport = {
+  id: 'report-futuretech-comprehensive',
+  scan_request_id: 'demo-investor-scan-pending-1',
+  company_name: 'FutureTech Inc.',
+  website_url: 'https://futuretech.ai',
+  report_type: 'standard',
+  created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+  executive_summary: "FutureTech Inc. represents a high-potential investment opportunity in the rapidly evolving AI/ML platform space. Founded in 2021 by ex-Google AI researchers, the company has developed a groundbreaking AutoML platform that democratizes machine learning for non-technical users. With $5.2M ARR growing at 220% YoY and serving 450+ enterprise customers including Microsoft and Toyota, FutureTech has achieved remarkable product-market fit. The platform's unique visual ML pipeline builder and automated model optimization capabilities have reduced ML development time by 75% for customers. However, concerns around high burn rate ($1.2M/month) and intense competition from established players like DataRobot and H2O.ai require careful consideration.",
+  investment_score: 78,
+  investment_rationale: "FutureTech merits a positive but cautious investment recommendation. The company's innovative approach to making ML accessible has captured significant market share in a $4.2B TAM growing at 38% CAGR. Key strengths include exceptional technical team (12 PhDs from top institutions), strong IP portfolio (8 patents filed), and impressive customer metrics (NPS 68, 125% net retention). However, the high cash burn and competitive landscape present material risks. The proposed Series A valuation of $120M (23x ARR) is aggressive but potentially justified given growth trajectory.",
+  tech_health_score: 82,
+  tech_health_grade: 'B+',
+  sections: {
+    companyOverview: {
+      title: "Company Overview",
+      summary: "FutureTech emerged from Stanford AI Lab in 2021 with a mission to democratize machine learning.",
+      findings: [
+        { text: "Founded by Dr. James Liu (ex-Google Brain) and Dr. Maria Santos (ex-DeepMind) with combined 25 years in AI research", category: "Founding Team" },
+        { text: "450+ enterprise customers including 12 Fortune 500 companies. Key verticals: Financial Services (35%), Healthcare (28%), Retail (22%)", category: "Customer Base" },
+        { text: "$5.2M ARR with $433K MRR, growing from $1.1M ARR twelve months ago. Average contract value $42K, up from $28K", category: "Financial Metrics" },
+        { text: "65 employees across San Francisco (HQ), Toronto (R&D), and Bangalore (Engineering). 73% technical roles", category: "Team Scale" }
+      ]
+    },
+    technologyStack: {
+      title: "Technology Architecture",
+      summary: "FutureTech's platform leverages cutting-edge ML infrastructure with a focus on usability and scalability.",
+      findings: [
+        { text: "Core platform built on Kubernetes with custom ML orchestration layer handling 2M+ model training jobs monthly", category: "Infrastructure" },
+        { text: "Proprietary AutoML engine using neural architecture search (NAS) achieves state-of-the-art results on 78% of benchmark datasets", category: "ML Innovation", severity: "info" },
+        { text: "Tech stack: Python/FastAPI backend, React/TypeScript frontend, PostgreSQL + TimescaleDB, Redis, Apache Spark for data processing", category: "Technology Choices" },
+        { text: "Model serving infrastructure handles 50M+ predictions daily with p99 latency of 23ms using custom ONNX runtime optimizations", category: "Performance" }
+      ],
+      risks: [
+        { text: "Heavy dependence on expensive GPU infrastructure ($180K/month) with limited cost optimization implemented", severity: "high" },
+        { text: "Technical debt in data pipeline code requiring estimated 3-month refactoring effort", severity: "medium" }
+      ]
+    },
+    marketPosition: {
+      title: "Market Analysis",
+      summary: "FutureTech operates in the competitive but rapidly growing AutoML market with differentiated positioning.",
+      findings: [
+        { text: "AutoML market valued at $4.2B in 2024, projected to reach $14.8B by 2028 (37% CAGR). FutureTech has 0.12% market share", category: "Market Size" },
+        { text: "Main competitors: DataRobot ($2.8B valuation), H2O.ai ($1.7B), Google AutoML, Amazon SageMaker. FutureTech differentiates through ease of use", category: "Competition" },
+        { text: "Win rate of 67% in competitive deals, primarily winning on user experience and time-to-value (average 2 weeks vs 2 months)", category: "Competitive Performance" },
+        { text: "Strong partnerships with AWS (Advanced Partner), Snowflake (Premier Partner), and Databricks driving 40% of new leads", category: "Partnerships" }
+      ],
+      opportunities: [
+        { text: "Expansion into European market represents $500M opportunity with GDPR-compliant infrastructure already in place" },
+        { text: "Vertical-specific solutions for healthcare and financial services could double average contract values" }
+      ]
+    }
+  },
+  evidence_collection_id: 'col-futuretech-20240115',
+  citations: [
+    { claim_id: "market_0", evidence_item_id: "futuretech-market-size", citation_text: "$4.2B AutoML market", citation_context: "Gartner Magic Quadrant for Data Science and Machine Learning Platforms 2024", citation_number: 1 },
+    { claim_id: "tech_0", evidence_item_id: "futuretech-benchmark-results", citation_text: "78% SOTA results", citation_context: "Internal benchmarking against MLPerf datasets", citation_number: 2 }
+  ],
+  metadata: {
+    analysisDepth: 'comprehensive',
+    processingTime: 38462,
+    reportVersion: '2.0',
+    confidenceScores: {
+      technical: 0.86,
+      financial: 0.82,
+      market: 0.84,
+      overall: 0.84
+    }
+  }
+};
+
+// Synergy Corp Comprehensive Report (Enterprise Software focus)
+export const mockSynergyReport: DemoStandardReport = {
+  id: 'report-synergy-comprehensive',
+  scan_request_id: 'demo-pe-scan-complete-1',
+  company_name: 'Synergy Corp',
+  website_url: 'https://synergy-enterprise.com',
+  report_type: 'standard',
+  created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+  executive_summary: "Synergy Corp presents a complex investment scenario as a mature enterprise software company attempting digital transformation. Founded in 2008, the company has built a substantial presence in enterprise resource planning (ERP) for mid-market manufacturing companies with $42M ARR. However, growth has stagnated at 12% YoY, and the technology stack shows significant legacy debt. The recent appointment of a new CTO from Salesforce and planned cloud migration initiative offer potential for revitalization, but execution risks remain high. The company's strong customer base (89% gross retention) and domain expertise provide a foundation for transformation.",
+  investment_score: 65,
+  investment_rationale: "Synergy Corp warrants a neutral to slightly positive assessment contingent on successful execution of its transformation plan. The company's established market position and sticky customer relationships provide downside protection, while the cloud migration and product modernization initiatives offer upside potential. Key concerns include technical debt (18.3% debt ratio), slow innovation velocity, and emerging cloud-native competitors. The proposed valuation of $380M (9x ARR) reflects these mixed fundamentals but may offer value if transformation succeeds.",
+  tech_health_score: 58,
+  tech_health_grade: 'C',
+  sections: {
+    companyOverview: {
+      title: "Company Overview",
+      summary: "Synergy Corp is an established player in mid-market ERP with strong domain expertise but facing modernization challenges.",
+      findings: [
+        { text: "Founded in 2008 in Detroit, MI. Bootstrapped to $15M ARR before taking PE investment in 2019 (Riverside Partners)", category: "Company History" },
+        { text: "Serving 850+ manufacturing companies with average customer tenure of 7.3 years. Top clients include Ford suppliers and aerospace manufacturers", category: "Customer Base" },
+        { text: "$42M ARR growing at 12% YoY (down from 35% in 2019). EBITDA positive at 18% margins but declining due to transformation investments", category: "Financial Performance" },
+        { text: "320 employees with concerning demographics: average age 47, only 15% hired in last 2 years, 45% eligible for retirement within 5 years", category: "Team Composition" }
+      ]
+    },
+    technologyStack: {
+      title: "Technology Assessment",
+      summary: "Legacy architecture constrains growth but modernization efforts show promise if executed successfully.",
+      findings: [
+        { text: "Core ERP system built on Java 8 (EOL) with Oracle database. Monolithic architecture with 2.3M lines of code in single repository", category: "Legacy Systems", severity: "high" },
+        { text: "SonarQube analysis reveals 2,341 code smells, 47 bugs, 12 security vulnerabilities. Technical debt estimated at 423 developer-days", category: "Code Quality", severity: "high", evidence_ids: ["synergy-technical-debt"] },
+        { text: "New cloud initiative using microservices (Spring Boot), Kubernetes, and PostgreSQL. 15% of functionality migrated in 18 months", category: "Modernization Progress" },
+        { text: "Customer-facing UI outdated (jQuery/JSP) with poor mobile experience. New React-based UI in beta with 25 pilot customers showing 3x engagement", category: "User Experience" }
+      ],
+      risks: [
+        { text: "Critical dependency on retiring Oracle DBA with no documented knowledge transfer plan", severity: "critical" },
+        { text: "Integration spaghetti with 200+ point-to-point connections to customer systems creating fragility", severity: "high" },
+        { text: "No automated testing for legacy modules covering 70% of codebase, making changes risky", severity: "high" }
+      ],
+      recommendations: [
+        { text: "Accelerate cloud migration with dedicated tiger team and external expertise to achieve 50% migration within 12 months" },
+        { text: "Implement comprehensive testing framework starting with critical financial modules to reduce deployment risks" },
+        { text: "Create retention packages for key technical staff and aggressive hiring program for cloud-native talent" }
+      ]
+    },
+    transformationPlan: {
+      title: "Digital Transformation Analysis",
+      summary: "Ambitious transformation plan with meaningful progress but execution risks remain substantial.",
+      findings: [
+        { text: "New CTO Sarah Mitchell (ex-Salesforce) hired 6 months ago, brought in 12 senior engineers from FAANG companies", category: "Leadership Change" },
+        { text: "Cloud migration budget of $15M over 3 years. Currently 15% complete, targeting 100% by 2026. Using strangler fig pattern", category: "Migration Strategy" },
+        { text: "API-first architecture enabling new integrations. 45 APIs published vs 0 eighteen months ago. Partner ecosystem growing", category: "Platform Evolution" },
+        { text: "Customer success metrics improving: NPS increased from 12 to 34, support tickets down 40%, feature velocity up 3x", category: "Early Results" }
+      ],
+      opportunities: [
+        { text: "Modern platform could enable expansion into adjacent verticals (logistics, warehousing) representing $200M TAM" },
+        { text: "API marketplace could generate $5-10M ARR based on comparable B2B software platforms" },
+        { text: "AI/ML capabilities for demand forecasting and optimization could justify 50% price increases" }
+      ]
+    }
+  },
+  evidence_collection_id: 'col-synergy-20240113',
+  citations: [
+    { claim_id: "tech_debt_0", evidence_item_id: "synergy-technical-debt", citation_text: "2,341 code smells identified", citation_context: "SonarQube enterprise scan completed January 2024", citation_number: 1 }
+  ],
+  metadata: {
+    analysisDepth: 'comprehensive',
+    processingTime: 42156,
+    reportVersion: '2.0',
+    confidenceScores: {
+      technical: 0.78,
+      financial: 0.88,
+      market: 0.82,
+      overall: 0.83
+    }
+  }
+};
+
+// InfraModern Comprehensive Report (Infrastructure/DevOps focus)
+export const mockInfraModernReport: DemoStandardReport = {
+  id: 'report-inframodern-comprehensive',
+  scan_request_id: 'demo-pe-scan-awaiting-review-1',
+  company_name: 'InfraModern',
+  website_url: 'https://inframodern.io',
+  report_type: 'standard',
+  created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+  executive_summary: "InfraModern represents a compelling infrastructure modernization play in the rapidly growing cloud migration and DevOps tooling market. Founded in 2020 by former AWS and HashiCorp engineers, the company has developed an innovative platform that automates cloud migration assessments and executes migrations with 70% less manual effort than traditional approaches. With $3.8M ARR growing at 340% YoY and blue-chip customers like Coca-Cola and Best Buy, InfraModern has found product-market fit in a massive market opportunity. The company's proprietary migration intelligence engine and automated cost optimization capabilities provide strong technical differentiation.",
+  investment_score: 84,
+  investment_rationale: "InfraModern merits a strong investment recommendation based on exceptional growth metrics, proven ROI for customers, and massive market tailwinds. The cloud migration market ($45B by 2027) remains vastly underpenetrated with only 35% of enterprise workloads in the cloud. InfraModern's solution addresses the key barrier - complexity and cost of migration. The team's pedigree (AWS, HashiCorp, Google Cloud) provides credibility and technical excellence. At a proposed $95M valuation (25x ARR), the company is reasonably priced given 340% growth and strong unit economics (LTV:CAC of 4.2:1).",
+  tech_health_score: 91,
+  tech_health_grade: 'A',
+  sections: {
+    companyOverview: {
+      title: "Company Overview",
+      summary: "InfraModern has rapidly emerged as a leader in automated cloud migration and infrastructure optimization.",
+      findings: [
+        { text: "Founded in September 2020 by ex-AWS Principal Engineers Tom Bradley and Lisa Wang who previously built AWS Migration Hub", category: "Founding Story" },
+        { text: "120+ enterprise customers with average contract value of $125K. Notable wins: Coca-Cola, Best Buy, Johnson & Johnson, Delta Airlines", category: "Customer Traction" },
+        { text: "$3.8M ARR growing from $700K one year ago (340% growth). Monthly growth averaging 28% over last 6 months", category: "Revenue Growth" },
+        { text: "48 employees (40 technical). Distributed team across SF, Seattle, Toronto. Notable hires from Terraform, Kubernetes, and Datadog teams", category: "Team Building" }
+      ]
+    },
+    technologyStack: {
+      title: "Technology Platform",
+      summary: "InfraModern's platform represents best-in-class cloud-native architecture with innovative automation capabilities.",
+      findings: [
+        { text: "Migration Intelligence Engine analyzes existing infrastructure using graph neural networks, achieving 94% accuracy in predicting migration complexity", category: "Core Technology" },
+        { text: "Platform built on Go microservices, Temporal for workflow orchestration, TimescaleDB for metrics, and React/TypeScript frontend", category: "Architecture" },
+        { text: "Automated cost optimization algorithms have saved customers average of 37% on cloud bills through rightsizing and reserved instance planning", category: "Cost Innovation", evidence_ids: ["inframodern-cost-analysis"] },
+        { text: "Security-first design with SOC2 Type II, ISO 27001, and FedRAMP-ready architecture supporting government customers", category: "Security & Compliance" },
+        { text: "Multi-cloud support for AWS, Azure, GCP with 250+ service mappings. Proprietary abstraction layer enables cloud-agnostic migrations", category: "Platform Capabilities" }
+      ],
+      opportunities: [
+        { text: "FinOps platform extension could add $15M TAM by providing ongoing cost optimization beyond initial migration" },
+        { text: "Kubernetes migration specialist tool addressing the 78% of enterprises struggling with container adoption" },
+        { text: "Acquisition of complementary tools in observability or security could create full-stack platform" }
+      ]
+    },
+    marketPosition: {
+      title: "Market & Competition",
+      summary: "InfraModern is well-positioned in a large and growing market with limited direct competition.",
+      findings: [
+        { text: "Cloud migration market valued at $15B in 2024, growing to $45B by 2027 (44% CAGR) driven by digital transformation initiatives", category: "Market Size" },
+        { text: "Only 35% of enterprise workloads currently in cloud, leaving massive headroom. Average enterprise has 500+ applications to migrate", category: "Market Opportunity" },
+        { text: "Direct competitors limited: CloudEndure (acquired by AWS), Carbonite Migrate, Zerto. InfraModern wins on automation and cost", category: "Competitive Landscape" },
+        { text: "Partners with all major cloud providers and systems integrators (Accenture, Deloitte) who drive 60% of revenue", category: "Go-to-Market" }
+      ]
+    },
+    customerMetrics: {
+      title: "Customer Success Metrics",
+      summary: "Exceptional customer satisfaction and proven ROI drive rapid growth and expansion.",
+      findings: [
+        { text: "Average customer reduces migration time by 70% and costs by 55% compared to traditional approaches. ROI achieved in 4.5 months", category: "Customer ROI" },
+        { text: "Net Promoter Score of 72 (vs industry average of 30). 95% of customers rate platform 4 or 5 stars", category: "Satisfaction" },
+        { text: "141% net revenue retention driven by expansion into additional cloud platforms and ongoing optimization services", category: "Expansion" },
+        { text: "Customer quotes: 'InfraModern saved us $2.3M and 18 months on our cloud migration' - CTO, Fortune 500 Retailer", category: "Testimonials" }
+      ]
+    }
+  },
+  evidence_collection_id: 'col-inframodern-20240114',
+  citations: [
+    { claim_id: "cost_0", evidence_item_id: "inframodern-cost-analysis", citation_text: "37% average cloud cost reduction", citation_context: "Analysis of 50 customer implementations showing pre/post migration costs", citation_number: 1 }
+  ],
+  metadata: {
+    analysisDepth: 'comprehensive',
+    processingTime: 35234,
+    reportVersion: '2.0',
+    confidenceScores: {
+      technical: 0.92,
+      financial: 0.89,
+      market: 0.90,
+      overall: 0.90
+    }
+  }
+};
+
+// Add new evidence items for the additional companies
+export const additionalEvidenceItems: DemoEvidenceItem[] = [
+  // FutureTech evidence
+  { _original_crypto_id: "futuretech-market-size", id: "futuretech-market-size", type: "market_research", source_tool: "Gartner Report", content_summary: "AutoML market valued at $4.2B in 2024, projected $14.8B by 2028. Key drivers: shortage of data scientists, democratization of ML, enterprise AI adoption.", timestamp: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString() },
+  { _original_crypto_id: "futuretech-benchmark-results", id: "futuretech-benchmark-results", type: "technical_analysis", source_tool: "MLPerf Benchmarking", content_summary: "FutureTech AutoML achieved SOTA on 78% of datasets: CIFAR-10 (98.2%), IMDB sentiment (94.1%), Housing prices (R² 0.95). Average 15% better than Google AutoML.", timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
+  
+  // Additional Ring4 evidence
+  { _original_crypto_id: "ring4-ml-architecture", id: "ring4-ml-architecture", type: "technical_documentation", source_tool: "Architecture Review", content_summary: "ML pipeline: Real-time feature extraction → Ensemble model (XGBoost + LSTM) → A/B testing framework. Processing 2M+ calls daily with 94% routing accuracy.", timestamp: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString() },
+  { _original_crypto_id: "ring4-ai-performance", id: "ring4-ai-performance", type: "performance_metrics", source_tool: "Performance Dashboard", content_summary: "AI metrics: Transcription accuracy 97% (Whisper fine-tuned), Smart routing saves 2.3 hrs/week per user, Spam detection 89% accuracy with 0.1% false positives.", timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
+  
+  // More evidence items for completeness
+  { _original_crypto_id: "gartner-ucaas-2024", id: "gartner-ucaas-2024", type: "market_research", source_tool: "Gartner UCaaS Report", content_summary: "UCaaS market $15.8B in 2024, growing 22% CAGR. Key trends: security focus, AI integration, mobile-first design. Ring4 positioned in Visionaries quadrant.", timestamp: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString() },
+];
+
+// Merge all evidence items
+export const allMockEvidenceItems = [...mockEvidenceItems, ...additionalEvidenceItems];
+
+// Update the standard reports array
+mockStandardReports.push(mockFutureTechReport, mockSynergyReport, mockInfraModernReport);
+
+// Update the complete mock demo reports mapping
+Object.assign(mockDemoReports, {
+  'report-futuretech-comprehensive': mockFutureTechReport,
+  'report-synergy-comprehensive': mockSynergyReport,
+  'report-inframodern-comprehensive': mockInfraModernReport
+});
+
+// Deep dive mock data for Ring4 (from df71adb)
+export const deepDiveMockData = {
+  executiveSummary: {
+    companyName: 'Ring4',
+    overallAssessment: 'Strong technical foundation with exceptional execution and proven scalability',
+    investmentScore: 87,
+    investmentGrade: 'A-',
+    keyStrengths: [
+      'Sophisticated microservices architecture with 99.97% uptime',
+      'Full internal access provided including 23 repositories and team interviews',
+      'Advanced security practices including zero-trust architecture implementation',
+      'Automated testing coverage at 94% with comprehensive CI/CD pipeline'
+    ],
+    keyRisks: [
+      'Database sharding needed for 10x scale with $200k implementation cost',
+      'Legacy authentication service requires $120k modernization investment',
+      'Key person dependency on lead architect requiring succession planning'
+    ],
+    investmentRecommendation: 'STRONG BUY - Exceptional technical execution with clear scaling path. Management team demonstrates deep technical competence and operational excellence.',
+    nextSteps: [
+      'Complete technical due diligence within 2 weeks',
+      'Schedule follow-up sessions with engineering leadership',
+      'Review and approve scaling investment budget',
+      'Finalize partnership terms and investment structure'
+    ]
+  },
+  
+  internalCodeAnalysis: {
+    companyName: 'Ring4',
+    accessLevel: 'Full Internal Access',
+    repositoriesAnalyzed: 23,
+    linesOfCodeReviewed: 847623,
+    overallCodeQuality: 88,
+    analysisScore: 91,
+    codebaseHealth: {
+      testCoverage: 94,
+      documentationCoverage: 78,
+      codeComplexity: 'Low to Moderate',
+      technicalDebt: 'Manageable',
+      securityCompliance: 'Excellent'
+    },
+    architecturalPatterns: [
+      {
+        pattern: 'Microservices',
+        implementation: 'Excellent',
+        maturity: 95,
+        benefits: ['High availability', 'Independent scaling', 'Technology diversity']
+      },
+      {
+        pattern: 'Event-Driven Architecture',
+        implementation: 'Good',
+        maturity: 82,
+        benefits: ['Loose coupling', 'Asynchronous processing', 'Scalability']
+      },
+      {
+        pattern: 'CQRS (Command Query Responsibility Segregation)',
+        implementation: 'Fair',
+        maturity: 65,
+        benefits: ['Read/write optimization', 'Complex business logic handling']
+      }
+    ],
+    teamPractices: {
+      codeReviewCoverage: 98,
+      averageReviewTime: '4.2 hours',
+      deploymentFrequency: 'Multiple times per day',
+      leadTimeForChanges: '2.3 hours',
+      meanTimeToRecovery: '15 minutes',
+      changeFailureRate: '2.1%'
+    },
+    keyFindings: [
+      {
+        area: 'Architecture',
+        finding: 'Exemplary microservices implementation with proper service boundaries',
+        impact: 'Enables independent team scaling and technology choices',
+        recommendation: 'Continue current practices, consider service mesh for complexity management'
+      },
+      {
+        area: 'Testing',
+        finding: '94% test coverage with comprehensive integration tests',
+        impact: 'High confidence in deployments and refactoring safety',
+        recommendation: 'Maintain current testing standards, add chaos engineering'
+      },
+      {
+        area: 'Security',
+        finding: 'Zero-trust security model with comprehensive authentication',
+        impact: 'Enterprise-ready security posture',
+        recommendation: 'Complete SOC2 certification process'
+      }
+    ],
+    riskFactors: [
+      {
+        risk: 'Legacy Authentication Service',
+        severity: 'Medium',
+        impact: 'Security and compliance limitations',
+        mitigation: '$120k modernization investment planned',
+        timeline: '6 months'
+      },
+      {
+        risk: 'Database Scaling Bottlenecks',
+        severity: 'Medium',
+        impact: 'Performance degradation at 10x scale',
+        mitigation: 'Database sharding implementation',
+        timeline: '4 months'
+      }
+    ]
+  },
+
+  stackEvolution: {
+    companyName: 'Ring4',
+    foundingYear: 2019,
+    currentYear: 2024,
+    evolutionScore: 92,
+    timeline: [
+      {
+        year: '2019',
+        quarter: '1',
+        title: 'Company Founded & MVP Development',
+        description: 'Initial team formation and development of core communication platform using React and Node.js monolith.',
+        category: 'product' as const,
+        confidence: 95,
+        keyDevelopments: [
+          'React frontend with basic calling functionality',
+          'Node.js backend with PostgreSQL database',
+          'Initial team of 3 engineers'
+        ],
+        impact: 'high' as const
+      },
+      {
+        year: '2019',
+        quarter: '3',
+        title: 'Beta Launch & User Feedback',
+        description: 'Launched beta version with 100 initial users, gathered feedback on core features.',
+        category: 'product' as const,
+        confidence: 92,
+        keyDevelopments: [
+          'Beta launch with 100 users',
+          'WebRTC integration for video calls',
+          'Basic user management system'
+        ],
+        impact: 'medium' as const
+      },
+      {
+        year: '2020',
+        quarter: '2',
+        title: 'Microservices Migration',
+        description: 'Decomposed monolith into microservices to support growing user base and team.',
+        category: 'architecture' as const,
+        confidence: 90,
+        keyDevelopments: [
+          'User service extraction',
+          'Communication service separation',
+          'API gateway implementation'
+        ],
+        impact: 'high' as const
+      },
+      {
+        year: '2021',
+        quarter: '1',
+        title: 'Enterprise Security Implementation',
+        description: 'Added enterprise-grade security features including SSO and advanced encryption.',
+        category: 'security' as const,
+        confidence: 88,
+        keyDevelopments: [
+          'SAML/OAuth SSO integration',
+          'End-to-end encryption',
+          'Audit logging system'
+        ],
+        impact: 'high' as const
+      },
+      {
+        year: '2022',
+        quarter: '3',
+        title: 'AI-Powered Features Launch',
+        description: 'Integrated machine learning for smart call routing and transcription services.',
+        category: 'product' as const,
+        confidence: 85,
+        keyDevelopments: [
+          'ML-based call routing',
+          'Real-time transcription',
+          'Sentiment analysis'
+        ],
+        impact: 'medium' as const
+      },
+      {
+        year: '2023',
+        quarter: '4',
+        title: 'Cloud Infrastructure Optimization',
+        description: 'Major infrastructure overhaul for improved performance and cost efficiency.',
+        category: 'infrastructure' as const,
+        confidence: 93,
+        keyDevelopments: [
+          'Kubernetes migration',
+          'Multi-region deployment',
+          'CDN implementation'
+        ],
+        impact: 'high' as const
+      },
+      {
+        year: '2024',
+        quarter: '4',
+        title: 'Scale Readiness & Performance',
+        description: 'Current state: 75K users, enterprise-ready platform with strong technical foundation.',
+        category: 'scaling' as const,
+        confidence: 96,
+        keyDevelopments: [
+          '75K active users',
+          '99.97% uptime achievement',
+          'Enterprise customer wins'
+        ],
+        impact: 'high' as const
+      }
+    ],
+    keyMilestones: {
+      founding: 'Q1 2019 - Initial MVP with 3-person team',
+      firstProduct: 'Q3 2019 - Beta launch with 100 users',
+      majorPivot: 'Q2 2021 - Shift to enterprise focus',
+      currentState: 'Q4 2024 - 75K users, enterprise-ready platform'
+    }
+  },
+  
+  technicalLeadership: {
+    companyName: 'Ring4',
+    overallAssessment: 'Strong technical leadership with experienced founders and growing team',
+    teamSize: 12,
+    leadershipScore: 85,
+    founders: [
+      {
+        name: 'Alex Chen',
+        role: 'CEO & Co-founder',
+        tenure: '6 years',
+        background: 'Former Senior Engineer at Zoom, 8 years experience',
+        strengths: ['Technical architecture', 'Product vision', 'Team building'],
+        experience: {
+          years: 8,
+          companies: ['Zoom', 'Google'],
+          domains: ['Communication', 'Distributed Systems']
+        },
+        education: 'MS Computer Science, Stanford',
+        confidence: 90,
+        riskLevel: 'low' as const
+      }
+    ],
+    keyTechnicalLeaders: [],
+    leadershipGaps: [
+      {
+        area: 'Security Leadership',
+        severity: 'important' as const,
+        description: 'Need dedicated security expertise for compliance',
+        recommendation: 'Hire security engineer or promote internal candidate',
+        timeframe: '3 months'
+      }
+    ],
+    recommendations: [
+      'Hire security engineer to address compliance requirements',
+      'Establish formal mentorship program for junior developers'
+    ],
+    riskFactors: [
+      'Key person dependency on lead architect',
+      'Limited security expertise in leadership team'
+    ]
+  },
+  
+  cloudVendorDependencies: {
+    companyName: 'Ring4',
+    overallRiskScore: 72,
+    totalMonthlySpend: '$18,500',
+    vendorCount: 12,
+    dependencies: [
+      {
+        name: 'Amazon Web Services',
+        category: 'infrastructure' as const,
+        criticality: 'critical' as const,
+        description: 'Primary cloud infrastructure provider',
+        monthlySpend: '$12,000',
+        contractTerms: 'Pay-as-you-go',
+        riskLevel: 'medium' as const,
+        alternatives: ['Google Cloud', 'Microsoft Azure'],
+        migrationComplexity: 'high' as const,
+        dataExposure: 'extensive' as const
+      }
+    ],
+    riskAssessment: {
+      singlePointsOfFailure: ['AWS outage would impact entire platform'],
+      vendorConcentrationRisk: 'High dependency on AWS ecosystem',
+      dataPrivacyRisks: ['Customer payment data stored with Stripe'],
+      costOptimizationOpportunities: ['Reserved instance savings: $2,100/month']
+    },
+    recommendations: [
+      'Implement multi-cloud strategy for critical services',
+      'Establish vendor SLA monitoring and alerting'
+    ],
+    contingencyPlans: {
+      criticalVendorFailure: ['Activate backup payment processor within 2 hours'],
+      costEscalation: ['Implement cost monitoring and alerts'],
+      dataBreachResponse: ['Immediate vendor notification and assessment']
+    }
+  }
+};
+
 // Export everything needed by the application
 export default {
   mockDemoScanRequests,
@@ -743,5 +1295,6 @@ export default {
   mockDeepDiveReports,
   mockEnhancedPEReports,
   mockDemoReports,
-  mockEvidenceItems
+  mockEvidenceItems: allMockEvidenceItems,
+  deepDiveMockData
 }; 
