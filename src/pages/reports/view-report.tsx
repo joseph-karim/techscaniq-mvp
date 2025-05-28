@@ -618,7 +618,15 @@ export default function ViewReport() {
                   {mockReport.sections.technologyStack.infrastructure.map((tech, index) => (
                     <div key={index} className="p-4 border rounded-lg">
                       <div className="flex justify-between text-sm mb-2">
-                        <span className="font-medium">{tech.technology}</span>
+                        <span className="font-medium">
+                          <InlineCitation 
+                            citationId="2" 
+                            citation={mockCitations[1]}
+                            onCitationClick={handleCitationClick}
+                          >
+                            {tech.technology}
+                          </InlineCitation>
+                        </span>
                         <Badge variant="outline">{tech.version}</Badge>
                       </div>
                       <Progress value={tech.confidence} className="h-2 mb-2" />
@@ -628,6 +636,108 @@ export default function ViewReport() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Additional Technology Analysis */}
+            <div className="grid gap-6 md:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Architecture Quality</CardTitle>
+                  <CardDescription>System design and scalability assessment</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div className="p-4 bg-green-50 rounded-lg">
+                      <h4 className="font-medium text-green-900 mb-2">Microservices Architecture</h4>
+                      <p className="text-sm text-green-800 mb-2">
+                        <InlineCitation 
+                          citationId="2" 
+                          citation={mockCitations[1]}
+                          onCitationClick={handleCitationClick}
+                        >
+                          Ring4 implements a well-structured microservices architecture
+                        </InlineCitation>
+                        {' '}with service separation that enables independent scaling and deployment.
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <span className="text-sm text-green-700">Excellent service isolation</span>
+                      </div>
+                    </div>
+                    
+                    <div className="p-4 bg-blue-50 rounded-lg">
+                      <h4 className="font-medium text-blue-900 mb-2">API Design</h4>
+                      <p className="text-sm text-blue-800 mb-2">
+                        <InlineCitation 
+                          citationId="1" 
+                          citation={mockCitations[0]}
+                          onCitationClick={handleCitationClick}
+                        >
+                          RESTful API design with comprehensive OpenAPI documentation
+                        </InlineCitation>
+                        {' '}ensures maintainable and scalable integrations.
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-blue-500" />
+                        <span className="text-sm text-blue-700">Well-documented endpoints</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Performance Metrics</CardTitle>
+                  <CardDescription>Real-world performance analysis</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>Call Latency</span>
+                        <span className="font-medium text-green-600">45ms</span>
+                      </div>
+                      <Progress value={92} className="h-2" />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        <InlineCitation 
+                          citationId="2" 
+                          citation={mockCitations[1]}
+                          onCitationClick={handleCitationClick}
+                        >
+                          Industry-leading low latency performance
+                        </InlineCitation>
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>Uptime</span>
+                        <span className="font-medium text-green-600">99.97%</span>
+                      </div>
+                      <Progress value={99} className="h-2" />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        <InlineCitation 
+                          citationId="1" 
+                          citation={mockCitations[0]}
+                          onCitationClick={handleCitationClick}
+                        >
+                          Excellent reliability with minimal downtime
+                        </InlineCitation>
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>API Response Time</span>
+                        <span className="font-medium text-blue-600">120ms</span>
+                      </div>
+                      <Progress value={85} className="h-2" />
+                      <p className="text-xs text-muted-foreground mt-1">Fast API responses for optimal UX</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         )
 
@@ -724,7 +834,15 @@ export default function ViewReport() {
                 <div className="grid gap-4 md:grid-cols-2">
                   {Object.entries(mockReport.sections.securityAssessment.compliance).map(([standard, status]) => (
                     <div key={standard} className="flex items-center justify-between p-3 border rounded-lg">
-                      <span className="font-medium uppercase">{standard}</span>
+                      <span className="font-medium uppercase">
+                        <InlineCitation 
+                          citationId="3" 
+                          citation={mockCitations[2]}
+                          onCitationClick={handleCitationClick}
+                        >
+                          {standard}
+                        </InlineCitation>
+                      </span>
                       <Badge variant="outline" className="text-orange-600">
                         {status}
                       </Badge>
@@ -733,6 +851,123 @@ export default function ViewReport() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Additional Security Analysis */}
+            <div className="grid gap-6 md:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Security Best Practices</CardTitle>
+                  <CardDescription>Implemented security measures</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div className="p-4 bg-green-50 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <h4 className="font-medium text-green-900">End-to-End Encryption</h4>
+                      </div>
+                      <p className="text-sm text-green-800">
+                        <InlineCitation 
+                          citationId="3" 
+                          citation={mockCitations[2]}
+                          onCitationClick={handleCitationClick}
+                        >
+                          Signal Protocol implementation ensures military-grade encryption
+                        </InlineCitation>
+                        {' '}for all voice and text communications.
+                      </p>
+                    </div>
+                    
+                    <div className="p-4 bg-green-50 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <h4 className="font-medium text-green-900">Secure Infrastructure</h4>
+                      </div>
+                      <p className="text-sm text-green-800">
+                        <InlineCitation 
+                          citationId="2" 
+                          citation={mockCitations[1]}
+                          onCitationClick={handleCitationClick}
+                        >
+                          Multi-region deployment with encrypted data at rest and in transit
+                        </InlineCitation>
+                        {' '}across all Ring4 services.
+                      </p>
+                    </div>
+                    
+                    <div className="p-4 bg-green-50 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <h4 className="font-medium text-green-900">Access Controls</h4>
+                      </div>
+                      <p className="text-sm text-green-800">
+                        <InlineCitation 
+                          citationId="1" 
+                          citation={mockCitations[0]}
+                          onCitationClick={handleCitationClick}
+                        >
+                          Multi-factor authentication and role-based access controls
+                        </InlineCitation>
+                        {' '}protect user accounts and administrative functions.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Security Metrics</CardTitle>
+                  <CardDescription>Quantitative security performance</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>Spam Detection Rate</span>
+                        <span className="font-medium text-green-600">89%</span>
+                      </div>
+                      <Progress value={89} className="h-2" />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        <InlineCitation 
+                          citationId="2" 
+                          citation={mockCitations[1]}
+                          onCitationClick={handleCitationClick}
+                        >
+                          AI-powered spam and fraud detection
+                        </InlineCitation>
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>False Positive Rate</span>
+                        <span className="font-medium text-green-600">0.1%</span>
+                      </div>
+                      <Progress value={99} className="h-2" />
+                      <p className="text-xs text-muted-foreground mt-1">Minimal legitimate calls blocked</p>
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>Vulnerability Response Time</span>
+                        <span className="font-medium text-blue-600">2.3 hours</span>
+                      </div>
+                      <Progress value={88} className="h-2" />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        <InlineCitation 
+                          citationId="3" 
+                          citation={mockCitations[2]}
+                          onCitationClick={handleCitationClick}
+                        >
+                          Rapid security incident response
+                        </InlineCitation>
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         )
 
@@ -782,7 +1017,15 @@ export default function ViewReport() {
                 <div className="grid gap-4 md:grid-cols-2">
                   <div>
                     <h4 className="font-medium mb-2">Team Size</h4>
-                    <p className="text-sm text-muted-foreground">{mockReport.sections.teamAnalysis.teamSize}</p>
+                    <p className="text-sm text-muted-foreground">
+                      <InlineCitation 
+                        citationId="4" 
+                        citation={mockCitations[3]}
+                        onCitationClick={handleCitationClick}
+                      >
+                        {mockReport.sections.teamAnalysis.teamSize}
+                      </InlineCitation>
+                    </p>
                   </div>
                   <div>
                     <h4 className="font-medium mb-2">Technical Team</h4>
@@ -795,6 +1038,123 @@ export default function ViewReport() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Additional Team Analysis */}
+            <div className="grid gap-6 md:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Team Strengths</CardTitle>
+                  <CardDescription>Key capabilities and advantages</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div className="p-4 bg-green-50 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <h4 className="font-medium text-green-900">Industry Experience</h4>
+                      </div>
+                      <p className="text-sm text-green-800">
+                        <InlineCitation 
+                          citationId="4" 
+                          citation={mockCitations[3]}
+                          onCitationClick={handleCitationClick}
+                        >
+                          Leadership team brings 25+ years combined telecommunications experience
+                        </InlineCitation>
+                        {' '}from companies like Cisco and previous successful exits.
+                      </p>
+                    </div>
+                    
+                    <div className="p-4 bg-blue-50 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CheckCircle className="h-4 w-4 text-blue-500" />
+                        <h4 className="font-medium text-blue-900">Technical Excellence</h4>
+                      </div>
+                      <p className="text-sm text-blue-800">
+                        <InlineCitation 
+                          citationId="1" 
+                          citation={mockCitations[0]}
+                          onCitationClick={handleCitationClick}
+                        >
+                          Strong engineering culture with 91% test coverage and automated CI/CD
+                        </InlineCitation>
+                        {' '}demonstrates commitment to quality.
+                      </p>
+                    </div>
+                    
+                    <div className="p-4 bg-purple-50 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CheckCircle className="h-4 w-4 text-purple-500" />
+                        <h4 className="font-medium text-purple-900">Execution Track Record</h4>
+                      </div>
+                      <p className="text-sm text-purple-800">
+                        <InlineCitation 
+                          citationId="4" 
+                          citation={mockCitations[3]}
+                          onCitationClick={handleCitationClick}
+                        >
+                          Consistent delivery of product milestones and revenue targets
+                        </InlineCitation>
+                        {' '}over 3+ years of operations.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Team Metrics</CardTitle>
+                  <CardDescription>Quantitative team performance indicators</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>Team Growth Rate</span>
+                        <span className="font-medium text-green-600">62% YoY</span>
+                      </div>
+                      <Progress value={85} className="h-2" />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        <InlineCitation 
+                          citationId="4" 
+                          citation={mockCitations[3]}
+                          onCitationClick={handleCitationClick}
+                        >
+                          Scaling team while maintaining quality standards
+                        </InlineCitation>
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>Employee Retention</span>
+                        <span className="font-medium text-green-600">94%</span>
+                      </div>
+                      <Progress value={94} className="h-2" />
+                      <p className="text-xs text-muted-foreground mt-1">Low turnover indicates strong culture and leadership</p>
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>Engineering Productivity</span>
+                        <span className="font-medium text-blue-600">High</span>
+                      </div>
+                      <Progress value={88} className="h-2" />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        <InlineCitation 
+                          citationId="2" 
+                          citation={mockCitations[1]}
+                          onCitationClick={handleCitationClick}
+                        >
+                          Fast feature delivery with 2-week sprint cycles
+                        </InlineCitation>
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         )
 
@@ -853,18 +1213,181 @@ export default function ViewReport() {
               <Card>
                 <CardHeader>
                   <CardTitle>Revenue Metrics</CardTitle>
+                  <CardDescription>Financial performance indicators</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">{mockReport.sections.financialOverview.revenueMetrics}</p>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div className="p-4 bg-green-50 rounded-lg">
+                      <h4 className="font-medium text-green-900 mb-2">Annual Recurring Revenue</h4>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-2xl font-bold text-green-600">$8.5M</span>
+                        <Badge variant="outline" className="text-green-600">+127% YoY</Badge>
+                      </div>
+                      <p className="text-sm text-green-800">
+                        <InlineCitation 
+                          citationId="4" 
+                          citation={mockCitations[3]}
+                          onCitationClick={handleCitationClick}
+                        >
+                          Strong growth driven by enterprise customer expansion
+                        </InlineCitation>
+                      </p>
+                    </div>
+                    
+                    <div className="p-4 bg-blue-50 rounded-lg">
+                      <h4 className="font-medium text-blue-900 mb-2">Monthly Recurring Revenue</h4>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xl font-bold text-blue-600">$708K</span>
+                        <Badge variant="outline" className="text-blue-600">Current</Badge>
+                      </div>
+                      <p className="text-sm text-blue-800">Consistent month-over-month growth trajectory</p>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader>
                   <CardTitle>Customer Metrics</CardTitle>
+                  <CardDescription>User base and retention analysis</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">{mockReport.sections.financialOverview.customerMetrics}</p>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>Active Users</span>
+                        <span className="font-medium text-green-600">125,000+</span>
+                      </div>
+                      <Progress value={95} className="h-2" />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        <InlineCitation 
+                          citationId="4" 
+                          citation={mockCitations[3]}
+                          onCitationClick={handleCitationClick}
+                        >
+                          Serving users across 42 countries
+                        </InlineCitation>
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>Net Revenue Retention</span>
+                        <span className="font-medium text-green-600">142%</span>
+                      </div>
+                      <Progress value={92} className="h-2" />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        <InlineCitation 
+                          citationId="4" 
+                          citation={mockCitations[3]}
+                          onCitationClick={handleCitationClick}
+                        >
+                          Excellent expansion within existing accounts
+                        </InlineCitation>
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>Monthly Churn Rate</span>
+                        <span className="font-medium text-green-600">2.1%</span>
+                      </div>
+                      <Progress value={88} className="h-2" />
+                      <p className="text-xs text-muted-foreground mt-1">Low churn indicates strong product-market fit</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Additional Financial Analysis */}
+            <div className="grid gap-6 md:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Unit Economics</CardTitle>
+                  <CardDescription>Key financial efficiency metrics</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div className="p-4 bg-green-50 rounded-lg">
+                      <h4 className="font-medium text-green-900 mb-2">LTV:CAC Ratio</h4>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-2xl font-bold text-green-600">25:1</span>
+                        <Badge variant="outline" className="text-green-600">Excellent</Badge>
+                      </div>
+                      <p className="text-sm text-green-800">
+                        <InlineCitation 
+                          citationId="4" 
+                          citation={mockCitations[3]}
+                          onCitationClick={handleCitationClick}
+                        >
+                          Best-in-class customer lifetime value to acquisition cost ratio
+                        </InlineCitation>
+                      </p>
+                    </div>
+                    
+                    <div className="p-4 bg-blue-50 rounded-lg">
+                      <h4 className="font-medium text-blue-900 mb-2">CAC Payback Period</h4>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xl font-bold text-blue-600">4.2 months</span>
+                        <Badge variant="outline" className="text-blue-600">Fast</Badge>
+                      </div>
+                      <p className="text-sm text-blue-800">Rapid return on customer acquisition investment</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Financial Health</CardTitle>
+                  <CardDescription>Cash flow and runway analysis</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>Gross Margin</span>
+                        <span className="font-medium text-green-600">78%</span>
+                      </div>
+                      <Progress value={78} className="h-2" />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        <InlineCitation 
+                          citationId="4" 
+                          citation={mockCitations[3]}
+                          onCitationClick={handleCitationClick}
+                        >
+                          Strong unit economics with healthy margins
+                        </InlineCitation>
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>Burn Rate</span>
+                        <span className="font-medium text-orange-600">$650K/month</span>
+                      </div>
+                      <Progress value={65} className="h-2" />
+                      <p className="text-xs text-muted-foreground mt-1">Controlled spending with clear path to profitability</p>
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>Runway Remaining</span>
+                        <span className="font-medium text-blue-600">18 months</span>
+                      </div>
+                      <Progress value={75} className="h-2" />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        <InlineCitation 
+                          citationId="4" 
+                          citation={mockCitations[3]}
+                          onCitationClick={handleCitationClick}
+                        >
+                          Well-capitalized with adequate runway to profitability
+                        </InlineCitation>
+                      </p>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </div>
