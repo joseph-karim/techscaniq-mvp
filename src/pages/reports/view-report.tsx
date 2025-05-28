@@ -1,192 +1,267 @@
-import { useNavigate } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ArrowLeft, Building2, Calendar, Shield, CheckCircle, XCircle, AlertTriangle, TrendingUp } from 'lucide-react'
+import { ArrowLeft, Building2, Calendar, Shield, CheckCircle, XCircle, AlertTriangle, TrendingUp, Loader2 } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
+import { supabase } from '@/lib/supabaseClient'
+import { useToast } from '@/hooks/use-toast'
 
-// Mock Ring4 report data
+// Mock Ring4 report data - using actual data from the database
 const mockReport = {
-  id: "ecff380a-67a5-40c9-acd3-88946773a6e9",
+  id: "54d36b34-190c-4085-b3ea-84017a3538bf",
   company_name: "Ring4",
-  website_url: "https://ring4.com",
-  report_type: "deep-dive",
-  investor_name: "Demo Capital Ventures",
-  assessment_context: "Series B Investment",
-  created_at: "2025-05-28T03:33:38.951151+00:00",
-  scan_request_id: "f54e43c6-bcde-44e4-b40d-4d50d9d1d0df",
-  report_data: {
-    executiveSummary: {
-      overallAssessment: "Ring4 presents a strong investment opportunity in the business communications space with proven market traction, solid technology foundation, and significant growth potential. The company has demonstrated product-market fit with over 700,000 users worldwide and shows promising indicators for scalability.",
-      investmentScore: 75,
-      keyFindings: [
-        "700,000+ active users across 190 countries with strong organic growth",
-        "Modern cloud-native architecture built on reliable infrastructure (AWS, Twilio)",
-        "Competitive pricing model targeting underserved SMB and startup segments",
-        "Strong security posture with SOC2 compliance and enterprise-grade features",
-        "Experienced team with telecom and SaaS backgrounds"
-      ],
-      criticalRisks: [
-        "Highly competitive market with established players (RingCentral, 8x8)",
-        "Dependence on third-party infrastructure providers",
-        "Customer acquisition costs may increase as market matures",
-        "Limited differentiation in core feature set"
-      ]
-    },
-    technologyAssessment: {
-      architectureStrengths: [
-        "Microservices architecture enabling independent scaling",
-        "Multi-region deployment for low latency globally",
-        "Real-time synchronization across devices",
-        "API-first design supporting third-party integrations"
-      ],
-      stackOverview: {
-        backend: ["Node.js", "Express", "PostgreSQL", "Redis"],
-        frontend: ["React", "Next.js", "TypeScript", "Tailwind CSS"],
-        infrastructure: ["AWS", "CloudFront", "Docker", "Kubernetes"],
-        monitoring: ["New Relic", "Sentry", "DataDog"],
-        communications: ["Twilio", "WebRTC", "SIP Protocol"]
-      },
-      scalabilityAnalysis: {
-        currentCapacity: "Supporting 700K users with 99.95% uptime",
-        growthReadiness: "Architecture can handle 10x growth with minimal changes",
-        recommendedImprovements: [
-          "Implement read replicas",
-          "Add caching layer",
-          "Optimize WebSocket connections"
-        ],
-        bottlenecks: [
-          "Database connection pooling",
-          "Real-time event processing"
-        ]
-      },
-      technicalDebt: [
-        "Legacy mobile apps need modernization",
-        "Database sharding required for next growth phase",
-        "Testing coverage at 68% - below industry standards"
-      ]
-    },
-    marketAnalysis: {
-      totalAddressableMarket: "$24.8B global UCaaS market by 2025",
-      marketGrowthRate: "11.2% CAGR",
-      competitiveLandscape: {
-        marketPosition: "Challenger brand focusing on SMB segment",
-        directCompetitors: ["RingCentral", "8x8", "Dialpad", "Nextiva"],
-        differentiators: [
-          "Simplified pricing without per-user fees",
-          "No contract requirements",
-          "Built-in CRM integrations",
-          "Mobile-first design"
-        ]
-      },
-      customerAnalysis: {
-        targetSegments: ["Startups", "Small businesses", "Remote teams", "Call centers"],
-        averageContractValue: "$149/month",
-        netPromoterScore: 67,
-        churnRate: "3.2% monthly"
-      }
-    },
-    teamAssessment: {
-      leadershipTeam: [
-        {
-          name: "John Chen",
-          role: "CEO & Founder",
-          background: "Former VP at RingCentral, 15+ years in telecom"
-        },
-        {
-          name: "Sarah Kim",
-          role: "CTO",
-          background: "Ex-Google, led teams building communication platforms"
-        },
-        {
-          name: "Michael Rodriguez",
-          role: "VP of Sales",
-          background: "Built sales teams at Zoom and Slack"
-        }
-      ],
-      teamStrength: "Strong domain expertise with proven track records in communications and SaaS",
-      hiringVelocity: "40% YoY team growth, focusing on engineering and customer success",
-      culturalFactors: [
-        "Remote-first company",
-        "Strong engineering culture",
-        "Customer-obsessed mindset"
-      ]
-    },
-    financialIndicators: {
-      revenueIndicators: {
-        estimatedARR: "$12-15M based on user count and pricing",
-        growthRate: "120% YoY",
-        unitEconomics: "LTV:CAC ratio of 3.5:1"
-      },
-      fundingHistory: [
-        "Seed: $2M (2019)",
-        "Series A: $15M (2021) - led by Bessemer Venture Partners",
-        "Series B: Expected Q2 2025"
-      ],
-      burnRate: "Estimated $800K/month",
-      runway: "18-24 months at current burn rate"
-    },
-    dueDiligenceFlags: {
-      greenFlags: [
-        "Strong product-market fit demonstrated",
-        "Experienced team with domain expertise",
-        "Modern, scalable technology stack",
-        "Healthy unit economics",
-        "Growing organically with low marketing spend"
-      ],
-      yellowFlags: [
-        "Concentrated dependency on Twilio",
-        "Limited international presence",
-        "No significant IP or patents",
-        "Customer concentration risk"
-      ],
-      redFlags: [
-        "No clear moat against larger competitors",
-        "Potential margin pressure as scale increases"
-      ]
-    },
-    recommendedNextSteps: [
-      "Schedule deep-dive technical due diligence session",
-      "Review detailed financial statements and cohort analysis",
-      "Conduct customer reference calls (5-10 customers)",
-      "Analyze competitive positioning with expert networks",
-      "Evaluate international expansion strategy"
+  company_url: "https://ring4.com",
+  report_type: "due_diligence",
+  status: "completed",
+  created_at: "2025-05-28T04:25:51.056085+00:00",
+  updated_at: "2025-05-28T04:25:51.056085+00:00",
+  investment_score: 65,
+  tech_health_score: 6.5,
+  tech_health_grade: "C",
+  executive_summary: "Ring4 presents a promising but incompletely defined investment opportunity. While the available evidence suggests a solid technological foundation and a capable team, critical details regarding infrastructure, security protocols, and financial performance are lacking. A deeper dive is required to fully assess the scalability and long-term viability of the platform. The investment score reflects the potential, tempered by the need for further due diligence.",
+  investment_rationale: "The investment score of 65 reflects a cautiously optimistic view. The technology appears sound, and the team seems competent. However, the lack of detailed information regarding infrastructure, security, and financials introduces significant risk. A higher score would require more concrete evidence of scalability, robust security measures, and a clear path to profitability. The market position needs further clarification to understand the competitive landscape and growth potential.",
+  companyInfo: {
+    name: "Ring4",
+    website: "https://ring4.com",
+    industry: "Business/Productivity Software",
+    description: "Ring4 is a cloud-based phone system and communication platform that provides second phone numbers for business and personal use. The company operates in the VoIP industry, offering affordable and easy-to-use solutions for startups, SMBs, freelancers, and enterprises.",
+    location: "United States"
+  },
+  technologyOverview: {
+    primaryStack: [
+      { category: "Platform", technologies: ["Cloud-based VoIP", "Mobile Applications"] },
+      { category: "Communication", technologies: ["Voice over Internet Protocol (VoIP)", "SMS/Text Messaging"] },
+      { category: "Infrastructure", technologies: ["Cloud Phone Systems", "Global Phone Number Provisioning"] }
     ],
-    appendices: {
-      technicalMetrics: {
-        uptime: "99.95% over last 12 months",
-        apiResponseTime: "127ms average",
-        securityAudits: "Passed SOC2 Type II audit (2024)",
-        mobileAppRating: "4.6/5.0 (iOS), 4.4/5.0 (Android)"
-      },
-      competitorComparison: {
-        Ring4: {
-          price: "$149/month",
-          users: "Unlimited",
-          features: "Core + CRM"
-        },
-        RingCentral: {
-          price: "$499/month",
-          users: "20",
-          features: "Full suite"
-        },
-        "8x8": {
-          price: "$399/month",
-          users: "15",
-          features: "Full suite"
-        }
-      },
-      customerTestimonials: [
-        "Ring4 helped us reduce communication costs by 60% while improving call quality - StartupX CEO",
-        "The simplicity and reliability made switching from our previous provider seamless - Agency Owner"
-      ]
+    architectureHighlights: [
+      "Provides phone numbers in multiple countries without physical offices",
+      "BYOD (Bring Your Own Device) solution for businesses",
+      "Integration with CRM systems and business tools",
+      "Both iOS and Android mobile applications"
+    ]
+  },
+  securityAssessment: {
+    grade: "Unknown",
+    score: 0,
+    findings: [
+      {
+        severity: "medium",
+        title: "Limited Security Information Available",
+        description: "Security assessment could not be completed due to lack of detailed security information",
+        recommendation: "Request detailed security audit and compliance certifications"
+      }
+    ],
+    compliance: {
+      gdpr: "Unknown",
+      hipaa: "Unknown",
+      soc2: "Unknown",
+      iso27001: "Unknown"
     }
-  }
+  },
+  teamInformation: {
+    totalSize: "Unknown",
+    keyMembers: [
+      {
+        name: "Alex Botteri",
+        role: "CEO & Co-Founder",
+        experience: "Leading Ring4's vision and strategy",
+        linkedIn: ""
+      },
+      {
+        name: "Ferreol de Soras",
+        role: "Co-Founder",
+        experience: "Co-founded Ring4",
+        linkedIn: ""
+      },
+      {
+        name: "Trevor",
+        role: "Managing Partner",
+        experience: "Managing partner at Ring4",
+        linkedIn: ""
+      }
+    ],
+    openPositions: 0,
+    techTeamSize: "Unknown"
+  },
+  fundingHistory: [
+    {
+      date: "2018",
+      round: "Crowdfunding",
+      amount: "$396K total raised",
+      investors: ["284 investors via Republic", "Inturact Capital", "Leonis Investment"],
+      valuation: "$6,000,000 (valuation cap)"
+    },
+    {
+      date: "2017",
+      round: "Angel",
+      amount: "$225K",
+      investors: ["Angel investors and funds"],
+      valuation: "Not disclosed"
+    }
+  ],
+  marketAnalysis: {
+    marketSize: "VoIP market was over $30 billion in 2020",
+    growthRate: "15% CAGR from 2021 to 2027",
+    competitors: [
+      { name: "OpenPhone", marketShare: "Unknown", strengths: ["Business phone system features"] },
+      { name: "Google Voice", marketShare: "Unknown", strengths: ["Free tier", "Google integration"] },
+      { name: "Dialpad", marketShare: "0.03%", strengths: ["AI features", "Enterprise focus"] },
+      { name: "magicJack", marketShare: "Unknown", strengths: ["Low cost VoIP"] },
+      { name: "Talk360", marketShare: "Unknown", strengths: ["International calling"] }
+    ],
+    targetMarket: "Startups, SMBs, freelancers, sales professionals, remote enterprises",
+    differentiators: [
+      "Second phone line without carrying two phones",
+      "Global phone numbers in multiple countries",
+      "BYOD trend solution for businesses",
+      "Protection for personal phone numbers in sharing economy"
+    ]
+  },
+  performanceMetrics: {
+    revenue: {
+      annual2019: "$262K",
+      growth: "150% increase in 12 months after launch",
+      recurring: "Unknown"
+    },
+    customers: {
+      total: "700,000+ users worldwide (from company claims)",
+      growth: "Unknown",
+      churn: "Unknown"
+    },
+    usage: {
+      activeUsers: "Unknown",
+      engagement: "Sales per installation increased from $1.4 to $5.05",
+      retention: "Unknown"
+    }
+  },
+  infrastructureDetails: {
+    hosting: "Cloud-based (provider unknown)",
+    scalability: "Unknown",
+    availability: "Unknown",
+    performance: {
+      averageResponseTime: "Unknown",
+      uptime: "Unknown",
+      errorRate: "Unknown"
+    }
+  },
+  riskAssessment: {
+    technical: [
+      { risk: "Infrastructure details unknown", impact: "high", mitigation: "Request infrastructure audit" },
+      { risk: "Security posture unclear", impact: "high", mitigation: "Conduct security assessment" },
+      { risk: "Scalability limitations unknown", impact: "medium", mitigation: "Performance testing required" }
+    ],
+    business: [
+      { risk: "Intense VoIP market competition", impact: "high", mitigation: "Clear differentiation strategy needed" },
+      { risk: "Low market share (0.00%)", impact: "high", mitigation: "Growth strategy validation required" },
+      { risk: "Limited financial transparency", impact: "medium", mitigation: "Request detailed financials" }
+    ],
+    compliance: [
+      { risk: "Unknown compliance status", impact: "medium", mitigation: "Compliance audit required" }
+    ]
+  },
+  recommendations: [
+    {
+      priority: "high",
+      category: "Due Diligence",
+      action: "Conduct comprehensive infrastructure and security audit",
+      rationale: "Critical information gaps need to be filled before investment decision"
+    },
+    {
+      priority: "high",
+      category: "Financial",
+      action: "Request detailed financial statements and unit economics",
+      rationale: "Limited financial data makes valuation assessment difficult"
+    },
+    {
+      priority: "medium",
+      category: "Market",
+      action: "Validate market differentiation and growth strategy",
+      rationale: "Competitive market requires clear competitive advantages"
+    },
+    {
+      priority: "medium",
+      category: "Technical",
+      action: "Assess platform scalability and technical debt",
+      rationale: "Unknown infrastructure poses risks for growth"
+    }
+  ],
+  appendices: {
+    evidenceSummary: "8 evidence items collected including website analysis, security scan, team information, market analysis, and financial data from Google Search",
+    dataQuality: "Medium - significant gaps in infrastructure, security details, and recent financial performance",
+    analysisLimitations: [
+      "No access to internal systems or documentation",
+      "Limited public financial information",
+      "Security assessment incomplete due to external scan limitations",
+      "Infrastructure details completely unavailable"
+    ]
+  },
+  scan_request_id: "fd363bb3-bafa-4bb7-86b6-b27bc7012747"
 }
 
 export default function ViewReportPage() {
+  const { id } = useParams()
   const navigate = useNavigate()
+  const { toast } = useToast()
+  const [loading, setLoading] = useState(true)
+  const [report, setReport] = useState<any>(null)
+
+  useEffect(() => {
+    async function fetchReport() {
+      if (!id) {
+        setReport(mockReport)
+        setLoading(false)
+        return
+      }
+
+      try {
+        // Try to fetch from database first
+        const { data, error } = await supabase
+          .from('scan_reports')
+          .select('*')
+          .eq('id', id)
+          .maybeSingle()
+
+        if (error) {
+          console.error('Error fetching report:', error)
+          // Fall back to mock data
+          setReport(mockReport)
+        } else if (data) {
+          // Use the real data from database
+          setReport(data)
+        } else {
+          // No data found, use mock
+          setReport(mockReport)
+        }
+      } catch (error) {
+        console.error('Error:', error)
+        // Fall back to mock data
+        setReport(mockReport)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchReport()
+  }, [id])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  if (!report) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p>Report not found</p>
+      </div>
+    )
+  }
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return 'text-green-600'
@@ -202,8 +277,7 @@ export default function ViewReportPage() {
     return { color: 'destructive' as const, text: 'Pass' }
   }
 
-  const report = mockReport
-  const scoreBadge = getScoreBadge(report.report_data.executiveSummary.investmentScore)
+  const scoreBadge = getScoreBadge(report.investment_score)
 
   return (
     <div className="min-h-screen bg-background">
@@ -222,11 +296,11 @@ export default function ViewReportPage() {
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
               <h1 className="text-3xl font-bold mb-2">{report.company_name}</h1>
-              <p className="text-muted-foreground">{report.website_url}</p>
+              <p className="text-muted-foreground">{report.company_url}</p>
             </div>
             <div className="text-right">
-              <div className={`text-5xl font-bold ${getScoreColor(report.report_data.executiveSummary.investmentScore)}`}>
-                {report.report_data.executiveSummary.investmentScore}
+              <div className={`text-5xl font-bold ${getScoreColor(report.investment_score)}`}>
+                {report.investment_score}
               </div>
               <Badge variant={scoreBadge.color} className="mt-2">
                 {scoreBadge.text}
@@ -256,37 +330,28 @@ export default function ViewReportPage() {
             <CardTitle>Executive Summary</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-lg mb-6">{report.report_data.executiveSummary.overallAssessment}</p>
+            <p className="text-lg mb-6">{report.executive_summary}</p>
             
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <h3 className="font-semibold mb-3 flex items-center gap-2">
                   <CheckCircle className="h-5 w-5 text-green-600" />
-                  Key Findings
+                  Investment Rationale
                 </h3>
-                <ul className="space-y-2">
-                  {report.report_data.executiveSummary.keyFindings.map((finding, index) => (
-                    <li key={index} className="text-sm flex items-start gap-2">
-                      <span className="text-green-600 mt-0.5">•</span>
-                      <span>{finding}</span>
-                    </li>
-                  ))}
-                </ul>
+                <p className="text-sm">{report.investment_rationale}</p>
               </div>
               
               <div>
                 <h3 className="font-semibold mb-3 flex items-center gap-2">
                   <AlertTriangle className="h-5 w-5 text-red-600" />
-                  Critical Risks
+                  Investment Score
                 </h3>
-                <ul className="space-y-2">
-                  {report.report_data.executiveSummary.criticalRisks.map((risk, index) => (
-                    <li key={index} className="text-sm flex items-start gap-2">
-                      <span className="text-red-600 mt-0.5">•</span>
-                      <span>{risk}</span>
-                    </li>
-                  ))}
-                </ul>
+                <div className={`text-5xl font-bold ${getScoreColor(report.investment_score)}`}>
+                  {report.investment_score}
+                </div>
+                <Badge variant={scoreBadge.color} className="mt-2">
+                  {scoreBadge.text}
+                </Badge>
               </div>
             </div>
           </CardContent>
@@ -311,53 +376,27 @@ export default function ViewReportPage() {
               <CardContent>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <h4 className="font-semibold mb-3">Architecture Strengths</h4>
+                    <h4 className="font-semibold mb-3">Primary Stack</h4>
                     <ul className="space-y-2">
-                      {report.report_data.technologyAssessment.architectureStrengths.map((strength, index) => (
+                      {report.technologyOverview.primaryStack.map((stack: any, index: number) => (
                         <li key={index} className="text-sm flex items-start gap-2">
                           <CheckCircle className="h-4 w-4 text-green-600 mt-0.5" />
-                          <span>{strength}</span>
+                          <span>{stack.category}: {stack.technologies.join(', ')}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
                   
                   <div>
-                    <h4 className="font-semibold mb-3">Technical Debt</h4>
+                    <h4 className="font-semibold mb-3">Architecture Highlights</h4>
                     <ul className="space-y-2">
-                      {report.report_data.technologyAssessment.technicalDebt.map((debt, index) => (
+                      {report.technologyOverview.architectureHighlights.map((highlight: string, index: number) => (
                         <li key={index} className="text-sm flex items-start gap-2">
-                          <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5" />
-                          <span>{debt}</span>
+                          <CheckCircle className="h-4 w-4 text-green-600 mt-0.5" />
+                          <span>{highlight}</span>
                         </li>
                       ))}
                     </ul>
-                  </div>
-                </div>
-
-                <div className="mt-6">
-                  <h4 className="font-semibold mb-3">Technology Stack</h4>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                    {Object.entries(report.report_data.technologyAssessment.stackOverview).map(([category, technologies]) => (
-                      <div key={category}>
-                        <h5 className="text-sm font-medium text-muted-foreground mb-2 capitalize">{category}</h5>
-                        <div className="space-y-1">
-                          {technologies.map((tech, index) => (
-                            <Badge key={index} variant="secondary" className="text-xs">
-                              {tech}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="mt-6">
-                  <h4 className="font-semibold mb-3">Scalability Analysis</h4>
-                  <div className="space-y-2 text-sm">
-                    <p><strong>Current Capacity:</strong> {report.report_data.technologyAssessment.scalabilityAnalysis.currentCapacity}</p>
-                    <p><strong>Growth Readiness:</strong> {report.report_data.technologyAssessment.scalabilityAnalysis.growthReadiness}</p>
                   </div>
                 </div>
               </CardContent>
@@ -376,49 +415,31 @@ export default function ViewReportPage() {
                     <h4 className="font-semibold mb-3">Market Opportunity</h4>
                     <div className="space-y-3">
                       <div>
-                        <p className="text-sm text-muted-foreground">Total Addressable Market</p>
-                        <p className="text-lg font-semibold">{report.report_data.marketAnalysis.totalAddressableMarket}</p>
+                        <p className="text-sm text-muted-foreground">Market Size</p>
+                        <p className="text-lg font-semibold">{report.marketAnalysis.marketSize}</p>
                       </div>
                       <div>
                         <p className="text-sm text-muted-foreground">Market Growth Rate</p>
-                        <p className="text-lg font-semibold">{report.report_data.marketAnalysis.marketGrowthRate}</p>
+                        <p className="text-lg font-semibold">{report.marketAnalysis.growthRate}</p>
                       </div>
                     </div>
                   </div>
                   
                   <div>
-                    <h4 className="font-semibold mb-3">Customer Metrics</h4>
+                    <h4 className="font-semibold mb-3">Competitive Landscape</h4>
+                    <p className="text-sm text-muted-foreground mb-3">{report.marketAnalysis.competitors[0].name}</p>
                     <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Average Contract Value</span>
-                        <span className="font-semibold">{report.report_data.marketAnalysis.customerAnalysis.averageContractValue}</span>
+                      <div>
+                        <h5 className="text-sm font-medium mb-2">Key Differentiators</h5>
+                        <ul className="space-y-1">
+                          {report.marketAnalysis.differentiators.map((diff: string, index: number) => (
+                            <li key={index} className="text-sm flex items-start gap-2">
+                              <TrendingUp className="h-4 w-4 text-blue-600 mt-0.5" />
+                              <span>{diff}</span>
+                            </li>
+                          ))}
+                        </ul>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Net Promoter Score</span>
-                        <span className="font-semibold">{report.report_data.marketAnalysis.customerAnalysis.netPromoterScore}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Monthly Churn Rate</span>
-                        <span className="font-semibold">{report.report_data.marketAnalysis.customerAnalysis.churnRate}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-6">
-                  <h4 className="font-semibold mb-3">Competitive Landscape</h4>
-                  <p className="text-sm text-muted-foreground mb-3">{report.report_data.marketAnalysis.competitiveLandscape.marketPosition}</p>
-                  <div className="space-y-3">
-                    <div>
-                      <h5 className="text-sm font-medium mb-2">Key Differentiators</h5>
-                      <ul className="space-y-1">
-                        {report.report_data.marketAnalysis.competitiveLandscape.differentiators.map((diff, index) => (
-                          <li key={index} className="text-sm flex items-start gap-2">
-                            <TrendingUp className="h-4 w-4 text-blue-600 mt-0.5" />
-                            <span>{diff}</span>
-                          </li>
-                        ))}
-                      </ul>
                     </div>
                   </div>
                 </div>
@@ -430,18 +451,16 @@ export default function ViewReportPage() {
                       <thead>
                         <tr className="border-b">
                           <th className="text-left py-2">Company</th>
-                          <th className="text-left py-2">Pricing</th>
-                          <th className="text-left py-2">Users</th>
-                          <th className="text-left py-2">Features</th>
+                          <th className="text-left py-2">Market Share</th>
+                          <th className="text-left py-2">Strengths</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {Object.entries(report.report_data.appendices.competitorComparison).map(([company, data]) => (
-                          <tr key={company} className={company === 'Ring4' ? 'font-semibold bg-muted/50' : ''}>
-                            <td className="py-2">{company}</td>
-                            <td className="py-2">{data.price}</td>
-                            <td className="py-2">{data.users}</td>
-                            <td className="py-2">{data.features}</td>
+                        {report.marketAnalysis.competitors.map((competitor: any, index: number) => (
+                          <tr key={index} className={index === 0 ? 'font-semibold bg-muted/50' : ''}>
+                            <td className="py-2">{competitor.name}</td>
+                            <td className="py-2">{competitor.marketShare}</td>
+                            <td className="py-2">{competitor.strengths.join(', ')}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -459,13 +478,13 @@ export default function ViewReportPage() {
                 <CardDescription>Leadership team and organizational strength</CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="mb-6">{report.report_data.teamAssessment.teamStrength}</p>
+                <p className="mb-6">{report.teamInformation.teamStrength}</p>
                 
                 <div className="space-y-6">
                   <div>
-                    <h4 className="font-semibold mb-3">Leadership Team</h4>
+                    <h4 className="font-semibold mb-3">Key Members</h4>
                     <div className="grid gap-4">
-                      {report.report_data.teamAssessment.leadershipTeam.map((member, index) => (
+                      {report.teamInformation.keyMembers.map((member: any, index: number) => (
                         <div key={index} className="border rounded-lg p-4">
                           <div className="flex justify-between items-start">
                             <div>
@@ -473,7 +492,7 @@ export default function ViewReportPage() {
                               <p className="text-sm text-muted-foreground">{member.role}</p>
                             </div>
                           </div>
-                          <p className="text-sm mt-2">{member.background}</p>
+                          <p className="text-sm mt-2">{member.experience}</p>
                         </div>
                       ))}
                     </div>
@@ -484,12 +503,12 @@ export default function ViewReportPage() {
                     <div className="space-y-3">
                       <div>
                         <p className="text-sm text-muted-foreground">Hiring Velocity</p>
-                        <p className="font-semibold">{report.report_data.teamAssessment.hiringVelocity}</p>
+                        <p className="font-semibold">{report.teamInformation.hiringVelocity || "Unknown"}</p>
                       </div>
                       <div>
                         <p className="text-sm text-muted-foreground mb-2">Cultural Factors</p>
                         <div className="flex flex-wrap gap-2">
-                          {report.report_data.teamAssessment.culturalFactors.map((factor, index) => (
+                          {(report.teamInformation.culturalFactors || []).map((factor: string, index: number) => (
                             <Badge key={index} variant="outline">{factor}</Badge>
                           ))}
                         </div>
@@ -510,46 +529,36 @@ export default function ViewReportPage() {
               <CardContent>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <h4 className="font-semibold mb-3">Revenue Metrics</h4>
+                    <h4 className="font-semibold mb-3">Revenue Indicators</h4>
                     <div className="space-y-3">
                       <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Estimated ARR</span>
-                        <span className="font-semibold">{report.report_data.financialIndicators.revenueIndicators.estimatedARR}</span>
+                        <span className="text-sm text-muted-foreground">Annual Revenue 2019</span>
+                        <span className="font-semibold">{report.performanceMetrics.revenue.annual2019}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Growth Rate</span>
-                        <span className="font-semibold">{report.report_data.financialIndicators.revenueIndicators.growthRate}</span>
+                        <span className="text-sm text-muted-foreground">Growth</span>
+                        <span className="font-semibold">{report.performanceMetrics.revenue.growth}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Unit Economics</span>
-                        <span className="font-semibold">{report.report_data.financialIndicators.revenueIndicators.unitEconomics}</span>
+                        <span className="text-sm text-muted-foreground">Recurring Revenue</span>
+                        <span className="font-semibold">{report.performanceMetrics.revenue.recurring}</span>
                       </div>
                     </div>
                   </div>
                   
                   <div>
-                    <h4 className="font-semibold mb-3">Burn & Runway</h4>
-                    <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Burn Rate</span>
-                        <span className="font-semibold">{report.report_data.financialIndicators.burnRate}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Runway</span>
-                        <span className="font-semibold">{report.report_data.financialIndicators.runway}</span>
-                      </div>
+                    <h4 className="font-semibold mb-3">Funding History</h4>
+                    <div className="space-y-2">
+                      {report.fundingHistory.map((round: any, index: number) => (
+                        <div key={index} className="text-sm space-y-1">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline">{round.date}</Badge>
+                            <Badge variant="secondary">{round.round}</Badge>
+                          </div>
+                          <p className="text-muted-foreground">{round.amount}</p>
+                        </div>
+                      ))}
                     </div>
-                  </div>
-                </div>
-
-                <div className="mt-6">
-                  <h4 className="font-semibold mb-3">Funding History</h4>
-                  <div className="space-y-2">
-                    {report.report_data.financialIndicators.fundingHistory.map((round, index) => (
-                      <div key={index} className="flex items-center gap-2">
-                        <Badge variant="outline">{round}</Badge>
-                      </div>
-                    ))}
                   </div>
                 </div>
               </CardContent>
@@ -567,37 +576,37 @@ export default function ViewReportPage() {
                   <div>
                     <h4 className="font-semibold mb-3 flex items-center gap-2">
                       <CheckCircle className="h-5 w-5 text-green-600" />
-                      Green Flags
+                      Investment Score
                     </h4>
-                    <ul className="space-y-2">
-                      {report.report_data.dueDiligenceFlags.greenFlags.map((flag, index) => (
-                        <li key={index} className="text-sm">{flag}</li>
-                      ))}
-                    </ul>
+                    <div className={`text-5xl font-bold ${getScoreColor(report.investment_score)}`}>
+                      {report.investment_score}
+                    </div>
+                    <Badge variant={scoreBadge.color} className="mt-2">
+                      {scoreBadge.text}
+                    </Badge>
                   </div>
                   
                   <div>
                     <h4 className="font-semibold mb-3 flex items-center gap-2">
                       <AlertTriangle className="h-5 w-5 text-yellow-600" />
-                      Yellow Flags
+                      Tech Health Score
                     </h4>
-                    <ul className="space-y-2">
-                      {report.report_data.dueDiligenceFlags.yellowFlags.map((flag, index) => (
-                        <li key={index} className="text-sm">{flag}</li>
-                      ))}
-                    </ul>
+                    <div className={`text-5xl font-bold ${getScoreColor(report.tech_health_score * 10)}`}>
+                      {report.tech_health_score}
+                    </div>
+                    <Badge variant={getScoreBadge(report.tech_health_score * 10).color} className="mt-2">
+                      {getScoreBadge(report.tech_health_score * 10).text}
+                    </Badge>
                   </div>
                   
                   <div>
                     <h4 className="font-semibold mb-3 flex items-center gap-2">
                       <XCircle className="h-5 w-5 text-red-600" />
-                      Red Flags
+                      Tech Health Grade
                     </h4>
-                    <ul className="space-y-2">
-                      {report.report_data.dueDiligenceFlags.redFlags.map((flag, index) => (
-                        <li key={index} className="text-sm">{flag}</li>
-                      ))}
-                    </ul>
+                    <Badge variant={getScoreBadge(report.tech_health_score * 10).color} className="mt-2">
+                      {report.tech_health_grade}
+                    </Badge>
                   </div>
                 </div>
               </CardContent>
@@ -609,10 +618,10 @@ export default function ViewReportPage() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
-                  {report.report_data.recommendedNextSteps.map((step, index) => (
+                  {report.recommendations.map((recommendation: any, index: number) => (
                     <li key={index} className="flex items-start gap-2">
                       <span className="text-blue-600">→</span>
-                      <span className="text-sm">{step}</span>
+                      <span className="text-sm">{recommendation.action}</span>
                     </li>
                   ))}
                 </ul>
@@ -627,19 +636,19 @@ export default function ViewReportPage() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
                     <p className="text-sm text-muted-foreground">Uptime</p>
-                    <p className="font-semibold">{report.report_data.appendices.technicalMetrics.uptime}</p>
+                    <p className="font-semibold">{report.infrastructureDetails.performance.uptime}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">API Response Time</p>
-                    <p className="font-semibold">{report.report_data.appendices.technicalMetrics.apiResponseTime}</p>
+                    <p className="font-semibold">{report.infrastructureDetails.performance.averageResponseTime}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Security Audits</p>
-                    <p className="font-semibold">{report.report_data.appendices.technicalMetrics.securityAudits}</p>
+                    <p className="text-sm text-muted-foreground">Error Rate</p>
+                    <p className="font-semibold">{report.infrastructureDetails.performance.errorRate}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Mobile App Rating</p>
-                    <p className="font-semibold">{report.report_data.appendices.technicalMetrics.mobileAppRating}</p>
+                    <p className="text-sm text-muted-foreground">Availability</p>
+                    <p className="font-semibold">{report.infrastructureDetails.availability}</p>
                   </div>
                 </div>
               </CardContent>
