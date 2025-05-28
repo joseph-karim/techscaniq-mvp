@@ -96,27 +96,26 @@ export default function ScanDetailsPage() {
 
       try {
         // First try to fetch by scan_request_id
-        let { data, error } = await supabase
+        const { data } = await supabase
           .from('scan_reports')
           .select('*')
           .eq('scan_request_id', id)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single()
+          .maybeSingle()
 
-        // If not found, try by report id directly
-        if (error || !data) {
-          const { data: reportData, error: reportError } = await supabase
+        if (data) {
+          setReport(data)
+        } else {
+          // If not found, try by report id directly
+          const { data: reportData } = await supabase
             .from('scan_reports')
             .select('*')
             .eq('id', id)
-            .single()
+            .maybeSingle()
           
-          if (reportError) throw reportError
-          data = reportData
+          if (reportData) {
+            setReport(reportData)
+          }
         }
-
-        setReport(data)
       } catch (error) {
         console.error('Error fetching report:', error)
         toast({
