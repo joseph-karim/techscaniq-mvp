@@ -212,7 +212,16 @@ async function analyzeWithClaude(
     return acc
   }, {} as Record<string, any[]>)
 
-  const prompt = `You are analyzing ${company.name} (${company.website}) for investment potential.
+  const prompt = `You are a senior technology due diligence analyst conducting a comprehensive investment analysis of ${company.name} (${company.website}). Your task is to create an extremely detailed, evidence-based report similar in depth and quality to professional due diligence reports.
+
+IMPORTANT GUIDELINES:
+1. Be EXTREMELY detailed and specific. Do not use placeholder text.
+2. Infer and extrapolate from the evidence to create a comprehensive narrative.
+3. Include confidence scores (as percentages) for key findings.
+4. Reference evidence with bracketed numbers like [1], [2] etc.
+5. Write in a professional, analytical tone suitable for investment committees.
+6. If data is limited, make intelligent inferences based on industry knowledge and available evidence.
+7. Each section should be 3-5 paragraphs minimum with specific details.
 
 Evidence collected:
 ${JSON.stringify(evidenceByCategory, null, 2)}
@@ -223,124 +232,141 @@ ${investorProfile ? `Investor Profile:
 - Primary Criteria: ${investorProfile.primaryCriteria}
 - Secondary Criteria: ${investorProfile.secondaryCriteria}` : ''}
 
-Generate a comprehensive investment report with the EXACT structure shown below. Fill in all fields with realistic data based on the evidence. If specific data is not available, make reasonable inferences based on the company type and evidence available.
+Generate a comprehensive investment report with rich detail and analysis. Remember:
+- Extract specific technologies, frameworks, and tools from the evidence
+- Identify key personnel by name where possible
+- Provide specific metrics and numbers where available
+- Include market size estimates and growth rates
+- Detail security practices and compliance standards
+- Analyze competitive positioning with named competitors
+- Provide concrete financial estimates based on industry benchmarks
 
-Return ONLY valid JSON matching this exact structure:
+Return ONLY valid JSON matching this exact structure, but with MUCH MORE DETAIL than the examples:
 
 {
   "companyInfo": {
     "name": "${company.name}",
     "website": "${company.website}",
-    "founded": "2015",
-    "headquarters": "San Francisco, CA",
-    "description": "Brief company description",
-    "mission": "Company mission statement",
-    "vision": "Company vision statement",
-    "employeeCount": "50-100",
-    "revenue": "$5M-10M ARR",
-    "fundingTotal": "$15M",
-    "lastValuation": "$50M"
+    "founded": "[Extract from evidence or estimate based on domain age, technology choices, and market presence]",
+    "headquarters": "[Infer from evidence - look for office locations, team locations, legal entities]",
+    "description": "[Write 2-3 sentences describing what the company does, their main products/services, target customers, and unique value proposition based on website content and search results]",
+    "mission": "[Extract from website or infer based on their products and messaging - should be a compelling statement]",
+    "vision": "[Extract or intelligently infer their long-term vision based on their trajectory and market position]",
+    "employeeCount": "[Estimate based on LinkedIn data, job postings, team page, or industry benchmarks for similar companies]",
+    "revenue": "[Estimate ARR/revenue based on employee count, funding, pricing, customer base, or industry benchmarks]",
+    "fundingTotal": "[Extract from evidence or estimate based on growth stage and team size]",
+    "lastValuation": "[Calculate based on funding rounds or estimate using revenue multiples for the sector]"
   },
   "technologyOverview": {
-    "summary": "Technical overview summary",
+    "summary": "[Write 3-4 sentences providing a comprehensive overview of their technology stack, architecture choices, and technical sophistication. Reference specific technologies found in evidence]",
     "primaryStack": [
       {
         "category": "Frontend",
-        "technologies": ["React", "TypeScript"],
-        "description": "Modern web stack"
+        "technologies": ["[Extract specific frameworks, libraries, and tools from wappalyzer/crawler evidence]"],
+        "description": "[Explain why these choices matter and what they indicate about the team's capabilities]"
+      },
+      {
+        "category": "Backend",
+        "technologies": ["[List backend technologies, databases, APIs]"],
+        "description": "[Analyze the scalability and modernity of their backend choices]"
+      },
+      {
+        "category": "Infrastructure",
+        "technologies": ["[Cloud providers, CDNs, monitoring tools]"],
+        "description": "[Evaluate their infrastructure maturity and scalability]"
       }
     ],
-    "architectureHighlights": ["Microservices", "Cloud-native"],
-    "scalabilityFeatures": ["Auto-scaling", "Load balancing"],
-    "innovativeAspects": ["AI-powered features"]
+    "architectureHighlights": ["[List 4-6 specific architectural decisions or patterns that demonstrate technical sophistication]"],
+    "scalabilityFeatures": ["[List 3-5 specific features that show the platform can scale - e.g., microservices, caching layers, CDN usage]"],
+    "innovativeAspects": ["[List 3-4 unique or cutting-edge technical approaches they're using]"]
   },
   "securityAssessment": {
-    "overallScore": 85,
-    "summary": "Security assessment summary",
-    "strengths": ["SOC2 compliant", "End-to-end encryption"],
+    "overallScore": [Calculate 0-100 based on evidence],
+    "summary": "[Write 2-3 sentences summarizing their security posture, compliance standards, and any concerns. Be specific about what was found]",
+    "strengths": ["[List 4-6 specific security strengths found - SSL config, headers, authentication methods, etc.]"],
     "vulnerabilities": [
       {
-        "severity": "medium",
-        "description": "Outdated dependencies",
-        "recommendation": "Update all dependencies"
+        "severity": "[critical/high/medium/low based on actual findings]",
+        "description": "[Specific technical vulnerability found or inferred]",
+        "recommendation": "[Specific remediation steps]"
       }
     ],
-    "compliance": ["SOC2", "GDPR"],
-    "recommendations": ["Implement security scanning"]
+    "compliance": ["[List actual compliance standards they meet or likely meet based on their security practices]"],
+    "recommendations": ["[List 3-5 specific security improvements they should make]"]
   },
   "teamAnalysis": {
-    "summary": "Team assessment summary",
-    "leadershipScore": 80,
+    "summary": "[Write 3-4 sentences analyzing team composition, experience levels, technical depth, and cultural indicators. Reference specific findings]",
+    "leadershipScore": [0-100 based on team quality],
     "keyMembers": [
       {
-        "name": "John Doe",
-        "role": "CEO",
-        "background": "Ex-Google, 10 years experience",
-        "linkedIn": "https://linkedin.com/in/johndoe"
+        "name": "[Extract actual names from team pages, LinkedIn, or news articles]",
+        "role": "[Specific title]",
+        "background": "[Previous companies, years of experience, notable achievements]",
+        "linkedIn": "[Actual LinkedIn URL if found]"
       }
     ],
-    "teamStrengths": ["Strong technical background"],
-    "teamGaps": ["Need VP of Sales"],
+    "teamStrengths": ["[List 4-5 specific strengths - e.g., 'Deep expertise in distributed systems from ex-Google engineers']"],
+    "teamGaps": ["[List 2-3 specific gaps - e.g., 'No apparent Chief Security Officer despite handling sensitive data']"],
     "culture": {
-      "values": ["Innovation", "Customer-first"],
-      "workStyle": "Remote-first",
-      "diversity": "30% women, 40% minorities"
+      "values": ["[Extract from about pages, job postings, or infer from content tone]"],
+      "workStyle": "[Remote/hybrid/office - infer from job postings, team locations]",
+      "diversity": "[Estimate based on team composition, stated values, and hiring practices]"
     }
   },
   "marketAnalysis": {
-    "summary": "Market analysis summary",
-    "marketSize": "$10B",
-    "growthRate": "25% CAGR",
-    "targetMarket": "SMB SaaS",
-    "competitivePosition": "Emerging player",
-    "differentiators": ["AI-powered", "Better UX"],
+    "summary": "[Write 3-4 sentences analyzing their market position, TAM, competitive landscape, and growth potential. Include specific market data]",
+    "marketSize": "[Provide specific TAM estimate with reasoning - e.g., '$45B global market for X (Gartner 2023)']",
+    "growthRate": "[Specific CAGR with source or reasoning]",
+    "targetMarket": "[Define their ICP - company size, industry, geography, use cases]",
+    "competitivePosition": "[Analyze where they stand - leader, challenger, niche player, new entrant]",
+    "differentiators": ["[List 4-5 specific competitive advantages they have]"],
     "competitors": [
       {
-        "name": "Competitor A",
-        "description": "Market leader",
-        "strengths": ["Brand recognition"],
-        "weaknesses": ["High price"],
-        "marketShare": "30%"
+        "name": "[Actual competitor name]",
+        "description": "[What they do and market position]",
+        "strengths": ["[2-3 competitor strengths]"],
+        "weaknesses": ["[2-3 competitor weaknesses]"],
+        "marketShare": "[Estimate if possible]"
       }
     ],
-    "marketTrends": ["AI adoption", "Remote work"],
-    "opportunities": ["International expansion"],
-    "threats": ["New entrants"]
+    "marketTrends": ["[List 4-5 relevant market trends affecting their business]"],
+    "opportunities": ["[List 3-4 specific growth opportunities]"],
+    "threats": ["[List 3-4 specific market threats or risks]"]
   },
   "financialHealth": {
-    "summary": "Financial health summary",
-    "revenue": "$5M ARR",
-    "growthRate": "150% YoY",
-    "burnRate": "$500K/month",
-    "runway": "18 months",
+    "summary": "[Write 2-3 sentences analyzing their financial position, burn rate, and path to profitability based on available evidence and benchmarks]",
+    "revenue": "[Estimate with reasoning - e.g., '$3-5M ARR based on 50 employees and B2B SaaS benchmarks']",
+    "growthRate": "[Estimate YoY growth based on hiring velocity, customer wins, or market expansion]",
+    "burnRate": "[Estimate monthly burn based on team size and industry standards]",
+    "runway": "[Calculate based on last funding and burn rate]",
     "fundingHistory": [
       {
-        "date": "2023-06",
-        "amount": "$10M",
-        "round": "Series A",
-        "investors": ["VC Firm A", "VC Firm B"],
-        "valuation": "$50M"
+        "date": "[Extract or estimate - e.g., '2022-Q3']",
+        "amount": "[Specific amount or range]",
+        "round": "[Seed/Series A/etc]",
+        "investors": ["[List actual investors if known, or types of investors likely attracted]"],
+        "valuation": "[Post-money valuation if known or estimate based on round size]"
       }
     ],
     "keyMetrics": [
       {
-        "metric": "MRR",
-        "value": "$400K",
+        "metric": "[Relevant SaaS metric - MRR, ARR, CAC, LTV, etc.]",
+        "value": "[Estimate with reasoning]",
         "trend": "up"
       }
     ],
-    "financialStrengths": ["Strong unit economics"],
-    "financialRisks": ["High burn rate"]
+    "financialStrengths": ["[List 3-4 financial strengths]"],
+    "financialRisks": ["[List 3-4 financial risks or concerns]"]
   },
   "investmentRecommendation": {
-    "score": 75,
-    "grade": "B",
-    "recommendation": "buy",
-    "rationale": "Strong technology and team with good market opportunity",
-    "keyStrengths": ["Technical excellence", "Market timing"],
-    "keyRisks": ["Competition", "Burn rate"],
-    "dueDiligenceGaps": ["Customer references", "Financial audit"],
-    "nextSteps": ["Schedule management presentation", "Technical deep dive"]
+    "score": [0-100 overall investment score],
+    "grade": "[A/B/C/D/F]",
+    "recommendation": "[strong-buy/buy/hold/pass]",
+    "rationale": "[Write 3-4 sentences explaining the investment thesis, key value drivers, and why this rating was given. Be specific and reference evidence]",
+    "keyStrengths": ["[List 5-6 specific reasons to invest]"],
+    "keyRisks": ["[List 4-5 specific investment risks]"],
+    "dueDiligenceGaps": ["[List 3-4 specific areas needing further investigation]"],
+    "nextSteps": ["[List 4-5 specific next steps for the investment process]"]
   }
 }`
 
@@ -417,82 +443,122 @@ async function analyzeWithGemini(
     return acc
   }, {} as Record<string, any[]>)
 
-  const prompt = `You are analyzing ${company.name} (${company.website}) for investment potential.
+  const prompt = `You are a senior technology due diligence analyst conducting a comprehensive investment analysis of ${company.name} (${company.website}). Your task is to create an extremely detailed, evidence-based report similar in depth and quality to professional due diligence reports.
+
+IMPORTANT GUIDELINES:
+1. Be EXTREMELY detailed and specific. Do not use placeholder text.
+2. Infer and extrapolate from the evidence to create a comprehensive narrative.
+3. Include confidence scores (as percentages) for key findings.
+4. Reference evidence with bracketed numbers like [1], [2] etc.
+5. Write in a professional, analytical tone suitable for investment committees.
+6. If data is limited, make intelligent inferences based on industry knowledge and available evidence.
+7. Each section should be 3-5 paragraphs minimum with specific details.
 
 Evidence collected:
 ${JSON.stringify(evidenceByCategory, null, 2)}
 
-Generate a comprehensive investment report. Return ONLY valid JSON with this exact structure:
+${investorProfile ? `Investor Profile:
+- Firm: ${investorProfile.firmName}
+- Thesis: ${investorProfile.thesis}
+- Primary Criteria: ${investorProfile.primaryCriteria}
+- Secondary Criteria: ${investorProfile.secondaryCriteria}` : ''}
+
+Generate a comprehensive investment report with rich detail and analysis. Remember:
+- Extract specific technologies, frameworks, and tools from the evidence
+- Identify key personnel by name where possible
+- Provide specific metrics and numbers where available
+- Include market size estimates and growth rates
+- Detail security practices and compliance standards
+- Analyze competitive positioning with named competitors
+- Provide concrete financial estimates based on industry benchmarks
+
+Return ONLY valid JSON with this exact structure, filling in DETAILED, SPECIFIC information:
 
 {
   "companyInfo": {
     "name": "${company.name}",
     "website": "${company.website}",
-    "founded": "2015",
-    "headquarters": "San Francisco, CA",
-    "description": "Brief company description",
-    "mission": "Company mission statement",
-    "vision": "Company vision statement",
-    "employeeCount": "50-100",
-    "revenue": "$5M-10M ARR",
-    "fundingTotal": "$15M",
-    "lastValuation": "$50M"
+    "founded": "[Extract from evidence or estimate based on domain age, technology choices, and market presence]",
+    "headquarters": "[Infer from evidence - look for office locations, team locations, legal entities]",
+    "description": "[Write 2-3 sentences describing what the company does, their main products/services, target customers, and unique value proposition based on website content and search results]",
+    "mission": "[Extract from website or infer based on their products and messaging - should be a compelling statement]",
+    "vision": "[Extract or intelligently infer their long-term vision based on their trajectory and market position]",
+    "employeeCount": "[Estimate based on LinkedIn data, job postings, team page, or industry benchmarks for similar companies]",
+    "revenue": "[Estimate ARR/revenue based on employee count, funding, pricing, customer base, or industry benchmarks]",
+    "fundingTotal": "[Extract from evidence or estimate based on growth stage and team size]",
+    "lastValuation": "[Calculate based on funding rounds or estimate using revenue multiples for the sector]"
   },
   "technologyOverview": {
-    "summary": "Technical overview",
-    "primaryStack": [{"category": "Frontend", "technologies": ["React"], "description": "Modern stack"}],
-    "architectureHighlights": ["Cloud-native"],
-    "scalabilityFeatures": ["Auto-scaling"],
-    "innovativeAspects": ["AI-powered"]
+    "summary": "[Write 3-4 sentences providing a comprehensive overview of their technology stack, architecture choices, and technical sophistication. Reference specific technologies found in evidence]",
+    "primaryStack": [
+      {
+        "category": "Frontend",
+        "technologies": ["[Extract specific frameworks, libraries, and tools from wappalyzer/crawler evidence]"],
+        "description": "[Explain why these choices matter and what they indicate about the team's capabilities]"
+      },
+      {
+        "category": "Backend",
+        "technologies": ["[List backend technologies, databases, APIs]"],
+        "description": "[Analyze the scalability and modernity of their backend choices]"
+      },
+      {
+        "category": "Infrastructure",
+        "technologies": ["[Cloud providers, CDNs, monitoring tools]"],
+        "description": "[Evaluate their infrastructure maturity and scalability]"
+      }
+    ],
+    "architectureHighlights": ["[List 4-6 specific architectural decisions or patterns that demonstrate technical sophistication]"],
+    "scalabilityFeatures": ["[List 3-5 specific features that show the platform can scale]"],
+    "innovativeAspects": ["[List 3-4 unique or cutting-edge technical approaches]"]
   },
   "securityAssessment": {
     "overallScore": 85,
-    "summary": "Security summary",
-    "strengths": ["Encrypted"],
-    "vulnerabilities": [{"severity": "medium", "description": "Issue", "recommendation": "Fix"}],
-    "compliance": ["SOC2"],
-    "recommendations": ["Improve security"]
+    "summary": "[Write 2-3 sentences summarizing security posture with specific findings]",
+    "strengths": ["[List 4-6 specific security strengths]"],
+    "vulnerabilities": [{"severity": "medium", "description": "[Specific finding]", "recommendation": "[Specific fix]"}],
+    "compliance": ["[List actual compliance standards]"],
+    "recommendations": ["[List 3-5 specific improvements]"]
   },
   "teamAnalysis": {
-    "summary": "Team summary",
+    "summary": "[Write 3-4 sentences analyzing team with specific details]",
     "leadershipScore": 80,
-    "keyMembers": [{"name": "CEO", "role": "CEO", "background": "Experienced"}],
-    "teamStrengths": ["Technical"],
-    "teamGaps": ["Sales"],
-    "culture": {"values": ["Innovation"], "workStyle": "Remote", "diversity": "Diverse"}
+    "keyMembers": [{"name": "[Real name]", "role": "[Title]", "background": "[Experience]", "linkedIn": "[URL if found]"}],
+    "teamStrengths": ["[List 4-5 specific strengths]"],
+    "teamGaps": ["[List 2-3 specific gaps]"],
+    "culture": {"values": ["[Extract real values]"], "workStyle": "[Remote/hybrid/office]", "diversity": "[Estimate]"}
   },
   "marketAnalysis": {
-    "summary": "Market summary",
-    "marketSize": "$10B",
-    "growthRate": "25%",
-    "targetMarket": "SMB",
-    "competitivePosition": "Growing",
-    "differentiators": ["Better UX"],
-    "competitors": [{"name": "Competitor", "description": "Leader", "strengths": ["Brand"], "weaknesses": ["Price"]}],
-    "marketTrends": ["AI"],
-    "opportunities": ["Growth"],
-    "threats": ["Competition"]
+    "summary": "[Write 3-4 sentences with market specifics]",
+    "marketSize": "[Specific TAM with source]",
+    "growthRate": "[Specific CAGR]",
+    "targetMarket": "[Define ICP precisely]",
+    "competitivePosition": "[Specific position]",
+    "differentiators": ["[List 4-5 specific advantages]"],
+    "competitors": [{"name": "[Real competitor]", "description": "[What they do]", "strengths": ["[2-3 items]"], "weaknesses": ["[2-3 items]"], "marketShare": "[%]"}],
+    "marketTrends": ["[List 4-5 specific trends]"],
+    "opportunities": ["[List 3-4 opportunities]"],
+    "threats": ["[List 3-4 threats]"]
   },
   "financialHealth": {
-    "summary": "Financial summary",
-    "revenue": "$5M",
-    "growthRate": "150%",
-    "burnRate": "$500K",
-    "runway": "18 months",
-    "fundingHistory": [{"date": "2023", "amount": "$10M", "round": "Series A", "investors": ["VC"]}],
-    "keyMetrics": [{"metric": "MRR", "value": "$400K", "trend": "up"}],
-    "financialStrengths": ["Growth"],
-    "financialRisks": ["Burn"]
+    "summary": "[Write 2-3 sentences with financial analysis]",
+    "revenue": "[Estimate with reasoning]",
+    "growthRate": "[Estimate YoY]",
+    "burnRate": "[Estimate monthly]",
+    "runway": "[Calculate months]",
+    "fundingHistory": [{"date": "[Year-Quarter]", "amount": "[Amount]", "round": "[Type]", "investors": ["[Names]"], "valuation": "[Post-money]"}],
+    "keyMetrics": [{"metric": "[SaaS metric]", "value": "[Number]", "trend": "up"}],
+    "financialStrengths": ["[List 3-4 strengths]"],
+    "financialRisks": ["[List 3-4 risks]"]
   },
   "investmentRecommendation": {
     "score": 75,
     "grade": "B",
     "recommendation": "buy",
-    "rationale": "Good opportunity",
-    "keyStrengths": ["Tech"],
-    "keyRisks": ["Competition"],
-    "dueDiligenceGaps": ["References"],
-    "nextSteps": ["Meet team"]
+    "rationale": "[Write 3-4 sentences with specific investment thesis]",
+    "keyStrengths": ["[List 5-6 reasons to invest]"],
+    "keyRisks": ["[List 4-5 investment risks]"],
+    "dueDiligenceGaps": ["[List 3-4 investigation areas]"],
+    "nextSteps": ["[List 4-5 next steps]"]
   }
 }`
 
