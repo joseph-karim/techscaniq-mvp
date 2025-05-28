@@ -1,239 +1,332 @@
-Product Requirements Document: TechScanIQ Executive Report Generation System Enhancements
+Product Requirements Document: TechScanIQ Production Enhancement
 
-Project Overview:
-TechScanIQ currently has a basic working implementation with three microservices (website-scanner, tech-intelligence, report-orchestrator) and frontend components for displaying executive technology assessment reports. This PRD outlines enhancements to evolve the system from its current state into a comprehensive, production-ready platform that matches the strategic vision.
+Project Name: TechScanIQ - Enterprise Investment Intelligence Platform
+Version: 2.0
+Date: May 2024
 
-Current State:
-- Working website scanner service that detects technologies and infrastructure
-- Tech intelligence service using Gemini AI for analysis
-- Report orchestrator that coordinates services
-- Frontend components: QuickScanForm, Dashboard, and Report display pages
-- Basic data storage in scan_reports table
+Executive Summary:
+TechScanIQ requires comprehensive enhancements to evolve from a technical demo to a production-ready investment intelligence platform. The current system demonstrates basic capabilities but lacks the depth, reliability, and integration quality needed for institutional investors. This PRD outlines the complete overhaul needed across data collection, AI analysis, system architecture, and user experience.
 
-Strategic Vision:
-Build a robust, evidence-based executive report generation system that automatically collects real data about target companies and synthesizes executive-ready reports with full traceability and human review capabilities.
+Problem Statement:
+Current critical limitations preventing production readiness:
+1. Evidence Collection Gaps:
+   - Collects only basic technical data (HTML, security scans, performance metrics)
+   - No financial data collection (funding, revenue, growth metrics)
+   - No team/personnel information extraction
+   - Limited market intelligence and competitor analysis
+   - High failure rates with external API integrations
+   - Timeouts and worker creation failures in edge functions
 
-Key Requirements:
+2. AI Analysis Quality Issues:
+   - Generic placeholder text instead of detailed analysis
+   - No extraction of specific names, metrics, or technologies
+   - Inconsistent citation generation and evidence linking
+   - API quota exhaustion with free tier models
+   - Poor error handling for AI service failures
 
-1. Enhanced Data Collection Services
-- Integrate additional external APIs for comprehensive data gathering
-- Add security scanning capabilities (SSL Labs, security headers)
-- Implement company intelligence gathering (team, funding, market data)
-- Add historical analysis capabilities for tracking technology evolution
-- Create caching layer to optimize API usage and costs
+3. System Architecture Problems:
+   - Frontend-backend data structure mismatches
+   - Database schema inconsistencies (missing columns, constraint violations)
+   - Edge function memory issues (exit code 137)
+   - JWT verification failures and CORS issues
+   - Schema cache synchronization problems
+
+4. User Experience Limitations:
+   - Reports lack investment-grade depth and specificity
+   - Mock data quality far exceeds actual generated reports
+   - Missing real-time status updates during processing
+   - No progressive loading or partial results display
+   - Limited customization options for report generation
+
+Goals and Objectives:
+1. Build comprehensive evidence collection pipeline with 20+ data sources
+2. Generate institutional-quality reports with verifiable metrics and citations
+3. Achieve 99.9% system reliability with graceful degradation
+4. Process comprehensive reports in under 2 minutes
+5. Support concurrent report generation for 100+ users
+6. Implement progressive enhancement with real-time updates
+
+Target Users:
+- Private Equity Partners evaluating technology investments
+- Venture Capital analysts conducting due diligence
+- Corporate Development teams assessing acquisitions
+- Investment Banks preparing sector analysis
+- Management Consultants analyzing technology companies
+- Admin teams reviewing and validating reports
+
+Functional Requirements:
+
+1. Robust Evidence Collection System
+   a. Financial Data Integration:
+      - Crunchbase API for funding rounds and valuations
+      - LinkedIn Company API for employee growth metrics
+      - SEC Edgar for public company filings
+      - PitchBook/CB Insights for market intelligence
+      - Press release monitoring for announcements
+   
+   b. Team Intelligence Gathering:
+      - LinkedIn People Search for leadership profiles
+      - GitHub contributor analysis for engineering talent
+      - Patent database searches for innovation metrics
+      - Academic publication tracking
+      - Conference speaker identification
+   
+   c. Market Analysis Tools:
+      - Industry report aggregation (Gartner, Forrester)
+      - News sentiment analysis
+      - Job posting analysis for growth indicators
+      - Customer review mining (G2, Capterra)
+      - Social media monitoring for brand perception
+   
+   d. Technical Deep Dive:
+      - GitHub repository analysis for code quality
+      - API documentation assessment
+      - Performance benchmarking against competitors
+      - Comprehensive security auditing
+      - Open source contribution tracking
 
 2. Advanced AI Analysis Engine
-- Implement multi-turn, tool-using AI approach with function calling
-- Enable iterative data gathering where AI can request additional information
-- Add evidence citation system linking every claim to source data
-- Support multi-model ensemble for specialized analysis
-- Implement confidence scoring for all findings
+   a. Multi-Model Architecture:
+      - Claude for nuanced business analysis
+      - Gemini for broad market research
+      - GPT-4 for financial calculations
+      - Consensus mechanism for critical metrics
+      - Fallback chains for API failures
+   
+   b. Specialized Analysis Agents:
+      - Financial metrics calculator
+      - Team assessment evaluator
+      - Market sizing researcher
+      - Technical architecture analyst
+      - Competitive intelligence gatherer
+   
+   c. Evidence-Based Citations:
+      - Automatic citation generation with [1], [2] format
+      - Confidence scoring for each claim
+      - Evidence chain visualization
+      - Source verification links
 
-3. Evidence Management System
-- Store all raw evidence with timestamps and source metadata
-- Create citation tracking system for report transparency
-- Build evidence browsing UI for reviewing source materials
-- Implement data validation and quality control mechanisms
-- Add source verification and cross-referencing capabilities
+3. Resilient System Architecture
+   a. Database Enhancements:
+      - Fix schema inconsistencies and missing columns
+      - Implement proper RLS policies for admin access
+      - Add evidence_items table with proper constraints
+      - Create citation linking tables
+      - Implement caching layer for performance
+   
+   b. Edge Function Optimization:
+      - Implement proper error handling and retries
+      - Add timeout management with graceful degradation
+      - Fix JWT verification and CORS issues
+      - Implement worker pooling to prevent boot failures
+      - Add memory management for long-running processes
+   
+   c. API Integration Framework:
+      - Centralized API key management
+      - Rate limiting and quota tracking
+      - Automatic failover between providers
+      - Request queuing and batching
+      - Cost optimization algorithms
 
-4. Human-in-the-Loop Review System
-- Create advisor dashboard for expert report review
-- Implement side-by-side comparison with evidence viewing
-- Add editing and annotation capabilities
-- Track all human edits for continuous improvement
-- Build approval workflow before report publication
+4. Enhanced User Experience
+   a. Real-Time Processing Updates:
+      - WebSocket integration for live status
+      - Progress indicators for each phase
+      - Partial result streaming
+      - Error recovery options
+      - Time estimates for completion
+   
+   b. Report Customization:
+      - Adjustable analysis depth levels
+      - Section selection and ordering
+      - Custom scoring weight configuration
+      - Multiple export formats (PDF, DOCX, PPT)
+      - White-label branding options
+   
+   c. Review Workflow:
+      - Split-screen AI vs human comparison
+      - Inline annotation capabilities
+      - Evidence verification tools
+      - Bulk approval mechanisms
+      - Audit trail for changes
 
-5. Enhanced Frontend Integration
-- Utilize existing report display components (risk cards, charts, etc.)
-- Add evidence modal for viewing citations inline
-- Implement progress tracking for long-running analyses
-- Create batch processing interface for multiple companies
-- Add export capabilities (PDF generation with branding)
+5. Quality Assurance System
+   a. Automated Testing:
+      - Evidence collection validation
+      - AI response quality checks
+      - Citation accuracy verification
+      - Performance benchmarking
+      - Regression test suite
+   
+   b. Manual Review Process:
+      - Admin review queue
+      - Quality scoring rubrics
+      - Feedback collection system
+      - Continuous improvement tracking
+      - A/B testing for prompts
 
-6. Investment Thesis Alignment
-- Capture investor criteria and priorities
-- Score companies against specific thesis points
-- Identify enablers and blockers for investment
-- Generate overall alignment percentage
-- Provide detailed explanations for each criterion
+Non-Functional Requirements:
+1. Performance:
+   - Report generation < 2 minutes for comprehensive analysis
+   - API response times < 500ms
+   - Dashboard load time < 2 seconds
+   - Concurrent user support: 100+
 
-7. Scalability and Performance
-- Implement proper rate limiting for external APIs
-- Add job queueing for asynchronous processing
-- Create monitoring and alerting system
-- Optimize for sub-10 minute report generation
-- Build fault-tolerant architecture with graceful degradation
+2. Reliability:
+   - 99.9% uptime SLA
+   - Graceful degradation for service failures
+   - Automatic error recovery
+   - Data consistency guarantees
 
-8. Continuous Learning System
-- Log all AI outputs and human corrections
-- Build feedback collection mechanisms
-- Implement prompt refinement based on usage patterns
-- Create knowledge base update process
-- Track report quality metrics over time
+3. Security:
+   - SOC 2 Type II compliance
+   - End-to-end encryption for sensitive data
+   - Role-based access control
+   - Audit logging for all actions
+   - GDPR/CCPA compliance
 
-Technical Constraints:
-- Must integrate with existing Supabase backend
-- Use existing frontend components and styling
-- Maintain compatibility with current edge function architecture
-- Work within Gemini API capabilities and rate limits
-- Respect third-party API terms of service
+4. Scalability:
+   - Horizontal scaling for edge functions
+   - Database connection pooling
+   - CDN integration for static assets
+   - Queue-based processing for heavy operations
+
+Technical Architecture:
+1. Frontend:
+   - Next.js 14 with App Router
+   - TypeScript for type safety
+   - Tailwind CSS for styling
+   - Shadcn UI components
+   - React Query for data fetching
+   - WebSocket for real-time updates
+
+2. Backend:
+   - Supabase for database and auth
+   - Edge Functions for serverless compute
+   - Redis for caching and queues
+   - S3 for document storage
+   - CloudFlare for CDN
+
+3. AI Integration:
+   - Anthropic Claude API
+   - Google Gemini API
+   - OpenAI GPT-4 API
+   - Perplexity for research
+   - Custom prompt engineering
+
+4. Data Pipeline:
+   - Apache Airflow for orchestration
+   - Kafka for event streaming
+   - Elasticsearch for search
+   - PostgreSQL for primary storage
+   - TimescaleDB for metrics
+
+Success Metrics:
+1. Quality Metrics:
+   - Report completeness: 95% of sections with real data
+   - Data accuracy: 90% on verifiable metrics
+   - Analysis depth: 4+ paragraphs per section
+   - Citation coverage: 50+ evidence items per report
+
+2. Performance Metrics:
+   - Average report generation: < 90 seconds
+   - System availability: 99.9%
+   - API success rate: > 95%
+   - User satisfaction: 4.5+ rating
+
+3. Business Metrics:
+   - User adoption: 500+ reports/month
+   - Customer retention: 85%
+   - Revenue per report: $500+
+   - Market penetration: 10% of target
+
+Implementation Phases:
+
+Phase 1: Foundation (Weeks 1-3)
+- Fix database schema issues
+- Implement proper error handling
+- Set up API key management
+- Create fallback mechanisms
+- Deploy monitoring systems
+
+Phase 2: Evidence Collection (Weeks 4-6)
+- Integrate financial data APIs
+- Add team analysis tools
+- Implement market intelligence
+- Enhance technical scanners
+- Build citation system
+
+Phase 3: AI Enhancement (Weeks 7-9)
+- Deploy multi-model architecture
+- Create specialized agents
+- Implement prompt optimization
+- Add consensus mechanisms
+- Build quality scoring
+
+Phase 4: User Experience (Weeks 10-11)
+- Add real-time updates
+- Implement customization
+- Create review workflow
+- Build export system
+- Deploy progressive UI
+
+Phase 5: Quality & Scale (Weeks 12-13)
+- Implement testing suite
+- Add monitoring dashboards
+- Optimize performance
+- Document processes
+- Launch beta program
+
+Risk Mitigation:
+1. Technical Risks:
+   - API rate limits: Implement caching and queuing
+   - Service outages: Build redundancy and fallbacks
+   - Data quality: Multiple source verification
+   - Scaling issues: Load testing and optimization
+
+2. Business Risks:
+   - Competitor advancement: Rapid iteration cycles
+   - Cost overruns: Usage monitoring and alerts
+   - User adoption: Comprehensive onboarding
+   - Regulatory changes: Compliance tracking
+
+3. Operational Risks:
+   - Team bandwidth: Phased implementation
+   - Knowledge gaps: External consultants
+   - Integration complexity: Modular architecture
+   - Quality control: Automated testing
+
+Deliverables:
+1. Enhanced evidence collection system with 25+ data sources
+2. Multi-model AI analysis with specialized agents
+3. Resilient architecture with 99.9% uptime
+4. Real-time processing with progressive updates
+5. Comprehensive testing and monitoring suite
+6. Complete API documentation
+7. User training materials
+8. Operations playbook
+
+Budget Considerations:
+1. API Costs:
+   - AI models: $5,000/month
+   - Data sources: $3,000/month
+   - Infrastructure: $2,000/month
+   - Monitoring: $500/month
+
+2. Development Resources:
+   - Senior engineers: 4 FTE
+   - AI specialists: 2 FTE
+   - DevOps: 1 FTE
+   - QA engineers: 2 FTE
+
+3. Timeline: 13 weeks to production
+4. Total Budget: $350,000
 
 Success Criteria:
-- Generate comprehensive executive reports with real data in under 10 minutes
-- Every claim in reports traceable to verified evidence
-- 90%+ accuracy in technology detection and analysis
-- Support for batch processing of multiple companies
-- Human review capability with full audit trail
-- Scalable to hundreds of concurrent report generations
+1. Generate institutional-quality reports consistently
+2. Achieve sub-2-minute processing times
+3. Maintain 99.9% system availability
+4. Reach 90% customer satisfaction
+5. Process 1,000+ reports monthly
 
-TechScan IQ – SaaS Technical Due Diligence Platform
-
-PROJECT OVERVIEW:
-TechScan IQ is a SaaS platform designed to streamline and democratize technical due diligence for early-stage investors. By combining an AI-driven analysis engine with a structured human-in-the-loop review, the platform turns complex assessments of startups' technology stacks, architecture, security, and code quality into clear, actionable intelligence.
-
-KEY PROBLEMS SOLVED:
-1. Speed – Traditional technical reviews are too slow for fast-moving deals
-2. Cost – Smaller investors often can't afford full-service engineering audits  
-3. Relevance – Generic reports rarely map to an investor's unique thesis
-4. Clarity – Non-engineering stakeholders struggle to interpret highly technical findings
-
-SUCCESS CRITERIA:
-- First scan turnaround under 10 minutes of AI processing + human review in 24 hours
-- Investor satisfaction: ≥ 90% positive feedback on report clarity
-- Adoption: 50 paying scans in first quarter post-launch
-
-CORE FEATURES:
-
-1. Authentication & Multi-Tenant Workspace
-   - Supabase-powered email/password + SSO authentication
-   - Isolated data per organization with row-level security
-   - Two roles: Investor and Admin
-
-2. Interactive Dashboard
-   - Tech Health Score gauge with confidence indicators
-   - Risk cards color-coded by severity (Critical/red, High/orange, Medium/yellow, Low/green)
-   - Key findings summary and scan history
-
-3. Scan Request Form
-   - Company information input (name, website URL)
-   - Thesis-driven tags (multi-select predefined options)
-   - Custom criteria text areas (200-character limit)
-   - Industry and tech stack preferences
-
-4. AI Analysis Engine (Ensemble Approach)
-   - Claude-3 for thesis alignment analysis
-   - GPT-4 for code quality assessment
-   - Gemini-Pro for architecture evaluation
-   - Diffbot + Crawl4ai for evidence scraping and data collection
-
-5. Risk Assessment Module
-   - Color-coded risk cards with severity badges
-   - Business impact descriptions
-   - "View Evidence" functionality with detailed breakdowns
-
-6. Architecture Analysis
-   - Interactive block diagram with clickable components
-   - Component details on click with risk overlays
-   - Exportable architecture images
-
-7. Security & Compliance
-   - Vulnerability list with CVSS scores
-   - GDPR/SOC2 compliance checklist
-   - Data practices summary
-   - Security posture radar chart
-
-8. Code Quality & DevOps
-   - CI/CD pipeline maturity score
-   - Pipeline flow visualization
-   - Technical debt flags and recommendations
-   - Test coverage summary and analysis
-
-9. Evidence & Citation System
-   - Source attribution with timestamps
-   - Confidence scores for each finding
-   - Hover preview functionality
-   - Full evidence modal with detailed sources
-   - AI/human verification status indicators
-
-10. Advisor Review Workflow
-    - Split-screen AI vs. advisor view
-    - Inline annotation and comment system
-    - Approve/moderate/flag actions
-    - Bulk approval capabilities for efficiency
-
-11. Notifications System
-    - Push notifications when scans complete (to Admin)
-    - Alerts when human review finishes (to Investor)
-    - Real-time status updates
-
-12. PDF Export & Reporting
-    - White-label report generation
-    - Customizable headers, footers, and cover pages
-    - Branded export functionality
-
-TECH STACK:
-
-Frontend:
-- Vite + React + TypeScript
-- Tailwind CSS for styling
-- Shadcn UI component library
-- Cursor IDE for AI-powered development
-
-Backend & Database:
-- Supabase (PostgreSQL, Auth, Functions)
-- Netlify Functions for serverless endpoints
-- Row-level security for multi-tenancy
-
-AI & Data Processing:
-- Claude-3, GPT-4, Gemini-Pro APIs
-- Diffbot and Crawl4ai for web scraping
-- JSONB fields in Supabase for evidence storage
-
-DevOps & CI/CD:
-- Netlify automated deployments
-- ESLint and Prettier for code quality
-- Unit, integration, and E2E tests (Playwright/Jest)
-- GitHub Actions for CI pipeline
-
-PDF Generation:
-- Puppeteer or PDFKit for serverless export
-
-DESIGN SYSTEM:
-- Primary colors: Deep navy + slate gray
-- Accent colors: Electric teal, signal green
-- Typography: Inter, Satoshi, IBM Plex Sans
-- Minimal grid-based UI with glassmorphism effects
-- WCAG 2.1 AA compliance for accessibility
-
-USER FLOW:
-1. Investor signs up via email/password or SSO
-2. Completes onboarding wizard for workspace setup
-3. Lands on dashboard with Tech Health Score gauge
-4. Clicks "Request Scan" and fills out company details and thesis criteria
-5. System queues AI analysis and scraping jobs
-6. Admin receives notification when AI draft is ready
-7. Admin reviews in split-screen interface, adds annotations, approves/flags sections
-8. Investor receives notification when review is complete
-9. Investor views final report with interactive elements
-10. Investor can export branded PDF for sharing
-
-NON-FUNCTIONAL REQUIREMENTS:
-- Performance: Dashboard loads < 2 seconds, API responses < 500ms
-- Security: Data encrypted at rest and in transit, RBAC implementation
-- Usability: WCAG 2.1 AA compliance, responsive mobile-first design
-- Maintainability: 80%+ code coverage, enforced linting and formatting
-- Reliability: 99.5% uptime SLA with automated health checks
-
-CONSTRAINTS:
-- AI Model Availability: Rely on API access to Claude-3, GPT-4, Gemini-Pro
-- Supabase Limits: Keep within free/tier limits initially
-- User Load: Expect < 100 concurrent users at launch
-- No GitHub/Jira/AWS integration in V1
-
-OUT OF SCOPE (V1):
-- Integrations with GitHub, Jira, AWS, Docker registries
-- Tiered subscription plans, free trials, volume discounts
-- Advanced compliance certifications (SOC2 audit readiness)
-- Real-time collaboration features (chat, shared annotations)
-- Mobile-native apps (responsive web only)
-- On-premise or self-hosted deployments 
+This comprehensive enhancement will transform TechScanIQ from a promising prototype into a market-leading investment intelligence platform capable of serving the most demanding institutional investors with speed, accuracy, and depth that rivals traditional due diligence processes. 
