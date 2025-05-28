@@ -18,12 +18,21 @@ interface ScanRequest {
   created_at: string
   requestor_name: string
   organization_name: string
+  reports: {
+    id: string;
+    executive_summary?: string | null;
+    investment_score?: number | null;
+    tech_health_score: number | null
+    tech_health_grade: string | null
+    ai_confidence?: number | null;
+  }[] | null;
   ai_confidence: number | null
   tech_health_score: number | null
   tech_health_grade: string | null
   sections: any[]
   risks: any[]
   published_at: string | null
+  report_id?: string | null;
 }
 
 const getStatusColor = (status: string) => {
@@ -57,7 +66,9 @@ export default function ReportsListPage() {
   useEffect(() => {
     async function fetchScanRequests() {
       try {
-        let query = supabase.from('scan_requests').select('*')
+        let query = supabase
+          .from('scan_requests')
+          .select('*, reports (*)')
         
         // Filter based on user role
         if (!isAdmin) {
@@ -195,26 +206,32 @@ export default function ReportsListPage() {
                     Technical assessment covering architecture, security, and scalability
                   </p>
                   
-                  {scan.status === 'complete' && (
+                  {scan.status === 'completed' && scan.reports && scan.reports.length > 0 ? (
                     <div className="grid grid-cols-3 gap-4 rounded-lg border p-3">
                       <div className="text-center">
-                        <div className={`text-2xl font-bold ${getHealthScoreColor(scan.tech_health_score)}`}>
-                          {scan.tech_health_score || 'N/A'}
+                        <div className={`text-2xl font-bold ${getHealthScoreColor(scan.reports[0].tech_health_score)}`}>
+                          {scan.reports[0].tech_health_score ?? 'N/A'}
                         </div>
                         <p className="text-xs text-muted-foreground">Health Score</p>
                       </div>
                       <div className="text-center">
-                        <div className="text-2xl font-bold">{scan.tech_health_grade || '-'}</div>
+                        <div className="text-2xl font-bold">{scan.reports[0].tech_health_grade ?? '-'}</div>
                         <p className="text-xs text-muted-foreground">Grade</p>
                       </div>
                       <div className="text-center">
-                        <div className={`text-2xl font-bold ${scan.ai_confidence && scan.ai_confidence > 80 ? 'text-green-600' : 'text-yellow-600'}`}>
-                          {scan.ai_confidence || '-'}%
+                        <div className={`text-2xl font-bold ${scan.reports[0].ai_confidence && scan.reports[0].ai_confidence > 80 ? 'text-green-600' : 'text-yellow-600'}`}>
+                          {scan.reports[0].ai_confidence ?? '-' }%
                         </div>
                         <p className="text-xs text-muted-foreground">AI Confidence</p>
                       </div>
                     </div>
-                  )}
+                  ) : scan.status === 'completed' ? (
+                     <div className="rounded-lg border p-3 text-center">
+                       <div className="text-sm text-muted-foreground">
+                         Report complete, but detailed scores are pending or not linked.
+                       </div>
+                     </div>
+                  ) : null}
 
                   {(scan.status === 'processing' || scan.status === 'awaiting_review' || scan.status === 'in_review') && (
                     <div className="rounded-lg border p-3 text-center">
@@ -239,7 +256,7 @@ export default function ReportsListPage() {
                       Requested by: {scan.requestor_name}
                     </div>
                     <div className="flex gap-2">
-                      {scan.status === 'complete' && (
+                      {scan.status === 'completed' && scan.reports && scan.reports.length > 0 ? (
                         <>
                           <Button variant="outline" size="sm" asChild>
                             <Link to={`/scans/${scan.id}`}>
@@ -252,7 +269,14 @@ export default function ReportsListPage() {
                             Download
                           </Button>
                         </>
-                      )}
+                      ) : scan.status === 'completed' ? (
+                        <Button variant="outline" size="sm" asChild>
+                          <Link to={`/scans/${scan.id}`}>
+                            <Eye className="mr-2 h-4 w-4" />
+                            View (Details Pending)
+                          </Link>
+                        </Button>
+                      ) : null}
                       {(scan.status === 'processing' || scan.status === 'awaiting_review' || scan.status === 'in_review') && (
                         <Button variant="outline" size="sm" asChild>
                           <Link to={`/scans/${scan.id}`}>
