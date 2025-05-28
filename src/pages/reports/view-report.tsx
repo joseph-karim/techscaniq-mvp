@@ -325,6 +325,9 @@ export default function ViewReport() {
   const { } = useParams()
   const [selectedCitation, setSelectedCitation] = useState<Citation | null>(null)
   const [activeSection, setActiveSection] = useState('executive-summary')
+  
+  // For now, always show Ring4 report - later we can add logic to load different reports by ID
+  // const reportId = id || 'report-ring4-comprehensive'
 
   const handleCitationClick = (citation: Citation) => {
     setSelectedCitation(citation)
