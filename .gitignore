@@ -35,4 +35,8 @@ node_modules/
 # OS specific
 # Task files
 tasks.json
-tasks/ 
+tasks/
+
+# Ignore environment files and local Supabase config
+.env
+supabase/config.toml 

@@ -4,7 +4,6 @@
 
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
-import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.21.0"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -532,6 +531,58 @@ IMPORTANT: Return your complete analysis as a valid JSON object that matches the
 \`\`\``
 }
 
+// Add sleep utility function
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+// Add retry with exponential backoff
+async function retryWithBackoff<T>(
+  fn: () => Promise<T>,
+  maxRetries: number = 3,
+  initialDelay: number = 1000
+): Promise<T> {
+  let lastError: any
+  
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await fn()
+    } catch (error: any) {
+      lastError = error
+      
+      // Check if it's a rate limit error
+      if (error.status === 429 || error.message?.includes('429')) {
+        const delay = initialDelay * Math.pow(2, i) // Exponential backoff
+        console.log(`Rate limited. Retrying in ${delay}ms... (attempt ${i + 1}/${maxRetries})`)
+        
+        // Check for retry-after header in error details
+        const retryAfter = error.errorDetails?.find((d: any) => 
+          d['@type']?.includes('RetryInfo')
+        )?.retryDelay
+        
+        if (retryAfter) {
+          // Parse retry delay (e.g., "29s" -> 29000ms)
+          const match = retryAfter.match(/(\d+)s/)
+          if (match) {
+            const retryDelayMs = parseInt(match[1]) * 1000
+            console.log(`API suggests retry after ${retryDelayMs}ms`)
+            await sleep(Math.max(delay, retryDelayMs))
+          } else {
+            await sleep(delay)
+          }
+        } else {
+          await sleep(delay)
+        }
+      } else {
+        // For non-rate-limit errors, don't retry
+        throw error
+      }
+    }
+  }
+  
+  throw lastError
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -542,39 +593,46 @@ Deno.serve(async (req) => {
     const { investorProfile, targetCompany, contextDocs, apiKey } = await req.json()
 
     // Use provided API key or fall back to environment variable
-    const geminiApiKey = apiKey || Deno.env.get('GOOGLE_API_KEY')
-    if (!geminiApiKey) {
-      throw new Error('Google API key is required')
+    const claudeApiKey = apiKey || Deno.env.get('ANTHROPIC_API_KEY')
+    if (!claudeApiKey) {
+      throw new Error('Anthropic API key is required')
     }
-
-    // Initialize the Gemini API
-    const genAI = new GoogleGenerativeAI(geminiApiKey)
-    
-    // Use Gemini 2.5 Pro preview for enhanced capabilities
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.5-pro-preview-05-06",
-      generationConfig: {
-        temperature: 0.3,  // Lower temperature for more consistent, factual output
-        topK: 20,          // Narrower selection for more focused responses
-        topP: 0.85,        // Slightly lower for more deterministic output
-        maxOutputTokens: 30000,
-      },
-      tools: [
-        { googleSearch: {} },
-        { codeExecution: {} },  // Enable code execution for analysis
-        { url_context: {} }
-      ]
-    })
 
     const prompt = buildComprehensivePrompt(investorProfile, targetCompany, contextDocs)
 
     console.log('Generating comprehensive report for:', targetCompany.name)
     console.log('Report type:', investorProfile ? 'Executive' : 'Standard')
 
-    // Generate the report
-    const result = await model.generateContent(prompt)
-    const response = await result.response
-    const reportText = response.text()
+    // Call Claude API with retry logic
+    const response = await retryWithBackoff(async () => {
+      const resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': claudeApiKey,
+          'anthropic-version': '2023-06-01'
+        },
+        body: JSON.stringify({
+          model: 'claude-3-5-sonnet-20241022',
+          max_tokens: 8192,
+          temperature: 0.3,
+          messages: [{
+            role: 'user',
+            content: prompt
+          }]
+        })
+      })
+
+      if (!resp.ok) {
+        const error = await resp.text()
+        throw new Error(`Claude API error: ${resp.statusText} - ${error}`)
+      }
+
+      return resp
+    }, 3, 2000) // 3 retries, starting with 2 second delay
+    
+    const data = await response.json()
+    const reportText = data.content[0].text
     
     // Parse the JSON from the response text
     let reportData
@@ -613,7 +671,7 @@ Deno.serve(async (req) => {
       scanDate: new Date().toISOString(),
       reportType: investorProfile ? 'executive' : 'standard',
       generatedAt: new Date().toISOString(),
-      modelUsed: "gemini-2.5-pro-preview-05-06",
+      modelUsed: "claude-3-5-sonnet-20241022",
       context: targetCompany.assessmentContext || 'general'
     }
 
@@ -622,9 +680,9 @@ Deno.serve(async (req) => {
         success: true, 
         report: finalReport,
         tokenUsage: {
-          promptTokens: response.usageMetadata?.promptTokenCount,
-          completionTokens: response.usageMetadata?.candidatesTokenCount,
-          totalTokens: response.usageMetadata?.totalTokenCount
+          promptTokens: data.usage?.input_tokens,
+          completionTokens: data.usage?.output_tokens,
+          totalTokens: data.usage?.input_tokens + data.usage?.output_tokens
         }
       }),
       { 

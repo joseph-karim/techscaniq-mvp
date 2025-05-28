@@ -1,4 +1,3 @@
-
 [functions.generate-executive-report]
 enabled = true
 verify_jwt = true
@@ -9,3 +8,25 @@ entrypoint = "./functions/generate-executive-report/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/generate-executive-report/*.html" ]
+
+[functions.google-search-collector]
+enabled = true
+verify_jwt = false
+import_map = "./functions/google-search-collector/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/google-search-collector/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/google-search-collector/*.html" ]
+
+[functions.html-collector]
+enabled = true
+verify_jwt = false
+import_map = "./functions/html-collector/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/html-collector/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/html-collector/*.html" ]
