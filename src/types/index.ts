@@ -78,10 +78,31 @@ export interface Evidence {
 }
 
 export interface Citation {
-  text: string
-  source: string
-  relevance: number
-  verification_status: 'ai-verified' | 'human-verified' | 'pending'
+  id: string
+  claim: string
+  citation_text: string
+  citation_context?: string
+  reasoning: string
+  confidence: number // 0-100 percentage
+  analyst: string
+  review_date: string
+  methodology?: string
+  evidence_item_id: string
+  evidence_summary: Array<{
+    id: string
+    type: string
+    title: string
+    source: string
+    excerpt: string
+    metadata: Record<string, any>
+  }>
+  created_at: string
+  updated_at: string
+  // Legacy fields for backward compatibility
+  text?: string
+  source?: string
+  relevance?: number
+  verification_status?: 'ai-verified' | 'human-verified' | 'pending'
 }
 
 export interface ThesisAlignment {
@@ -111,3 +132,6 @@ export interface AdvisorReview {
   completed_at?: string
   created_at: string
 }
+
+// Export AI workflow types
+export * from './ai-workflow'

@@ -21,6 +21,7 @@ const SettingsPage = lazy(() => import('@/pages/settings'))
 const AnalyticsPage = lazy(() => import('@/pages/analytics'))
 const ReportsListPage = lazy(() => import('@/pages/reports/reports-list'))
 const GenerateExecutiveReport = lazy(() => import('@/pages/reports/GenerateExecutiveReport'))
+const AIWorkflowResults = lazy(() => import('@/pages/demo/ai-workflow-results'))
 
 
 // Route configuration interface
@@ -116,6 +117,12 @@ export const routeConfig: RouteConfig[] = [
         element: <SettingsPage />,
         label: 'Settings',
         showInNav: true
+      },
+      {
+        path: 'demo/ai-workflow-results',
+        element: <AIWorkflowResults />,
+        label: 'AI Workflow Demo',
+        showInNav: false
       },
 
       
