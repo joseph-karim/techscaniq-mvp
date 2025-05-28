@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Building2, TrendingUp, AlertTriangle, CheckCircle, Clock, BarChart3, FileText, Settings, Eye, Hourglass, PlusCircle } from 'lucide-react'
+import { Building2, TrendingUp, AlertTriangle, CheckCircle, Clock, BarChart3, FileText, Settings, Eye, PlusCircle } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -8,7 +8,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
 import { supabase } from '@/lib/supabaseClient'
 import { Scan } from '@/types'
-import { mockDemoScanRequests, DemoScanRequest } from '@/lib/mock-demo-data'
 import { ScanStatusBadge } from '@/components/dashboard/recent-scans-table'
 
 // Mock portfolio company data
