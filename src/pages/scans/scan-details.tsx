@@ -11,6 +11,7 @@ import { formatDate } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
 import { InlineCitation, Citation } from '@/components/reports/EvidenceCitation'
 import { EvidenceModal } from '@/components/reports/EvidenceModal'
+import { mockDemoScanRequests, mockDemoReports, DemoStandardReport } from '@/lib/mock-demo-data'
 
 interface ScanReport {
   id: string
@@ -99,6 +100,117 @@ export default function ScanDetailsPage() {
     async function fetchReport() {
       if (!id) return
       setLoading(true); // Ensure loading is true at the start
+
+      // Check if this is a mock scan first
+      const mockScan = mockDemoScanRequests.find(scan => scan.id === id)
+      if (mockScan && mockScan.mock_report_id) {
+        const mockReport = mockDemoReports[mockScan.mock_report_id]
+        if (mockReport) {
+          // Transform mock report to match ScanReport interface
+          const transformedReport: ScanReport = {
+            id: mockReport.id,
+            company_name: mockReport.company_name,
+            website_url: mockReport.website_url,
+            report_type: mockReport.report_type || 'standard',
+            report_data: {
+              executiveSummary: {
+                investmentScore: mockReport.investment_score,
+                overallAssessment: mockReport.executive_summary,
+                keyFindings: mockReport.sections.investmentRecommendation?.findings.filter(f => f.text.includes('Key Strengths')).map(f => f.text) || [],
+                criticalIssues: mockReport.sections.investmentRecommendation?.findings.filter(f => f.text.includes('Key Risks')).map(f => f.text) || []
+              },
+              companyOverview: {
+                description: mockReport.sections.companyInfo?.summary || '',
+                teamSize: mockReport.sections.companyInfo?.findings.find(f => f.text.includes('Employee Count'))?.text.split(':')[1]?.trim() || '',
+                foundingYear: mockReport.sections.companyInfo?.findings.find(f => f.text.includes('Founded'))?.text.split(':')[1]?.trim() || '',
+                keyProducts: [],
+                businessModel: ''
+              },
+              technologyStack: {
+                frontend: mockReport.sections.technologyOverview?.findings.filter(f => f.category === 'Frontend').map(f => f.text.split(':')[1]?.split('-')[0]?.trim() || '') || [],
+                backend: mockReport.sections.technologyOverview?.findings.filter(f => f.category === 'Backend').map(f => f.text.split(':')[1]?.split('-')[0]?.trim() || '') || [],
+                infrastructure: [],
+                databases: [],
+                aiTools: []
+              },
+              architectureAnalysis: {
+                systemDesign: mockReport.sections.technologyOverview?.findings.find(f => f.text.includes('Architecture'))?.text || '',
+                scalability: mockReport.sections.technologyOverview?.findings.find(f => f.text.includes('Scalability'))?.text || '',
+                security: '',
+                codeQuality: ''
+              },
+              securityAssessment: {
+                overallScore: parseInt(mockReport.sections.securityAssessment?.summary.match(/Score: (\d+)/)?.[1] || '0'),
+                vulnerabilities: mockReport.sections.securityAssessment?.risks || [],
+                compliance: mockReport.sections.securityAssessment?.findings.filter(f => f.category === 'Compliance').map(f => f.text) || [],
+                recommendations: mockReport.sections.securityAssessment?.recommendations?.map(r => r.text) || []
+              },
+              performanceMetrics: {
+                loadTime: '',
+                uptime: '',
+                scalability: '',
+                optimization: ''
+              },
+              teamCapabilities: {
+                teamSize: mockReport.sections.teamAnalysis?.findings.find(f => f.text.includes('Employee Count'))?.text || '',
+                expertise: mockReport.sections.teamAnalysis?.findings.filter(f => f.text.includes('Strengths')).map(f => f.text) || [],
+                gaps: mockReport.sections.teamAnalysis?.findings.filter(f => f.text.includes('Gaps')).map(f => f.text) || [],
+                culture: mockReport.sections.teamAnalysis?.findings.find(f => f.text.includes('Culture'))?.text || ''
+              },
+              marketPosition: {
+                competitors: mockReport.sections.marketAnalysis?.findings.filter(f => f.text.includes('Competitor')).map(f => f.text) || [],
+                differentiation: mockReport.sections.marketAnalysis?.findings.find(f => f.text.includes('Differentiators'))?.text || '',
+                marketSize: mockReport.sections.marketAnalysis?.findings.find(f => f.text.includes('Market Size'))?.text || '',
+                growthPotential: mockReport.sections.marketAnalysis?.findings.find(f => f.text.includes('Growth Rate'))?.text || ''
+              },
+              financialIndicators: {
+                revenueModel: '',
+                fundingHistory: mockReport.sections.financialHealth?.findings.find(f => f.text.includes('Funding History'))?.text || '',
+                burnRate: mockReport.sections.financialHealth?.findings.find(f => f.text.includes('Burn Rate'))?.text || '',
+                profitability: ''
+              },
+              recommendations: {
+                investmentDecision: mockReport.sections.investmentRecommendation?.summary.match(/Recommendation: (\w+)/)?.[1] || 'Pending',
+                keyStrengths: mockReport.sections.investmentRecommendation?.findings.filter(f => f.text.includes('Key Strengths')).map(f => f.text.split(':')[1]?.trim() || '') || [],
+                concerns: mockReport.sections.investmentRecommendation?.findings.filter(f => f.text.includes('Key Risks')).map(f => f.text.split(':')[1]?.trim() || '') || [],
+                nextSteps: mockReport.sections.investmentRecommendation?.findings.filter(f => f.text.includes('Next Steps')).map(f => f.text.split(':')[1]?.trim() || '') || []
+              }
+            },
+            created_at: mockReport.created_at || new Date().toISOString(),
+            scan_request_id: mockScan.id
+          }
+          setReport(transformedReport)
+          
+          // Transform mock citations to match Citation interface
+          if (mockReport.citations) {
+            const transformedCitations: Citation[] = mockReport.citations.map(c => ({
+              id: `citation-${c.citation_number}`,
+              claim_id_from_db: c.claim_id,
+              claim: c.citation_text,
+              evidence: [{
+                id: c.evidence_item_id,
+                type: 'web',
+                title: c.citation_text,
+                source: 'Mock Evidence',
+                url: '',
+                excerpt: c.citation_context || '',
+                metadata: {
+                  confidence: 85
+                }
+              }],
+              reasoning: c.citation_context || '',
+              confidence: 85,
+              analyst: 'TechScan AI',
+              reviewDate: new Date().toISOString(),
+              methodology: 'AI-powered analysis'
+            }))
+            setCitations(transformedCitations)
+          }
+          
+          setLoading(false)
+          return
+        }
+      }
 
       try {
         // Attempt to fetch scan_request first, as `id` is likely scan_request_id

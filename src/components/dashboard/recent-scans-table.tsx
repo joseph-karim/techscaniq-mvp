@@ -1,39 +1,62 @@
 import { Link } from 'react-router-dom'
-import { AlertCircle, CheckCircle2, Clock, FileText, Hourglass } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Clock, FileText, Hourglass, Eye } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { formatDate } from '@/lib/utils'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { Scan } from '@/types'
+import { mockDemoScanRequests, DemoScanRequest } from '@/lib/mock-demo-data'
 
 interface RecentScansTableProps {
   showAll?: boolean
+  // persona?: 'investor' | 'pe' | 'admin'; // Optional: to filter mock data by persona if needed later
 }
 
 export function RecentScansTable({ showAll = false }: RecentScansTableProps) {
-  const [scans, setScans] = useState<Scan[]>([])
+  const [scans, setScans] = useState<(Scan | DemoScanRequest)[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function fetchScans() {
       setLoading(true)
+      let fetchedScans: Scan[] = []
       const { data, error } = await supabase
-        .from('scans')
-        .select('*')
+        .from('scan_requests')
+        .select('*, reports(id)')
         .order('created_at', { ascending: false })
-        .limit(showAll ? 100 : 5)
+        .limit(showAll ? 100 : 10)
+
       if (error) {
-        setScans([])
+        console.error("Error fetching scans:", error)
+        // Continue with mock data even if real fetch fails for demo purposes
       } else {
-        setScans(data || [])
+        fetchedScans = data || []
       }
+
+      // For demo: combine mock scans with fetched scans
+      // Simple merge: add mock scans that are not already present by ID from fetchedScans
+      const combinedScans = [...fetchedScans]
+      const fetchedScanIds = new Set(fetchedScans.map(s => s.id))
+      
+      mockDemoScanRequests.forEach(mockScan => {
+        // Potentially filter mockScans by persona if a persona prop is added
+        if (!fetchedScanIds.has(mockScan.id)) {
+          combinedScans.push(mockScan)
+        }
+      })
+
+      // Sort combined results again by date, ensuring proper type handling for created_at
+      combinedScans.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      
+      setScans(combinedScans.slice(0, showAll ? 100 : 5))
       setLoading(false)
     }
     fetchScans()
   }, [showAll])
 
   if (loading) return <div>Loading...</div>
+  if (scans.length === 0) return <p className="text-muted-foreground p-4 text-center">No recent scans found.</p>
 
   return (
     <div className="overflow-hidden rounded-md border">
@@ -58,10 +81,10 @@ export function RecentScansTable({ showAll = false }: RecentScansTableProps) {
           {scans.map((scan) => (
             <tr key={scan.id} className="border-t">
               <td className="px-4 py-3">
-                <div className="font-medium">{scan.company_id}</div>
+                <div className="font-medium">{scan.company_name}</div>
               </td>
               <td className="px-4 py-3">
-                <ScanStatusBadge status={scan.status} />
+                <ScanStatusBadge status={scan.status as Scan['status']} />
               </td>
               <td className="px-4 py-3 text-muted-foreground">
                 {formatDate(scan.created_at)}
@@ -70,13 +93,24 @@ export function RecentScansTable({ showAll = false }: RecentScansTableProps) {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  disabled={scan.status !== 'complete'}
                   asChild
                 >
-                  <Link to={`/reports/${scan.id}`}>
-                    <FileText className="mr-2 h-4 w-4" />
-                    View Report
-                  </Link>
+                  {(scan.status === 'complete' && (scan as DemoScanRequest).mock_report_id) || 
+                   (scan.status === 'complete' && scan.reports && scan.reports.length > 0) ? (
+                    <Link to={`/scans/${scan.id}`}>
+                      <FileText className="mr-2 h-4 w-4" />
+                      View Report
+                    </Link>
+                  ) : scan.status === 'pending' || scan.status === 'processing' ? (
+                    <Link to={`/scans/${scan.id}`}>
+                      <Eye className="mr-2 h-4 w-4" />
+                      View Status
+                    </Link>
+                  ) : (
+                    <span className="text-muted-foreground italic text-sm">
+                      {scan.status === 'error' ? 'Scan Error' : 'Report Not Ready'}
+                    </span>
+                  )}
                 </Button>
               </td>
             </tr>
@@ -91,7 +125,7 @@ interface ScanStatusBadgeProps {
   status: string
 }
 
-function ScanStatusBadge({ status }: ScanStatusBadgeProps) {
+export function ScanStatusBadge({ status }: ScanStatusBadgeProps) {
   switch (status) {
     case 'pending':
       return (
