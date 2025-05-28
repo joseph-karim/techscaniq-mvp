@@ -205,45 +205,93 @@ export default function ViewReportPage() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [report, setReport] = useState<any>(null)
-  
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   useEffect(() => {
-    async function fetchReport() {
+    async function fetchReportData() {
       if (!id) {
-        setReport(mockReport)
-        setLoading(false)
-        return
+        console.warn('No ID provided to ViewReportPage, falling back to mock data.');
+        setReport(mockReport);
+        setLoading(false);
+        return;
       }
+      setLoading(true);
+      setErrorMessage(null);
 
       try {
-        // Try to fetch from database first
-        const { data, error } = await supabase
-          .from('scan_reports')
-          .select('*')
+        // 1. Assume 'id' is a scan_request_id and try to fetch it
+        const { data: scanRequestData, error: scanRequestError } = await supabase
+          .from('scan_requests')
+          .select('*, reports(*)') // Join with reports table
           .eq('id', id)
-          .maybeSingle()
+          .maybeSingle();
 
-        if (error) {
-          console.error('Error fetching report:', error)
-          // Fall back to mock data
-          setReport(mockReport)
-        } else if (data) {
-          // Use the real data from database
-          setReport(data)
-        } else {
-          // No data found, use mock
-          setReport(mockReport)
+        if (scanRequestError) {
+          console.error(`Error fetching scan_request ${id}:`, scanRequestError);
+          // Do not fall back to mock data yet, try fetching as direct report ID
         }
+
+        if (scanRequestData && scanRequestData.reports && scanRequestData.reports.length > 0) {
+          console.log('Fetched report via scan_request for ID ', id, scanRequestData.reports[0]);
+          setReport(scanRequestData.reports[0]);
+        } else if (scanRequestData && (!scanRequestData.reports || scanRequestData.reports.length === 0)) {
+          // Scan request found, but no linked report in the 'reports' table via join
+          console.warn(`Scan request ${id} found, but no linked report. Checking report_id field: ${scanRequestData.report_id}`);
+          if (scanRequestData.report_id) {
+            const { data: directReport, error: directReportError } = await supabase
+              .from('reports')
+              .select('*')
+              .eq('id', scanRequestData.report_id)
+              .single();
+            if (directReportError) {
+              console.error(`Error fetching report by scan_request.report_id ${scanRequestData.report_id}:`, directReportError);
+              setErrorMessage(`Failed to fetch report (Ref: SR-R). Scan ID: ${id}`);
+            } else if (directReport) {
+              console.log('Fetched report directly via scan_request.report_id for Scan ID ', id, directReport);
+              setReport(directReport);
+            } else {
+               setErrorMessage(`Report not found for scan_request.report_id ${scanRequestData.report_id}. Scan ID: ${id}`);
+            }
+          } else {
+            setErrorMessage(`Scan request ${id} found, but it has no associated report_id.`);
+          }
+        } else {
+          // scanRequestData is null, meaning 'id' was not a scan_request_id. Try as direct report_id.
+          console.log(`ID ${id} is not a scan_request_id. Attempting to fetch as direct report_id from 'reports' table.`);
+          const { data: directReport, error: directReportError } = await supabase
+            .from('reports')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+          if (directReportError) {
+            console.error(`Error fetching direct report ${id}:`, directReportError);
+            setErrorMessage(`Failed to fetch report (Ref: DR). Report ID: ${id}`);
+          } else if (directReport) {
+            console.log('Fetched report directly for ID ', id, directReport);
+            setReport(directReport);
+          } else {
+            setErrorMessage(`Report not found with ID ${id}.`);
+          }
+        }
+
       } catch (error) {
-        console.error('Error:', error)
-        // Fall back to mock data
-        setReport(mockReport)
+        console.error('Unexpected error in fetchReportData:', error);
+        setErrorMessage('An unexpected error occurred while fetching the report.');
       } finally {
-        setLoading(false)
+        setLoading(false);
+        // Only use mock data as an absolute last resort if no report and no specific error message set
+        if (!report && !errorMessage) { 
+          console.warn('All fetch attempts failed for ID ', id, ', falling back to mock data.');
+          setReport(mockReport);
+        } else if (!report && errorMessage) {
+           console.log('Displaying error message instead of mock report: ', errorMessage);
+        }
       }
     }
     
-    fetchReport()
-  }, [id])
+    fetchReportData();
+  }, [id]); // Simplified dependency array for now, can add back report/errorMessage if needed for specific re-fetch logic
 
   if (loading) {
     return (
@@ -251,6 +299,17 @@ export default function ViewReportPage() {
         <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     )
+  }
+
+  if (errorMessage && !report) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen text-center">
+        <AlertTriangle className="h-12 w-12 text-red-500 mb-4" />
+        <h2 className="text-2xl font-semibold mb-2">Report Not Available</h2>
+        <p className="text-muted-foreground mb-6">{errorMessage}</p>
+        <Button onClick={() => navigate('/reports')}>Back to Reports List</Button>
+      </div>
+    );
   }
 
   if (!report) {
