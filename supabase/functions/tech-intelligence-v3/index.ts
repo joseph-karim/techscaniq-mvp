@@ -394,9 +394,15 @@ Return ONLY valid JSON matching this exact structure:
 async function analyzeWithGemini(
   company: any,
   evidenceSummary: any[],
-  investorProfile: any
+  investorProfile: any,
+  req?: Request
 ): Promise<ReportData> {
-  const apiKey = Deno.env.get('GOOGLE_API_KEY')
+  // Check for API key in environment first, then in headers for local dev
+  let apiKey = Deno.env.get('GOOGLE_API_KEY')
+  if (!apiKey && req) {
+    apiKey = req.headers.get('x-google-api-key') || ''
+  }
+  
   if (!apiKey) {
     throw new Error('Google API key not configured')
   }
@@ -529,7 +535,18 @@ Generate a comprehensive investment report. Return ONLY valid JSON with this exa
     const data = await retryWithBackoff(generateContent, 3, 2000)
     
     if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
-      const reportData = JSON.parse(data.candidates[0].content.parts[0].text)
+      const rawText = data.candidates[0].content.parts[0].text;
+      console.log('Raw Gemini response text:', rawText); // Log the raw response
+
+      // Attempt to extract JSON object using regex, similar to Claude
+      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+      
+      if (!jsonMatch) {
+        console.error('Failed to extract JSON from Gemini response text:', rawText);
+        throw new Error('Failed to extract JSON from Gemini response');
+      }
+
+      const reportData = JSON.parse(jsonMatch[0]);
       console.log('Gemini analysis complete')
       return reportData
     } else {
@@ -652,7 +669,8 @@ Deno.serve(async (req) => {
       result = await analyzeWithGemini(
         request.company,
         request.evidenceSummary,
-        request.investorProfile
+        request.investorProfile,
+        req
       )
     }
     

@@ -95,19 +95,30 @@ function isLocal() {
   return url.includes('localhost') || url.includes('127.0.0.1')
 }
 
-async function callSupabaseFunction(functionName: string, payload: any): Promise<any> {
+async function callSupabaseFunction(functionName: string, payload: any, req?: Request): Promise<any> {
   const url = `${Deno.env.get('SUPABASE_URL')}/functions/v1/${functionName}`
   let anonKey = Deno.env.get('SUPABASE_ANON_KEY') || ''
   // For local dev, skip JWT verification by sending a dummy key
   if (isLocal()) {
     anonKey = 'test'
   }
+  
+  const headers: any = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${anonKey}`
+  }
+  
+  // Forward the Google API key header if present (for local dev)
+  if (req) {
+    const googleApiKey = req.headers.get('x-google-api-key')
+    if (googleApiKey) {
+      headers['x-google-api-key'] = googleApiKey
+    }
+  }
+  
   const response = await fetch(url, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${anonKey}`
-    },
+    headers,
     body: JSON.stringify(payload)
   })
   if (!response.ok) {
@@ -120,7 +131,8 @@ async function callSupabaseFunction(functionName: string, payload: any): Promise
 async function collectEvidence(
   companyName: string, 
   companyWebsite: string,
-  depth: 'shallow' | 'deep' | 'comprehensive' = 'deep'
+  depth: 'shallow' | 'deep' | 'comprehensive' = 'deep',
+  req?: Request
 ): Promise<any> {
   console.log(`Collecting evidence with depth: ${depth}`)
   
@@ -130,7 +142,7 @@ async function collectEvidence(
     companyWebsite,
     evidenceTypes: ['technical', 'security', 'team', 'financial', 'market'],
     depth
-  })
+  }, req)
   
   if (!response.success) {
     throw new Error(`Evidence collection failed: ${response.error}`)
@@ -139,7 +151,7 @@ async function collectEvidence(
   return response
 }
 
-async function analyzeWithGemini(company: any, evidence: any, investorProfile?: any): Promise<ComprehensiveReport> {
+async function analyzeWithGemini(company: any, evidence: any, investorProfile?: any, req?: Request): Promise<ComprehensiveReport> {
   console.log('Analyzing with tech-intelligence-v3...')
   
   // Prepare evidence for the new intelligence function
@@ -158,7 +170,7 @@ async function analyzeWithGemini(company: any, evidence: any, investorProfile?: 
     investorProfile,
     analysisType: 'comprehensive_report',
     evidenceCollectionId: evidence.collectionId
-  })
+  }, req)
   
   if (!analysisResult.success) {
     throw new Error(`Analysis failed: ${analysisResult.error}`)
@@ -338,8 +350,20 @@ function createSection(title: string, sectionData: any, evidence: any[]): Analys
 async function storeCitations(report: ComprehensiveReport): Promise<void> {
   console.log('Storing citations for traceability...')
   
+  // Create Supabase client
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+  let supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || Deno.env.get('SUPABASE_ANON_KEY') || ''
+  
+  // For local dev, use anon key or test key
+  if (isLocal() && !supabaseKey) {
+    supabaseKey = 'test'
+  }
+  
+  const supabase = createClient(supabaseUrl, supabaseKey)
+  
   // Extract all claims with evidence
   const citations: any[] = []
+  let citationNumber = 1
   
   Object.entries(report.sections).forEach(([sectionKey, section]) => {
     section.findings.forEach((finding, index) => {
@@ -350,14 +374,32 @@ async function storeCitations(report: ComprehensiveReport): Promise<void> {
           evidence_item_id: evidenceId,
           citation_text: finding.claim,
           citation_context: section.summary,
-          confidence_score: finding.confidence
+          confidence_score: finding.confidence,
+          citation_number: citationNumber++
         })
       })
     })
   })
   
-  // Store citations (would need a separate function or direct DB call)
-  console.log(`Created ${citations.length} citations for report ${report.reportId}`)
+  // Store citations in batches
+  if (citations.length > 0) {
+    const { error } = await supabase
+      .from('report_citations')
+      .insert(citations)
+    
+    if (error) {
+      console.error('Failed to store citations:', error)
+      // Log the specific citation data that failed, if possible
+      // Note: The error from Supabase might not directly point to *which* item in the batch failed
+      // if it's a batch insert error. However, if it's a FK violation, the message might give a clue.
+      // For more granular debugging, one might insert citations one-by-one in a loop here.
+      console.error('Problematic citations data (first few if many):', JSON.stringify(citations.slice(0, 5), null, 2))
+    } else {
+      console.log(`Successfully stored ${citations.length} citations for report ${report.reportId}`)
+    }
+  } else {
+    console.log('No citations to store')
+  }
 }
 
 Deno.serve(async (req) => {
@@ -436,7 +478,8 @@ Deno.serve(async (req) => {
     const evidenceData = await collectEvidence(
       company.name,
       company.website,
-      request.analysisDepth || 'comprehensive'
+      request.analysisDepth || 'comprehensive',
+      req
     )
     console.log(`${logPrefix} [1/3] Evidence collection complete. Evidence count: ${evidenceData?.evidence?.length ?? 0}`)
     
@@ -445,7 +488,8 @@ Deno.serve(async (req) => {
     const report = await analyzeWithGemini(
       company,
       evidenceData,
-      investorProfile
+      investorProfile,
+      req
     )
     console.log(`${logPrefix} [2/3] Gemini analysis complete. Investment score: ${report.investmentScore}`)
     
@@ -460,7 +504,13 @@ Deno.serve(async (req) => {
     
     // Store the report in the database
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    let supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || Deno.env.get('SUPABASE_ANON_KEY') || ''
+    
+    // For local dev, use anon key or test key
+    if (isLocal() && !supabaseKey) {
+      supabaseKey = 'test'
+    }
+    
     const supabase = createClient(supabaseUrl, supabaseKey)
     
     // Get the report data from v3
@@ -580,22 +630,22 @@ Deno.serve(async (req) => {
     
     // Create report record
     const { data: reportRecord, error: reportError } = await supabase
-      .from('scan_reports')
+      .from('reports')
       .insert({
         scan_request_id: request.scan_request_id || null,
         company_name: company.name,
-        company_url: company.website,
-        report_type: 'due_diligence',
-        status: 'completed',
+        report_data: reportData,
+        executive_summary: report.executiveSummary,
         investment_score: report.investmentScore,
+        investment_rationale: report.investmentRationale,
         tech_health_score: report.investmentScore / 10,
         tech_health_grade: 
           report.investmentScore >= 80 ? 'A' :
           report.investmentScore >= 70 ? 'B' :
           report.investmentScore >= 60 ? 'C' :
           report.investmentScore >= 50 ? 'D' : 'F',
-        executive_summary: report.executiveSummary,
-        report_data: reportData,
+        evidence_collection_id: evidenceData.collectionId,
+        metadata: report.metadata,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })

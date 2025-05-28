@@ -205,7 +205,7 @@ export default function ViewReportPage() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [report, setReport] = useState<any>(null)
-
+  
   useEffect(() => {
     async function fetchReport() {
       if (!id) {
@@ -241,7 +241,7 @@ export default function ViewReportPage() {
         setLoading(false)
       }
     }
-
+    
     fetchReport()
   }, [id])
 
@@ -276,11 +276,11 @@ export default function ViewReportPage() {
   }
 
   const scoreBadge = getScoreBadge(report.investment_score)
-
+  
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Header */}
+      {/* Header */}
         <div className="mb-8">
           <Button
             variant="ghost"
@@ -321,7 +321,7 @@ export default function ViewReportPage() {
             </div>
           </div>
         </div>
-
+        
         {/* Executive Summary Card */}
         <Card className="mb-8">
           <CardHeader>
@@ -337,8 +337,8 @@ export default function ViewReportPage() {
                   Investment Rationale
                 </h3>
                 <p className="text-sm">{report.investment_rationale}</p>
-              </div>
-              
+      </div>
+      
               <div>
                 <h3 className="font-semibold mb-3 flex items-center gap-2">
                   <AlertTriangle className="h-5 w-5 text-red-600" />
@@ -364,7 +364,7 @@ export default function ViewReportPage() {
             <TabsTrigger value="financials">Financials</TabsTrigger>
             <TabsTrigger value="diligence">Due Diligence</TabsTrigger>
           </TabsList>
-
+          
           <TabsContent value="technology" className="space-y-6">
             <Card>
               <CardHeader>
@@ -412,10 +412,10 @@ export default function ViewReportPage() {
                   <div>
                     <h4 className="font-semibold mb-3">Market Opportunity</h4>
                     <div className="space-y-3">
-                      <div>
+                    <div>
                         <p className="text-sm text-muted-foreground">Market Size</p>
                         <p className="text-lg font-semibold">{report.marketAnalysis.marketSize}</p>
-                      </div>
+                    </div>
                       <div>
                         <p className="text-sm text-muted-foreground">Market Growth Rate</p>
                         <p className="text-lg font-semibold">{report.marketAnalysis.growthRate}</p>
@@ -468,14 +468,14 @@ export default function ViewReportPage() {
               </CardContent>
             </Card>
           </TabsContent>
-
+          
           <TabsContent value="team" className="space-y-6">
             <Card>
-              <CardHeader>
+                  <CardHeader>
                 <CardTitle>Team Assessment</CardTitle>
                 <CardDescription>Leadership team and organizational strength</CardDescription>
-              </CardHeader>
-              <CardContent>
+                  </CardHeader>
+                  <CardContent>
                 <p className="mb-6">{report.teamInformation.teamStrength}</p>
                 
                 <div className="space-y-6">
@@ -513,11 +513,11 @@ export default function ViewReportPage() {
                       </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                    </div>
+                  </CardContent>
+                </Card>
           </TabsContent>
-
+          
           <TabsContent value="financials" className="space-y-6">
             <Card>
               <CardHeader>
@@ -562,7 +562,7 @@ export default function ViewReportPage() {
               </CardContent>
             </Card>
           </TabsContent>
-
+          
           <TabsContent value="diligence" className="space-y-6">
             <Card>
               <CardHeader>
@@ -581,8 +581,8 @@ export default function ViewReportPage() {
                     </div>
                     <Badge variant={scoreBadge.color} className="mt-2">
                       {scoreBadge.text}
-                    </Badge>
-                  </div>
+                        </Badge>
+                      </div>
                   
                   <div>
                     <h4 className="font-semibold mb-3 flex items-center gap-2">
@@ -609,23 +609,23 @@ export default function ViewReportPage() {
                 </div>
               </CardContent>
             </Card>
-
-            <Card>
-              <CardHeader>
+          
+              <Card>
+                <CardHeader>
                 <CardTitle>Recommended Next Steps</CardTitle>
-              </CardHeader>
-              <CardContent>
+                </CardHeader>
+                <CardContent>
                 <ul className="space-y-2">
                   {report.recommendations.map((recommendation: any, index: number) => (
                     <li key={index} className="flex items-start gap-2">
                       <span className="text-blue-600">→</span>
                       <span className="text-sm">{recommendation.action}</span>
                     </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-
+                      ))}
+                    </ul>
+                </CardContent>
+              </Card>
+          
             <Card>
               <CardHeader>
                 <CardTitle>Technical Metrics</CardTitle>
@@ -639,15 +639,15 @@ export default function ViewReportPage() {
                   <div>
                     <p className="text-sm text-muted-foreground">API Response Time</p>
                     <p className="font-semibold">{report.infrastructureDetails.performance.averageResponseTime}</p>
-                  </div>
+                </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Error Rate</p>
                     <p className="font-semibold">{report.infrastructureDetails.performance.errorRate}</p>
-                  </div>
+                        </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Availability</p>
                     <p className="font-semibold">{report.infrastructureDetails.availability}</p>
-                  </div>
+                      </div>
                 </div>
               </CardContent>
             </Card>

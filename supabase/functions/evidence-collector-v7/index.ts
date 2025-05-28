@@ -8,6 +8,13 @@ const corsHeaders = {
   'Access-Control-Max-Age': '86400',
 }
 
+// Function to determine if running locally (simplified)
+function isLocal(): boolean {
+  // If Deno is not defined, assume not running in a local Supabase Edge Function environment
+  // This is a simplification and might need adjustment based on actual deployment vs. local setup.
+  return typeof Deno !== 'undefined' && (Deno.env.get('SUPABASE_URL')?.includes('localhost') || Deno.env.get('SUPABASE_URL')?.includes('127.0.0.1'));
+}
+
 interface EvidenceRequest {
   companyName: string
   companyWebsite: string
@@ -33,42 +40,68 @@ interface Evidence {
     confidence?: number
     [key: string]: any
   }
+  _original_crypto_id?: string;
 }
 
 // Call another Supabase function with timeout
-async function callSupabaseFunction(functionName: string, payload: any, timeout = 30000): Promise<any> {
-  const baseUrl = Deno.env.get('SUPABASE_URL') || 'http://localhost:54321'
-  const anonKey = Deno.env.get('SUPABASE_ANON_KEY') || ''
-  
-  const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), timeout)
-  
-  try {
-    const response = await fetch(`${baseUrl}/functions/v1/${functionName}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${anonKey}`,
-      },
-      body: JSON.stringify(payload),
-      signal: controller.signal
-    })
-    
-    clearTimeout(timeoutId)
-    const data = await response.json()
-    
-    if (!response.ok) {
-      throw new Error(`Function ${functionName} failed: ${JSON.stringify(data)}`)
-    }
-    
-    return data
-  } catch (error) {
-    clearTimeout(timeoutId)
-    if (error.name === 'AbortError') {
-      throw new Error(`Function ${functionName} timed out after ${timeout}ms`)
-    }
-    throw error
+async function callSupabaseFunction(functionName: string, payload: any, timeout: number = 30000, req?: Request): Promise<any> {
+  // Ensure SUPABASE_URL and SUPABASE_ANON_KEY are retrieved safely
+  const supabaseUrl = typeof Deno !== 'undefined' ? Deno.env.get('SUPABASE_URL') : undefined;
+  let anonKey = typeof Deno !== 'undefined' ? Deno.env.get('SUPABASE_ANON_KEY') : undefined;
+
+  if (!supabaseUrl || !anonKey) {
+    console.error('Supabase URL or Anon Key is not defined. Ensure environment variables are set.');
+    // Potentially throw an error or return a more specific error response
+    // For now, let's attempt to proceed but log the critical issue.
+    // This might still fail if the URL/key are essential for the fetch call.
   }
+
+  const url = `${supabaseUrl}/functions/v1/${functionName}`
+  
+  if (isLocal()) {
+    // In local dev, supabase-js might handle auth differently, 
+    // or we might use a service_role key for direct calls if not simulating user context.
+    // For direct function-to-function calls locally, often a test/anon key is fine if JWT isn't strictly enforced by the called function.
+    anonKey = anonKey || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' // Fallback to a generic anon key for local if needed
+  }
+  
+  const headers: any = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${anonKey}`
+  }
+  
+  // Forward the Google API key header if present (for local dev)
+  if (req) {
+    const googleApiKey = req.headers.get('x-google-api-key')
+    if (googleApiKey) {
+      headers['x-google-api-key'] = googleApiKey
+    }
+  }
+  
+  const response = await Promise.race([
+    fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
+    }),
+    new Promise<Response>((_, reject) =>
+      setTimeout(() => reject(new Error(`Function ${functionName} timed out after ${timeout}ms`)), timeout)
+    ),
+  ])
+
+  const text = await response.text()
+  let result
+  try {
+    result = text ? JSON.parse(text) : {}
+  } catch {
+    result = { success: false, error: text }
+  }
+  
+  if (!response.ok || !result.success) {
+    throw new Error(`Function ${functionName} failed: ${JSON.stringify(result)}`)
+  }
+  
+  return result
 }
 
 // Generate unique ID
@@ -168,7 +201,13 @@ function createEvidence(type: string, category: string, data: any): Evidence {
 }
 
 // Main evidence collection orchestrator
-async function collectAllEvidence(companyName: string, companyWebsite: string, depth: string): Promise<Evidence[]> {
+async function collectAllEvidence(
+  companyName: string,
+  companyWebsite: string,
+  evidenceTypes: string[],
+  depth: 'shallow' | 'deep' | 'comprehensive',
+  req?: Request
+): Promise<Evidence[]> {
   const allEvidence: Evidence[] = []
   
   console.log(`Starting comprehensive evidence collection for ${companyName}`)
@@ -176,7 +215,7 @@ async function collectAllEvidence(companyName: string, companyWebsite: string, d
   console.log(`Depth: ${depth}`)
   
   // Phase 1: Basic content and business info (always run)
-  const phase1Promises = []
+  const phase1Promises: Promise<Evidence | null>[] = []
   
   // Use HTML collector for main content
   phase1Promises.push(
@@ -186,7 +225,7 @@ async function collectAllEvidence(companyName: string, companyWebsite: string, d
         timeout: 15000,
         userAgent: 'TechScanIQ/1.0 (Investment Analysis Bot)'
       }
-    }, 20000).then(result => {
+    }, 20000, req).then(result => {
       if (result?.success && result.html) {
         console.log('Got HTML from html-collector')
         return createEvidence('website_content', 'technology', {
@@ -211,7 +250,7 @@ async function collectAllEvidence(companyName: string, companyWebsite: string, d
       companyWebsite,
       searchType: 'general',
       maxResults: 5
-    }, 30000).then(result => {
+    }, 30000, req).then(result => {
       if (result?.success && result.results?.length > 0) {
         console.log('Got business info from Google Search')
         return createEvidence('business_overview', 'general', {
@@ -237,7 +276,7 @@ async function collectAllEvidence(companyName: string, companyWebsite: string, d
         extractScripts: true,
         extractAPIs: true
       }
-    }, 20000).then(result => {
+    }, 20000, req).then(result => {
       if (result?.success && result.results?.[0]) {
         console.log('Got technical data from Playwright crawler')
         return createEvidence('deep_crawl', 'technology', {
@@ -262,7 +301,7 @@ async function collectAllEvidence(companyName: string, companyWebsite: string, d
   })
 
   // Phase 2: Technical analysis tools (always run)
-  const phase2Promises = []
+  const phase2Promises: Promise<Evidence | null>[] = []
   
   // Get HTML first for tools that need it - try multiple sources
   const htmlPromise = (async (): Promise<{ html: string; source: string; metadata?: any; technologies?: any[] } | null> => {
@@ -273,7 +312,7 @@ async function collectAllEvidence(companyName: string, companyWebsite: string, d
       const htmlResult = await callSupabaseFunction('html-collector', {
         url: companyWebsite,
         options: { timeout: 15000 }
-      }, 20000)
+      }, 20000, req)
       
       if (htmlResult?.success && htmlResult.html) {
         console.log('Got HTML from html-collector for analysis')
@@ -297,7 +336,7 @@ async function collectAllEvidence(companyName: string, companyWebsite: string, d
             extractScripts: true,
             extractAPIs: true
           }
-        }, 20000)
+        }, 20000, req)
         
         if (playwrightResult?.success && playwrightResult.results?.[0]?.html) {
           console.log('Got HTML from Playwright crawler as fallback')
@@ -323,7 +362,7 @@ async function collectAllEvidence(companyName: string, companyWebsite: string, d
           const wappalyzerResult = await callSupabaseFunction('wappalyzer-analyzer', {
             url: companyWebsite,
             html: htmlData.html
-          }, 15000)
+          }, 15000, req)
           
           if (wappalyzerResult?.success) {
             console.log('Wappalyzer analysis completed')
@@ -350,7 +389,7 @@ async function collectAllEvidence(companyName: string, companyWebsite: string, d
     callSupabaseFunction('security-scanner', {
       url: companyWebsite,
       checks: ['headers', 'ssl', 'cookies']
-    }, 15000).then(result => {
+    }, 15000, req).then(result => {
       if (result?.success) {
         console.log('Security analysis completed')
         return createEvidence('security_analysis', 'security', {
@@ -369,15 +408,15 @@ async function collectAllEvidence(companyName: string, companyWebsite: string, d
 
   // SSL analysis
   phase2Promises.push(
-    callSupabaseFunction('ssl-analyzer', {
-      hostname: new URL(companyWebsite).hostname
-    }, 15000).then(result => {
+    callSupabaseFunction('testssl-scanner', {
+      url: companyWebsite
+    }, 15000, req).then(result => {
       if (result?.success) {
         console.log('SSL analysis completed')
         return createEvidence('ssl_analysis', 'security', {
           hostname: new URL(companyWebsite).hostname,
-          sslData: result.analysis || {},
-          source: 'ssl-analyzer'
+          sslData: result.data || {},
+          source: 'testssl-scanner'
         })
       }
       return null
@@ -387,18 +426,18 @@ async function collectAllEvidence(companyName: string, companyWebsite: string, d
     })
   )
 
-  // Performance metrics (simulated)
+  // Performance metrics
   phase2Promises.push(
-    callSupabaseFunction('lighthouse-simulator', {
+    callSupabaseFunction('performance-analyzer', {
       url: companyWebsite
-    }, 15000).then(result => {
+    }, 15000, req).then(result => {
       if (result?.success) {
         console.log('Performance analysis completed')
         return createEvidence('performance_metrics', 'infrastructure', {
           url: companyWebsite,
           metrics: result.metrics || {},
           score: result.score || 0,
-          source: 'lighthouse-simulator'
+          source: 'performance-analyzer'
         })
       }
       return null
@@ -418,7 +457,7 @@ async function collectAllEvidence(companyName: string, companyWebsite: string, d
 
   // Phase 3: Advanced searches (based on depth)
   if (depth === 'comprehensive') {
-    const phase3Promises = []
+    const phase3Promises: Promise<Evidence | null>[] = []
 
     // Team information search
     phase3Promises.push(
@@ -428,7 +467,7 @@ async function collectAllEvidence(companyName: string, companyWebsite: string, d
         companyWebsite,
         searchType: 'team',
         maxResults: 5
-      }, 30000).then(result => {
+      }, 30000, req).then(result => {
         if (result?.success && result.results?.length > 0) {
           console.log('Got team info from Google Search')
           return createEvidence('team_info', 'team', {
@@ -453,7 +492,7 @@ async function collectAllEvidence(companyName: string, companyWebsite: string, d
         companyWebsite,
         searchType: 'market',
         maxResults: 5
-      }, 30000).then(result => {
+      }, 30000, req).then(result => {
         if (result?.success && result.results?.length > 0) {
           console.log('Got market info from Google Search')
           return createEvidence('market_analysis', 'market', {
@@ -478,7 +517,7 @@ async function collectAllEvidence(companyName: string, companyWebsite: string, d
         companyWebsite,
         searchType: 'financial',
         maxResults: 5
-      }, 30000).then(result => {
+      }, 30000, req).then(result => {
         if (result?.success && result.results?.length > 0) {
           console.log('Got financial info from Google Search')
           return createEvidence('financial_info', 'financial', {
@@ -503,7 +542,7 @@ async function collectAllEvidence(companyName: string, companyWebsite: string, d
         companyWebsite,
         searchType: 'technology',
         maxResults: 5
-      }, 30000).then(result => {
+      }, 30000, req).then(result => {
         if (result?.success && result.results?.length > 0) {
           console.log('Got tech deep dive from Google Search')
           return createEvidence('tech_deep_dive', 'technology', {
@@ -523,13 +562,13 @@ async function collectAllEvidence(companyName: string, companyWebsite: string, d
     // Vulnerability scanning
     phase3Promises.push(
       callSupabaseFunction('nuclei-scanner', {
-        target: companyWebsite,
+        url: companyWebsite,
         templates: ['basic', 'security']
-      }, 30000).then(result => {
+      }, 30000, req).then(result => {
         if (result?.success) {
           console.log('Vulnerability scan completed')
           return createEvidence('vulnerability_scan', 'security', {
-            target: companyWebsite,
+            url: companyWebsite,
             findings: result.findings || [],
             summary: result.summary || {},
             source: 'nuclei-scanner'
@@ -568,63 +607,123 @@ Deno.serve(async (req) => {
     console.log(`Starting evidence collection v7 for ${companyName}`)
     
     // Collect all evidence using all available tools
-    const evidence = await collectAllEvidence(companyName, companyWebsite, depth)
+    const collectedRawEvidence = await collectAllEvidence(companyName, companyWebsite, [], depth, req)
     
     // Store in database
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const supabase = createClient(supabaseUrl, supabaseKey)
     
-    // Create collection record
+    let collectionId: string | undefined = undefined;
+    const successfullyStoredEvidence: Evidence[] = [];
+    let collectionUpdateError: any = null;
+
+    // Create collection record first
     const { data: collection, error: collectionError } = await supabase
       .from('evidence_collections')
       .insert({
         company_name: companyName,
         company_website: companyWebsite,
-        evidence_count: evidence.length,
-        status: 'completed',
+        evidence_count: 0, // Initialize with 0, will update later
+        status: 'processing', // Initial status
         collection_type: depth,
         metadata: {
-          evidenceTypes: [...new Set(evidence.map(e => e.type))],
-          tools: [...new Set(evidence.map(e => e.source.tool))],
-          duration: Date.now() - startTime
+          attemptedEvidenceTypes: [...new Set(collectedRawEvidence.map(e => e.type))],
+          attemptedTools: [...new Set(collectedRawEvidence.map(e => e.source.tool))],
+          initialAttemptCount: collectedRawEvidence.length,
+          duration: 0 // Will be updated later
         }
       })
       .select()
       .single()
-    
+
     if (collectionError) {
-      console.error('Failed to store collection:', collectionError)
-    } else if (collection) {
-      // Store evidence items
-      const evidenceItems = evidence.map(e => ({
-        collection_id: collection.id,
-        evidence_id: e.id,
-        type: e.type,
-        source_data: e.source,
-        content_data: e.content,
-        metadata: e.metadata || {},
-        company_name: companyName,
-        breadcrumbs: e.source.tool ? [{ tool: e.source.tool, timestamp: e.source.timestamp }] : [],
-        classifications: getClassifications(e)
-      }))
-      
-      const { error: itemsError } = await supabase
-        .from('evidence_items')
-        .insert(evidenceItems)
-      
-      if (itemsError) {
-        console.error('Failed to store evidence items:', itemsError)
+      console.error('Failed to create initial evidence_collections record:', collectionError)
+      throw new Error(`Failed to create evidence collection: ${collectionError.message}`);
+    }
+    
+    collectionId = collection.id;
+    console.log(`Created evidence_collections record with ID: ${collectionId}`);
+
+    if (collectedRawEvidence.length > 0) {
+      for (const rawEvidence of collectedRawEvidence) {
+        const evidenceItemToInsert = {
+          collection_id: collectionId,
+          evidence_id: rawEvidence.id,
+          type: rawEvidence.type,
+          source_data: rawEvidence.source,
+          content_data: rawEvidence.content,
+          metadata: rawEvidence.metadata || {},
+          company_name: companyName,
+          breadcrumbs: rawEvidence.source.tool ? [{ tool: rawEvidence.source.tool, timestamp: rawEvidence.source.timestamp }] : [],
+          classifications: getClassifications(rawEvidence)
+        };
+
+        const { data: insertedItemDataArray, error: itemInsertError } = await supabase
+          .from('evidence_items')
+          .insert(evidenceItemToInsert)
+          .select('id, evidence_id')
+
+        if (itemInsertError || !insertedItemDataArray || insertedItemDataArray.length === 0) {
+          console.warn(`Failed to store evidence item with original ID ${rawEvidence.id} of type ${rawEvidence.type}:`, itemInsertError?.message || 'No data returned from insert');
+        } else {
+          const insertedItemData = insertedItemDataArray[0];
+          successfullyStoredEvidence.push({
+            ...rawEvidence,
+            id: insertedItemData.id,
+            _original_crypto_id: insertedItemData.evidence_id || rawEvidence.id
+          });
+        }
       }
+
+      // Update the collection record with the actual count and status
+      const { error: collectionUpdateItemsError } = await supabase
+        .from('evidence_collections')
+        .update({
+          evidence_count: successfullyStoredEvidence.length,
+          status: successfullyStoredEvidence.length > 0 ? 'completed' : 'failed',
+          metadata: {
+            ...collection.metadata,
+            finalStoredCount: successfullyStoredEvidence.length,
+            duration: Date.now() - startTime
+          }
+        })
+        .eq('id', collectionId);
+
+      if (collectionUpdateItemsError) {
+        console.error('Failed to update evidence_collections record with final count:', collectionUpdateItemsError);
+        collectionUpdateError = collectionUpdateItemsError;
+      }
+      
+      if (successfullyStoredEvidence.length === 0 && collectedRawEvidence.length > 0) {
+        throw new Error(`Evidence collection attempted ${collectedRawEvidence.length} items, but failed to store any. Last collection update error: ${collectionUpdateError?.message}`);
+      }
+
+    } else {
+      const { error: emptyCollectionUpdateError } = await supabase
+        .from('evidence_collections')
+        .update({
+          status: 'completed',
+          evidence_count: 0,
+          metadata: {
+            ...collection.metadata,
+            finalStoredCount: 0,
+            duration: Date.now() - startTime
+          }
+        })
+        .eq('id', collectionId);
+        if (emptyCollectionUpdateError) {
+            console.error('Failed to update empty evidence_collections record:', emptyCollectionUpdateError);
+        }
     }
     
     const totalTime = Date.now() - startTime
-    console.log(`Evidence collection complete. Total evidence: ${evidence.length}`)
+    console.log(`Evidence collection process complete. Successfully stored evidence: ${successfullyStoredEvidence.length} out of ${collectedRawEvidence.length} attempted.`)
     console.log(`Time taken: ${totalTime}ms`)
-    console.log(`Tools used: ${[...new Set(evidence.map(e => e.source.tool))].join(', ')}`)
+    console.log(`Tools used for successful items: ${[...new Set(successfullyStoredEvidence.map(e => e.source.tool))].join(', ')}`)
     
-    // Add classifications to evidence before returning
-    const evidenceWithClassifications = evidence.map(e => ({
+    // Add classifications to successfully stored evidence before returning
+    const evidenceWithClassifications = successfullyStoredEvidence.map(e => ({
       ...e,
       classifications: getClassifications(e)
     }))
@@ -632,15 +731,17 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({
       success: true,
       evidence: evidenceWithClassifications,
-      collectionId: collection?.id,
+      collectionId: collectionId,
       summary: {
-        total: evidence.length,
-        byType: evidence.reduce((acc, e) => {
+        total: successfullyStoredEvidence.length,
+        byType: successfullyStoredEvidence.reduce((acc, e) => {
           acc[e.type] = (acc[e.type] || 0) + 1
           return acc
         }, {} as Record<string, number>),
-        tools: [...new Set(evidence.map(e => e.source.tool))],
-        duration: totalTime
+        tools: [...new Set(successfullyStoredEvidence.map(e => e.source.tool))],
+        duration: totalTime,
+        attemptedCount: collectedRawEvidence.length,
+        successCount: successfullyStoredEvidence.length
       }
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }

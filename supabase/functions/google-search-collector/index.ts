@@ -56,36 +56,42 @@ async function fetchWithTimeout(url: string, options: RequestInit, timeout = 300
   }
 }
 
-async function searchWithGemini(request: SearchRequest): Promise<SearchResult> {
-  const apiKey = Deno.env.get('GOOGLE_API_KEY')
+async function searchWithGemini(searchRequest: SearchRequest, req?: Request): Promise<SearchResult> {
+  // Check for API key in environment first, then in headers for local dev
+  let apiKey = Deno.env.get('GOOGLE_API_KEY')
+  if (!apiKey && req) {
+    apiKey = req.headers.get('x-google-api-key') || ''
+  }
+  
   if (!apiKey) {
     throw new Error('Google API key not configured')
   }
 
   const startTime = Date.now()
+  const searchResults: Array<{title: string, url: string, snippet: string, content?: string}> = []
   
   try {
-    console.log(`Searching with Gemini 2.0 Flash: ${request.query}`)
+    console.log(`Searching with Gemini 2.0 Flash: ${searchRequest.query}`)
     
     // Construct the search prompt based on search type
-    let searchPrompt = request.query
+    let searchPrompt = searchRequest.query
     
-    if (request.companyName && request.companyWebsite) {
-      switch (request.searchType) {
+    if (searchRequest.companyName && searchRequest.companyWebsite) {
+      switch (searchRequest.searchType) {
         case 'technology':
-          searchPrompt = `Technology stack and technical details for ${request.companyName} (${request.companyWebsite}): ${request.query}`
+          searchPrompt = `Technology stack and technical details for ${searchRequest.companyName} (${searchRequest.companyWebsite}): ${searchRequest.query}`
           break
         case 'team':
-          searchPrompt = `Team information, founders, executives for ${request.companyName}: ${request.query}`
+          searchPrompt = `Team information, founders, executives for ${searchRequest.companyName}: ${searchRequest.query}`
           break
         case 'market':
-          searchPrompt = `Market analysis, competitors, industry for ${request.companyName}: ${request.query}`
+          searchPrompt = `Market analysis, competitors, industry for ${searchRequest.companyName}: ${searchRequest.query}`
           break
         case 'financial':
-          searchPrompt = `Funding, revenue, financial information for ${request.companyName}: ${request.query}`
+          searchPrompt = `Funding, revenue, financial information for ${searchRequest.companyName}: ${searchRequest.query}`
           break
         default:
-          searchPrompt = `${request.companyName} ${request.query}`
+          searchPrompt = `${searchRequest.companyName} ${searchRequest.query}`
       }
     }
 
@@ -138,13 +144,11 @@ async function searchWithGemini(request: SearchRequest): Promise<SearchResult> {
     const groundingMetadata = data.candidates?.[0]?.groundingMetadata
     
     // Parse search results from grounding metadata
-    const searchResults: Array<{title: string, url: string, snippet: string, content?: string}> = []
-    
     if (groundingMetadata?.searchEntryPoint?.renderedContent) {
       // Extract search results from the grounding metadata
       const searchEntries = groundingMetadata.groundingSupports || []
       
-      for (const entry of searchEntries.slice(0, request.maxResults || 10)) {
+      for (const entry of searchEntries.slice(0, searchRequest.maxResults || 10)) {
         if (entry.segment && entry.groundingChunkIndices) {
           searchResults.push({
             title: entry.segment.text?.substring(0, 100) || 'Search Result',
@@ -159,8 +163,8 @@ async function searchWithGemini(request: SearchRequest): Promise<SearchResult> {
     // If no grounding results, create a synthetic result from the content
     if (searchResults.length === 0 && content) {
       searchResults.push({
-        title: `Search results for: ${request.query}`,
-        url: request.companyWebsite || '#',
+        title: `Search results for: ${searchRequest.query}`,
+        url: searchRequest.companyWebsite || '#',
         snippet: content.substring(0, 300) + '...',
         content: content
       })
@@ -169,12 +173,12 @@ async function searchWithGemini(request: SearchRequest): Promise<SearchResult> {
     const searchTime = Date.now() - startTime
 
     return {
-      query: request.query,
+      query: searchRequest.query,
       results: searchResults,
       searchMetadata: {
         searchTime,
         totalResults: searchResults.length,
-        searchType: request.searchType || 'general'
+        searchType: searchRequest.searchType || 'general'
       },
       groundingMetadata
     }
@@ -184,12 +188,12 @@ async function searchWithGemini(request: SearchRequest): Promise<SearchResult> {
     const searchTime = Date.now() - startTime
     
     return {
-      query: request.query,
+      query: searchRequest.query,
       results: [],
       searchMetadata: {
         searchTime,
         totalResults: 0,
-        searchType: request.searchType || 'general'
+        searchType: searchRequest.searchType || 'general'
       }
     }
   }
@@ -274,7 +278,7 @@ Deno.serve(async (req) => {
       )
     }
     
-    const result = await searchWithGemini(request)
+    const result = await searchWithGemini(request, req)
     
     return new Response(
       JSON.stringify({ success: true, ...result }),
