@@ -7,7 +7,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ArrowLeft, Building2, Calendar, Shield, CheckCircle, XCircle, AlertTriangle, TrendingUp, Loader2 } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 import { supabase } from '@/lib/supabaseClient'
-import { useToast } from '@/hooks/use-toast'
 
 // Mock Ring4 report data - using actual data from the database
 const mockReport = {
@@ -204,7 +203,6 @@ const mockReport = {
 export default function ViewReportPage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { toast } = useToast()
   const [loading, setLoading] = useState(true)
   const [report, setReport] = useState<any>(null)
 
