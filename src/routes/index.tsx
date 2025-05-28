@@ -10,7 +10,6 @@ const RegisterPage = lazy(() => import('@/pages/auth/register'))
 const ForgotPasswordPage = lazy(() => import('@/pages/auth/forgot-password'))
 const DashboardPage = lazy(() => import('@/pages/dashboard'))
 const RequestScanPage = lazy(() => import('@/pages/scans/request-scan'))
-const ScanDetailsPage = lazy(() => import('@/pages/scans/scan-details'))
 const ViewReportPage = lazy(() => import('@/pages/reports/view-report'))
 const AdvisorReviewPage = lazy(() => import('@/pages/advisor/review'))
 const AdvisorQueuePage = lazy(() => import('@/pages/advisor/queue'))
@@ -84,7 +83,7 @@ export const routeConfig: RouteConfig[] = [
       },
       {
         path: 'scans/:id',
-        element: <ScanDetailsPage />,
+        element: <ViewReportPage />,
         label: 'Scan Details',
         showInNav: false
       },

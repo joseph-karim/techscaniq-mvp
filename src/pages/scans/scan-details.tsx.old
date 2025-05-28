@@ -508,18 +508,6 @@ export default function ScanDetailsPage() {
             </Badge>
           </div>
         </div>
-        
-        {/* View Full Report button for enhanced reports */}
-        {report.company_name === 'Ring4' && (
-          <Button 
-            onClick={() => navigate('/reports/report-ring4-comprehensive')}
-            className="ml-4"
-            size="lg"
-          >
-            <FileText className="mr-2 h-4 w-4" />
-            View Full Professional Report
-          </Button>
-        )}
       </div>
 
       {/* Investment Score Card */}
