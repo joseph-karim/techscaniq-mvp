@@ -391,191 +391,6 @@ async function createEnhancedCitations(reportId, evidenceItems) {
   return createdCitations;
 }
 
-async function completeMockWorkflow(scanRequest, workflowRun, authClient) {
-  console.log('\n📋 Creating mock data for workflow demonstration...');
-  
-  // Step 1: Create mock evidence collection
-  const { data: evidenceCollection, error: collectionError } = await authClient
-    .from('evidence_collections')
-    .insert({
-      company_name: 'Ring4',
-      company_website: 'https://ring4.ai',
-      collection_status: 'complete',
-      evidence_count: 15,
-      status: 'complete',
-      collection_type: 'ai_driven_mock',
-      metadata: {
-        workflow_run_id: workflowRun.id,
-        tools_used: ['playwright', 'wappalyzer', 'nuclei'],
-        analysis_depth: 'comprehensive',
-        mock_data: true
-      }
-    })
-    .select()
-    .single();
-
-  if (collectionError) {
-    console.error('❌ Error creating mock evidence collection:', collectionError);
-    throw collectionError;
-  }
-
-  // Step 2: Create mock evidence items
-  const evidenceItems = await createEnhancedEvidenceItems(evidenceCollection.id, workflowRun.id);
-
-  // Step 3: Create mock report with proper structure
-  const reportData = {
-    company_name: 'Ring4',
-    investment_score: 78,
-    sections: {
-      executiveSummary: {
-        title: 'Executive Summary',
-        summary: 'Ring4 represents a compelling investment opportunity in the VoIP communications space with strong technology foundations and enterprise-grade security.',
-        findings: [{
-          text: 'Ring4 provides VoIP and cloud communications solutions for businesses',
-          category: 'business_model',
-          severity: 'info',
-          evidence_ids: [evidenceItems[0].id]
-        }]
-      },
-      companyOverview: {
-        title: 'Company Overview',
-        summary: 'Ring4 is a VoIP and cloud communications platform enabling businesses to communicate through local and international phone numbers.',
-        findings: [{
-          text: 'Focused on business communications with international reach',
-          category: 'market_position',
-          evidence_ids: [evidenceItems[0].id]
-        }]
-      },
-      technologyStack: {
-        title: 'Technology Stack',
-        summary: 'Modern technology stack built on React, Node.js, AWS infrastructure, and WebRTC for real-time communications.',
-        findings: [{
-          text: 'Ring4 uses modern technology stack including React and Node.js',
-          category: 'technology',
-          evidence_ids: [evidenceItems[1].id]
-        }]
-      },
-      securityAssessment: {
-        title: 'Security Assessment',
-        summary: 'Strong security posture with end-to-end encryption, SSL/TLS implementation, and SOC 2 compliance.',
-        findings: [{
-          text: 'Ring4 implements strong security measures including end-to-end encryption',
-          category: 'security',
-          evidence_ids: [evidenceItems[2].id]
-        }]
-      },
-      teamAnalysis: {
-        title: 'Team Analysis',
-        summary: 'Analysis of team composition and leadership capabilities based on available information.',
-        findings: []
-      },
-      financialOverview: {
-        title: 'Financial Overview',
-        summary: 'Financial analysis based on publicly available information and market positioning.',
-        findings: []
-      }
-    }
-  };
-
-  const { data: report, error: reportError } = await authClient
-    .from('reports')
-    .insert({
-      scan_request_id: scanRequest.id,
-      company_name: 'Ring4',
-      report_data: reportData,
-      executive_summary: 'Ring4 demonstrates strong potential as an investment opportunity with modern technology stack, robust security measures, and clear market positioning in the growing VoIP sector.',
-      investment_score: 78,
-      investment_rationale: 'Recommendation based on strong technology foundations (React/Node.js), enterprise-grade security (end-to-end encryption, SOC 2), and position in growing communications market.',
-      tech_health_score: 7.8,
-      tech_health_grade: 'B',
-      evidence_collection_id: evidenceCollection.id,
-      ai_model_used: 'claude-3-sonnet',
-      evidence_count: evidenceItems.length,
-      quality_score: 0.87,
-      human_reviewed: false,
-      report_version: '2.0'
-    })
-    .select()
-    .single();
-
-  if (reportError) {
-    console.error('❌ Error creating mock report:', reportError);
-    throw reportError;
-  }
-
-  console.log('✅ Mock report created:', report.id);
-
-  // Step 4: Create enhanced citations
-  const citations = await createEnhancedCitations(report.id, evidenceItems);
-
-  // Step 5: Log completion stages
-  const analysisStage = await createWorkflowStage(workflowRun.id, 'mock_analysis', 'analysis');
-  await updateWorkflowStage(analysisStage.id, {
-    status: 'completed',
-    output_data: {
-      investment_score: 78,
-      technology_score: 85,
-      security_score: 90,
-      market_score: 75,
-      overall_confidence: 0.87,
-      mock_data: true
-    }
-  });
-
-  const reportStage = await createWorkflowStage(workflowRun.id, 'mock_report_generation', 'drafting');
-  await updateWorkflowStage(reportStage.id, {
-    status: 'completed',
-    output_data: {
-      report_id: report.id,
-      citations_generated: citations.length,
-      sections_completed: 6,
-      mock_data: true
-    }
-  });
-
-  // Step 6: Finalize workflow
-  await authClient
-    .from('ai_workflow_runs')
-    .update({
-      status: 'completed',
-      completed_at: new Date().toISOString(),
-      performance_metrics: {
-        total_evidence_collected: evidenceItems.length,
-        total_citations_generated: citations.length,
-        average_confidence_score: 0.87,
-        processing_time_by_stage: {
-          planning: 2500,
-          collection: 8500,
-          analysis: 12000,
-          drafting: 6500
-        },
-        mock_data: true
-      },
-      total_processing_time_ms: 29500
-    })
-    .eq('id', workflowRun.id);
-
-  // Update scan request final status
-  await authClient
-    .from('scan_requests')
-    .update({
-      status: 'complete',
-      ai_workflow_status: 'completed',
-      evidence_collection_progress: 1.0,
-      report_generation_progress: 1.0,
-      thesis_alignment_score: 0.85
-    })
-    .eq('id', scanRequest.id);
-
-  return {
-    scanRequest,
-    workflowRun,
-    report,
-    citations,
-    evidenceItems,
-    mockData: true
-  };
-}
 
 async function runFullAIWorkflow() {
   try {
@@ -665,57 +480,55 @@ async function runFullAIWorkflow() {
       const errorText = await response.text();
       console.log('⚠️ Orchestrator issue (likely rate limits):', errorText);
       
-      // Check if it's a rate limit or API quota issue
-      const isRateLimit = errorText.includes('quota') || 
-                         errorText.includes('rate') || 
-                         errorText.includes('limit') ||
-                         errorText.includes('API key not configured');
+      // Check if it's a Google API issue, if so try Claude fallback
+      const isGoogleAPIIssue = errorText.includes('Google API key not configured') || 
+                               errorText.includes('quota') || 
+                               errorText.includes('rate');
       
-      if (isRateLimit) {
-        console.log('🔄 Continuing with mock data due to API limits...');
+      if (isGoogleAPIIssue) {
+        console.log('🔄 Google API issue detected, trying Claude fallback...');
         
-        // Create mock orchestrator result for demonstration
-        const mockResult = {
-          reportId: 'mock-' + crypto.randomUUID(),
-          company: 'Ring4',
-          investmentScore: 78,
-          evidence: {
-            total: 15,
-            byType: {
-              'webpage_content': 8,
-              'technology_stack': 4,
-              'security_analysis': 3
-            }
-          },
-          metadata: {
-            processingTime: 25000,
-            servicesUsed: ['evidence-collector-v7', 'tech-intelligence-v3'],
-            confidenceScore: 0.87
+        // Try using evidence-collector directly
+        try {
+          const evidenceResponse = await fetch(`${supabaseUrl}/functions/v1/evidence-collector-v7`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${supabaseAnonKey}`
+            },
+            body: JSON.stringify({
+              company_name: 'Ring4',
+              website_url: 'https://ring4.ai',
+              collection_type: 'comprehensive'
+            })
+          });
+
+          if (evidenceResponse.ok) {
+            const evidenceResult = await evidenceResponse.json();
+            console.log('✅ Evidence collection fallback successful');
+            
+            await updateWorkflowStage(orchestratorStage.id, {
+              status: 'completed',
+              output_data: {
+                fallback_used: 'evidence_collector',
+                evidence_collected: true,
+                collection_id: evidenceResult.collection_id
+              }
+            });
+            
+            return evidenceResult;
           }
-        };
-        
-        await updateWorkflowStage(orchestratorStage.id, {
-          status: 'completed',
-          output_data: {
-            mock_result: true,
-            rate_limited: true,
-            evidence_total: 15,
-            investment_score: 78,
-            processing_time_ms: 25000
-          }
-        });
-        
-        // Continue with mock workflow using existing database structure
-        console.log('✅ Using mock data - continuing workflow demonstration');
-        return await completeMockWorkflow(scanRequest, workflowRun, authClient);
-      } else {
-        await updateWorkflowStage(orchestratorStage.id, {
-          status: 'failed',
-          error_message: `Orchestrator failed: ${errorText}`
-        });
-        
-        throw new Error(`Orchestrator failed: ${errorText}`);
+        } catch (evidenceError) {
+          console.log('⚠️ Evidence collector fallback also failed:', evidenceError.message);
+        }
       }
+      
+      await updateWorkflowStage(orchestratorStage.id, {
+        status: 'failed',
+        error_message: `Orchestrator failed: ${errorText}`
+      });
+      
+      throw new Error(`Orchestrator failed: ${errorText}`);
     }
 
     const orchestratorResult = await response.json();
