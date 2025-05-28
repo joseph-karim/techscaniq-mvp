@@ -5,10 +5,12 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { ArrowLeft, Building2, Calendar, TrendingUp, Shield, AlertTriangle, CheckCircle, XCircle, Loader2 } from 'lucide-react'
+import { ArrowLeft, Building2, Calendar, TrendingUp, Shield, AlertTriangle, CheckCircle, XCircle, Loader2, FileText } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
 import { formatDate } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
+import { InlineCitation, Citation } from '@/components/reports/EvidenceCitation'
+import { EvidenceModal } from '@/components/reports/EvidenceModal'
 
 interface ScanReport {
   id: string
@@ -89,31 +91,99 @@ export default function ScanDetailsPage() {
   const { toast } = useToast()
   const [loading, setLoading] = useState(true)
   const [report, setReport] = useState<ScanReport | null>(null)
+  const [citations, setCitations] = useState<Citation[]>([])
+  const [evidenceModalOpen, setEvidenceModalOpen] = useState(false)
+  const [activeCitation, setActiveCitation] = useState<Citation | null>(null)
 
   useEffect(() => {
     async function fetchReport() {
       if (!id) return
+      setLoading(true); // Ensure loading is true at the start
 
       try {
-        // First try to fetch by scan_request_id
-        const { data } = await supabase
-          .from('scan_reports')
-          .select('*')
-          .eq('scan_request_id', id)
+        // Attempt to fetch scan_request first, as `id` is likely scan_request_id
+        const { data: scanRequestData, error: scanRequestError } = await supabase
+          .from('scan_requests')
+          .select('*, reports(*)') // Fetch related report directly if linked
+          .eq('id', id)
           .maybeSingle()
 
-        if (data) {
-          setReport(data)
+        if (scanRequestError) {
+          console.error('Error fetching scan request:', scanRequestError)
+          // Continue to try fetching as a direct report ID as a fallback
+        }
+
+        if (scanRequestData) {
+          console.log('Fetched scan_request:', scanRequestData);
+          // If scan_request has a linked report (either via join or report_id field)
+          let finalReportData = null;
+          if (scanRequestData.reports) { // data from join reports(*)
+            finalReportData = {
+              ...scanRequestData, // include scan_request fields
+              ...scanRequestData.reports, // spread joined report data
+              report_data: scanRequestData.reports.report_data, // ensure report_data is from the report
+              id: scanRequestData.reports.id, // ensure id is the report's id
+              scan_request_id: scanRequestData.id // keep scan_request_id for reference
+            }
+            // The scan_reports table might be deprecated, this structure assumes scan_requests
+            // and reports are the source of truth.
+          } else if (scanRequestData.report_id) {
+             const { data: reportById, error: reportByIdError } = await supabase
+              .from('reports')
+              .select('*')
+              .eq('id', scanRequestData.report_id)
+              .single();
+            
+            if (reportByIdError) {
+              console.error(`Error fetching report by id ${scanRequestData.report_id}:`, reportByIdError);
+            } else if (reportById) {
+              finalReportData = {
+                ...scanRequestData, // include scan_request fields
+                ...reportById, // spread fetched report data
+                id: reportById.id, // ensure id is the report's id
+                scan_request_id: scanRequestData.id // keep scan_request_id
+              };
+            }
+          }
+
+          if (finalReportData) {
+            setReport(finalReportData as ScanReport); // Type assertion
+            fetchCitations(finalReportData.id);
+          } else {
+            // No direct report found via scan_request, and scan_request itself might have been found or not.
+            // If scanRequestData was found but had no report, it means linking failed or report is pending.
+            // If scanRequestData was NOT found, then 'id' is not a scan_request_id.
+            // In either of these cases, try treating 'id' as a direct report_id on the main 'reports' table.
+            console.warn(`Scan request ${id} processed, but no final report data was constructed directly from it. Attempting to fetch report by ID ${id} from 'reports' table.`);
+            const { data: directReportData, error: directReportError } = await supabase
+              .from('reports') 
+              .select('*')
+              .eq('id', id)
+              .maybeSingle();
+            
+            if (directReportData) {
+              setReport(directReportData as ScanReport);
+              fetchCitations(directReportData.id);
+            } else {
+              console.error('All attempts to fetch report failed for id:', id, scanRequestError, directReportError);
+              toast({ title: "Error", description: "Report not found.", variant: "destructive" });
+            }
+          }
         } else {
-          // If not found, try by report id directly
-          const { data: reportData } = await supabase
-            .from('scan_reports')
+          // scanRequestData is null, so `id` was not a scan_request_id. Try `id` as a direct report_id on 'reports' table.
+          console.log(`No scan_request found for ID ${id}. Trying ID as direct report ID on 'reports' table.`);
+          const { data: directReportData, error: directReportError } = await supabase
+            .from('reports') 
             .select('*')
             .eq('id', id)
-            .maybeSingle()
+            .maybeSingle();
           
-          if (reportData) {
-            setReport(reportData)
+          if (directReportData) {
+            setReport(directReportData as ScanReport);
+            fetchCitations(directReportData.id);
+          } else {
+            console.error('All attempts to fetch report failed for id:', id, directReportError);
+            toast({ title: "Error", description: "Report not found.", variant: "destructive" });
           }
         }
       } catch (error) {
@@ -128,8 +198,64 @@ export default function ScanDetailsPage() {
       }
     }
 
+    async function fetchCitations(reportId: string) {
+      try {
+        const { data: citationData } = await supabase
+          .from('report_citations')
+          .select(`
+            *,
+            evidence_items (*)
+          `)
+          .eq('report_id', reportId)
+
+        if (citationData) {
+          // Transform citation data to match Citation interface
+          const transformedCitations: Citation[] = citationData.map(c => {
+            const evidenceItem = c.evidence_items; // This is the joined evidence_items record
+            let evidencePieces: any[] = [];
+
+            if (evidenceItem) {
+              evidencePieces = [{
+                id: evidenceItem.id, // This is the PK of the evidence_items table row
+                type: evidenceItem.type || 'web',
+                title: evidenceItem.content_data?.summary || 
+                       (evidenceItem.content_data?.raw ? evidenceItem.content_data.raw.substring(0, 100) + '...' : 'Evidence Detail'),
+                source: evidenceItem.source_data?.tool || evidenceItem.source_data?.url || 'Unknown Source',
+                url: evidenceItem.source_data?.url || '',
+                excerpt: evidenceItem.content_data?.summary || evidenceItem.content_data?.raw || 'No excerpt available.',
+                metadata: {
+                  confidence: c.confidence_score ? c.confidence_score * 100 : 0,
+                  ...(evidenceItem.metadata || {})
+                }
+              }];
+            }
+            
+            return {
+              id: c.id, // Use the report_citations primary key as the unique ID for the citation itself
+              claim_id_from_db: c.claim_id, // Keep original claim_id if needed for other logic
+              claim: c.citation_text,
+              evidence: evidencePieces,
+              reasoning: c.citation_context || '',
+              confidence: c.confidence_score ? c.confidence_score * 100 : 0,
+              analyst: 'TechScan AI',
+              reviewDate: c.created_at || new Date().toISOString(), // Use citation creation date if available
+              methodology: 'AI-powered analysis'
+            }
+          })
+          setCitations(transformedCitations)
+        }
+      } catch (error) {
+        console.error('Error fetching citations:', error)
+      }
+    }
+
     fetchReport()
   }, [id, toast])
+
+  const handleCitationClick = (citation: Citation) => {
+    setActiveCitation(citation)
+    setEvidenceModalOpen(true)
+  }
 
   if (loading) {
     return (
@@ -231,9 +357,29 @@ export default function ScanDetailsPage() {
               <div>
                 <h3 className="font-semibold mb-2">Key Findings</h3>
                 <ul className="list-disc list-inside space-y-1">
-                  {report.report_data?.executiveSummary?.keyFindings?.map((finding, i) => (
-                    <li key={i} className="text-sm">{finding}</li>
-                  ))}
+                  {report.report_data?.executiveSummary?.keyFindings?.map((finding, i) => {
+                    // Check if we have a citation for this finding
+                    const citation = citations.find(c => 
+                      c.claim.toLowerCase().includes(finding.toLowerCase().slice(0, 30)) ||
+                      finding.toLowerCase().includes(c.claim.toLowerCase().slice(0, 30))
+                    )
+                    
+                    return (
+                      <li key={i} className="text-sm">
+                        {citation ? (
+                          <InlineCitation
+                            citationId={citation.id}
+                            citation={citation}
+                            onCitationClick={handleCitationClick}
+                          >
+                            {finding}
+                          </InlineCitation>
+                        ) : (
+                          finding
+                        )}
+                      </li>
+                    )
+                  })}
                 </ul>
               </div>
 
@@ -355,12 +501,34 @@ export default function ScanDetailsPage() {
                 <h4 className="font-semibold mb-2">Vulnerabilities</h4>
                 {report.report_data?.securityAssessment?.vulnerabilities?.length > 0 ? (
                   <ul className="space-y-2">
-                    {report.report_data.securityAssessment.vulnerabilities.map((vuln: any, i: number) => (
-                      <li key={i} className="flex items-start gap-2">
-                        <XCircle className="h-4 w-4 text-red-500 mt-0.5" />
-                        <span className="text-sm">{vuln}</span>
-                      </li>
-                    ))}
+                    {report.report_data.securityAssessment.vulnerabilities.map((vuln: any, i: number) => {
+                      // Check if we have a citation for this vulnerability
+                      const vulnText = typeof vuln === 'string' ? vuln : vuln.description || ''
+                      const citation = citations.find(c => 
+                        c.claim.toLowerCase().includes(vulnText.toLowerCase().slice(0, 30)) ||
+                        vulnText.toLowerCase().includes(c.claim.toLowerCase().slice(0, 30))
+                      )
+                      
+                      return (
+                        <li key={i} className="flex items-start gap-2">
+                          <XCircle className="h-4 w-4 text-red-500 mt-0.5" />
+                          <div className="flex-1">
+                            <span className="text-sm">{vulnText}</span>
+                            {citation && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="ml-2 gap-1 text-xs"
+                                onClick={() => handleCitationClick(citation)}
+                              >
+                                <FileText className="h-3 w-3" />
+                                View Evidence
+                              </Button>
+                            )}
+                          </div>
+                        </li>
+                      )
+                    })}
                   </ul>
                 ) : (
                   <p className="text-sm text-muted-foreground">No critical vulnerabilities detected</p>
@@ -537,6 +705,15 @@ export default function ScanDetailsPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Evidence Modal */}
+      {activeCitation && (
+        <EvidenceModal
+          isOpen={evidenceModalOpen}
+          onClose={() => setEvidenceModalOpen(false)}
+          citation={activeCitation}
+        />
+      )}
     </div>
   )
 }
