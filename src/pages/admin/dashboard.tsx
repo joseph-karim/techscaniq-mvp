@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { 
   Activity, 
@@ -16,106 +16,52 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
+import { supabase } from '@/lib/supabaseClient'
+import { Scan } from '@/types'
+import { mockDemoScanRequests, DemoScanRequest } from '@/lib/mock-demo-data'
+import { ScanStatusBadge } from '@/components/dashboard/recent-scans-table'
+import { formatDate } from '@/lib/utils'
 
 export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState('overview')
+  const [allScans, setAllScans] = useState<(Scan | DemoScanRequest)[]>([])
+  const [loading, setLoading] = useState(true);
+
+  const [scanStats, setScanStats] = useState({
+    pendingRequests: 0,
+    inProgress: 0,
+    awaitingReview: 0,
+    completedToday: 0,
+    totalActive: 0,
+  });
+
+  useEffect(() => {
+    async function loadAndProcessScans() {
+      setLoading(true);
+      const combinedScans = [...mockDemoScanRequests];
+
+      combinedScans.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      setAllScans(combinedScans);
+
+      const pending = combinedScans.filter(s => s.status === 'pending').length;
+      const processing = combinedScans.filter(s => s.status === 'processing').length;
+      const review = combinedScans.filter(s => s.status === 'awaiting_review').length;
+      const completed = combinedScans.filter(s => s.status === 'complete').length;
+      
+      setScanStats({
+        pendingRequests: pending,
+        inProgress: processing,
+        awaitingReview: review,
+        completedToday: completed,
+        totalActive: processing + review,
+      });
+
+      setLoading(false);
+    }
+    loadAndProcessScans();
+  }, []);
   
-  // Mock data for scan workflow
-  const scanStats = {
-    pendingRequests: 5,
-    inProgress: 3,
-    awaitingReview: 4,
-    completedToday: 8,
-    totalActive: 12,
-    avgProcessingTime: '45m',
-    successRate: 94.2
-  }
-
-  const recentRequests = [
-    {
-      id: 'req-001',
-      company: 'TechFlow Solutions',
-      requestedBy: 'Sarah Chen',
-      organization: 'Venture Partners',
-      priority: 'high',
-      status: 'pending_config',
-      submittedAt: '2 hours ago'
-    },
-    {
-      id: 'req-002', 
-      company: 'DataSync Pro',
-      requestedBy: 'Michael Rodriguez',
-      organization: 'Growth Capital',
-      priority: 'medium',
-      status: 'pending_config',
-      submittedAt: '4 hours ago'
-    },
-    {
-      id: 'req-003',
-      company: 'CloudSecure Inc',
-      requestedBy: 'Lisa Wang',
-      organization: 'Tech Ventures',
-      priority: 'urgent',
-      status: 'pending_config',
-      submittedAt: '6 hours ago'
-    }
-  ]
-
-  const activeScans = [
-    {
-      id: 'scan-101',
-      company: 'DevOps Masters',
-      stage: 'data_collection',
-      progress: 35,
-      estimatedCompletion: '25 minutes',
-      aiModel: 'Claude-3 + GPT-4'
-    },
-    {
-      id: 'scan-102',
-      company: 'API Gateway Co',
-      stage: 'security_analysis',
-      progress: 72,
-      estimatedCompletion: '12 minutes',
-      aiModel: 'Gemini-Pro'
-    },
-    {
-      id: 'scan-103',
-      company: 'MicroServices Ltd',
-      stage: 'architecture_review',
-      progress: 88,
-      estimatedCompletion: '5 minutes',
-      aiModel: 'Claude-3'
-    }
-  ]
-
-  const reviewQueue = [
-    {
-      id: 'scan-201',
-      company: 'FastDeploy Systems',
-      completedAt: '1 hour ago',
-      aiConfidence: 92,
-      flaggedIssues: 2,
-      priority: 'high'
-    },
-    {
-      id: 'scan-202',
-      company: 'SecureCloud Pro',
-      completedAt: '3 hours ago',
-      aiConfidence: 87,
-      flaggedIssues: 0,
-      priority: 'medium'
-    },
-    {
-      id: 'scan-203',
-      company: 'DataFlow Analytics',
-      completedAt: '5 hours ago',
-      aiConfidence: 94,
-      flaggedIssues: 1,
-      priority: 'low'
-    }
-  ]
-
-  const getPriorityColor = (priority: string) => {
+  const getPriorityColor = (priority?: Scan['status'] | string) => {
     switch (priority) {
       case 'urgent': return 'bg-red-50 text-red-600 border-red-200'
       case 'high': return 'bg-orange-50 text-orange-600 border-orange-200'
@@ -123,6 +69,12 @@ export default function AdminDashboardPage() {
       default: return 'bg-gray-50 text-gray-600 border-gray-200'
     }
   }
+  
+  if (loading) return <div>Loading Admin Dashboard...</div>;
+
+  const recentRequests = allScans.filter(s => s.status === 'pending');
+  const activeProcessingScans = allScans.filter(s => s.status === 'processing');
+  const reviewQueueScans = allScans.filter(s => s.status === 'awaiting_review' || (s.status === 'complete' && !(s as DemoScanRequest).mock_report_id));
 
   return (
     <div className="space-y-6">
@@ -147,7 +99,6 @@ export default function AdminDashboardPage() {
         </div>
       </div>
       
-      {/* Key Metrics */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardContent className="p-6">
@@ -228,7 +179,6 @@ export default function AdminDashboardPage() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
-          {/* Workflow Status Overview */}
           <Card className="border-electric-teal/20 bg-electric-teal/5">
             <CardHeader className="pb-3">
               <CardTitle>Scan Workflow Status</CardTitle>
@@ -259,17 +209,16 @@ export default function AdminDashboardPage() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Success Rate</span>
-                    <span className="text-sm text-muted-foreground">{scanStats.successRate}%</span>
+                    {/* <span className="text-sm text-muted-foreground">{scanStats.successRate}%</span> */}
                   </div>
-                  <Progress value={scanStats.successRate} className="h-2" />
-                  <p className="text-xs text-muted-foreground">Last 30 days</p>
+                  {/* <Progress value={scanStats.successRate} className="h-2" /> */}
+                  <p className="text-xs text-muted-foreground">Last 30 days (Demo)</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <div className="grid gap-4 md:grid-cols-2">
-            {/* Recent Requests */}
             <Card>
               <CardHeader>
                 <CardTitle>Recent Scan Requests</CardTitle>
@@ -279,19 +228,19 @@ export default function AdminDashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {recentRequests.map((request) => (
+                  {recentRequests.slice(0, 3).map((request) => (
                     <div key={request.id} className="flex items-center justify-between rounded-lg border p-3">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <h4 className="font-medium">{request.company}</h4>
-                          <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${getPriorityColor(request.priority)}`}>
-                            {request.priority}
+                          <h4 className="font-medium">{request.company_name}</h4>
+                          <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${getPriorityColor((request as DemoScanRequest).priority || 'medium')}`}>
+                            {(request as DemoScanRequest).priority || 'medium'}
                           </span>
                         </div>
                         <p className="text-sm text-muted-foreground">
-                          {request.requestedBy} • {request.organization}
+                          {(request as DemoScanRequest).requestor_name || 'N/A'} • {(request as DemoScanRequest).organization_name || 'N/A'}
                         </p>
-                        <p className="text-xs text-muted-foreground">{request.submittedAt}</p>
+                        <p className="text-xs text-muted-foreground">{formatDate(request.created_at)}</p>
                       </div>
                       <Button size="sm" variant="outline" asChild>
                         <Link to={`/admin/scan-config/${request.id}`}>
@@ -300,11 +249,11 @@ export default function AdminDashboardPage() {
                       </Button>
                     </div>
                   ))}
+                  {recentRequests.length === 0 && <p className="text-sm text-muted-foreground">No recent requests.</p>}
                 </div>
               </CardContent>
             </Card>
 
-            {/* System Health */}
             <Card>
               <CardHeader>
                 <CardTitle>System Health</CardTitle>
@@ -380,20 +329,20 @@ export default function AdminDashboardPage() {
                     <div className="flex items-start justify-between">
                       <div className="space-y-2">
                         <div className="flex items-center gap-3">
-                          <h3 className="font-semibold">{request.company}</h3>
-                          <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${getPriorityColor(request.priority)}`}>
-                            {request.priority} priority
+                          <h3 className="font-semibold">{request.company_name}</h3>
+                          <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${getPriorityColor((request as DemoScanRequest).priority || 'medium')}`}>
+                            {(request as DemoScanRequest).priority || 'medium'} priority
                           </span>
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          <p>Requested by: <span className="font-medium">{request.requestedBy}</span></p>
-                          <p>Organization: <span className="font-medium">{request.organization}</span></p>
-                          <p>Submitted: <span className="font-medium">{request.submittedAt}</span></p>
+                          <p>Requested by: <span className="font-medium">{(request as DemoScanRequest).requestor_name || 'N/A'}</span></p>
+                          <p>Organization: <span className="font-medium">{(request as DemoScanRequest).organization_name || 'N/A'}</span></p>
+                          <p>Submitted: <span className="font-medium">{formatDate(request.created_at)}</span></p>
                         </div>
                       </div>
                       <div className="flex gap-2">
                         <Button variant="outline" size="sm" asChild>
-                          <Link to={`/admin/requests/${request.id}`}>
+                          <Link to={`/scans/${request.id}`}>
                             View Details
                           </Link>
                         </Button>
@@ -407,6 +356,7 @@ export default function AdminDashboardPage() {
                     </div>
                   </div>
                 ))}
+                {recentRequests.length === 0 && <p className="text-sm text-muted-foreground">No pending requests.</p>}
               </div>
             </CardContent>
           </Card>
@@ -422,43 +372,38 @@ export default function AdminDashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {activeScans.map((scan) => (
+                {activeProcessingScans.map((scan) => (
                   <div key={scan.id} className="rounded-lg border p-4">
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <h3 className="font-semibold">{scan.company}</h3>
-                        <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-electric-teal/10 text-electric-teal">
-                          {scan.stage.replace('_', ' ')}
-                        </span>
+                        <h3 className="font-semibold">{scan.company_name}</h3>
+                        <ScanStatusBadge status={scan.status as Scan['status']} />
                       </div>
                       
                       <div className="space-y-2">
                         <div className="flex items-center justify-between text-sm">
                           <span>Progress</span>
-                          <span className="font-medium">{scan.progress}%</span>
+                          <span className="font-medium">{ (scan as DemoScanRequest).status === 'processing' ? '50%' : 'N/A'}</span>
                         </div>
-                        <Progress value={scan.progress} className="h-2" />
+                        <Progress value={(scan as DemoScanRequest).status === 'processing' ? 50 : 0} className="h-2" />
                         <div className="flex items-center justify-between text-xs text-muted-foreground">
-                          <span>AI Model: {scan.aiModel}</span>
-                          <span>ETA: {scan.estimatedCompletion}</span>
+                          <span>AI Model: Mock Model</span>
+                          <span>ETA: N/A</span>
                         </div>
                       </div>
                       
                       <div className="flex gap-2">
                         <Button variant="outline" size="sm" asChild>
-                          <Link to={`/admin/scans/${scan.id}/monitor`}>
+                          <Link to={`/scans/${scan.id}/monitor`}>
                             <Activity className="mr-1 h-3 w-3" />
                             Monitor
                           </Link>
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Settings className="mr-1 h-3 w-3" />
-                          Adjust
                         </Button>
                       </div>
                     </div>
                   </div>
                 ))}
+                {activeProcessingScans.length === 0 && <p className="text-sm text-muted-foreground">No active scans.</p>}
               </div>
             </CardContent>
           </Card>
@@ -474,44 +419,39 @@ export default function AdminDashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {reviewQueue.map((scan) => (
+                {reviewQueueScans.map((scan) => (
                   <div key={scan.id} className="rounded-lg border p-4">
                     <div className="flex items-start justify-between">
                       <div className="space-y-2">
                         <div className="flex items-center gap-3">
-                          <h3 className="font-semibold">{scan.company}</h3>
-                          <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${getPriorityColor(scan.priority)}`}>
-                            {scan.priority} priority
+                          <h3 className="font-semibold">{scan.company_name}</h3>
+                          <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${getPriorityColor((scan as DemoScanRequest).priority || 'medium')}`}>
+                            {(scan as DemoScanRequest).priority || 'medium'} priority
                           </span>
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          <p>Completed: <span className="font-medium">{scan.completedAt}</span></p>
-                          <p>AI Confidence: <span className="font-medium">{scan.aiConfidence}%</span></p>
-                          {scan.flaggedIssues > 0 && (
+                          <p>Completed: <span className="font-medium">{formatDate(scan.updated_at)}</span></p>
+                          <p>AI Confidence: <span className="font-medium">{ (scan as DemoScanRequest).status === 'complete' ? '90%' : 'N/A'}</span></p>
+                          {(scan as DemoScanRequest).status === 'complete' && Math.random() > 0.7 && (
                             <p className="flex items-center gap-1 text-orange-600">
                               <AlertTriangle className="h-3 w-3" />
-                              {scan.flaggedIssues} flagged issue{scan.flaggedIssues > 1 ? 's' : ''}
+                              {Math.floor(Math.random() * 3) + 1} flagged issues
                             </p>
                           )}
                         </div>
                       </div>
                       <div className="flex gap-2">
                         <Button variant="outline" size="sm" asChild>
-                          <Link to={`/admin/scans/${scan.id}/preview`}>
-                            <Eye className="mr-1 h-3 w-3" />
-                            Preview
-                          </Link>
-                        </Button>
-                        <Button size="sm" className="bg-electric-teal hover:bg-electric-teal/90" asChild>
-                          <Link to={`/advisor/review/${scan.id}`}>
+                          <Link to={`/scans/${scan.id}`}>
                             <FileText className="mr-1 h-3 w-3" />
-                            Review
+                            View Report
                           </Link>
                         </Button>
                       </div>
                     </div>
                   </div>
                 ))}
+                {reviewQueueScans.length === 0 && <p className="text-sm text-muted-foreground">No scans in review queue.</p>}
               </div>
             </CardContent>
           </Card>

@@ -1,11 +1,15 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Building2, TrendingUp, AlertTriangle, CheckCircle, Clock, BarChart3, FileText, Settings } from 'lucide-react'
+import { Building2, TrendingUp, AlertTriangle, CheckCircle, Clock, BarChart3, FileText, Settings, Eye, Hourglass, PlusCircle } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
+import { supabase } from '@/lib/supabaseClient'
+import { Scan } from '@/types'
+import { mockDemoScanRequests, DemoScanRequest } from '@/lib/mock-demo-data'
+import { ScanStatusBadge } from '@/components/dashboard/recent-scans-table'
 
 // Mock portfolio company data
 const portfolioCompanies = [
@@ -90,6 +94,28 @@ const getStatusIcon = (status: string) => {
 
 export default function PortfolioPage() {
   const [selectedView, setSelectedView] = useState('overview')
+  const [activeScans, setActiveScans] = useState<Scan[]>([])
+  const [loadingActiveScans, setLoadingActiveScans] = useState(true)
+
+  useEffect(() => {
+    async function fetchActiveScans() {
+      setLoadingActiveScans(true);
+      const { data, error } = await supabase
+        .from('scan_requests')
+        .select('*, reports(id)')
+        .in('status', ['pending', 'processing'])
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error("Error fetching active scans:", error);
+        setActiveScans([]);
+      } else {
+        setActiveScans(data || []);
+      }
+      setLoadingActiveScans(false);
+    }
+    fetchActiveScans();
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -165,10 +191,11 @@ export default function PortfolioPage() {
         </Card>
       </div>
 
-      {/* Portfolio Companies List */}
+      {/* Portfolio Companies List & Pending Scans */}
       <Tabs value={selectedView} onValueChange={setSelectedView} className="space-y-4">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="active_scans">Active Scans ({activeScans.length})</TabsTrigger>
           <TabsTrigger value="health">Technical Health</TabsTrigger>
           <TabsTrigger value="initiatives">Initiatives</TabsTrigger>
         </TabsList>
@@ -268,6 +295,52 @@ export default function PortfolioPage() {
               </Card>
             ))}
           </div>
+        </TabsContent>
+
+        <TabsContent value="active_scans" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Active Scan Requests</CardTitle>
+              <CardDescription>
+                Scans currently pending or in processing.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loadingActiveScans ? (
+                <p>Loading active scans...</p>
+              ) : activeScans.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <PlusCircle className="mx-auto h-12 w-12 mb-4 opacity-50" />
+                  <p>No active scan requests at the moment.</p>
+                  <Button size="sm" variant="outline" className="mt-4" asChild>
+                     <Link to="/scans/request">Request a New Scan</Link>
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {activeScans.map((scan) => (
+                    <div key={scan.id} className="flex items-center justify-between rounded-lg border p-3">
+                      <div>
+                        <h3 className="font-medium">{scan.company_name}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Requested by: {scan.requestor_name || 'N/A'} for {scan.organization_name || 'N/A'}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <ScanStatusBadge status={scan.status} />
+                        <Button variant="outline" size="sm" asChild>
+                          <Link to={`/scans/${scan.id}`}>
+                            <Eye className="mr-1.5 h-3.5 w-3.5" />
+                            View
+                          </Link>
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="health" className="space-y-4">

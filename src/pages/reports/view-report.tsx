@@ -206,7 +206,7 @@ export default function ViewReportPage() {
   const [loading, setLoading] = useState(true)
   const [report, setReport] = useState<any>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
+  
   useEffect(() => {
     async function fetchReportData() {
       if (!id) {
@@ -260,7 +260,7 @@ export default function ViewReportPage() {
           console.log(`ID ${id} is not a scan_request_id. Attempting to fetch as direct report_id from 'reports' table.`);
           const { data: directReport, error: directReportError } = await supabase
             .from('reports')
-            .select('*')
+          .select('*')
             .eq('id', id)
             .single();
 

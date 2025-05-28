@@ -36,11 +36,15 @@ export interface ThesisInput {
 export interface Scan {
   id: string
   company_id: string
+  company_name: string
   user_id: string
   status: 'pending' | 'processing' | 'awaiting_review' | 'complete' | 'error'
   thesis_input: ThesisInput
   created_at: string
   updated_at: string
+  reports?: { id: string }[] | null
+  requestor_name?: string | null
+  organization_name?: string | null
 }
 
 // Report types
