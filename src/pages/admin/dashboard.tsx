@@ -9,14 +9,12 @@ import {
   Eye,
   FileText,
   Play,
-  Settings,
-  Zap 
+  Zap
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import { supabase } from '@/lib/supabaseClient'
 import { Scan } from '@/types'
 import { mockDemoScanRequests, DemoScanRequest } from '@/lib/mock-demo-data'
 import { ScanStatusBadge } from '@/components/dashboard/recent-scans-table'

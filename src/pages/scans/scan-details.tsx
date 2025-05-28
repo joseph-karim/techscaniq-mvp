@@ -1,17 +1,18 @@
+import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { supabase } from '@/lib/supabaseClient'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { ArrowLeft, Building2, Calendar, TrendingUp, Shield, AlertTriangle, CheckCircle, XCircle, Loader2, FileText } from 'lucide-react'
-import { supabase } from '@/lib/supabaseClient'
-import { formatDate } from '@/lib/utils'
+import { ArrowLeft, Building2, Calendar, TrendingUp, Shield, AlertTriangle, CheckCircle, XCircle, FileText, Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
-import { InlineCitation, Citation } from '@/components/reports/EvidenceCitation'
 import { EvidenceModal } from '@/components/reports/EvidenceModal'
-import { mockDemoScanRequests, mockDemoReports, DemoStandardReport } from '@/lib/mock-demo-data'
+import { InlineCitation, Citation } from '@/components/reports/EvidenceCitation'
+import { Evidence } from '@/components/reports/EvidenceCitation'
+import { formatDate } from '@/lib/utils'
+import { mockDemoScanRequests, mockDemoReports, mockEvidenceItems } from '@/lib/mock-demo-data'
 
 interface ScanReport {
   id: string
@@ -106,104 +107,195 @@ export default function ScanDetailsPage() {
       if (mockScan && mockScan.mock_report_id) {
         const mockReport = mockDemoReports[mockScan.mock_report_id]
         if (mockReport) {
-          // Transform mock report to match ScanReport interface
+          // Transform DemoStandardReport to ScanReport format
           const transformedReport: ScanReport = {
             id: mockReport.id,
             company_name: mockReport.company_name,
             website_url: mockReport.website_url,
             report_type: mockReport.report_type || 'standard',
+            created_at: mockReport.created_at || new Date().toISOString(),
+            scan_request_id: mockReport.scan_request_id,
             report_data: {
               executiveSummary: {
                 investmentScore: mockReport.investment_score,
                 overallAssessment: mockReport.executive_summary,
-                keyFindings: mockReport.sections.investmentRecommendation?.findings.filter(f => f.text.includes('Key Strengths')).map(f => f.text) || [],
-                criticalIssues: mockReport.sections.investmentRecommendation?.findings.filter(f => f.text.includes('Key Risks')).map(f => f.text) || []
+                keyFindings: [],
+                criticalIssues: []
               },
               companyOverview: {
-                description: mockReport.sections.companyInfo?.summary || '',
-                teamSize: mockReport.sections.companyInfo?.findings.find(f => f.text.includes('Employee Count'))?.text.split(':')[1]?.trim() || '',
-                foundingYear: mockReport.sections.companyInfo?.findings.find(f => f.text.includes('Founded'))?.text.split(':')[1]?.trim() || '',
+                description: mockReport.executive_summary,
+                teamSize: 'N/A',
+                foundingYear: 'N/A',
                 keyProducts: [],
-                businessModel: ''
+                businessModel: 'N/A'
               },
               technologyStack: {
-                frontend: mockReport.sections.technologyOverview?.findings.filter(f => f.category === 'Frontend').map(f => f.text.split(':')[1]?.split('-')[0]?.trim() || '') || [],
-                backend: mockReport.sections.technologyOverview?.findings.filter(f => f.category === 'Backend').map(f => f.text.split(':')[1]?.split('-')[0]?.trim() || '') || [],
+                frontend: [],
+                backend: [],
                 infrastructure: [],
                 databases: [],
                 aiTools: []
               },
               architectureAnalysis: {
-                systemDesign: mockReport.sections.technologyOverview?.findings.find(f => f.text.includes('Architecture'))?.text || '',
-                scalability: mockReport.sections.technologyOverview?.findings.find(f => f.text.includes('Scalability'))?.text || '',
-                security: '',
-                codeQuality: ''
+                systemDesign: 'N/A',
+                scalability: 'N/A',
+                security: 'N/A',
+                codeQuality: 'N/A'
               },
               securityAssessment: {
-                overallScore: parseInt(mockReport.sections.securityAssessment?.summary.match(/Score: (\d+)/)?.[1] || '0'),
-                vulnerabilities: mockReport.sections.securityAssessment?.risks || [],
-                compliance: mockReport.sections.securityAssessment?.findings.filter(f => f.category === 'Compliance').map(f => f.text) || [],
-                recommendations: mockReport.sections.securityAssessment?.recommendations?.map(r => r.text) || []
+                overallScore: mockReport.tech_health_score,
+                vulnerabilities: [],
+                compliance: [],
+                recommendations: []
               },
               performanceMetrics: {
-                loadTime: '',
-                uptime: '',
-                scalability: '',
-                optimization: ''
+                loadTime: 'N/A',
+                uptime: 'N/A',
+                scalability: 'N/A',
+                optimization: 'N/A'
               },
               teamCapabilities: {
-                teamSize: mockReport.sections.teamAnalysis?.findings.find(f => f.text.includes('Employee Count'))?.text || '',
-                expertise: mockReport.sections.teamAnalysis?.findings.filter(f => f.text.includes('Strengths')).map(f => f.text) || [],
-                gaps: mockReport.sections.teamAnalysis?.findings.filter(f => f.text.includes('Gaps')).map(f => f.text) || [],
-                culture: mockReport.sections.teamAnalysis?.findings.find(f => f.text.includes('Culture'))?.text || ''
+                teamSize: 'N/A',
+                expertise: [],
+                gaps: [],
+                culture: 'N/A'
               },
               marketPosition: {
-                competitors: mockReport.sections.marketAnalysis?.findings.filter(f => f.text.includes('Competitor')).map(f => f.text) || [],
-                differentiation: mockReport.sections.marketAnalysis?.findings.find(f => f.text.includes('Differentiators'))?.text || '',
-                marketSize: mockReport.sections.marketAnalysis?.findings.find(f => f.text.includes('Market Size'))?.text || '',
-                growthPotential: mockReport.sections.marketAnalysis?.findings.find(f => f.text.includes('Growth Rate'))?.text || ''
+                competitors: [],
+                differentiation: 'N/A',
+                marketSize: 'N/A',
+                growthPotential: 'N/A'
               },
               financialIndicators: {
-                revenueModel: '',
-                fundingHistory: mockReport.sections.financialHealth?.findings.find(f => f.text.includes('Funding History'))?.text || '',
-                burnRate: mockReport.sections.financialHealth?.findings.find(f => f.text.includes('Burn Rate'))?.text || '',
-                profitability: ''
+                revenueModel: 'N/A',
+                fundingHistory: 'N/A',
+                burnRate: 'N/A',
+                profitability: 'N/A'
               },
               recommendations: {
-                investmentDecision: mockReport.sections.investmentRecommendation?.summary.match(/Recommendation: (\w+)/)?.[1] || 'Pending',
-                keyStrengths: mockReport.sections.investmentRecommendation?.findings.filter(f => f.text.includes('Key Strengths')).map(f => f.text.split(':')[1]?.trim() || '') || [],
-                concerns: mockReport.sections.investmentRecommendation?.findings.filter(f => f.text.includes('Key Risks')).map(f => f.text.split(':')[1]?.trim() || '') || [],
-                nextSteps: mockReport.sections.investmentRecommendation?.findings.filter(f => f.text.includes('Next Steps')).map(f => f.text.split(':')[1]?.trim() || '') || []
+                investmentDecision: mockReport.investment_rationale || 'N/A',
+                keyStrengths: [],
+                concerns: [],
+                nextSteps: []
               }
-            },
-            created_at: mockReport.created_at || new Date().toISOString(),
-            scan_request_id: mockScan.id
+            }
           }
+
+          // Extract data from sections
+          Object.entries(mockReport.sections).forEach(([key, section]) => {
+            if (key === 'companyInfo' && section.findings) {
+              section.findings.forEach(finding => {
+                if (finding.text.includes('Founded:')) {
+                  transformedReport.report_data.companyOverview.foundingYear = finding.text.split(': ')[1]
+                } else if (finding.text.includes('Employee Count:')) {
+                  transformedReport.report_data.companyOverview.teamSize = finding.text.split(': ')[1]
+                } else if (finding.text.includes('Description:')) {
+                  transformedReport.report_data.companyOverview.description = finding.text.split(': ')[1]
+                }
+              })
+            } else if (key === 'technologyOverview' && section.findings) {
+              section.findings.forEach(finding => {
+                if (finding.text.includes('Frontend')) {
+                  transformedReport.report_data.technologyStack.frontend.push(finding.text.split(': ')[1] || finding.text)
+                } else if (finding.text.includes('Backend')) {
+                  transformedReport.report_data.technologyStack.backend.push(finding.text.split(': ')[1] || finding.text)
+                }
+              })
+            } else if (key === 'securityAssessment') {
+              if (section.findings) {
+                transformedReport.report_data.executiveSummary.keyFindings = section.findings.map(f => f.text)
+              }
+              if (section.risks) {
+                transformedReport.report_data.securityAssessment.vulnerabilities = section.risks.map(r => r.text)
+              }
+              if (section.recommendations) {
+                transformedReport.report_data.securityAssessment.recommendations = section.recommendations.map(r => r.text)
+              }
+            } else if (key === 'teamAnalysis' && section.findings) {
+              section.findings.forEach(finding => {
+                if (finding.text.includes('Team Size:')) {
+                  transformedReport.report_data.teamCapabilities.teamSize = finding.text.split(': ')[1]
+                } else if (finding.text.includes('Culture Values:')) {
+                  transformedReport.report_data.teamCapabilities.culture = finding.text.split(': ')[1]
+                }
+              })
+            } else if (key === 'marketAnalysis' && section.findings) {
+              section.findings.forEach(finding => {
+                if (finding.text.includes('Market Size:')) {
+                  transformedReport.report_data.marketPosition.marketSize = finding.text.split(': ')[1]
+                } else if (finding.text.includes('Growth Rate:')) {
+                  transformedReport.report_data.marketPosition.growthPotential = finding.text.split(': ')[1]
+                } else if (finding.text.includes('Differentiators:')) {
+                  transformedReport.report_data.marketPosition.differentiation = finding.text.split(': ')[1]
+                } else if (finding.text.includes('Competitor')) {
+                  transformedReport.report_data.marketPosition.competitors.push(finding.text)
+                }
+              })
+            } else if (key === 'financialHealth' && section.findings) {
+              section.findings.forEach(finding => {
+                if (finding.text.includes('Revenue:')) {
+                  transformedReport.report_data.financialIndicators.revenueModel = finding.text
+                } else if (finding.text.includes('Burn Rate:')) {
+                  transformedReport.report_data.financialIndicators.burnRate = finding.text.split(': ')[1]
+                } else if (finding.text.includes('Funding History:')) {
+                  transformedReport.report_data.financialIndicators.fundingHistory = finding.text.split(': ')[1]
+                }
+              })
+            } else if (key === 'investmentRecommendation' && section.findings) {
+              section.findings.forEach(finding => {
+                if (finding.text.includes('Key Strengths:')) {
+                  transformedReport.report_data.recommendations.keyStrengths.push(finding.text.split(': ')[1])
+                } else if (finding.text.includes('Key Risks:')) {
+                  transformedReport.report_data.recommendations.concerns.push(finding.text.split(': ')[1])
+                } else if (finding.text.includes('Next Steps:')) {
+                  transformedReport.report_data.recommendations.nextSteps.push(finding.text.split(': ')[1])
+                }
+              })
+            } else {
+              // For other sections, try to extract key findings
+              if (section.findings) {
+                transformedReport.report_data.executiveSummary.keyFindings.push(
+                  ...section.findings.map(f => f.text)
+                )
+              }
+            }
+          })
+
           setReport(transformedReport)
           
           // Transform mock citations to match Citation interface
-          if (mockReport.citations) {
-            const transformedCitations: Citation[] = mockReport.citations.map(c => ({
-              id: `citation-${c.citation_number}`,
-              claim_id_from_db: c.claim_id,
-              claim: c.citation_text,
-              evidence: [{
-                id: c.evidence_item_id,
-                type: 'web',
-                title: c.citation_text,
-                source: 'Mock Evidence',
-                url: '',
-                excerpt: c.citation_context || '',
-                metadata: {
-                  confidence: 85
-                }
-              }],
-              reasoning: c.citation_context || '',
-              confidence: 85,
-              analyst: 'TechScan AI',
-              reviewDate: new Date().toISOString(),
-              methodology: 'AI-powered analysis'
-            }))
+          if (mockReport.citations && mockReport.citations.length > 0) {
+            const transformedCitations: Citation[] = mockReport.citations.map(c => {
+              // Find the corresponding evidence item from mockEvidenceItems
+              const evidenceItem = mockEvidenceItems.find(e => e._original_crypto_id === c.evidence_item_id)
+              
+              let evidencePieces: Evidence[] = []
+              if (evidenceItem) {
+                evidencePieces = [{
+                  id: evidenceItem.id,
+                  type: mapEvidenceType(evidenceItem.type),
+                  title: evidenceItem.content_summary.substring(0, 50) + '...',
+                  source: evidenceItem.source_tool || 'Unknown Source',
+                  url: evidenceItem.source_url || '',
+                  excerpt: evidenceItem.content_summary,
+                  metadata: {
+                    confidence: 85 // Default confidence for mock data
+                  }
+                }]
+              }
+              
+              return {
+                id: `citation-${c.citation_number}`,
+                claim_id_from_db: c.claim_id,
+                claim: c.citation_text,
+                evidence: evidencePieces,
+                reasoning: c.citation_context || '',
+                confidence: 85, // Default confidence
+                analyst: 'TechScan AI',
+                reviewDate: mockReport.created_at || new Date().toISOString(),
+                methodology: 'AI-powered analysis with multi-source verification'
+              }
+            })
             setCitations(transformedCitations)
           }
           
@@ -828,4 +920,39 @@ export default function ScanDetailsPage() {
       )}
     </div>
   )
+}
+
+// Helper function to map evidence types
+function mapEvidenceType(type: string): Evidence['type'] {
+  const typeMap: Record<string, Evidence['type']> = {
+    'code_analysis': 'code',
+    'code_review': 'code',
+    'dependency_scan': 'code',
+    'vulnerability_report': 'code',
+    'compliance_document': 'document',
+    'security_assessment': 'document',
+    'infrastructure_scan': 'database',
+    'infrastructure_assessment': 'database',
+    'cloud_migration_analysis': 'analysis',
+    'cost_analysis': 'analysis',
+    'cost_projection': 'analysis',
+    'architecture_review': 'analysis',
+    'architecture_diagram': 'document',
+    'cicd_analysis': 'analysis',
+    'deployment_metrics': 'database',
+    'code_quality_report': 'code',
+    'team_survey': 'interview',
+    'open_source_analysis': 'web',
+    'culture_assessment': 'interview',
+    'market_research': 'document',
+    'customer_analysis': 'database',
+    'customer_satisfaction': 'interview',
+    'ai_model_analysis': 'analysis',
+    'customer_deployment': 'database',
+    'model_performance': 'analysis',
+    'infrastructure_gap': 'analysis',
+    'scalability_test_result': 'analysis',
+    'market_research_report': 'document'
+  }
+  return typeMap[type] || 'document'
 }

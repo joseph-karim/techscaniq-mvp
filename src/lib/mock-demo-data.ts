@@ -1,4 +1,4 @@
-import { Scan, Evidence, Citation, Risk, ThesisAlignment, TechHealthScore } from '@/types';
+import { Scan } from '@/types';
 
 // --- Enhanced Scan Type for Demo ---
 export interface DemoScanRequest extends Scan {
@@ -378,12 +378,47 @@ export const mockRing4StandardReport: DemoStandardReport = {
 };
 
 export const mockEvidenceItems: DemoEvidenceItem[] = [
-  { _original_crypto_id: 'dd9f0bf4-ed37-4d65-925e-c19bed901235', id: 'dd9f0bf4-ed37-4d65-925e-c19bed901235', type: 'vulnerability_report', source_tool: 'Third-Party Library Scanner', source_url: 'https://ring4.ai/security_scan_details.html#lib-vuln-xyz', content_summary: 'Vulnerable JS library xyz.js v1.2.3 detected.', content_raw: 'Detailed scan output for xyz.js vulnerability...', timestamp: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString() },
+  // Ring4 evidence items (existing)
+  { _original_crypto_id: 'dd9f0bf4-ed37-4d65-925e-c19bed901235', id: 'dd9f0bf4-ed37-4d65-925e-c19bed901235', type: 'vulnerability_report', source_tool: 'Third-Party Library Scanner', source_url: 'https://ring4.ai/security_scan_details.html#lib-vuln-xyz', content_summary: 'Vulnerable JS library xyz.js v1.2.3 detected in frontend bundle. CVE-2023-1234 allows XSS attacks.', content_raw: 'Detailed scan output for xyz.js vulnerability...', timestamp: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString() },
   { _original_crypto_id: '614dd040-68bc-41ec-b2c3-d4c419914ed2', id: '614dd040-68bc-41ec-b2c3-d4c419914ed2', type: 'compliance_document', source_tool: 'Documentation Review', source_url: 'internal-docs/soc2-status.pdf', content_summary: 'SOC2 Type I report available, Type II audit is currently in progress, expected completion Q3.', timestamp: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString() },
-  { _original_crypto_id: 'synergy-ev-1', id: 'synergy-ev-1', type: 'code_analysis', source_tool: 'SonarQube Scan', content_summary: 'Core backend module utilizes Java 8, which has an End-of-Life (EOL) for public updates.', timestamp: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString()},
-  { _original_crypto_id: 'mock-ev-id-003', id: 'mock-ev-id-003', type: 'architecture_diagram', source_tool: 'Lucidchart Export', content_summary: 'System architecture diagram showing microservices.', timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
-  { _original_crypto_id: 'mock-ev-id-004', id: 'mock-ev-id-004', type: 'scalability_test_result', source_tool: 'K6 Load Test Report', content_summary: 'Load test shows system handles 10,000 concurrent users.', timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
-  { _original_crypto_id: 'mock-ev-id-005', id: 'mock-ev-id-005', type: 'market_research_report', source_tool: 'Gartner Report Q1 2024', content_summary: 'UCaaS market projected to grow by 25% YoY.', timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
+  
+  // Synergy Corp evidence items
+  { _original_crypto_id: 'synergy-ev-1', id: 'synergy-ev-1', type: 'code_analysis', source_tool: 'SonarQube Scan', source_url: 'https://sonar.synergy.internal/dashboard?id=backend-core', content_summary: 'Core backend module utilizes Java 8, which has reached End-of-Life for public updates. 2,341 code smells detected.', content_raw: 'Java version: 1.8.0_292\nCode smells: 2,341\nBugs: 47\nVulnerabilities: 12\nSecurity hotspots: 23', timestamp: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString()},
+  { _original_crypto_id: 'synergy-ev-2', id: 'synergy-ev-2', type: 'dependency_scan', source_tool: 'npm audit', content_summary: 'Frontend using React 17.0.2 with 37 known vulnerabilities (3 high, 12 moderate, 22 low)', content_raw: 'found 37 vulnerabilities (22 low, 12 moderate, 3 high) in 1523 scanned packages', timestamp: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString()},
+  { _original_crypto_id: 'synergy-ev-3', id: 'synergy-ev-3', type: 'infrastructure_scan', source_tool: 'Database Configuration Review', content_summary: 'PostgreSQL 12.8 with Redis 6.2 for caching. Well-configured with automated backups.', timestamp: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString()},
+  { _original_crypto_id: 'synergy-ev-4', id: 'synergy-ev-4', type: 'security_assessment', source_tool: 'Security Documentation Review', content_summary: 'No penetration testing reports found in the last 18 months. Last security audit was performed in January 2022.', timestamp: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString()},
+  { _original_crypto_id: 'synergy-ev-5', id: 'synergy-ev-5', type: 'code_review', source_tool: 'Authentication Module Analysis', content_summary: 'JWT-based authentication implemented correctly with RS256 algorithm. Tokens expire after 24 hours.', timestamp: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString()},
+  
+  // InfraModern evidence items
+  { _original_crypto_id: 'infra-ev-1', id: 'infra-ev-1', type: 'infrastructure_assessment', source_tool: 'Infrastructure Inventory Scan', content_summary: '85% of compute workloads running on Dell PowerEdge servers in on-premise datacenter. 15% using AWS for object storage only.', timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()},
+  { _original_crypto_id: 'infra-ev-2', id: 'infra-ev-2', type: 'cloud_migration_analysis', source_tool: 'AWS Migration Assessment Tool', content_summary: 'Analysis shows 70% of workloads are cloud-ready with minimal refactoring. Estimated migration timeline: 6-8 months.', timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()},
+  { _original_crypto_id: 'infra-ev-3', id: 'infra-ev-3', type: 'cost_analysis', source_tool: 'Financial Records Analysis', content_summary: 'Monthly infrastructure costs breakdown: Hardware leases $25K, Power/cooling $8K, Network $5K, Staff $7K. Total: $45K/month.', timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()},
+  { _original_crypto_id: 'infra-ev-4', id: 'infra-ev-4', type: 'architecture_review', source_tool: 'Container Readiness Assessment', content_summary: 'Applications are already using Docker. Kubernetes adoption would require minimal changes to existing containerized services.', timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()},
+  { _original_crypto_id: 'infra-ev-5', id: 'infra-ev-5', type: 'cost_projection', source_tool: 'AWS Pricing Calculator', content_summary: 'Cloud migration costs: $150K (one-time). Projected monthly AWS costs: $27K. Annual savings: $216K (40% reduction).', timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()},
+  
+  // CloudNova evidence items
+  { _original_crypto_id: 'cloudnova-ev-1', id: 'cloudnova-ev-1', type: 'cicd_analysis', source_tool: 'GitHub Actions Dashboard', source_url: 'https://github.com/cloudnova/platform/actions', content_summary: 'Fully automated CI/CD pipeline with 2,500+ successful deployments in the last 30 days. Average pipeline duration: 12 minutes.', timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()},
+  { _original_crypto_id: 'cloudnova-ev-2', id: 'cloudnova-ev-2', type: 'deployment_metrics', source_tool: 'ArgoCD Metrics', content_summary: 'Deployment frequency: Average 52 deployments/day. Lead time for changes: 2.3 hours. MTTR: 15 minutes.', timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()},
+  { _original_crypto_id: 'cloudnova-ev-3', id: 'cloudnova-ev-3', type: 'code_quality_report', source_tool: 'SonarCloud Analysis', source_url: 'https://sonarcloud.io/dashboard?id=cloudnova', content_summary: 'Code coverage: 87%. Technical debt ratio: 0.8%. Maintainability rating: A. Zero critical issues.', timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()},
+  { _original_crypto_id: 'cloudnova-ev-4', id: 'cloudnova-ev-4', type: 'architecture_diagram', source_tool: 'Kubernetes Deployment Analysis', content_summary: 'Blue-green deployment strategy implemented with Istio service mesh. Zero-downtime deployments verified over 6 months.', timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()},
+  { _original_crypto_id: 'cloudnova-ev-5', id: 'cloudnova-ev-5', type: 'team_survey', source_tool: 'LinkedIn/GitHub Profile Analysis', content_summary: 'Engineering team analysis: 45 total, 36 with 5+ years experience, 12 with FAANG background, 8 with advanced degrees.', timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()},
+  { _original_crypto_id: 'cloudnova-ev-6', id: 'cloudnova-ev-6', type: 'open_source_analysis', source_tool: 'GitHub Contribution Tracker', content_summary: 'Team contributed 450+ PRs to Kubernetes, Terraform, and Helm projects in the last year. 3 team members are project maintainers.', timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()},
+  { _original_crypto_id: 'cloudnova-ev-7', id: 'cloudnova-ev-7', type: 'culture_assessment', source_tool: 'Glassdoor/Internal Survey Analysis', content_summary: 'Monthly hackathons with 85% participation. Last 3 hackathon projects launched as product features. 4.7/5 Glassdoor rating.', timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()},
+  { _original_crypto_id: 'cloudnova-ev-8', id: 'cloudnova-ev-8', type: 'market_research', source_tool: 'Gartner DevOps Report 2024', source_url: 'https://gartner.com/reports/devops-2024', content_summary: 'DevOps tools market size: $15.8B in 2024, projected $28.4B by 2028. CAGR: 22%. Key growth drivers: Cloud adoption, microservices.', timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()},
+  { _original_crypto_id: 'cloudnova-ev-9', id: 'cloudnova-ev-9', type: 'customer_analysis', source_tool: 'CRM Database Export', content_summary: 'Customer base: 156 total, 147 active. Notable: Microsoft, Toyota, Nike. Average contract value: $125K/year. Churn rate: 2.1%.', timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()},
+  { _original_crypto_id: 'cloudnova-ev-10', id: 'cloudnova-ev-10', type: 'customer_satisfaction', source_tool: 'Delighted NPS Survey Platform', content_summary: 'Q4 2023 NPS Score: 72 (World-class). Promoters: 78%, Detractors: 6%. Top feedback: "Saves us 10+ hours/week on deployments"', timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()},
+  
+  // FutureTech evidence items
+  { _original_crypto_id: 'future-ev-1', id: 'future-ev-1', type: 'ai_model_analysis', source_tool: 'Model Architecture Review', content_summary: 'Custom BERT variant fine-tuned on industry-specific corpus. 340M parameters. Training data: 2.5TB domain-specific text.', timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString()},
+  { _original_crypto_id: 'future-ev-2', id: 'future-ev-2', type: 'customer_deployment', source_tool: 'Production Monitoring Dashboard', content_summary: 'Current deployments: 3 pilot customers (FinTech startup, Healthcare SMB, Legal firm). Total API calls: 45K/day.', timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString()},
+  { _original_crypto_id: 'future-ev-3', id: 'future-ev-3', type: 'model_performance', source_tool: 'ML Evaluation Framework', content_summary: 'Test set accuracy: 78.3%, F1 score: 0.81. Production metrics limited - only 2 weeks of data from pilot customers.', timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString()},
+  { _original_crypto_id: 'future-ev-4', id: 'future-ev-4', type: 'infrastructure_gap', source_tool: 'MLOps Maturity Assessment', content_summary: 'No model monitoring, A/B testing, or automated retraining pipelines. Models deployed manually via scripts.', timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString()},
+  { _original_crypto_id: 'future-ev-5', id: 'future-ev-5', type: 'cost_analysis', source_tool: 'AWS Cost Explorer', content_summary: 'Current GPU compute costs: $18K/month for inference. No optimization applied - using on-demand p3.2xlarge instances.', timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString()},
+  
+  // Generic evidence items for other reports
+  { _original_crypto_id: 'mock-ev-id-003', id: 'mock-ev-id-003', type: 'architecture_diagram', source_tool: 'Lucidchart Export', content_summary: 'System architecture diagram showing microservices communication patterns and data flow.', timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
+  { _original_crypto_id: 'mock-ev-id-004', id: 'mock-ev-id-004', type: 'scalability_test_result', source_tool: 'K6 Load Test Report', content_summary: 'Load test shows system handles 10,000 concurrent users with p95 latency under 200ms.', timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
+  { _original_crypto_id: 'mock-ev-id-005', id: 'mock-ev-id-005', type: 'market_research_report', source_tool: 'Gartner Report Q1 2024', content_summary: 'UCaaS market projected to grow by 25% YoY. Key players consolidating through M&A activity.', timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
 ];
 
 export const mockStandardReports: DemoStandardReport[] = [
@@ -401,14 +436,38 @@ export const mockStandardReports: DemoStandardReport[] = [
     tech_health_score: 72,
     tech_health_grade: 'C',
     sections: {
-      technologyStack: { title: 'Tech Stack', summary: 'Java monolith with some React microfrontends.', findings: [{text: 'Core backend is Java 8.'}, {text: 'Frontend uses React 17.'}] },
-      security: { title: 'Security', summary: 'Basic security measures in place.', findings: [{text: 'No recent pentest data found.'}], risks: [{text: 'Potential for XSS due to outdated frontend libraries.', severity: 'medium'}] },
+      technologyStack: { 
+        title: 'Tech Stack', 
+        summary: 'Java monolith with some React microfrontends.', 
+        findings: [
+          {text: 'Core backend is Java 8.', evidence_ids: ['synergy-ev-1']}, 
+          {text: 'Frontend uses React 17.', evidence_ids: ['synergy-ev-2']},
+          {text: 'Database: PostgreSQL 12 with Redis caching', evidence_ids: ['synergy-ev-3']}
+        ] 
+      },
+      security: { 
+        title: 'Security', 
+        summary: 'Basic security measures in place with room for improvement.', 
+        findings: [
+          {text: 'No recent pentest data found.', severity: 'high', evidence_ids: ['synergy-ev-4']},
+          {text: 'Basic authentication implemented with JWT tokens', severity: 'info', evidence_ids: ['synergy-ev-5']}
+        ], 
+        risks: [
+          {text: 'Potential for XSS due to outdated frontend libraries.', severity: 'medium', evidence_ids: ['synergy-ev-2']}
+        ],
+        recommendations: [
+          {text: 'Conduct comprehensive penetration testing', evidence_ids: ['synergy-ev-4']},
+          {text: 'Update React to latest version to patch security vulnerabilities', evidence_ids: ['synergy-ev-2']}
+        ]
+      },
     },
     evidence_collection_id: 'col-synergy-123',
     citations: [
       { citation_number: 1, claim_id: 'tech_debt_0', evidence_item_id: 'synergy-ev-1', citation_text: 'Java 8 EOL', citation_context: 'Core backend uses Java 8 which is approaching EOL.'},
+      { citation_number: 2, claim_id: 'frontend_0', evidence_item_id: 'synergy-ev-2', citation_text: 'React 17 security vulnerabilities', citation_context: 'Frontend framework has known security issues that need patching.'},
+      { citation_number: 3, claim_id: 'security_0', evidence_item_id: 'synergy-ev-4', citation_text: 'No penetration testing', citation_context: 'Security posture cannot be fully verified without recent pentest results.'}
     ],
-    metadata: { analysisDepth: 'deep' }
+    metadata: { analysisDepth: 'deep', processingTime: 18500, servicesUsed: ['evidence-collector-v7', 'security-scanner-v2'] }
   },
   {
     id: 'report-inframodern-review',
@@ -422,11 +481,119 @@ export const mockStandardReports: DemoStandardReport[] = [
     tech_health_score: 65,
     tech_health_grade: 'C',
     sections: {
-      infrastructure: { title: 'Infrastructure', summary: 'On-premise servers with some AWS S3 usage.', findings: [{text: 'Significant portion of compute is on dedicated hardware.'}] },
+      infrastructure: { 
+        title: 'Infrastructure', 
+        summary: 'On-premise servers with some AWS S3 usage.', 
+        findings: [
+          {text: 'Significant portion of compute is on dedicated hardware.', evidence_ids: ['infra-ev-1']},
+          {text: '70% of workloads could be migrated to cloud', evidence_ids: ['infra-ev-2']},
+          {text: 'Current monthly infrastructure cost: $45,000', evidence_ids: ['infra-ev-3']}
+        ],
+        opportunities: [
+          {text: 'Cloud migration could reduce costs by 40%', evidence_ids: ['infra-ev-2', 'infra-ev-3']},
+          {text: 'Kubernetes adoption would improve scalability', evidence_ids: ['infra-ev-4']}
+        ]
+      },
+      costAnalysis: {
+        title: 'Cost Optimization Analysis',
+        summary: 'Significant opportunities for infrastructure cost reduction identified.',
+        findings: [
+          {text: 'Current annual infrastructure spend: $540,000', evidence_ids: ['infra-ev-3']},
+          {text: 'Estimated cloud migration cost: $150,000 one-time', evidence_ids: ['infra-ev-5']},
+          {text: 'Projected annual savings post-migration: $216,000', evidence_ids: ['infra-ev-3', 'infra-ev-5']}
+        ]
+      }
     },
     evidence_collection_id: 'col-inframodern-456',
-    citations: [],
-    metadata: { analysisDepth: 'comprehensive' }
+    citations: [
+      { citation_number: 1, claim_id: 'infra_0', evidence_item_id: 'infra-ev-1', citation_text: 'On-premise infrastructure', citation_context: 'Current infrastructure heavily relies on physical servers.'},
+      { citation_number: 2, claim_id: 'cost_0', evidence_item_id: 'infra-ev-3', citation_text: 'High infrastructure costs', citation_context: 'Monthly spend of $45K indicates optimization opportunities.'}
+    ],
+    metadata: { analysisDepth: 'comprehensive', processingTime: 22000, servicesUsed: ['infrastructure-analyzer-v3', 'cost-optimizer-v2'] }
+  },
+  {
+    id: 'report-cloudnova-processing',
+    scan_request_id: 'demo-investor-scan-processing-1',
+    company_name: 'CloudNova Solutions (Demo)',
+    website_url: 'https://example-cloudnova.com',
+    report_type: 'standard',
+    created_at: new Date(Date.now() - 10 * 60 * 1000).toISOString(), // 10 minutes ago
+    executive_summary: 'CloudNova demonstrates strong DevOps practices with mature CI/CD pipelines. Cloud-native architecture positions them well for scale.',
+    investment_score: 82,
+    investment_rationale: 'Strong technical foundation with experienced team. Market timing is excellent for their DevOps automation platform.',
+    tech_health_score: 88,
+    tech_health_grade: 'A',
+    sections: {
+      cicdPipeline: {
+        title: 'CI/CD Pipeline Analysis',
+        summary: 'Mature DevOps practices with automated testing and deployment.',
+        findings: [
+          {text: 'Fully automated CI/CD using GitHub Actions and ArgoCD', evidence_ids: ['cloudnova-ev-1']},
+          {text: 'Average deployment frequency: 50+ per day', evidence_ids: ['cloudnova-ev-2']},
+          {text: 'Test coverage: 87% with automated quality gates', evidence_ids: ['cloudnova-ev-3']},
+          {text: 'Zero-downtime deployments with blue-green strategy', evidence_ids: ['cloudnova-ev-4']}
+        ]
+      },
+      teamCapabilities: {
+        title: 'Team & Culture',
+        summary: 'Strong engineering culture with focus on automation and quality.',
+        findings: [
+          {text: 'Team of 45 engineers, 80% with 5+ years experience', evidence_ids: ['cloudnova-ev-5']},
+          {text: 'Active contributors to open source (Kubernetes, Terraform)', evidence_ids: ['cloudnova-ev-6']},
+          {text: 'Monthly hackathons driving innovation', evidence_ids: ['cloudnova-ev-7']}
+        ]
+      },
+      marketPosition: {
+        title: 'Market Analysis',
+        summary: 'Well-positioned in the growing DevOps tools market.',
+        findings: [
+          {text: 'DevOps tools market growing at 22% CAGR', evidence_ids: ['cloudnova-ev-8']},
+          {text: '150+ enterprise customers including 3 Fortune 500', evidence_ids: ['cloudnova-ev-9']},
+          {text: 'NPS score of 72 indicates strong product-market fit', evidence_ids: ['cloudnova-ev-10']}
+        ]
+      }
+    },
+    evidence_collection_id: 'col-cloudnova-789',
+    citations: [
+      { citation_number: 1, claim_id: 'devops_0', evidence_item_id: 'cloudnova-ev-1', citation_text: 'Automated CI/CD', citation_context: 'Modern DevOps toolchain demonstrates technical maturity.'},
+      { citation_number: 2, claim_id: 'quality_0', evidence_item_id: 'cloudnova-ev-3', citation_text: 'High test coverage', citation_context: '87% test coverage indicates strong quality practices.'},
+      { citation_number: 3, claim_id: 'market_0', evidence_item_id: 'cloudnova-ev-9', citation_text: 'Enterprise adoption', citation_context: 'Fortune 500 customers validate enterprise readiness.'}
+    ],
+    metadata: { analysisDepth: 'comprehensive', processingTime: 19800, servicesUsed: ['devops-analyzer-v2', 'market-intelligence-v3'] }
+  },
+  {
+    id: 'report-futuretech-pending',
+    scan_request_id: 'demo-investor-scan-pending-1',
+    company_name: 'FutureTech Inc. (Demo)',
+    website_url: 'https://example-future.com',
+    report_type: 'standard',
+    created_at: new Date(Date.now() - 5 * 60 * 1000).toISOString(), // 5 minutes ago - simulating just created
+    executive_summary: 'AI-powered SaaS platform showing promise but still in early stages. Limited production deployment data available.',
+    investment_score: 58,
+    investment_rationale: 'Early-stage technology with potential. Needs more validation and production metrics before investment decision.',
+    tech_health_score: 62,
+    tech_health_grade: 'D',
+    sections: {
+      aiCapabilities: {
+        title: 'AI Technology Assessment',
+        summary: 'Proprietary AI models show promise but lack production validation.',
+        findings: [
+          {text: 'Custom transformer models for industry-specific NLP', evidence_ids: ['future-ev-1']},
+          {text: 'Limited production deployment (3 pilot customers)', evidence_ids: ['future-ev-2']},
+          {text: 'Model accuracy: 78% on test data, production metrics unavailable', evidence_ids: ['future-ev-3']}
+        ],
+        risks: [
+          {text: 'No MLOps infrastructure for model monitoring', severity: 'high', evidence_ids: ['future-ev-4']},
+          {text: 'High compute costs not yet optimized', severity: 'medium', evidence_ids: ['future-ev-5']}
+        ]
+      }
+    },
+    evidence_collection_id: 'col-futuretech-101',
+    citations: [
+      { citation_number: 1, claim_id: 'ai_0', evidence_item_id: 'future-ev-1', citation_text: 'Custom AI models', citation_context: 'Proprietary technology could be a differentiator if proven.'},
+      { citation_number: 2, claim_id: 'risk_0', evidence_item_id: 'future-ev-4', citation_text: 'No MLOps infrastructure', citation_context: 'Lack of model monitoring poses significant production risk.'}
+    ],
+    metadata: { analysisDepth: 'standard', processingTime: 15600, servicesUsed: ['ai-analyzer-v3', 'evidence-collector-v7'] }
   }
 ];
 
@@ -474,5 +641,6 @@ export const mockDemoReports: Record<string, DemoStandardReport> = {
   'report-ring4-real-data': mockRing4StandardReport,
   'report-synergy-standard': mockStandardReports[1],
   'report-inframodern-review': mockStandardReports[2],
-  // Add more reports here as needed
+  'report-cloudnova-processing': mockStandardReports[3],
+  'report-futuretech-pending': mockStandardReports[4],
 } 
