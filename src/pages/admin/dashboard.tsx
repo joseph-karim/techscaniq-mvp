@@ -9,20 +9,33 @@ import {
   Eye,
   FileText,
   Play,
-  Zap
+  Zap,
+  Database,
+  Brain,
+  ExternalLink
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
+import { Badge } from '@/components/ui/badge'
 import { Scan } from '@/types'
 import { mockDemoScanRequests, DemoScanRequest } from '@/lib/mock-demo-data'
 import { ScanStatusBadge } from '@/components/dashboard/recent-scans-table'
 import { formatDate } from '@/lib/utils'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+)
 
 export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState('overview')
   const [allScans, setAllScans] = useState<(Scan | DemoScanRequest)[]>([])
+  const [realReports, setRealReports] = useState<any[]>([])
+  const [, setRealScans] = useState<any[]>([])
+  const [aiWorkflows, setAiWorkflows] = useState<any[]>([])
   const [loading, setLoading] = useState(true);
 
   const [scanStats, setScanStats] = useState({
@@ -31,12 +44,43 @@ export default function AdminDashboardPage() {
     awaitingReview: 0,
     completedToday: 0,
     totalActive: 0,
+    realReports: 0,
+    aiWorkflows: 0,
   });
 
   useEffect(() => {
     async function loadAndProcessScans() {
       setLoading(true);
+      
+      // Load mock demo data
       const combinedScans = [...mockDemoScanRequests];
+
+      // Load real data from database (admin view can see all)
+      try {
+        const [
+          { data: dbScans },
+          { data: dbReports },
+          { data: dbWorkflows }
+        ] = await Promise.all([
+          supabase.from('scan_requests').select('*').order('created_at', { ascending: false }),
+          supabase.from('reports').select('*').order('created_at', { ascending: false }),
+          supabase.from('ai_workflow_runs').select('*').order('created_at', { ascending: false })
+        ]);
+
+        setRealScans(dbScans || []);
+        setRealReports(dbReports || []);
+        setAiWorkflows(dbWorkflows || []);
+
+        console.log('Loaded real data:', { 
+          scans: dbScans?.length || 0, 
+          reports: dbReports?.length || 0, 
+          workflows: dbWorkflows?.length || 0 
+        });
+
+      } catch (error) {
+        console.error('Error loading real data:', error);
+        // Continue with mock data only
+      }
 
       combinedScans.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       setAllScans(combinedScans);
@@ -52,12 +96,14 @@ export default function AdminDashboardPage() {
         awaitingReview: review,
         completedToday: completed,
         totalActive: processing + review,
+        realReports: realReports.length,
+        aiWorkflows: aiWorkflows.length,
       });
 
       setLoading(false);
     }
     loadAndProcessScans();
-  }, []);
+  }, [realReports.length, aiWorkflows.length]);
   
   const getPriorityColor = (priority?: Scan['status'] | string) => {
     switch (priority) {
@@ -97,7 +143,7 @@ export default function AdminDashboardPage() {
         </div>
       </div>
       
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center space-x-2">
@@ -165,14 +211,50 @@ export default function AdminDashboardPage() {
             </div>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-2">
+              <Database className="h-10 w-10 rounded-lg bg-purple-100 p-2 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400" />
+              <div>
+                <p className="text-sm text-muted-foreground">Real Reports</p>
+                <div className="flex items-baseline space-x-2">
+                  <h2 className="text-3xl font-bold">{scanStats.realReports}</h2>
+                  <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-purple-50 text-purple-600">
+                    Live
+                  </span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-2">
+              <Brain className="h-10 w-10 rounded-lg bg-pink-100 p-2 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400" />
+              <div>
+                <p className="text-sm text-muted-foreground">AI Workflows</p>
+                <div className="flex items-baseline space-x-2">
+                  <h2 className="text-3xl font-bold">{scanStats.aiWorkflows}</h2>
+                  <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-pink-50 text-pink-600">
+                    AI
+                  </span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList>
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="requests">Scan Requests</TabsTrigger>
           <TabsTrigger value="active">Active Scans</TabsTrigger>
           <TabsTrigger value="review">Review Queue</TabsTrigger>
+          <TabsTrigger value="reports">All Reports</TabsTrigger>
+          <TabsTrigger value="workflows">AI Workflows</TabsTrigger>
           <TabsTrigger value="config">Configuration</TabsTrigger>
         </TabsList>
 
@@ -534,6 +616,148 @@ export default function AdminDashboardPage() {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="reports" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Database className="h-5 w-5" />
+                All Reports ({realReports.length})
+              </CardTitle>
+              <CardDescription>
+                View all generated reports including AI workflow results
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {realReports.map((report) => (
+                  <div key={report.id} className="border rounded-lg p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-3">
+                          <h3 className="font-semibold">{report.company_name}</h3>
+                          <Badge variant="outline">
+                            Score: {report.investment_score || 'N/A'}/100
+                          </Badge>
+                          <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                            {report.ai_model_used || 'AI Generated'}
+                          </Badge>
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          <p>Report ID: <span className="font-mono text-xs">{report.id}</span></p>
+                          <p>Evidence Count: <span className="font-medium">{report.evidence_count || 0}</span></p>
+                          <p>Citation Count: <span className="font-medium">{report.citation_count || 0}</span></p>
+                          <p>Quality Score: <span className="font-medium">{((report.quality_score || 0.85) * 100).toFixed(0)}%</span></p>
+                          <p>Created: <span className="font-medium">{formatDate(report.created_at)}</span></p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" asChild>
+                          <Link to={`/reports/${report.id}`}>
+                            <FileText className="mr-1 h-3 w-3" />
+                            View Report
+                          </Link>
+                        </Button>
+                        {report.scan_request_id && (
+                          <Button variant="outline" size="sm" asChild>
+                            <Link to={`/scans/${report.scan_request_id}`}>
+                              <ExternalLink className="mr-1 h-3 w-3" />
+                              View Scan
+                            </Link>
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                    {report.executive_summary && (
+                      <div className="mt-3 pt-3 border-t">
+                        <p className="text-sm text-gray-700 line-clamp-2">
+                          {report.executive_summary.substring(0, 200)}...
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {realReports.length === 0 && (
+                  <div className="text-center py-8">
+                    <Database className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-500">No reports found</p>
+                    <p className="text-sm text-gray-400">Run the AI workflow test to generate reports</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="workflows" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Brain className="h-5 w-5" />
+                AI Workflows ({aiWorkflows.length})
+              </CardTitle>
+              <CardDescription>
+                Monitor AI-driven analysis workflows and performance
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {aiWorkflows.map((workflow) => (
+                  <div key={workflow.id} className="border rounded-lg p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-3">
+                          <h3 className="font-semibold">Workflow #{workflow.id.substring(0, 8)}</h3>
+                          <Badge variant={workflow.status === 'completed' ? 'default' : 
+                                        workflow.status === 'failed' ? 'destructive' : 'secondary'}>
+                            {workflow.status}
+                          </Badge>
+                          <Badge variant="outline" className="capitalize">
+                            {workflow.workflow_type.replace('_', ' ')}
+                          </Badge>
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          <p>Processing Time: <span className="font-medium">
+                            {workflow.total_processing_time_ms ? 
+                              `${(workflow.total_processing_time_ms / 1000).toFixed(1)}s` : 'N/A'}
+                          </span></p>
+                          <p>Evidence Collected: <span className="font-medium">
+                            {workflow.performance_metrics?.total_evidence_collected || 0}
+                          </span></p>
+                          <p>Citations Generated: <span className="font-medium">
+                            {workflow.performance_metrics?.total_citations_generated || 0}
+                          </span></p>
+                          <p>Confidence Score: <span className="font-medium">
+                            {((workflow.performance_metrics?.average_confidence_score || 0) * 100).toFixed(1)}%
+                          </span></p>
+                          <p>Started: <span className="font-medium">{formatDate(workflow.started_at)}</span></p>
+                          {workflow.completed_at && (
+                            <p>Completed: <span className="font-medium">{formatDate(workflow.completed_at)}</span></p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" asChild>
+                          <Link to={`/demo/ai-workflow-results`}>
+                            <Brain className="mr-1 h-3 w-3" />
+                            View Details
+                          </Link>
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {aiWorkflows.length === 0 && (
+                  <div className="text-center py-8">
+                    <Brain className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-500">No AI workflows found</p>
+                    <p className="text-sm text-gray-400">Run the AI workflow test to see results here</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
