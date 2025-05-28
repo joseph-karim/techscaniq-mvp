@@ -11,7 +11,7 @@ const ForgotPasswordPage = lazy(() => import('@/pages/auth/forgot-password'))
 const DashboardPage = lazy(() => import('@/pages/dashboard'))
 const RequestScanPage = lazy(() => import('@/pages/scans/request-scan'))
 const ScanDetailsPage = lazy(() => import('@/pages/scans/scan-details'))
-const ScanReportPaginated = lazy(() => import('@/pages/reports/scan-report-paginated'))
+const ViewReportPage = lazy(() => import('@/pages/reports/view-report'))
 const AdvisorReviewPage = lazy(() => import('@/pages/advisor/review'))
 const AdvisorQueuePage = lazy(() => import('@/pages/advisor/queue'))
 const AdminDashboardPage = lazy(() => import('@/pages/admin/dashboard'))
@@ -102,7 +102,7 @@ export const routeConfig: RouteConfig[] = [
       },
       {
         path: 'reports/:id',
-        element: <ScanReportPaginated />,
+        element: <ViewReportPage />,
         label: 'Report Details',
         showInNav: false
       },
@@ -130,7 +130,7 @@ export const routeConfig: RouteConfig[] = [
       },
       {
         path: 'portfolio/:id/scan',
-        element: <ScanReportPaginated />,
+        element: <ViewReportPage />,
         label: 'Portfolio Scan',
         requirePE: true,
         showInNav: false
