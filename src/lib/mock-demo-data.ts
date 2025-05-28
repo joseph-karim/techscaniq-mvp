@@ -376,6 +376,44 @@ export const mockEvidenceItems: DemoEvidenceItem[] = [
 ];
 
 // Ring4 Comprehensive Report (Real Data Enhanced)
+// Deep dive mock data for Ring4
+const deepDiveMockData = {
+  executiveSummary: {
+    investmentThesis: 'Ring4 demonstrates exceptional technical execution with internal access revealing sophisticated engineering practices, robust security implementations, and clear scalability roadmap. The deep dive analysis confirms strong operational fundamentals and identifies specific optimization opportunities worth $2.3M in annual savings.',
+    keyFindings: {
+      enablers: [
+        'Sophisticated microservices architecture with 99.97% uptime',
+        'Advanced security practices including zero-trust architecture',
+        'Automated testing coverage at 94% with comprehensive CI/CD',
+        'Strong engineering culture with detailed code review processes',
+        'Clear technical roadmap with quarterly OKRs and milestone tracking',
+        'Efficient cost management with $180k annual cloud optimization',
+        'Robust disaster recovery with 15-minute RTO/RPO targets'
+      ],
+      blockers: [
+        'Legacy authentication service requires $120k modernization investment',
+        'Database sharding needed for 10x scale ($200k implementation cost)',
+        'Missing SOC2 Type II certification limiting enterprise sales',
+        'Technical debt in payment processing system (6-month remediation)'
+      ],
+      risks: [
+        'Key person dependency on lead architect (succession planning needed)',
+        'Vendor concentration risk with 70% infrastructure on single provider',
+        'Compliance gaps for international expansion (GDPR, SOX readiness)',
+        'Performance bottlenecks identified at 50k concurrent users'
+      ]
+    },
+    recommendations: [
+      'Implement database sharding strategy (Q2 2024, $200k investment)',
+      'Complete SOC2 Type II certification (Q1 2024, $80k cost)',
+      'Modernize authentication service with zero-downtime migration',
+      'Establish multi-cloud strategy for vendor risk mitigation',
+      'Hire senior architect to reduce key person dependency',
+      'Implement performance optimization for 100k+ user scale'
+    ]
+  }
+};
+
 export const mockRing4Report: DemoStandardReport = {
   id: 'report-ring4-comprehensive',
   scan_request_id: 'a420adbf-65bc-4daa-aef9-d01c04b1e177',
@@ -552,6 +590,16 @@ export const mockRing4Report: DemoStandardReport = {
         { text: "Implement monthly board meetings (vs quarterly) for first year to maximize value creation impact during critical scaling period", evidence_ids: ["ring4-governance-cadence"] },
         { text: "Begin exit planning discussions early - introduce management to public market advisors and potential strategic acquirers to maximize optionality", evidence_ids: ["ring4-exit-preparation"] }
       ]
+    },
+    executiveSummaryHighlights: {
+      title: "Executive Summary Highlights",
+      summary: deepDiveMockData?.executiveSummary?.investmentThesis ?? "Key findings from the deep dive technical assessment.",
+      findings: [
+        ...(deepDiveMockData?.executiveSummary?.keyFindings?.enablers || []).map((item: string, index: number) => ({ text: item, category: 'Enabler', evidence_ids: [`dd_exec_enabler_${index}`] })),
+        ...(deepDiveMockData?.executiveSummary?.keyFindings?.blockers || []).map((item: string, index: number) => ({ text: item, severity: 'medium', category: 'Blocker', evidence_ids: [`dd_exec_blocker_${index}`] })),
+      ],
+      risks: (deepDiveMockData?.executiveSummary?.keyFindings?.risks || []).map((item: string, index: number) => ({ text: item, severity: 'high', evidence_ids: [`dd_exec_risk_${index}`] })),
+      recommendations: (deepDiveMockData?.executiveSummary?.recommendations || []).map((item: string, index: number) => ({ text: item, evidence_ids: [`dd_exec_rec_${index}`] })) // Ensure this maps from deepDiveMockData.executiveSummary.recommendations
     }
   },
   evidence_collection_id: 'col-ring4-20240115',
