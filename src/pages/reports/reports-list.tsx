@@ -242,7 +242,7 @@ export default function ReportsListPage() {
                       {scan.status === 'complete' && (
                         <>
                           <Button variant="outline" size="sm" asChild>
-                            <Link to={`/reports/${scan.id}`}>
+                            <Link to={`/scans/${scan.id}`}>
                               <Eye className="mr-2 h-4 w-4" />
                               View Report
                             </Link>
@@ -255,7 +255,7 @@ export default function ReportsListPage() {
                       )}
                       {(scan.status === 'processing' || scan.status === 'awaiting_review' || scan.status === 'in_review') && (
                         <Button variant="outline" size="sm" asChild>
-                          <Link to={`/reports/${scan.id}`}>
+                          <Link to={`/scans/${scan.id}`}>
                             <BarChart3 className="mr-2 h-4 w-4" />
                             View Status
                           </Link>
