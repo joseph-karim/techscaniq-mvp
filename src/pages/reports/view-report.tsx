@@ -1,539 +1,652 @@
-import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { supabase } from '@/lib/supabaseClient'
+import { useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import { ArrowLeft, Building2, Calendar, Shield, CheckCircle, XCircle, AlertTriangle, TrendingUp } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
-import { useToast } from '@/hooks/use-toast'
 
-interface ScanReport {
-  id: string
-  company_name: string
-  website_url: string
-  report_type: string
+// Mock Ring4 report data
+const mockReport = {
+  id: "ecff380a-67a5-40c9-acd3-88946773a6e9",
+  company_name: "Ring4",
+  website_url: "https://ring4.com",
+  report_type: "deep-dive",
+  investor_name: "Demo Capital Ventures",
+  assessment_context: "Series B Investment",
+  created_at: "2025-05-28T03:33:38.951151+00:00",
+  scan_request_id: "f54e43c6-bcde-44e4-b40d-4d50d9d1d0df",
   report_data: {
     executiveSummary: {
-      investmentScore: number
-      overallAssessment: string
-      keyFindings: string[]
-      criticalIssues: string[]
-    }
-    companyOverview: {
-      description: string
-      teamSize: string
-      foundingYear: string
-      keyProducts: string[]
-      businessModel: string
-    }
-    technologyStack: {
-      frontend: string[]
-      backend: string[]
-      infrastructure: string[]
-      databases: string[]
-      aiTools: string[]
-    }
-    architectureAnalysis: {
-      systemDesign: string
-      scalability: string
-      security: string
-      codeQuality: string
-    }
-    securityAssessment: {
-      overallScore: number
-      vulnerabilities: any[]
-      compliance: string[]
-      recommendations: string[]
-    }
-    performanceMetrics: {
-      loadTime: string
-      uptime: string
-      scalability: string
-      optimization: string
-    }
-    teamCapabilities: {
-      teamSize: string
-      expertise: string[]
-      gaps: string[]
-      culture: string
-    }
-    marketPosition: {
-      competitors: string[]
-      differentiation: string
-      marketSize: string
-      growthPotential: string
-    }
+      overallAssessment: "Ring4 presents a strong investment opportunity in the business communications space with proven market traction, solid technology foundation, and significant growth potential. The company has demonstrated product-market fit with over 700,000 users worldwide and shows promising indicators for scalability.",
+      investmentScore: 75,
+      keyFindings: [
+        "700,000+ active users across 190 countries with strong organic growth",
+        "Modern cloud-native architecture built on reliable infrastructure (AWS, Twilio)",
+        "Competitive pricing model targeting underserved SMB and startup segments",
+        "Strong security posture with SOC2 compliance and enterprise-grade features",
+        "Experienced team with telecom and SaaS backgrounds"
+      ],
+      criticalRisks: [
+        "Highly competitive market with established players (RingCentral, 8x8)",
+        "Dependence on third-party infrastructure providers",
+        "Customer acquisition costs may increase as market matures",
+        "Limited differentiation in core feature set"
+      ]
+    },
+    technologyAssessment: {
+      architectureStrengths: [
+        "Microservices architecture enabling independent scaling",
+        "Multi-region deployment for low latency globally",
+        "Real-time synchronization across devices",
+        "API-first design supporting third-party integrations"
+      ],
+      stackOverview: {
+        backend: ["Node.js", "Express", "PostgreSQL", "Redis"],
+        frontend: ["React", "Next.js", "TypeScript", "Tailwind CSS"],
+        infrastructure: ["AWS", "CloudFront", "Docker", "Kubernetes"],
+        monitoring: ["New Relic", "Sentry", "DataDog"],
+        communications: ["Twilio", "WebRTC", "SIP Protocol"]
+      },
+      scalabilityAnalysis: {
+        currentCapacity: "Supporting 700K users with 99.95% uptime",
+        growthReadiness: "Architecture can handle 10x growth with minimal changes",
+        recommendedImprovements: [
+          "Implement read replicas",
+          "Add caching layer",
+          "Optimize WebSocket connections"
+        ],
+        bottlenecks: [
+          "Database connection pooling",
+          "Real-time event processing"
+        ]
+      },
+      technicalDebt: [
+        "Legacy mobile apps need modernization",
+        "Database sharding required for next growth phase",
+        "Testing coverage at 68% - below industry standards"
+      ]
+    },
+    marketAnalysis: {
+      totalAddressableMarket: "$24.8B global UCaaS market by 2025",
+      marketGrowthRate: "11.2% CAGR",
+      competitiveLandscape: {
+        marketPosition: "Challenger brand focusing on SMB segment",
+        directCompetitors: ["RingCentral", "8x8", "Dialpad", "Nextiva"],
+        differentiators: [
+          "Simplified pricing without per-user fees",
+          "No contract requirements",
+          "Built-in CRM integrations",
+          "Mobile-first design"
+        ]
+      },
+      customerAnalysis: {
+        targetSegments: ["Startups", "Small businesses", "Remote teams", "Call centers"],
+        averageContractValue: "$149/month",
+        netPromoterScore: 67,
+        churnRate: "3.2% monthly"
+      }
+    },
+    teamAssessment: {
+      leadershipTeam: [
+        {
+          name: "John Chen",
+          role: "CEO & Founder",
+          background: "Former VP at RingCentral, 15+ years in telecom"
+        },
+        {
+          name: "Sarah Kim",
+          role: "CTO",
+          background: "Ex-Google, led teams building communication platforms"
+        },
+        {
+          name: "Michael Rodriguez",
+          role: "VP of Sales",
+          background: "Built sales teams at Zoom and Slack"
+        }
+      ],
+      teamStrength: "Strong domain expertise with proven track records in communications and SaaS",
+      hiringVelocity: "40% YoY team growth, focusing on engineering and customer success",
+      culturalFactors: [
+        "Remote-first company",
+        "Strong engineering culture",
+        "Customer-obsessed mindset"
+      ]
+    },
     financialIndicators: {
-      revenueModel: string
-      fundingHistory: string
-      burnRate: string
-      profitability: string
-    }
-    recommendations: {
-      investmentDecision: string
-      keyStrengths: string[]
-      concerns: string[]
-      nextSteps: string[]
+      revenueIndicators: {
+        estimatedARR: "$12-15M based on user count and pricing",
+        growthRate: "120% YoY",
+        unitEconomics: "LTV:CAC ratio of 3.5:1"
+      },
+      fundingHistory: [
+        "Seed: $2M (2019)",
+        "Series A: $15M (2021) - led by Bessemer Venture Partners",
+        "Series B: Expected Q2 2025"
+      ],
+      burnRate: "Estimated $800K/month",
+      runway: "18-24 months at current burn rate"
+    },
+    dueDiligenceFlags: {
+      greenFlags: [
+        "Strong product-market fit demonstrated",
+        "Experienced team with domain expertise",
+        "Modern, scalable technology stack",
+        "Healthy unit economics",
+        "Growing organically with low marketing spend"
+      ],
+      yellowFlags: [
+        "Concentrated dependency on Twilio",
+        "Limited international presence",
+        "No significant IP or patents",
+        "Customer concentration risk"
+      ],
+      redFlags: [
+        "No clear moat against larger competitors",
+        "Potential margin pressure as scale increases"
+      ]
+    },
+    recommendedNextSteps: [
+      "Schedule deep-dive technical due diligence session",
+      "Review detailed financial statements and cohort analysis",
+      "Conduct customer reference calls (5-10 customers)",
+      "Analyze competitive positioning with expert networks",
+      "Evaluate international expansion strategy"
+    ],
+    appendices: {
+      technicalMetrics: {
+        uptime: "99.95% over last 12 months",
+        apiResponseTime: "127ms average",
+        securityAudits: "Passed SOC2 Type II audit (2024)",
+        mobileAppRating: "4.6/5.0 (iOS), 4.4/5.0 (Android)"
+      },
+      competitorComparison: {
+        Ring4: {
+          price: "$149/month",
+          users: "Unlimited",
+          features: "Core + CRM"
+        },
+        RingCentral: {
+          price: "$499/month",
+          users: "20",
+          features: "Full suite"
+        },
+        "8x8": {
+          price: "$399/month",
+          users: "15",
+          features: "Full suite"
+        }
+      },
+      customerTestimonials: [
+        "Ring4 helped us reduce communication costs by 60% while improving call quality - StartupX CEO",
+        "The simplicity and reliability made switching from our previous provider seamless - Agency Owner"
+      ]
     }
   }
-  created_at: string
-  scan_request_id?: string
 }
 
 export default function ViewReportPage() {
-  const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { toast } = useToast()
-  
-  const [report, setReport] = useState<ScanReport | null>(null)
-  const [loading, setLoading] = useState(true)
-  
-  useEffect(() => {
-    async function fetchReport() {
-      if (!id) return
-      
-      try {
-        // First try to fetch by scan_request_id
-        const { data } = await supabase
-          .from('scan_reports')
-          .select('*')
-          .eq('scan_request_id', id)
-          .maybeSingle()
 
-        if (data) {
-          setReport(data)
-        } else {
-          // If not found, try by report id directly
-          const { data: reportData } = await supabase
-            .from('scan_reports')
-            .select('*')
-            .eq('id', id)
-            .maybeSingle()
-          
-          if (reportData) {
-            setReport(reportData)
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching report:', error)
-        toast({
-          title: "Error",
-          description: "Failed to load report",
-          variant: "destructive"
-        })
-      } finally {
-        setLoading(false)
-      }
-    }
-    
-    fetchReport()
-  }, [id, toast])
-  
-  if (loading) {
-    return <div className="flex items-center justify-center h-64">Loading report...</div>
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return 'text-green-600'
+    if (score >= 60) return 'text-yellow-600'
+    return 'text-red-600'
   }
-  
-  if (!report) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64 space-y-4">
-        <p className="text-muted-foreground">Report not found</p>
-        <Button variant="outline" onClick={() => navigate(-1)}>
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Go Back
-        </Button>
-      </div>
-    )
+
+  const getScoreBadge = (score: number) => {
+    if (score >= 80) return { color: 'default' as const, text: 'Strong Buy' }
+    if (score >= 70) return { color: 'default' as const, text: 'Buy' }
+    if (score >= 60) return { color: 'secondary' as const, text: 'Hold' }
+    if (score >= 50) return { color: 'secondary' as const, text: 'Caution' }
+    return { color: 'destructive' as const, text: 'Pass' }
   }
-  
-  const investmentScore = report.report_data?.executiveSummary?.investmentScore || 0
-  const scoreColor = investmentScore >= 70 ? 'text-green-600' : investmentScore >= 40 ? 'text-yellow-600' : 'text-red-600'
-  
+
+  const report = mockReport
+  const scoreBadge = getScoreBadge(report.report_data.executiveSummary.investmentScore)
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Header */}
+        <div className="mb-8">
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/reports')}
+            className="mb-4"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Reports
           </Button>
-          <h1 className="text-3xl font-bold mt-2">{report.company_name} - Technical Due Diligence</h1>
-          <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <Building2 className="h-4 w-4" />
-              {report.website_url}
-            </span>
-            <span className="flex items-center gap-1">
-              <Calendar className="h-4 w-4" />
-              {formatDate(report.created_at)}
-            </span>
-            <Badge variant="outline">
-              {report.report_type}
-            </Badge>
-          </div>
-        </div>
-      </div>
-      
-      {/* Investment Score Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Investment Score</CardTitle>
-          <CardDescription>AI-powered investment assessment</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <TrendingUp className={`h-8 w-8 ${scoreColor}`} />
-                <span className={`text-5xl font-bold ${scoreColor}`}>
-                  {investmentScore}
-                </span>
-                <span className="text-2xl text-muted-foreground">/100</span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {report.report_data?.executiveSummary?.overallAssessment || 'Overall assessment not available'}
-              </p>
+          
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold mb-2">{report.company_name}</h1>
+              <p className="text-muted-foreground">{report.website_url}</p>
             </div>
             <div className="text-right">
-              <p className="text-sm font-medium">Investment Decision</p>
-              <p className="text-lg font-bold">
-                {report.report_data?.recommendations?.investmentDecision || 'Pending'}
-              </p>
+              <div className={`text-5xl font-bold ${getScoreColor(report.report_data.executiveSummary.investmentScore)}`}>
+                {report.report_data.executiveSummary.investmentScore}
+              </div>
+              <Badge variant={scoreBadge.color} className="mt-2">
+                {scoreBadge.text}
+              </Badge>
             </div>
           </div>
-        </CardContent>
-      </Card>
-      
-      {/* Main Content Tabs */}
-      <Tabs defaultValue="summary" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="summary">Summary</TabsTrigger>
-          <TabsTrigger value="technology">Technology</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
-          <TabsTrigger value="team">Team</TabsTrigger>
-          <TabsTrigger value="market">Market</TabsTrigger>
-          <TabsTrigger value="recommendations">Recommendations</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="summary" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Executive Summary</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Key Findings */}
+
+          <div className="flex flex-wrap gap-4 mt-6">
+            <div className="flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm">{report.investor_name}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Shield className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm">{report.assessment_context}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm">{formatDate(report.created_at)}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Executive Summary Card */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Executive Summary</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-lg mb-6">{report.report_data.executiveSummary.overallAssessment}</p>
+            
+            <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <h3 className="font-semibold mb-2">Key Findings</h3>
-                <ul className="list-disc list-inside space-y-1">
-                  {report.report_data?.executiveSummary?.keyFindings?.map((finding, i) => (
-                    <li key={i} className="text-sm">{finding}</li>
+                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                  Key Findings
+                </h3>
+                <ul className="space-y-2">
+                  {report.report_data.executiveSummary.keyFindings.map((finding, index) => (
+                    <li key={index} className="text-sm flex items-start gap-2">
+                      <span className="text-green-600 mt-0.5">•</span>
+                      <span>{finding}</span>
+                    </li>
                   ))}
                 </ul>
               </div>
+              
+              <div>
+                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-red-600" />
+                  Critical Risks
+                </h3>
+                <ul className="space-y-2">
+                  {report.report_data.executiveSummary.criticalRisks.map((risk, index) => (
+                    <li key={index} className="text-sm flex items-start gap-2">
+                      <span className="text-red-600 mt-0.5">•</span>
+                      <span>{risk}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-              {/* Critical Issues */}
-              {report.report_data?.executiveSummary?.criticalIssues?.length > 0 && (
-                <Alert variant="destructive">
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertDescription>
-                    <h4 className="font-semibold mb-1">Critical Issues</h4>
-                    <ul className="list-disc list-inside space-y-1">
-                      {report.report_data.executiveSummary.criticalIssues.map((issue, i) => (
-                        <li key={i} className="text-sm">{issue}</li>
+        {/* Detailed Analysis Tabs */}
+        <Tabs defaultValue="technology" className="space-y-6">
+          <TabsList className="grid grid-cols-2 lg:grid-cols-5 w-full">
+            <TabsTrigger value="technology">Technology</TabsTrigger>
+            <TabsTrigger value="market">Market</TabsTrigger>
+            <TabsTrigger value="team">Team</TabsTrigger>
+            <TabsTrigger value="financials">Financials</TabsTrigger>
+            <TabsTrigger value="diligence">Due Diligence</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="technology" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Technology Stack</CardTitle>
+                <CardDescription>Overview of the technical architecture and infrastructure</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="font-semibold mb-3">Architecture Strengths</h4>
+                    <ul className="space-y-2">
+                      {report.report_data.technologyAssessment.architectureStrengths.map((strength, index) => (
+                        <li key={index} className="text-sm flex items-start gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-600 mt-0.5" />
+                          <span>{strength}</span>
+                        </li>
                       ))}
                     </ul>
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              {/* Company Overview */}
-              <div>
-                <h3 className="font-semibold mb-2">Company Overview</h3>
-                <p className="text-sm text-muted-foreground">
-                  {report.report_data?.companyOverview?.description}
-                </p>
-                <div className="grid grid-cols-2 gap-4 mt-2">
+                  </div>
+                  
                   <div>
-                    <p className="text-sm font-medium">Founded</p>
-                    <p className="text-sm text-muted-foreground">{report.report_data?.companyOverview?.foundingYear || 'N/A'}</p>
+                    <h4 className="font-semibold mb-3">Technical Debt</h4>
+                    <ul className="space-y-2">
+                      {report.report_data.technologyAssessment.technicalDebt.map((debt, index) => (
+                        <li key={index} className="text-sm flex items-start gap-2">
+                          <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5" />
+                          <span>{debt}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
+                </div>
+
+                <div className="mt-6">
+                  <h4 className="font-semibold mb-3">Technology Stack</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    {Object.entries(report.report_data.technologyAssessment.stackOverview).map(([category, technologies]) => (
+                      <div key={category}>
+                        <h5 className="text-sm font-medium text-muted-foreground mb-2 capitalize">{category}</h5>
+                        <div className="space-y-1">
+                          {technologies.map((tech, index) => (
+                            <Badge key={index} variant="secondary" className="text-xs">
+                              {tech}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mt-6">
+                  <h4 className="font-semibold mb-3">Scalability Analysis</h4>
+                  <div className="space-y-2 text-sm">
+                    <p><strong>Current Capacity:</strong> {report.report_data.technologyAssessment.scalabilityAnalysis.currentCapacity}</p>
+                    <p><strong>Growth Readiness:</strong> {report.report_data.technologyAssessment.scalabilityAnalysis.growthReadiness}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="market" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Market Analysis</CardTitle>
+                <CardDescription>Market opportunity and competitive positioning</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <p className="text-sm font-medium">Team Size</p>
-                    <p className="text-sm text-muted-foreground">{report.report_data?.companyOverview?.teamSize || 'N/A'}</p>
+                    <h4 className="font-semibold mb-3">Market Opportunity</h4>
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Total Addressable Market</p>
+                        <p className="text-lg font-semibold">{report.report_data.marketAnalysis.totalAddressableMarket}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Market Growth Rate</p>
+                        <p className="text-lg font-semibold">{report.report_data.marketAnalysis.marketGrowthRate}</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-semibold mb-3">Customer Metrics</h4>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Average Contract Value</span>
+                        <span className="font-semibold">{report.report_data.marketAnalysis.customerAnalysis.averageContractValue}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Net Promoter Score</span>
+                        <span className="font-semibold">{report.report_data.marketAnalysis.customerAnalysis.netPromoterScore}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Monthly Churn Rate</span>
+                        <span className="font-semibold">{report.report_data.marketAnalysis.customerAnalysis.churnRate}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
-        <TabsContent value="technology" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Technology Stack</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-6">
-                <div>
-                  <h4 className="font-semibold mb-2">Frontend</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {report.report_data?.technologyStack?.frontend?.map((tech, i) => (
-                      <Badge key={i} variant="secondary">{tech}</Badge>
+                <div className="mt-6">
+                  <h4 className="font-semibold mb-3">Competitive Landscape</h4>
+                  <p className="text-sm text-muted-foreground mb-3">{report.report_data.marketAnalysis.competitiveLandscape.marketPosition}</p>
+                  <div className="space-y-3">
+                    <div>
+                      <h5 className="text-sm font-medium mb-2">Key Differentiators</h5>
+                      <ul className="space-y-1">
+                        {report.report_data.marketAnalysis.competitiveLandscape.differentiators.map((diff, index) => (
+                          <li key={index} className="text-sm flex items-start gap-2">
+                            <TrendingUp className="h-4 w-4 text-blue-600 mt-0.5" />
+                            <span>{diff}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6">
+                  <h4 className="font-semibold mb-3">Competitor Comparison</h4>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left py-2">Company</th>
+                          <th className="text-left py-2">Pricing</th>
+                          <th className="text-left py-2">Users</th>
+                          <th className="text-left py-2">Features</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {Object.entries(report.report_data.appendices.competitorComparison).map(([company, data]) => (
+                          <tr key={company} className={company === 'Ring4' ? 'font-semibold bg-muted/50' : ''}>
+                            <td className="py-2">{company}</td>
+                            <td className="py-2">{data.price}</td>
+                            <td className="py-2">{data.users}</td>
+                            <td className="py-2">{data.features}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="team" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Team Assessment</CardTitle>
+                <CardDescription>Leadership team and organizational strength</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="mb-6">{report.report_data.teamAssessment.teamStrength}</p>
+                
+                <div className="space-y-6">
+                  <div>
+                    <h4 className="font-semibold mb-3">Leadership Team</h4>
+                    <div className="grid gap-4">
+                      {report.report_data.teamAssessment.leadershipTeam.map((member, index) => (
+                        <div key={index} className="border rounded-lg p-4">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h5 className="font-semibold">{member.name}</h5>
+                              <p className="text-sm text-muted-foreground">{member.role}</p>
+                            </div>
+                          </div>
+                          <p className="text-sm mt-2">{member.background}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold mb-3">Growth & Culture</h4>
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Hiring Velocity</p>
+                        <p className="font-semibold">{report.report_data.teamAssessment.hiringVelocity}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-2">Cultural Factors</p>
+                        <div className="flex flex-wrap gap-2">
+                          {report.report_data.teamAssessment.culturalFactors.map((factor, index) => (
+                            <Badge key={index} variant="outline">{factor}</Badge>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="financials" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Financial Indicators</CardTitle>
+                <CardDescription>Revenue metrics and funding history</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="font-semibold mb-3">Revenue Metrics</h4>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Estimated ARR</span>
+                        <span className="font-semibold">{report.report_data.financialIndicators.revenueIndicators.estimatedARR}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Growth Rate</span>
+                        <span className="font-semibold">{report.report_data.financialIndicators.revenueIndicators.growthRate}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Unit Economics</span>
+                        <span className="font-semibold">{report.report_data.financialIndicators.revenueIndicators.unitEconomics}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-semibold mb-3">Burn & Runway</h4>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Burn Rate</span>
+                        <span className="font-semibold">{report.report_data.financialIndicators.burnRate}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Runway</span>
+                        <span className="font-semibold">{report.report_data.financialIndicators.runway}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6">
+                  <h4 className="font-semibold mb-3">Funding History</h4>
+                  <div className="space-y-2">
+                    {report.report_data.financialIndicators.fundingHistory.map((round, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <Badge variant="outline">{round}</Badge>
+                      </div>
                     ))}
                   </div>
                 </div>
-                <div>
-                  <h4 className="font-semibold mb-2">Backend</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {report.report_data?.technologyStack?.backend?.map((tech, i) => (
-                      <Badge key={i} variant="secondary">{tech}</Badge>
-                    ))}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="diligence" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Due Diligence Flags</CardTitle>
+                <CardDescription>Key considerations for investment decision</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-3 gap-6">
+                  <div>
+                    <h4 className="font-semibold mb-3 flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                      Green Flags
+                    </h4>
+                    <ul className="space-y-2">
+                      {report.report_data.dueDiligenceFlags.greenFlags.map((flag, index) => (
+                        <li key={index} className="text-sm">{flag}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-semibold mb-3 flex items-center gap-2">
+                      <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                      Yellow Flags
+                    </h4>
+                    <ul className="space-y-2">
+                      {report.report_data.dueDiligenceFlags.yellowFlags.map((flag, index) => (
+                        <li key={index} className="text-sm">{flag}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-semibold mb-3 flex items-center gap-2">
+                      <XCircle className="h-5 w-5 text-red-600" />
+                      Red Flags
+                    </h4>
+                    <ul className="space-y-2">
+                      {report.report_data.dueDiligenceFlags.redFlags.map((flag, index) => (
+                        <li key={index} className="text-sm">{flag}</li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
-                <div>
-                  <h4 className="font-semibold mb-2">Infrastructure</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {report.report_data?.technologyStack?.infrastructure?.map((tech, i) => (
-                      <Badge key={i} variant="secondary">{tech}</Badge>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-2">Databases</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {report.report_data?.technologyStack?.databases?.map((tech, i) => (
-                      <Badge key={i} variant="secondary">{tech}</Badge>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Architecture Analysis</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <h4 className="font-semibold mb-1">System Design</h4>
-                <p className="text-sm text-muted-foreground">{report.report_data?.architectureAnalysis?.systemDesign}</p>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-1">Scalability</h4>
-                <p className="text-sm text-muted-foreground">{report.report_data?.architectureAnalysis?.scalability}</p>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-1">Code Quality</h4>
-                <p className="text-sm text-muted-foreground">{report.report_data?.architectureAnalysis?.codeQuality}</p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="security" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span className="flex items-center gap-2">
-                  <Shield className="h-5 w-5" />
-                  Security Assessment
-                </span>
-                <Badge variant={report.report_data?.securityAssessment?.overallScore >= 70 ? "default" : "destructive"}>
-                  Score: {report.report_data?.securityAssessment?.overallScore || 0}/100
-                </Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <h4 className="font-semibold mb-2">Vulnerabilities</h4>
-                {report.report_data?.securityAssessment?.vulnerabilities?.length > 0 ? (
-                  <ul className="space-y-2">
-                    {report.report_data.securityAssessment.vulnerabilities.map((vuln: any, i: number) => (
-                      <li key={i} className="flex items-start gap-2">
-                        <XCircle className="h-4 w-4 text-red-500 mt-0.5" />
-                        <span className="text-sm">{vuln}</span>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-sm text-muted-foreground">No critical vulnerabilities detected</p>
-                )}
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-2">Compliance</h4>
-                <div className="flex flex-wrap gap-2">
-                  {report.report_data?.securityAssessment?.compliance?.map((comp, i) => (
-                    <Badge key={i} variant="outline">
-                      <CheckCircle className="h-3 w-3 mr-1" />
-                      {comp}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-2">Recommendations</h4>
-                <ul className="list-disc list-inside space-y-1">
-                  {report.report_data?.securityAssessment?.recommendations?.map((rec, i) => (
-                    <li key={i} className="text-sm">{rec}</li>
-                  ))}
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="team" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Team Capabilities</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-semibold mb-1">Team Size</h4>
-                  <p className="text-sm text-muted-foreground">{report.report_data?.teamCapabilities?.teamSize}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-1">Culture</h4>
-                  <p className="text-sm text-muted-foreground">{report.report_data?.teamCapabilities?.culture}</p>
-                </div>
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-2">Expertise Areas</h4>
-                <div className="flex flex-wrap gap-2">
-                  {report.report_data?.teamCapabilities?.expertise?.map((skill, i) => (
-                    <Badge key={i} variant="secondary">{skill}</Badge>
-                  ))}
-                </div>
-              </div>
-
-              {report.report_data?.teamCapabilities?.gaps?.length > 0 && (
-                <div>
-                  <h4 className="font-semibold mb-2">Identified Gaps</h4>
-                  <ul className="list-disc list-inside space-y-1">
-                    {report.report_data.teamCapabilities.gaps.map((gap, i) => (
-                      <li key={i} className="text-sm text-muted-foreground">{gap}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="market" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Market Position</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <h4 className="font-semibold mb-1">Market Size</h4>
-                <p className="text-sm text-muted-foreground">{report.report_data?.marketPosition?.marketSize}</p>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-1">Growth Potential</h4>
-                <p className="text-sm text-muted-foreground">{report.report_data?.marketPosition?.growthPotential}</p>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-1">Differentiation</h4>
-                <p className="text-sm text-muted-foreground">{report.report_data?.marketPosition?.differentiation}</p>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-2">Key Competitors</h4>
-                <div className="flex flex-wrap gap-2">
-                  {report.report_data?.marketPosition?.competitors?.map((comp, i) => (
-                    <Badge key={i} variant="outline">{comp}</Badge>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Financial Indicators</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-semibold mb-1">Revenue Model</h4>
-                  <p className="text-sm text-muted-foreground">{report.report_data?.financialIndicators?.revenueModel || 'N/A'}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-1">Funding History</h4>
-                  <p className="text-sm text-muted-foreground">{report.report_data?.financialIndicators?.fundingHistory || 'N/A'}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-1">Burn Rate</h4>
-                  <p className="text-sm text-muted-foreground">{report.report_data?.financialIndicators?.burnRate || 'N/A'}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-1">Profitability</h4>
-                  <p className="text-sm text-muted-foreground">{report.report_data?.financialIndicators?.profitability || 'N/A'}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="recommendations" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Investment Recommendations</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Alert>
-                <TrendingUp className="h-4 w-4" />
-                <AlertDescription>
-                  <h4 className="font-semibold mb-1">Investment Decision</h4>
-                  <p>{report.report_data?.recommendations?.investmentDecision}</p>
-                </AlertDescription>
-              </Alert>
-
-              <div>
-                <h4 className="font-semibold mb-2">Key Strengths</h4>
+            <Card>
+              <CardHeader>
+                <CardTitle>Recommended Next Steps</CardTitle>
+              </CardHeader>
+              <CardContent>
                 <ul className="space-y-2">
-                  {report.report_data?.recommendations?.keyStrengths?.map((strength, i) => (
-                    <li key={i} className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
-                      <span className="text-sm">{strength}</span>
+                  {report.report_data.recommendedNextSteps.map((step, index) => (
+                    <li key={index} className="flex items-start gap-2">
+                      <span className="text-blue-600">→</span>
+                      <span className="text-sm">{step}</span>
                     </li>
                   ))}
                 </ul>
-              </div>
+              </CardContent>
+            </Card>
 
-              <div>
-                <h4 className="font-semibold mb-2">Concerns</h4>
-                <ul className="space-y-2">
-                  {report.report_data?.recommendations?.concerns?.map((concern, i) => (
-                    <li key={i} className="flex items-start gap-2">
-                      <AlertTriangle className="h-4 w-4 text-yellow-500 mt-0.5" />
-                      <span className="text-sm">{concern}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-2">Next Steps</h4>
-                <ul className="list-disc list-inside space-y-1">
-                  {report.report_data?.recommendations?.nextSteps?.map((step, i) => (
-                    <li key={i} className="text-sm">{step}</li>
-                  ))}
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            <Card>
+              <CardHeader>
+                <CardTitle>Technical Metrics</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Uptime</p>
+                    <p className="font-semibold">{report.report_data.appendices.technicalMetrics.uptime}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">API Response Time</p>
+                    <p className="font-semibold">{report.report_data.appendices.technicalMetrics.apiResponseTime}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Security Audits</p>
+                    <p className="font-semibold">{report.report_data.appendices.technicalMetrics.securityAudits}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Mobile App Rating</p>
+                    <p className="font-semibold">{report.report_data.appendices.technicalMetrics.mobileAppRating}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   )
 } 
