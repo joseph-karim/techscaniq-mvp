@@ -3,12 +3,8 @@ import {
   FileText, 
   BarChart3, 
   Shield, 
-  AlertTriangle, 
   TrendingUp,
   Code,
-  Server,
-
-  Clock,
   CheckCircle,
   ChevronRight
 } from 'lucide-react'
@@ -28,77 +24,45 @@ export const scanReportSections: ScanReportSection[] = [
     id: 'executive-summary',
     title: 'Executive Summary',
     icon: <FileText className="h-4 w-4" />,
-    description: 'High-level findings and key insights',
+    description: 'Investment analysis and key insights',
     category: 'overview'
   },
   {
-    id: 'risk-assessment',
-    title: 'Risk Assessment',
-    icon: <AlertTriangle className="h-4 w-4" />,
-    description: 'Risk analysis and severity breakdown',
+    id: 'company-overview',
+    title: 'Company Overview',
+    icon: <BarChart3 className="h-4 w-4" />,
+    description: 'Business model and market position',
     category: 'overview'
   },
   {
     id: 'technology-overview',
-    title: 'Technology Overview',
-    icon: <BarChart3 className="h-4 w-4" />,
-    description: 'Technology stack and architecture analysis',
+    title: 'Technology Stack',
+    icon: <Code className="h-4 w-4" />,
+    description: 'Technology architecture and stack analysis',
+    category: 'technical'
+  },
+  
+  // Analysis Sections
+  {
+    id: 'security-assessment',
+    title: 'Security Assessment',
+    icon: <Shield className="h-4 w-4" />,
+    description: 'Security analysis and compliance',
+    category: 'security'
+  },
+  {
+    id: 'team-analysis',
+    title: 'Team Analysis',
+    icon: <CheckCircle className="h-4 w-4" />,
+    description: 'Leadership and team capabilities',
     category: 'overview'
   },
-  
-  // Technical Analysis
   {
-    id: 'code-analysis',
-    title: 'Code Analysis',
-    icon: <Code className="h-4 w-4" />,
-    description: 'Code quality, patterns, and technical debt',
-    category: 'technical'
-  },
-  {
-    id: 'infrastructure-analysis',
-    title: 'Infrastructure Analysis',
-    icon: <Server className="h-4 w-4" />,
-    description: 'Deployment, scaling, and infrastructure patterns',
-    category: 'technical'
-  },
-  {
-    id: 'performance-analysis',
-    title: 'Performance Analysis',
+    id: 'financial-overview',
+    title: 'Financial Overview',
     icon: <TrendingUp className="h-4 w-4" />,
-    description: 'Performance metrics and optimization opportunities',
-    category: 'technical'
-  },
-  
-  // Security Analysis
-  {
-    id: 'security-analysis',
-    title: 'Security Analysis',
-    icon: <Shield className="h-4 w-4" />,
-    description: 'Security vulnerabilities and best practices',
-    category: 'security'
-  },
-  {
-    id: 'compliance-check',
-    title: 'Compliance Check',
-    icon: <CheckCircle className="h-4 w-4" />,
-    description: 'Regulatory and industry compliance assessment',
-    category: 'security'
-  },
-  
-  // Recommendations
-  {
-    id: 'recommendations',
-    title: 'Recommendations',
-    icon: <TrendingUp className="h-4 w-4" />,
-    description: 'Actionable recommendations and next steps',
-    category: 'recommendations'
-  },
-  {
-    id: 'timeline',
-    title: 'Implementation Timeline',
-    icon: <Clock className="h-4 w-4" />,
-    description: 'Suggested timeline for improvements',
-    category: 'recommendations'
+    description: 'Financial metrics and funding history',
+    category: 'overview'
   }
 ]
 
