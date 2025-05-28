@@ -1,18 +1,146 @@
-import { useParams, useNavigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { useParams } from 'react-router-dom'
+import { ScanReportNavigation } from '@/components/reports/ScanReportNavigation'
+import { Breadcrumbs } from '@/components/pe/deep-dive-report/Breadcrumbs'
+import { InlineCitation, Citation } from '@/components/reports/EvidenceCitation'
+import { EvidenceModal } from '@/components/reports/EvidenceModal'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ArrowLeft, Building2, Calendar, Shield, CheckCircle, XCircle, AlertTriangle, TrendingUp, Loader2 } from 'lucide-react'
-import { formatDate } from '@/lib/utils'
-import { supabase } from '@/lib/supabaseClient'
+import { Home, FileText, Search, AlertTriangle, CheckCircle, XCircle, TrendingUp, Shield, Building2, Calendar } from 'lucide-react'
 
-// Mock Ring4 report data - using actual data from the database
+// Comprehensive citations covering all sections and facts
+const mockCitations: Citation[] = [
+  {
+    id: 'c1',
+    claim: 'Ring4 uses React-based technology stack with cloud infrastructure',
+    evidence: [
+      {
+        id: 'e1',
+        type: 'code',
+        title: 'Frontend technology detection',
+        source: 'ring4.com/js/bundle.js',
+        url: 'https://ring4.com',
+        excerpt: 'React.createElement, React.Component, ReactDOM.render detected in main bundle',
+        metadata: {
+          fileType: 'JavaScript',
+          lastModified: '2025-01-15',
+          confidence: 95
+        }
+      },
+      {
+        id: 'e2',
+        type: 'document',
+        title: 'Company overview',
+        source: 'ring4.com/about',
+        excerpt: 'Ring4 is a cloud-based phone system and communication platform that provides second phone numbers for business and personal use.',
+        metadata: {
+          fileType: 'HTML',
+          lastModified: '2025-01-10',
+          confidence: 90
+        }
+      }
+    ],
+    reasoning: 'Analysis of the Ring4 website reveals React-based frontend implementation through JavaScript bundle analysis. The company positions itself as a cloud-based VoIP platform.',
+    confidence: 93,
+    analyst: 'Sarah Chen, Frontend Specialist',
+    reviewDate: '2025-01-15',
+    methodology: 'Static code analysis of web assets and company documentation'
+  },
+  {
+    id: 'c2',
+    claim: 'The platform implements VoIP technology with global phone number provisioning',
+    evidence: [
+      {
+        id: 'e3',
+        type: 'api',
+        title: 'API endpoint analysis',
+        source: 'ring4.com/api/numbers',
+        excerpt: 'GET /api/numbers/available?country=US&type=local returns available phone numbers',
+        metadata: {
+          confidence: 88
+        }
+      },
+      {
+        id: 'e4',
+        type: 'document',
+        title: 'Service description',
+        source: 'ring4.com/features',
+        excerpt: 'Get phone numbers in 100+ countries without physical offices. BYOD solution for businesses.',
+        metadata: {
+          fileType: 'HTML',
+          lastModified: '2025-01-08',
+          confidence: 85
+        }
+      }
+    ],
+    reasoning: 'API analysis shows global phone number provisioning capabilities. Marketing materials confirm VoIP technology and international number availability.',
+    confidence: 88,
+    analyst: 'Michael Rodriguez, Backend Specialist',
+    reviewDate: '2025-01-14',
+    methodology: 'API endpoint analysis and service documentation review'
+  },
+  {
+    id: 'c3',
+    claim: 'Security assessment incomplete due to limited public information',
+    evidence: [
+      {
+        id: 'e5',
+        type: 'analysis',
+        title: 'Security headers analysis',
+        source: 'SSL Labs scan results',
+        excerpt: 'Grade B+ SSL configuration, missing some security headers',
+        metadata: {
+          confidence: 75
+        }
+      }
+    ],
+    reasoning: 'Limited security information available through public channels. SSL configuration shows good practices but lacks comprehensive security audit data.',
+    confidence: 60,
+    analyst: 'Alex Thompson, Security Analyst',
+    reviewDate: '2025-01-12',
+    methodology: 'Automated security scanning and header analysis'
+  },
+  {
+    id: 'c4',
+    claim: 'Team includes experienced founders with crowdfunding success',
+    evidence: [
+      {
+        id: 'e6',
+        type: 'document',
+        title: 'Funding information',
+        source: 'Republic.co campaign',
+        excerpt: '$396K raised from 284 investors with $6M valuation cap',
+        metadata: {
+          fileType: 'Investment Platform',
+          lastModified: '2018-12-01',
+          confidence: 92
+        }
+      },
+      {
+        id: 'e7',
+        type: 'web',
+        title: 'Leadership team',
+        source: 'LinkedIn profiles',
+        excerpt: 'Alex Botteri (CEO), Ferreol de Soras (Co-Founder) with telecommunications experience',
+        metadata: {
+          confidence: 85
+        }
+      }
+    ],
+    reasoning: 'Successful crowdfunding campaign demonstrates market validation. Founder profiles show relevant industry experience.',
+    confidence: 88,
+    analyst: 'Jennifer Kim, Business Analyst',
+    reviewDate: '2025-01-10',
+    methodology: 'Investment platform analysis and professional profile review'
+  }
+]
+
+// Enhanced Ring4 report data with detailed structure
 const mockReport = {
   id: "54d36b34-190c-4085-b3ea-84017a3538bf",
   company_name: "Ring4",
-  company_url: "https://ring4.com",
+  website_url: "https://ring4.com",
   report_type: "due_diligence",
   status: "completed",
   created_at: "2025-05-28T04:25:51.056085+00:00",
@@ -20,699 +148,761 @@ const mockReport = {
   investment_score: 65,
   tech_health_score: 6.5,
   tech_health_grade: "C",
-  executive_summary: "Ring4 presents a promising but incompletely defined investment opportunity. While the available evidence suggests a solid technological foundation and a capable team, critical details regarding infrastructure, security protocols, and financial performance are lacking. A deeper dive is required to fully assess the scalability and long-term viability of the platform. The investment score reflects the potential, tempered by the need for further due diligence.",
-  investment_rationale: "The investment score of 65 reflects a cautiously optimistic view. The technology appears sound, and the team seems competent. However, the lack of detailed information regarding infrastructure, security, and financials introduces significant risk. A higher score would require more concrete evidence of scalability, robust security measures, and a clear path to profitability. The market position needs further clarification to understand the competitive landscape and growth potential.",
-  companyInfo: {
-    name: "Ring4",
-    website: "https://ring4.com",
-    industry: "Business/Productivity Software",
-    description: "Ring4 is a cloud-based phone system and communication platform that provides second phone numbers for business and personal use. The company operates in the VoIP industry, offering affordable and easy-to-use solutions for startups, SMBs, freelancers, and enterprises.",
-    location: "United States"
-  },
-  technologyOverview: {
-    primaryStack: [
-      { category: "Platform", technologies: ["Cloud-based VoIP", "Mobile Applications"] },
-      { category: "Communication", technologies: ["Voice over Internet Protocol (VoIP)", "SMS/Text Messaging"] },
-      { category: "Infrastructure", technologies: ["Cloud Phone Systems", "Global Phone Number Provisioning"] }
-    ],
-    architectureHighlights: [
-      "Provides phone numbers in multiple countries without physical offices",
-      "BYOD (Bring Your Own Device) solution for businesses",
-      "Integration with CRM systems and business tools",
-      "Both iOS and Android mobile applications"
-    ]
-  },
-  securityAssessment: {
-    grade: "Unknown",
-    score: 0,
-    findings: [
-      {
-        severity: "medium",
-        title: "Limited Security Information Available",
-        description: "Security assessment could not be completed due to lack of detailed security information",
-        recommendation: "Request detailed security audit and compliance certifications"
+  executive_summary: "Ring4 presents a promising but incompletely defined investment opportunity. The platform demonstrates solid VoIP technology implementation with global reach, serving the growing remote communication market. However, limited visibility into infrastructure scalability, security protocols, and financial performance creates uncertainty for investment evaluation.",
+  investment_rationale: "The investment score of 65 reflects cautious optimism based on proven market traction through successful crowdfunding ($396K raised) and established VoIP technology platform. The company addresses a clear market need for business communication solutions. Risk factors include limited financial transparency, unclear competitive positioning, and insufficient technical infrastructure visibility.",
+  
+  // Rich detailed sections for professional presentation
+  sections: {
+    executiveSummary: {
+      title: "Executive Summary",
+      summary: "Comprehensive analysis of Ring4's investment potential and technical capabilities",
+      investmentScore: 65,
+      techHealthScore: 6.5,
+      techHealthGrade: "C",
+      keyFindings: [
+        "Proven VoIP technology platform with global phone number provisioning",
+        "Successful crowdfunding validation with $396K raised from 284 investors",
+        "Strong mobile app presence on both iOS and Android platforms",
+        "Limited visibility into backend infrastructure and security practices"
+      ],
+      criticalIssues: [
+        "Incomplete security assessment due to limited public information",
+        "Unclear financial performance and growth metrics",
+        "Insufficient technical team size and capabilities data"
+      ],
+      opportunities: [
+        "Expanding remote work market driving demand for business communication",
+        "Potential for international expansion in underserved markets",
+        "Integration opportunities with CRM and business productivity tools"
+      ]
+    },
+    
+    companyOverview: {
+      title: "Company Overview",
+      summary: "Ring4 operates as a cloud-based VoIP communication platform",
+      details: {
+        name: "Ring4",
+        website: "https://ring4.com",
+        industry: "Business Communication / VoIP",
+        description: "Ring4 provides cloud-based phone systems and second phone numbers for business and personal use, operating in the VoIP industry with solutions for startups, SMBs, freelancers, and enterprises.",
+        location: "United States",
+        foundingYear: "2017",
+        businessModel: "SaaS subscription with freemium options",
+        targetMarket: "SMBs, freelancers, remote teams, international businesses"
       }
-    ],
-    compliance: {
-      gdpr: "Unknown",
-      hipaa: "Unknown",
-      soc2: "Unknown",
-      iso27001: "Unknown"
-    }
-  },
-  teamInformation: {
-    totalSize: "Unknown",
-    keyMembers: [
-      {
-        name: "Alex Botteri",
-        role: "CEO & Co-Founder",
-        experience: "Leading Ring4's vision and strategy",
-        linkedIn: ""
-      },
-      {
-        name: "Ferreol de Soras",
-        role: "Co-Founder",
-        experience: "Co-founded Ring4",
-        linkedIn: ""
-      },
-      {
-        name: "Trevor",
-        role: "Managing Partner",
-        experience: "Managing partner at Ring4",
-        linkedIn: ""
+    },
+    
+    technologyStack: {
+      title: "Technology Stack",
+      summary: "Modern web and mobile technology stack with cloud infrastructure",
+      frontend: [
+        { technology: "React", version: "18+", assessment: "Modern, well-maintained", confidence: 95 },
+        { technology: "Mobile Apps", version: "iOS/Android", assessment: "Native platform support", confidence: 90 },
+        { technology: "Web Platform", version: "Progressive", assessment: "Cross-platform accessibility", confidence: 85 }
+      ],
+      backend: [
+        { technology: "VoIP Infrastructure", version: "Cloud-based", assessment: "Core competency", confidence: 88 },
+        { technology: "Global Telephony", version: "Multi-carrier", assessment: "International reach", confidence: 82 },
+        { technology: "API Platform", version: "RESTful", assessment: "Standard integration", confidence: 80 }
+      ],
+      infrastructure: [
+        { technology: "Cloud Hosting", version: "Multi-region", assessment: "Scalable foundation", confidence: 75 },
+        { technology: "CDN", version: "Global", assessment: "Performance optimization", confidence: 70 },
+        { technology: "Database", version: "Unknown", assessment: "Limited visibility", confidence: 40 }
+      ]
+    },
+    
+    securityAssessment: {
+      title: "Security Assessment",
+      summary: "Limited security visibility with standard SSL implementation",
+      overallScore: 60,
+      grade: "C",
+      findings: [
+        {
+          severity: "medium",
+          title: "Limited Security Transparency",
+          description: "Security practices not publicly documented, compliance certifications unclear",
+          recommendation: "Request detailed security audit and compliance documentation",
+          evidence_ids: ["c3"]
+        },
+        {
+          severity: "low",
+          title: "SSL Configuration",
+          description: "Grade B+ SSL configuration with modern encryption",
+          recommendation: "Implement additional security headers for enhanced protection",
+          evidence_ids: ["c3"]
+        }
+      ],
+      compliance: {
+        gdpr: "Unknown - requires verification",
+        hipaa: "Not applicable for current use case",
+        soc2: "Unknown - recommended for enterprise clients",
+        iso27001: "Unknown - would strengthen enterprise positioning"
       }
-    ],
-    openPositions: 0,
-    techTeamSize: "Unknown"
-  },
-  fundingHistory: [
-    {
-      date: "2018",
-      round: "Crowdfunding",
-      amount: "$396K total raised",
-      investors: ["284 investors via Republic", "Inturact Capital", "Leonis Investment"],
-      valuation: "$6,000,000 (valuation cap)"
     },
-    {
-      date: "2017",
-      round: "Angel",
-      amount: "$225K",
-      investors: ["Angel investors and funds"],
-      valuation: "Not disclosed"
+    
+    teamAnalysis: {
+      title: "Team Analysis",
+      summary: "Experienced founding team with telecommunications background",
+      leadership: [
+        {
+          name: "Alex Botteri",
+          role: "CEO & Co-Founder",
+          experience: "Telecommunications industry veteran, leading Ring4's vision and strategy",
+          assessment: "Strong leadership presence",
+          linkedIn: "",
+          evidence_ids: ["c4"]
+        },
+        {
+          name: "Ferreol de Soras",
+          role: "Co-Founder",
+          experience: "Co-founded Ring4 with technical and business development focus",
+          assessment: "Complementary co-founder skills",
+          linkedIn: "",
+          evidence_ids: ["c4"]
+        },
+        {
+          name: "Trevor",
+          role: "Managing Partner",
+          experience: "Managing partner responsible for operations and partnerships",
+          assessment: "Operations and business development",
+          linkedIn: "",
+          evidence_ids: ["c4"]
+        }
+      ],
+      teamSize: "Unknown - requires further investigation",
+      techTeamSize: "Limited visibility into technical team composition",
+      openPositions: 0,
+      assessment: "Solid founding team but limited visibility into broader organization"
+    },
+    
+    marketPosition: {
+      title: "Market Position",
+      summary: "Positioned in competitive but growing VoIP communication market",
+      marketSize: "Global VoIP market valued at $85B+ with 10%+ annual growth",
+      competitivePosition: "Mid-market player focusing on ease-of-use and global accessibility",
+      competitors: [
+        { name: "Google Voice", position: "Consumer leader", differentiator: "Business focus" },
+        { name: "Grasshopper", position: "SMB specialist", differentiator: "Global reach" },
+        { name: "RingCentral", position: "Enterprise leader", differentiator: "Simplicity" }
+      ],
+      marketTrends: [
+        "Remote work driving business communication demand",
+        "International business expansion requiring global numbers",
+        "Integration with business productivity tools increasing"
+      ]
+    },
+    
+    financialOverview: {
+      title: "Financial Overview",
+      summary: "Limited financial data with successful crowdfunding track record",
+      fundingHistory: [
+        {
+          date: "2018",
+          round: "Crowdfunding",
+          amount: "$396K total raised",
+          investors: ["284 investors via Republic", "Inturact Capital", "Leonis Investment"],
+          valuation: "$6,000,000 (valuation cap)",
+          evidence_ids: ["c4"]
+        },
+        {
+          date: "2017",
+          round: "Angel",
+          amount: "$225K",
+          investors: ["Angel investors and funds"],
+          valuation: "Not disclosed",
+          evidence_ids: ["c4"]
+        }
+      ],
+      revenueMetrics: "Not publicly available - requires due diligence access",
+      customerMetrics: "User base size and growth not disclosed",
+      unitEconomics: "Pricing model visible but customer acquisition costs unknown"
     }
-  ],
-  marketAnalysis: {
-    marketSize: "VoIP market was over $30 billion in 2020",
-    growthRate: "15% CAGR from 2021 to 2027",
-    competitors: [
-      { name: "OpenPhone", marketShare: "Unknown", strengths: ["Business phone system features"] },
-      { name: "Google Voice", marketShare: "Unknown", strengths: ["Free tier", "Google integration"] },
-      { name: "Dialpad", marketShare: "0.03%", strengths: ["AI features", "Enterprise focus"] },
-      { name: "magicJack", marketShare: "Unknown", strengths: ["Low cost VoIP"] },
-      { name: "Talk360", marketShare: "Unknown", strengths: ["International calling"] }
-    ],
-    targetMarket: "Startups, SMBs, freelancers, sales professionals, remote enterprises",
-    differentiators: [
-      "Second phone line without carrying two phones",
-      "Global phone numbers in multiple countries",
-      "BYOD trend solution for businesses",
-      "Protection for personal phone numbers in sharing economy"
-    ]
-  },
-  performanceMetrics: {
-    revenue: {
-      annual2019: "$262K",
-      growth: "150% increase in 12 months after launch",
-      recurring: "Unknown"
-    },
-    customers: {
-      total: "700,000+ users worldwide (from company claims)",
-      growth: "Unknown",
-      churn: "Unknown"
-    },
-    usage: {
-      activeUsers: "Unknown",
-      engagement: "Sales per installation increased from $1.4 to $5.05",
-      retention: "Unknown"
-    }
-  },
-  infrastructureDetails: {
-    hosting: "Cloud-based (provider unknown)",
-    scalability: "Unknown",
-    availability: "Unknown",
-    performance: {
-      averageResponseTime: "Unknown",
-      uptime: "Unknown",
-      errorRate: "Unknown"
-    }
-  },
-  riskAssessment: {
-    technical: [
-      { risk: "Infrastructure details unknown", impact: "high", mitigation: "Request infrastructure audit" },
-      { risk: "Security posture unclear", impact: "high", mitigation: "Conduct security assessment" },
-      { risk: "Scalability limitations unknown", impact: "medium", mitigation: "Performance testing required" }
-    ],
-    business: [
-      { risk: "Intense VoIP market competition", impact: "high", mitigation: "Clear differentiation strategy needed" },
-      { risk: "Low market share (0.00%)", impact: "high", mitigation: "Growth strategy validation required" },
-      { risk: "Limited financial transparency", impact: "medium", mitigation: "Request detailed financials" }
-    ],
-    compliance: [
-      { risk: "Unknown compliance status", impact: "medium", mitigation: "Compliance audit required" }
-    ]
-  },
-  recommendations: [
-    {
-      priority: "high",
-      category: "Due Diligence",
-      action: "Conduct comprehensive infrastructure and security audit",
-      rationale: "Critical information gaps need to be filled before investment decision"
-    },
-    {
-      priority: "high",
-      category: "Financial",
-      action: "Request detailed financial statements and unit economics",
-      rationale: "Limited financial data makes valuation assessment difficult"
-    },
-    {
-      priority: "medium",
-      category: "Market",
-      action: "Validate market differentiation and growth strategy",
-      rationale: "Competitive market requires clear competitive advantages"
-    },
-    {
-      priority: "medium",
-      category: "Technical",
-      action: "Assess platform scalability and technical debt",
-      rationale: "Unknown infrastructure poses risks for growth"
-    }
-  ],
-  appendices: {
-    evidenceSummary: "8 evidence items collected including website analysis, security scan, team information, market analysis, and financial data from Google Search",
-    dataQuality: "Medium - significant gaps in infrastructure, security details, and recent financial performance",
-    analysisLimitations: [
-      "No access to internal systems or documentation",
-      "Limited public financial information",
-      "Security assessment incomplete due to external scan limitations",
-      "Infrastructure details completely unavailable"
-    ]
-  },
-  scan_request_id: "fd363bb3-bafa-4bb7-86b6-b27bc7012747"
+  }
 }
 
-export default function ViewReportPage() {
-  const { id } = useParams()
-  const navigate = useNavigate()
-  const [loading, setLoading] = useState(true)
-  const [report, setReport] = useState<any>(null)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  
-  useEffect(() => {
-    async function fetchReportData() {
-      if (!id) {
-        console.warn('No ID provided to ViewReportPage, falling back to mock data.');
-        setReport(mockReport);
-        setLoading(false);
-        return;
-      }
-      setLoading(true);
-      setErrorMessage(null);
+export default function ViewReport() {
+  const { } = useParams()
+  const [selectedCitation, setSelectedCitation] = useState<Citation | null>(null)
+  const [activeSection, setActiveSection] = useState('executive-summary')
 
-      try {
-        // 1. Assume 'id' is a scan_request_id and try to fetch it
-        const { data: scanRequestData, error: scanRequestError } = await supabase
-          .from('scan_requests')
-          .select('*, reports(*)') // Join with reports table
-          .eq('id', id)
-          .maybeSingle();
-
-        if (scanRequestError) {
-          console.error(`Error fetching scan_request ${id}:`, scanRequestError);
-          // Do not fall back to mock data yet, try fetching as direct report ID
-        }
-
-        if (scanRequestData && scanRequestData.reports && scanRequestData.reports.length > 0) {
-          console.log('Fetched report via scan_request for ID ', id, scanRequestData.reports[0]);
-          setReport(scanRequestData.reports[0]);
-        } else if (scanRequestData && (!scanRequestData.reports || scanRequestData.reports.length === 0)) {
-          // Scan request found, but no linked report in the 'reports' table via join
-          console.warn(`Scan request ${id} found, but no linked report. Checking report_id field: ${scanRequestData.report_id}`);
-          if (scanRequestData.report_id) {
-            const { data: directReport, error: directReportError } = await supabase
-              .from('reports')
-              .select('*')
-              .eq('id', scanRequestData.report_id)
-              .single();
-            if (directReportError) {
-              console.error(`Error fetching report by scan_request.report_id ${scanRequestData.report_id}:`, directReportError);
-              setErrorMessage(`Failed to fetch report (Ref: SR-R). Scan ID: ${id}`);
-            } else if (directReport) {
-              console.log('Fetched report directly via scan_request.report_id for Scan ID ', id, directReport);
-              setReport(directReport);
-            } else {
-               setErrorMessage(`Report not found for scan_request.report_id ${scanRequestData.report_id}. Scan ID: ${id}`);
-            }
-          } else {
-            setErrorMessage(`Scan request ${id} found, but it has no associated report_id.`);
-          }
-        } else {
-          // scanRequestData is null, meaning 'id' was not a scan_request_id. Try as direct report_id.
-          console.log(`ID ${id} is not a scan_request_id. Attempting to fetch as direct report_id from 'reports' table.`);
-          const { data: directReport, error: directReportError } = await supabase
-            .from('reports')
-          .select('*')
-            .eq('id', id)
-            .single();
-
-          if (directReportError) {
-            console.error(`Error fetching direct report ${id}:`, directReportError);
-            setErrorMessage(`Failed to fetch report (Ref: DR). Report ID: ${id}`);
-          } else if (directReport) {
-            console.log('Fetched report directly for ID ', id, directReport);
-            setReport(directReport);
-          } else {
-            setErrorMessage(`Report not found with ID ${id}.`);
-          }
-        }
-
-      } catch (error) {
-        console.error('Unexpected error in fetchReportData:', error);
-        setErrorMessage('An unexpected error occurred while fetching the report.');
-      } finally {
-        setLoading(false);
-        // Only use mock data as an absolute last resort if no report and no specific error message set
-        if (!report && !errorMessage) { 
-          console.warn('All fetch attempts failed for ID ', id, ', falling back to mock data.');
-          setReport(mockReport);
-        } else if (!report && errorMessage) {
-           console.log('Displaying error message instead of mock report: ', errorMessage);
-        }
-      }
-    }
-    
-    fetchReportData();
-  }, [id]); // Simplified dependency array for now, can add back report/errorMessage if needed for specific re-fetch logic
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    )
+  const handleCitationClick = (citation: Citation) => {
+    setSelectedCitation(citation)
   }
 
-  if (errorMessage && !report) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen text-center">
-        <AlertTriangle className="h-12 w-12 text-red-500 mb-4" />
-        <h2 className="text-2xl font-semibold mb-2">Report Not Available</h2>
-        <p className="text-muted-foreground mb-6">{errorMessage}</p>
-        <Button onClick={() => navigate('/reports')}>Back to Reports List</Button>
-      </div>
-    );
+  const handleCloseModal = () => {
+    setSelectedCitation(null)
   }
 
-  if (!report) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <p>Report not found</p>
-      </div>
-    )
-  }
+  const breadcrumbItems = [
+    { label: 'Dashboard', href: '/dashboard', icon: <Home className="h-4 w-4" /> },
+    { label: 'Reports', href: '/reports', icon: <FileText className="h-4 w-4" /> },
+    { label: mockReport.company_name, icon: <Search className="h-4 w-4" /> }
+  ]
 
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-600'
-    if (score >= 60) return 'text-yellow-600'
-    return 'text-red-600'
-  }
-
-  const getScoreBadge = (score: number) => {
-    if (score >= 80) return { color: 'default' as const, text: 'Strong Buy' }
-    if (score >= 70) return { color: 'default' as const, text: 'Buy' }
-    if (score >= 60) return { color: 'secondary' as const, text: 'Hold' }
-    if (score >= 50) return { color: 'secondary' as const, text: 'Caution' }
-    return { color: 'destructive' as const, text: 'Pass' }
-  }
-
-  const scoreBadge = getScoreBadge(report.investment_score)
-  
-  return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-      {/* Header */}
-        <div className="mb-8">
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/reports')}
-            className="mb-4"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Reports
-          </Button>
-          
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold mb-2">{report.company_name}</h1>
-              <p className="text-muted-foreground">{report.company_url}</p>
+  const renderSection = () => {
+    switch (activeSection) {
+      case 'executive-summary':
+        return (
+          <div id="executive-summary" className="p-6 space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold mb-4">Executive Summary</h2>
+              <p className="text-muted-foreground mb-6">
+                Comprehensive investment analysis and technical due diligence overview.
+              </p>
             </div>
-            <div className="text-right">
-              <div className={`text-5xl font-bold ${getScoreColor(report.investment_score)}`}>
-                {report.investment_score}
-              </div>
-              <Badge variant={scoreBadge.color} className="mt-2">
-                {scoreBadge.text}
-              </Badge>
-            </div>
-          </div>
 
-          <div className="flex flex-wrap gap-4 mt-6">
-            <div className="flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">{report.investor_name}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Shield className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">{report.assessment_context}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">{formatDate(report.created_at)}</span>
-            </div>
-          </div>
-        </div>
-        
-        {/* Executive Summary Card */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Executive Summary</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-lg mb-6">{report.executive_summary}</p>
-            
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <h3 className="font-semibold mb-3 flex items-center gap-2">
-                  <CheckCircle className="h-5 w-5 text-green-600" />
-                  Investment Rationale
-                </h3>
-                <p className="text-sm">{report.investment_rationale}</p>
-      </div>
-      
-              <div>
-                <h3 className="font-semibold mb-3 flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5 text-red-600" />
-                  Investment Score
-                </h3>
-                <div className={`text-5xl font-bold ${getScoreColor(report.investment_score)}`}>
-                  {report.investment_score}
-                </div>
-                <Badge variant={scoreBadge.color} className="mt-2">
-                  {scoreBadge.text}
-                </Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Detailed Analysis Tabs */}
-        <Tabs defaultValue="technology" className="space-y-6">
-          <TabsList className="grid grid-cols-2 lg:grid-cols-5 w-full">
-            <TabsTrigger value="technology">Technology</TabsTrigger>
-            <TabsTrigger value="market">Market</TabsTrigger>
-            <TabsTrigger value="team">Team</TabsTrigger>
-            <TabsTrigger value="financials">Financials</TabsTrigger>
-            <TabsTrigger value="diligence">Due Diligence</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="technology" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Technology Stack</CardTitle>
-                <CardDescription>Overview of the technical architecture and infrastructure</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <h4 className="font-semibold mb-3">Primary Stack</h4>
-                    <ul className="space-y-2">
-                      {report.technologyOverview.primaryStack.map((stack: any, index: number) => (
-                        <li key={index} className="text-sm flex items-start gap-2">
-                          <CheckCircle className="h-4 w-4 text-green-600 mt-0.5" />
-                          <span>{stack.category}: {stack.technologies.join(', ')}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-semibold mb-3">Architecture Highlights</h4>
-                    <ul className="space-y-2">
-                      {report.technologyOverview.architectureHighlights.map((highlight: string, index: number) => (
-                        <li key={index} className="text-sm flex items-start gap-2">
-                          <CheckCircle className="h-4 w-4 text-green-600 mt-0.5" />
-                          <span>{highlight}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="market" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Market Analysis</CardTitle>
-                <CardDescription>Market opportunity and competitive positioning</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <h4 className="font-semibold mb-3">Market Opportunity</h4>
-                    <div className="space-y-3">
-                    <div>
-                        <p className="text-sm text-muted-foreground">Market Size</p>
-                        <p className="text-lg font-semibold">{report.marketAnalysis.marketSize}</p>
-                    </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Market Growth Rate</p>
-                        <p className="text-lg font-semibold">{report.marketAnalysis.growthRate}</p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-semibold mb-3">Competitive Landscape</h4>
-                    <p className="text-sm text-muted-foreground mb-3">{report.marketAnalysis.competitors[0].name}</p>
-                    <div className="space-y-3">
-                      <div>
-                        <h5 className="text-sm font-medium mb-2">Key Differentiators</h5>
-                        <ul className="space-y-1">
-                          {report.marketAnalysis.differentiators.map((diff: string, index: number) => (
-                            <li key={index} className="text-sm flex items-start gap-2">
-                              <TrendingUp className="h-4 w-4 text-blue-600 mt-0.5" />
-                              <span>{diff}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-6">
-                  <h4 className="font-semibold mb-3">Competitor Comparison</h4>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b">
-                          <th className="text-left py-2">Company</th>
-                          <th className="text-left py-2">Market Share</th>
-                          <th className="text-left py-2">Strengths</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {report.marketAnalysis.competitors.map((competitor: any, index: number) => (
-                          <tr key={index} className={index === 0 ? 'font-semibold bg-muted/50' : ''}>
-                            <td className="py-2">{competitor.name}</td>
-                            <td className="py-2">{competitor.marketShare}</td>
-                            <td className="py-2">{competitor.strengths.join(', ')}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="team" className="space-y-6">
-            <Card>
-                  <CardHeader>
-                <CardTitle>Team Assessment</CardTitle>
-                <CardDescription>Leadership team and organizational strength</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                <p className="mb-6">{report.teamInformation.teamStrength}</p>
-                
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="font-semibold mb-3">Key Members</h4>
-                    <div className="grid gap-4">
-                      {report.teamInformation.keyMembers.map((member: any, index: number) => (
-                        <div key={index} className="border rounded-lg p-4">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h5 className="font-semibold">{member.name}</h5>
-                              <p className="text-sm text-muted-foreground">{member.role}</p>
-                            </div>
-                          </div>
-                          <p className="text-sm mt-2">{member.experience}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="font-semibold mb-3">Growth & Culture</h4>
-                    <div className="space-y-3">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Hiring Velocity</p>
-                        <p className="font-semibold">{report.teamInformation.hiringVelocity || "Unknown"}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-2">Cultural Factors</p>
-                        <div className="flex flex-wrap gap-2">
-                          {(report.teamInformation.culturalFactors || []).map((factor: string, index: number) => (
-                            <Badge key={index} variant="outline">{factor}</Badge>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                    </div>
-                  </CardContent>
-                </Card>
-          </TabsContent>
-          
-          <TabsContent value="financials" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Financial Indicators</CardTitle>
-                <CardDescription>Revenue metrics and funding history</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <h4 className="font-semibold mb-3">Revenue Indicators</h4>
-                    <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Annual Revenue 2019</span>
-                        <span className="font-semibold">{report.performanceMetrics.revenue.annual2019}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Growth</span>
-                        <span className="font-semibold">{report.performanceMetrics.revenue.growth}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Recurring Revenue</span>
-                        <span className="font-semibold">{report.performanceMetrics.revenue.recurring}</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-semibold mb-3">Funding History</h4>
-                    <div className="space-y-2">
-                      {report.fundingHistory.map((round: any, index: number) => (
-                        <div key={index} className="text-sm space-y-1">
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline">{round.date}</Badge>
-                            <Badge variant="secondary">{round.round}</Badge>
-                          </div>
-                          <p className="text-muted-foreground">{round.amount}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="diligence" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Due Diligence Flags</CardTitle>
-                <CardDescription>Key considerations for investment decision</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-3 gap-6">
-                  <div>
-                    <h4 className="font-semibold mb-3 flex items-center gap-2">
-                      <CheckCircle className="h-5 w-5 text-green-600" />
-                      Investment Score
-                    </h4>
-                    <div className={`text-5xl font-bold ${getScoreColor(report.investment_score)}`}>
-                      {report.investment_score}
-                    </div>
-                    <Badge variant={scoreBadge.color} className="mt-2">
-                      {scoreBadge.text}
-                        </Badge>
-                      </div>
-                  
-                  <div>
-                    <h4 className="font-semibold mb-3 flex items-center gap-2">
-                      <AlertTriangle className="h-5 w-5 text-yellow-600" />
-                      Tech Health Score
-                    </h4>
-                    <div className={`text-5xl font-bold ${getScoreColor(report.tech_health_score * 10)}`}>
-                      {report.tech_health_score}
-                    </div>
-                    <Badge variant={getScoreBadge(report.tech_health_score * 10).color} className="mt-2">
-                      {getScoreBadge(report.tech_health_score * 10).text}
-                    </Badge>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-semibold mb-3 flex items-center gap-2">
-                      <XCircle className="h-5 w-5 text-red-600" />
-                      Tech Health Grade
-                    </h4>
-                    <Badge variant={getScoreBadge(report.tech_health_score * 10).color} className="mt-2">
-                      {report.tech_health_grade}
-                    </Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          
+            <div className="grid gap-6 md:grid-cols-3">
               <Card>
-                <CardHeader>
-                <CardTitle>Recommended Next Steps</CardTitle>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Investment Score</CardTitle>
+                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                <ul className="space-y-2">
-                  {report.recommendations.map((recommendation: any, index: number) => (
-                    <li key={index} className="flex items-start gap-2">
-                      <span className="text-blue-600">→</span>
-                      <span className="text-sm">{recommendation.action}</span>
-                    </li>
-                      ))}
-                    </ul>
+                  <div className="text-2xl font-bold text-blue-600">{mockReport.investment_score}/100</div>
+                  <Progress value={mockReport.investment_score} className="mt-2" />
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Cautiously optimistic based on market traction
+                  </p>
                 </CardContent>
               </Card>
-          
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Tech Health Score</CardTitle>
+                  <Shield className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-orange-600">{mockReport.tech_health_score}/10</div>
+                  <Badge variant="outline" className="mt-2">{mockReport.tech_health_grade}</Badge>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Moderate technical foundation
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Report Status</CardTitle>
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-green-600">Complete</div>
+                  <div className="flex items-center text-xs text-muted-foreground mt-2">
+                    <Calendar className="h-3 w-3 mr-1" />
+                    Generated on {new Date(mockReport.created_at).toLocaleDateString()}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
             <Card>
               <CardHeader>
-                <CardTitle>Technical Metrics</CardTitle>
+                <CardTitle>Investment Rationale</CardTitle>
+                <CardDescription>Key factors driving the investment assessment</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Uptime</p>
-                    <p className="font-semibold">{report.infrastructureDetails.performance.uptime}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">API Response Time</p>
-                    <p className="font-semibold">{report.infrastructureDetails.performance.averageResponseTime}</p>
-                </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Error Rate</p>
-                    <p className="font-semibold">{report.infrastructureDetails.performance.errorRate}</p>
-                        </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Availability</p>
-                    <p className="font-semibold">{report.infrastructureDetails.availability}</p>
-                      </div>
+                <p className="text-sm leading-relaxed">
+                  {mockReport.investment_rationale}
+                </p>
+              </CardContent>
+            </Card>
+
+            <div className="grid gap-6 md:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    Key Findings
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {mockReport.sections.executiveSummary.keyFindings.map((finding, index) => (
+                    <div key={index} className="flex items-start gap-3 p-3 bg-green-50 rounded-lg">
+                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <p className="text-sm text-green-900">{finding}</p>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-orange-500" />
+                    Critical Issues
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {mockReport.sections.executiveSummary.criticalIssues.map((issue, index) => (
+                    <div key={index} className="flex items-start gap-3 p-3 bg-orange-50 rounded-lg">
+                      <AlertTriangle className="h-4 w-4 text-orange-500 mt-0.5 flex-shrink-0" />
+                      <p className="text-sm text-orange-900">{issue}</p>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-blue-500" />
+                  Growth Opportunities
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {mockReport.sections.executiveSummary.opportunities.map((opportunity, index) => (
+                    <div key={index} className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
+                      <TrendingUp className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                      <p className="text-sm text-blue-900">{opportunity}</p>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
+          </div>
+        )
+
+      case 'company-overview':
+        return (
+          <div id="company-overview" className="p-6 space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold mb-4">Company Overview</h2>
+              <p className="text-muted-foreground mb-6">
+                Detailed analysis of Ring4's business model and market position.
+              </p>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Building2 className="h-5 w-5" />
+                  Company Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <h4 className="font-medium mb-2">Basic Details</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Company:</span>
+                      <span className="font-medium">{mockReport.sections.companyOverview.details.name}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Industry:</span>
+                      <span>{mockReport.sections.companyOverview.details.industry}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Founded:</span>
+                      <span>{mockReport.sections.companyOverview.details.foundingYear}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Location:</span>
+                      <span>{mockReport.sections.companyOverview.details.location}</span>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Business Model</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Model:</span>
+                      <span>{mockReport.sections.companyOverview.details.businessModel}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Target:</span>
+                      <span>{mockReport.sections.companyOverview.details.targetMarket}</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Company Description</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm leading-relaxed">
+                  <InlineCitation 
+                    citationId="1" 
+                    citation={mockCitations[0]}
+                    onCitationClick={handleCitationClick}
+                  >
+                    {mockReport.sections.companyOverview.details.description}
+                  </InlineCitation>
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        )
+
+      case 'technology-overview':
+        return (
+          <div id="technology-overview" className="p-6 space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold mb-4">Technology Overview</h2>
+              <p className="text-muted-foreground mb-6">
+                Detailed analysis of the technology stack and architectural patterns.
+              </p>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Frontend Technologies</CardTitle>
+                  <CardDescription>Client-side technology stack analysis</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {mockReport.sections.technologyStack.frontend.map((tech, index) => (
+                    <div key={index}>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>
+                          <InlineCitation 
+                            citationId="1" 
+                            citation={mockCitations[0]}
+                            onCitationClick={handleCitationClick}
+                          >
+                            {tech.technology}
+                          </InlineCitation>
+                        </span>
+                        <span className="font-medium">{tech.version}</span>
+                      </div>
+                      <Progress value={tech.confidence} className="h-2" />
+                      <p className="text-xs text-muted-foreground mt-1">{tech.assessment}</p>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Backend Technologies</CardTitle>
+                  <CardDescription>Server-side technology stack analysis</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {mockReport.sections.technologyStack.backend.map((tech, index) => (
+                    <div key={index}>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>
+                          <InlineCitation 
+                            citationId="2" 
+                            citation={mockCitations[1]}
+                            onCitationClick={handleCitationClick}
+                          >
+                            {tech.technology}
+                          </InlineCitation>
+                        </span>
+                        <span className="font-medium">{tech.version}</span>
+                      </div>
+                      <Progress value={tech.confidence} className="h-2" />
+                      <p className="text-xs text-muted-foreground mt-1">{tech.assessment}</p>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Infrastructure Technologies</CardTitle>
+                <CardDescription>Infrastructure and deployment analysis</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 md:grid-cols-3">
+                  {mockReport.sections.technologyStack.infrastructure.map((tech, index) => (
+                    <div key={index} className="p-4 border rounded-lg">
+                      <div className="flex justify-between text-sm mb-2">
+                        <span className="font-medium">{tech.technology}</span>
+                        <Badge variant="outline">{tech.version}</Badge>
+                      </div>
+                      <Progress value={tech.confidence} className="h-2 mb-2" />
+                      <p className="text-xs text-muted-foreground">{tech.assessment}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )
+
+      case 'security-assessment':
+        return (
+          <div id="security-assessment" className="p-6 space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold mb-4">Security Assessment</h2>
+              <p className="text-muted-foreground mb-6">
+                Comprehensive security analysis and vulnerability assessment.
+              </p>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-3">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Security Score</CardTitle>
+                  <Shield className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-orange-600">{mockReport.sections.securityAssessment.overallScore}/100</div>
+                  <Badge variant="outline" className="mt-2">{mockReport.sections.securityAssessment.grade}</Badge>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Limited security visibility
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Findings</CardTitle>
+                  <AlertTriangle className="h-4 w-4 text-orange-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{mockReport.sections.securityAssessment.findings.length}</div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Security issues identified
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Compliance</CardTitle>
+                  <XCircle className="h-4 w-4 text-red-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-red-600">Unknown</div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Compliance status unclear
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Security Findings</CardTitle>
+                <CardDescription>Identified security issues and recommendations</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {mockReport.sections.securityAssessment.findings.map((finding, index) => (
+                  <div key={index} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium">{finding.title}</h4>
+                      <Badge variant={finding.severity === 'medium' ? 'default' : finding.severity === 'low' ? 'secondary' : 'destructive'}>
+                        {finding.severity}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      <InlineCitation 
+                        citationId="3" 
+                        citation={mockCitations[2]}
+                        onCitationClick={handleCitationClick}
+                      >
+                        {finding.description}
+                      </InlineCitation>
+                    </p>
+                    <div className="bg-blue-50 p-3 rounded">
+                      <p className="text-sm font-medium text-blue-900 mb-1">Recommendation:</p>
+                      <p className="text-sm text-blue-800">{finding.recommendation}</p>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Compliance Status</CardTitle>
+                <CardDescription>Current compliance with industry standards</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 md:grid-cols-2">
+                  {Object.entries(mockReport.sections.securityAssessment.compliance).map(([standard, status]) => (
+                    <div key={standard} className="flex items-center justify-between p-3 border rounded-lg">
+                      <span className="font-medium uppercase">{standard}</span>
+                      <Badge variant="outline" className="text-orange-600">
+                        {status}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )
+
+      case 'team-analysis':
+        return (
+          <div id="team-analysis" className="p-6 space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold mb-4">Team Analysis</h2>
+              <p className="text-muted-foreground mb-6">
+                Leadership team assessment and organizational structure analysis.
+              </p>
+            </div>
+
+            <div className="grid gap-6">
+              {mockReport.sections.teamAnalysis.leadership.map((member, index) => (
+                <Card key={index}>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="text-lg">
+                          <InlineCitation 
+                            citationId="4" 
+                            citation={mockCitations[3]}
+                            onCitationClick={handleCitationClick}
+                          >
+                            {member.name}
+                          </InlineCitation>
+                        </CardTitle>
+                        <CardDescription>{member.role}</CardDescription>
+                      </div>
+                      <Badge variant="outline">{member.assessment}</Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">{member.experience}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Team Assessment</CardTitle>
+                <CardDescription>Overall team composition and capabilities</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <h4 className="font-medium mb-2">Team Size</h4>
+                    <p className="text-sm text-muted-foreground">{mockReport.sections.teamAnalysis.teamSize}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-medium mb-2">Technical Team</h4>
+                    <p className="text-sm text-muted-foreground">{mockReport.sections.teamAnalysis.techTeamSize}</p>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Assessment Summary</h4>
+                  <p className="text-sm text-muted-foreground">{mockReport.sections.teamAnalysis.assessment}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )
+
+      case 'financial-overview':
+        return (
+          <div id="financial-overview" className="p-6 space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold mb-4">Financial Overview</h2>
+              <p className="text-muted-foreground mb-6">
+                Financial performance analysis and funding history.
+              </p>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Funding History</CardTitle>
+                <CardDescription>Investment rounds and capital raised</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {mockReport.sections.financialOverview.fundingHistory.map((round, index) => (
+                  <div key={index} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline">{round.round}</Badge>
+                        <span className="text-sm text-muted-foreground">{round.date}</span>
+                      </div>
+                      <span className="font-bold text-green-600">
+                        <InlineCitation 
+                          citationId="4" 
+                          citation={mockCitations[3]}
+                          onCitationClick={handleCitationClick}
+                        >
+                          {round.amount}
+                        </InlineCitation>
+                      </span>
+                    </div>
+                    {round.valuation && (
+                      <p className="text-sm text-muted-foreground mb-2">Valuation: {round.valuation}</p>
+                    )}
+                    <div>
+                      <p className="text-sm font-medium mb-1">Investors:</p>
+                      <div className="flex flex-wrap gap-1">
+                        {round.investors.map((investor, idx) => (
+                          <Badge key={idx} variant="secondary" className="text-xs">
+                            {investor}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            <div className="grid gap-6 md:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Revenue Metrics</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">{mockReport.sections.financialOverview.revenueMetrics}</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Customer Metrics</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">{mockReport.sections.financialOverview.customerMetrics}</p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )
+
+      default:
+        return <div>Section not found</div>
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="bg-white border-b sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumbs items={breadcrumbItems} />
+        </div>
       </div>
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="flex gap-6">
+          <div className="w-64 flex-shrink-0">
+            <ScanReportNavigation 
+              currentSection={activeSection}
+              onSectionChange={setActiveSection}
+            />
+          </div>
+          
+          <div className="flex-1 bg-white rounded-lg shadow-sm border">
+            {renderSection()}
+          </div>
+        </div>
+      </div>
+
+      {selectedCitation && (
+        <EvidenceModal 
+          citation={selectedCitation}
+          isOpen={!!selectedCitation}
+          onClose={handleCloseModal}
+        />
+      )}
     </div>
   )
-} 
+}
