@@ -34,7 +34,8 @@ import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import { Citation, Evidence } from './EvidenceCitation'
+import { Citation } from './EvidenceCitation'
+import { Evidence } from './EvidenceCitation'
 
 interface EvidenceNote {
   id: string
