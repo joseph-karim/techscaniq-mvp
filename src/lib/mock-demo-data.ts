@@ -1,4 +1,5 @@
 import { Scan } from '@/types';
+import { ring4MockReport } from './ring4-mock-report-data';
 
 // --- Enhanced Scan Type for Demo ---
 export interface DemoScanRequest extends Scan {
@@ -20,18 +21,27 @@ export interface DemoScanRequest extends Scan {
 // Based on the output of report-orchestrator-v3 for a standard report
 export interface DemoStandardReport {
   id: string; // Report ID
-  scan_request_id: string;
+  scan_request_id?: string;
   company_name: string;
-  website_url: string;
+  domain?: string;
+  website_url?: string;
+  scan_type?: string;
   report_type?: string; // Add optional report_type
   created_at?: string; // Add optional created_at
-  executive_summary: string;
-  investment_score: number; // 0-100
+  executive_summary?: string;
+  investment_score?: number; // 0-100
   investment_rationale?: string;
-  tech_health_score: number; // 0-100
-  tech_health_grade: string; // A, B, C, D, F
-  sections: {
-    [key: string]: { // e.g., technologyStack, infrastructure, security
+  tech_health_score?: number; // 0-100
+  tech_health_grade?: string; // A, B, C, D, F
+  sections: Array<{
+    title: string;
+    content: string;
+    subsections?: Array<{
+      title: string;
+      content: string;
+    }>;
+  }> | {
+    [key: string]: { // e.g., technologyStack, infrastructure, security (legacy format)
       title: string;
       summary: string;
       findings: Array<{
@@ -45,9 +55,9 @@ export interface DemoStandardReport {
       risks?: Array<{ text: string; severity?: string; evidence_ids?: string[] }>;
     };
   };
-  evidence_collection_id: string;
+  evidence_collection_id?: string;
   // Simplified citations for demo - actual ones are more complex
-  citations: Array<{ 
+  citations?: Array<{ 
     citation_number: number;
     claim_id: string; // e.g., "security_0"
     evidence_item_id: string; // Should match a _original_crypto_id from a DemoEvidenceItem
@@ -414,11 +424,15 @@ const deepDiveMockDataInternal = {
   }
 };
 
-export const mockRing4Report: DemoStandardReport = {
-  id: 'report-ring4-comprehensive',
+// Use the comprehensive Ring4 report from ring4-mock-report-data.ts
+export const mockRing4Report: DemoStandardReport = ring4MockReport;
+
+// Legacy Ring4 report backup
+export const mockRing4ReportLegacy: DemoStandardReport = {
+  id: 'report-ring4-comprehensive-legacy',
   scan_request_id: 'a420adbf-65bc-4daa-aef9-d01c04b1e177',
   company_name: 'Ring4',
-  website_url: 'https://ring4.ai',
+  website_url: 'https://ring4.com',
   report_type: 'standard',
   created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
   executive_summary: "Ring4 represents a compelling investment opportunity in the rapidly growing secure communications market, currently valued at $15.8B and expanding at 22% CAGR. Founded in 2015 by telecommunications industry veterans, Ring4 has emerged as a leader in the virtual phone number space by addressing a critical need: enabling professionals to maintain separate business and personal communications without carrying multiple devices. The company has achieved remarkable traction with $8.5M ARR growing at 127% year-over-year, serving over 125,000 active users including three Fortune 500 companies. Ring4's competitive advantage lies in its unique combination of military-grade security (end-to-end encryption using Signal Protocol), innovative AI features (smart call routing with 94% accuracy, real-time transcription at 97% accuracy), and superior user experience (4.8/5 app store rating vs 3.2 industry average). The founding team brings exceptional pedigree - CEO John Harrison previously scaled a telecom company from $10M to $150M as CTO, while CTO Sarah Chen holds 12 VoIP-related patents from her tenure at Cisco. Financial metrics demonstrate strong product-market fit with 78% gross margins, 142% net revenue retention, and a best-in-class LTV:CAC ratio of 25:1. The company is well-capitalized following a $15M Series A led by Bessemer Venture Partners, providing 18 months runway to reach profitability. Key risks include intense competition from established players like Google Voice and emerging threats from WhatsApp Business, though Ring4's technical moat and privacy focus provide strong differentiation. With a clear path to $50M ARR by 2026 and multiple expansion opportunities in healthcare (post-HIPAA compliance) and international markets, Ring4 presents an attractive risk-adjusted return profile for growth-stage investors.",
