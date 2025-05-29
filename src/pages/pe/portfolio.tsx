@@ -68,6 +68,25 @@ const portfolioCompanies = [
     alerts: 1,
     completedInitiatives: 3,
     totalInitiatives: 8
+  },
+  {
+    id: 4,
+    name: 'Synergy Solutions',
+    industry: 'Enterprise Software',
+    acquisitionDate: '2023-12-01',
+    investmentThesis: 'AI/ML integration to boost platform efficiency by 40%, expand enterprise client base through advanced analytics capabilities',
+    technicalHealth: 89,
+    lastScanDate: '2024-01-18',
+    status: 'excellent',
+    keyMetrics: {
+      codeQuality: 91,
+      security: 87,
+      scalability: 92,
+      compliance: 85
+    },
+    alerts: 1,
+    completedInitiatives: 6,
+    totalInitiatives: 9
   }
 ]
 
@@ -275,7 +294,7 @@ export default function PortfolioPage() {
                             View Scan
                           </Link>
                         </Button>
-                        {company.id === 1 && (
+                        {(company.id === 1 || company.id === 4) && (
                           <Button variant="outline" size="sm" asChild>
                             <Link to={`/portfolio/${company.id}/deep-dive`}>
                               <FileText className="mr-2 h-4 w-4" />
