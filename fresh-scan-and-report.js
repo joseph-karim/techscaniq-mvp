@@ -28,7 +28,7 @@ async function main() {
   // Step 1: Create scan request
   const scanData = {
     company_name: 'Ring4',
-    website_url: 'https://ring4.ai',
+    website_url: 'https://ring4.com',
     requestor_name: 'Test User',
     organization_name: 'Test Organization',
     status: 'pending'

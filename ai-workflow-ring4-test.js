@@ -196,7 +196,7 @@ async function createEnhancedEvidenceItems(collectionId, workflowRunId) {
         title: 'Ring4 Company Overview'
       },
       source_data: {
-        url: 'https://ring4.ai',
+        url: 'https://ring4.com',
         timestamp: new Date().toISOString(),
         query: 'Ring4 company overview'
       },
@@ -230,7 +230,7 @@ async function createEnhancedEvidenceItems(collectionId, workflowRunId) {
         title: 'Ring4 Technology Stack Analysis'
       },
       source_data: {
-        url: 'https://ring4.ai/careers',
+        url: 'https://ring4.com/careers',
         timestamp: new Date().toISOString(),
         query: 'Ring4 technology stack'
       },
@@ -264,7 +264,7 @@ async function createEnhancedEvidenceItems(collectionId, workflowRunId) {
         title: 'Ring4 Security Assessment'
       },
       source_data: {
-        url: 'https://ring4.ai/security',
+        url: 'https://ring4.com/security',
         timestamp: new Date().toISOString(),
         query: 'Ring4 security features'
       },
@@ -326,7 +326,7 @@ async function createEnhancedCitations(reportId, evidenceItems) {
         id: evidenceItems[0].id,
         type: 'webpage_content',
         title: 'Ring4 Company Overview',
-        source: 'https://ring4.ai',
+        source: 'https://ring4.com',
         excerpt: 'Ring4 is a VoIP and cloud communications platform for business communications.',
         metadata: evidenceItems[0].metadata
       }]
@@ -348,7 +348,7 @@ async function createEnhancedCitations(reportId, evidenceItems) {
         id: evidenceItems[1].id,
         type: 'technology_stack',
         title: 'Ring4 Technology Stack Analysis',
-        source: 'https://ring4.ai/careers',
+        source: 'https://ring4.com/careers',
         excerpt: 'Modern tech stack with React, Node.js, AWS, and WebRTC.',
         metadata: evidenceItems[1].metadata
       }]

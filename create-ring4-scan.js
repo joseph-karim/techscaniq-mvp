@@ -45,7 +45,7 @@ async function createRing4Scan() {
       .from('scan_requests')
       .insert({
         company_name: 'Ring4',
-        website_url: 'https://ring4.ai',
+        website_url: 'https://ring4.com',
         status: 'pending',
         requestor_name: 'System Admin',
         organization_name: 'TechScanIQ',
@@ -71,7 +71,7 @@ async function createRing4Scan() {
       body: JSON.stringify({
         company: {
           name: 'Ring4',
-          website: 'https://ring4.ai'
+          website: 'https://ring4.com'
         },
         analysisDepth: 'comprehensive',
         scan_request_id: scanRequest.id
