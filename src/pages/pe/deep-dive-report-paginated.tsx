@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useParams } from 'react-router-dom'
 import { DeepDiveNavigation, deepDiveSections } from '@/components/pe/deep-dive-report/DeepDiveNavigation'
 import { Breadcrumbs } from '@/components/pe/deep-dive-report/Breadcrumbs'
 import { Citation } from '@/components/reports/EvidenceCitation'
@@ -9,6 +10,7 @@ import { TechnicalLeadership } from '@/components/pe/enhanced-report/sections/Te
 import { CloudVendorDependencies } from '@/components/pe/enhanced-report/sections/CloudVendorDependencies'
 import { InternalCodeAnalysis } from '@/components/pe/deep-dive-report/sections/InternalCodeAnalysis'
 import { deepDiveMockData } from '@/lib/mock-demo-data'
+import { synergyMockReport, synergyMockCitations } from '@/lib/synergy-mock-report-data'
 import { Home, FileText, Building } from 'lucide-react'
 
 // Comprehensive citations for deep dive report
@@ -396,11 +398,42 @@ const analystReviews = [
   }
 ]
 
+// Function to get company data based on ID
+const getCompanyData = (id: string) => {
+  switch (id) {
+    case '1': // TechFlow Solutions
+      return {
+        name: 'TechFlow Solutions',
+        data: deepDiveMockData,
+        citations: deepDiveCitations,
+        reportType: 'standard'
+      }
+    case '4': // Synergy Solutions
+      return {
+        name: 'Synergy Solutions', 
+        data: null, // We'll use the comprehensive report format
+        citations: synergyMockCitations,
+        reportType: 'comprehensive',
+        report: synergyMockReport
+      }
+    default:
+      return {
+        name: 'Unknown Company',
+        data: deepDiveMockData,
+        citations: deepDiveCitations,
+        reportType: 'standard'
+      }
+  }
+}
+
 export default function DeepDiveReportPaginated() {
+  const { id } = useParams<{ id: string }>()
   const [currentSection, setCurrentSection] = useState('executive-summary')
   const [selectedCitation, setSelectedCitation] = useState<Citation | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   
+  // Get company data based on ID
+  const companyInfo = getCompanyData(id || '1')
   const currentSectionData = deepDiveSections.find(section => section.id === currentSection)
 
   const handleCitationClick = (citation: Citation) => {
@@ -420,7 +453,7 @@ export default function DeepDiveReportPaginated() {
       icon: <Building className="h-4 w-4" />
     },
     {
-      label: 'Ring4 Deep Dive',
+      label: `${companyInfo.name} Deep Dive`,
       icon: <FileText className="h-4 w-4" />
     },
     {
@@ -431,12 +464,94 @@ export default function DeepDiveReportPaginated() {
   ]
 
   const renderCurrentSection = () => {
+    // Handle comprehensive reports (like Synergy) differently
+    if (companyInfo.reportType === 'comprehensive' && companyInfo.report) {
+      const report = companyInfo.report
+      
+      switch (currentSection) {
+        case 'executive-summary':
+          return (
+            <div id="executive-summary" className="space-y-6">
+              <div className="prose prose-lg max-w-none" dangerouslySetInnerHTML={{ 
+                __html: (report.executive_summary || '').replace(/\[\[(\d+)\]\]\(#cite-synergy-(\d+)\)/g, 
+                  '<a href="#cite-synergy-$2" class="text-blue-600 hover:text-blue-800 font-medium">[$1]</a>')
+              }} />
+            </div>
+          )
+        case 'stack-architecture':
+          return (
+            <div id="stack-architecture" className="space-y-6">
+              <div className="prose prose-lg max-w-none">
+                <h2 className="text-2xl font-bold mb-4">Architecture & AI/ML Readiness</h2>
+                <p>This comprehensive section covers Synergy's sophisticated microservices architecture and AI/ML integration capabilities.</p>
+                <div className="bg-green-50 p-4 rounded-lg mt-4">
+                  <p className="text-green-800"><strong>Excellent Architecture Foundation:</strong> Event-driven microservices with CQRS and Event Sourcing</p>
+                </div>
+              </div>
+            </div>
+          )
+        case 'internal-code-analysis':
+          return (
+            <div id="internal-code-analysis" className="space-y-6">
+              <div className="prose prose-lg max-w-none">
+                <h2 className="text-2xl font-bold mb-4">Security & Compliance Excellence</h2>
+                <p>Synergy Solutions maintains enterprise-grade security with SOC 2 Type II certification and comprehensive compliance framework.</p>
+                <div className="bg-blue-50 p-4 rounded-lg mt-4">
+                  <p className="text-blue-800"><strong>Enterprise Ready:</strong> Full security compliance with zero-trust architecture</p>
+                </div>
+              </div>
+            </div>
+          )
+        case 'code-quality-devops':
+          return (
+            <div id="code-quality-devops" className="space-y-6">
+              <div className="prose prose-lg max-w-none">
+                <h2 className="text-2xl font-bold mb-4">Development Velocity & Innovation Excellence</h2>
+                <p>Industry-leading development practices with 12 deploys per day and 32-person engineering team including 4 AI/ML specialists.</p>
+                <div className="bg-purple-50 p-4 rounded-lg mt-4">
+                  <p className="text-purple-800"><strong>Elite Performance:</strong> Top 1% DevOps metrics with proven execution capability</p>
+                </div>
+              </div>
+            </div>
+          )
+        case 'infrastructure-deep-dive':
+          return (
+            <div id="infrastructure-deep-dive" className="space-y-6">
+              <div className="prose prose-lg max-w-none">
+                <h2 className="text-2xl font-bold mb-4">Investment Analysis & ROI Projection</h2>
+                <p>Strong investment opportunity with $1.65M technical investment for 40% efficiency gains and $8.5M annual revenue impact by Year 2.</p>
+                <div className="bg-gold-50 p-4 rounded-lg mt-4">
+                  <p className="text-yellow-800"><strong>Strong ROI:</strong> Multiple value creation levers with 95% execution success probability</p>
+                </div>
+              </div>
+            </div>
+          )
+        default:
+          return (
+            <div className="p-8">
+              <h2 className="text-2xl font-bold mb-4">Comprehensive Report Section</h2>
+              <p className="text-gray-600">This section contains detailed analysis for Synergy Solutions comprehensive technical assessment.</p>
+            </div>
+          )
+      }
+    }
+
+    // Handle standard reports (like TechFlow)
+    if (!companyInfo.data) {
+      return (
+        <div className="p-8">
+          <h2 className="text-2xl font-bold mb-4">Report Not Available</h2>
+          <p className="text-gray-600">Report data is not available for this company.</p>
+        </div>
+      )
+    }
+
     switch (currentSection) {
       case 'executive-summary':
         return (
           <div id="executive-summary" className="space-y-6">
             <ExecutiveSummary 
-              data={deepDiveMockData.executiveSummary} 
+              data={companyInfo.data.executiveSummary} 
               citations={deepDiveCitations}
               onCitationClick={handleCitationClick}
             />
@@ -445,13 +560,13 @@ export default function DeepDiveReportPaginated() {
       case 'stack-evolution':
         return (
           <div id="stack-evolution">
-            <StackEvolutionTimeline data={deepDiveMockData.stackEvolution} />
+            <StackEvolutionTimeline data={companyInfo.data.stackEvolution} />
           </div>
         )
       case 'technical-leadership':
         return (
           <div id="technical-leadership">
-            <TechnicalLeadership data={deepDiveMockData.technicalLeadership} />
+            <TechnicalLeadership data={companyInfo.data.technicalLeadership} />
           </div>
         )
       case 'stack-architecture':
@@ -470,7 +585,7 @@ export default function DeepDiveReportPaginated() {
       case 'cloud-vendor-dependencies':
         return (
           <div id="cloud-vendor-dependencies">
-            <CloudVendorDependencies data={deepDiveMockData.cloudVendorDependencies} />
+            <CloudVendorDependencies data={companyInfo.data.cloudVendorDependencies} />
           </div>
         )
       case 'code-quality-devops':
@@ -490,7 +605,7 @@ export default function DeepDiveReportPaginated() {
         return (
           <div id="internal-code-analysis" className="space-y-6">
             <InternalCodeAnalysis 
-              data={deepDiveMockData.internalCodeAnalysis} 
+              data={companyInfo.data.internalCodeAnalysis} 
               citations={deepDiveCitations}
               onCitationClick={handleCitationClick}
             />
@@ -509,78 +624,8 @@ export default function DeepDiveReportPaginated() {
             </ul>
           </div>
         )
-      case 'team-process-analysis':
-        return (
-          <div id="team-process-analysis" className="p-8">
-            <h2 className="text-2xl font-bold mb-4">Team & Process Analysis</h2>
-            <p className="text-gray-600">This section is under development. It will include:</p>
-            <ul className="list-disc list-inside mt-4 space-y-2 text-gray-600">
-              <li>Team structure and engineering culture assessment</li>
-              <li>Development workflow analysis</li>
-              <li>Documentation quality evaluation</li>
-              <li>Communication patterns and collaboration effectiveness</li>
-            </ul>
-          </div>
-        )
-      case 'financial-metrics':
-        return (
-          <div id="financial-metrics" className="p-8">
-            <h2 className="text-2xl font-bold mb-4">Financial & Operational Metrics</h2>
-            <p className="text-gray-600">This section is under development. It will include:</p>
-            <ul className="list-disc list-inside mt-4 space-y-2 text-gray-600">
-              <li>Revenue analysis and unit economics</li>
-              <li>Technology cost breakdown and optimization</li>
-              <li>Profitability analysis and cash flow</li>
-              <li>Investment metrics and efficiency ratios</li>
-            </ul>
-          </div>
-        )
-      case 'compliance-audit':
-        return (
-          <div id="compliance-audit" className="p-8">
-            <h2 className="text-2xl font-bold mb-4">Compliance & Security Audit</h2>
-            <p className="text-gray-600">This section is under development. It will include:</p>
-            <ul className="list-disc list-inside mt-4 space-y-2 text-gray-600">
-              <li>Security compliance framework assessment</li>
-              <li>Data protection and privacy compliance</li>
-              <li>Access control and audit readiness</li>
-              <li>Risk assessment and remediation planning</li>
-            </ul>
-          </div>
-        )
-      case 'integration-analysis':
-        return (
-          <div id="integration-analysis" className="p-8">
-            <h2 className="text-2xl font-bold mb-4">Integration & API Analysis</h2>
-            <p className="text-gray-600">This section is under development. It will include:</p>
-            <ul className="list-disc list-inside mt-4 space-y-2 text-gray-600">
-              <li>API architecture and endpoint analysis</li>
-              <li>Third-party integration health monitoring</li>
-              <li>Data flow analysis and security assessment</li>
-              <li>Performance bottleneck identification</li>
-            </ul>
-          </div>
-        )
-      case 'scalability-assessment':
-        return (
-          <div id="scalability-assessment" className="p-8">
-            <h2 className="text-2xl font-bold mb-4">Scalability & Technical Roadmap</h2>
-            <p className="text-gray-600">This section is under development. It will include:</p>
-            <ul className="list-disc list-inside mt-4 space-y-2 text-gray-600">
-              <li>Architectural readiness for scale</li>
-              <li>Performance projections and growth planning</li>
-              <li>Technical roadmap and scaling strategies</li>
-              <li>Risk assessment and mitigation plans</li>
-            </ul>
-          </div>
-        )
       default:
-        return (
-          <div className="p-8">
-            <h2 className="text-2xl font-bold mb-4">Section Not Found</h2>
-            <p className="text-gray-600">The requested section could not be found.</p>
-          </div>
-        )
+        return null
     }
   }
 
