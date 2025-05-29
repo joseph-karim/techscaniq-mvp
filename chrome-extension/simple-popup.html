@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      width: 300px;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    .button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      margin: 8px 0;
+      font-size: 14px;
+    }
+    .button:hover { background: #1d4ed8; }
+    .button:disabled { background: #94a3b8; cursor: not-allowed; }
+    .button.stop { background: #dc2626; }
+    .button.stop:hover { background: #b91c1c; }
+    .status {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      background: #f1f5f9;
+      color: #475569;
+    }
+    .status.collecting { background: #fef3c7; color: #92400e; }
+    .status.success { background: #d1fae5; color: #065f46; }
+    .status.error { background: #fee2e2; color: #dc2626; }
+    .stats {
+      margin: 10px 0;
+      font-size: 12px;
+      color: #64748b;
+      background: #f8fafc;
+      padding: 8px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h3>📡 Simple Network Collector</h3>
+  
+  <button id="toggleBtn" class="button">🔍 Start Collecting</button>
+  
+  <div id="status" class="status" style="display: none;"></div>
+  
+  <div id="stats" class="stats" style="display: none;"></div>
+
+  <button id="downloadBtn" class="button" disabled>💾 Download All Data</button>
+  <button id="clearBtn" class="button" style="background: #dc2626;">🗑️ Clear Data</button>
+
+  <script>
+    let isCollecting = false;
+    let collectedData = null;
+
+    const toggleBtn = document.getElementById('toggleBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const statusDiv = document.getElementById('status');
+    const statsDiv = document.getElementById('stats');
+
+    function showStatus(message, type = 'info') {
+      statusDiv.textContent = message;
+      statusDiv.className = `status ${type}`;
+      statusDiv.style.display = 'block';
+      
+      if (type === 'success' || type === 'error') {
+        setTimeout(() => statusDiv.style.display = 'none', 3000);
+      }
+    }
+
+    function updateStats(data) {
+      if (data) {
+        const stats = `📊 ${data.networkRequests?.length || 0} network requests
+📄 ${data.scripts?.length || 0} scripts found
+🎨 ${data.styles?.length || 0} stylesheets
+🔗 ${data.links?.length || 0} links`;
+        statsDiv.innerHTML = stats;
+        statsDiv.style.display = 'block';
+        downloadBtn.disabled = false;
+      } else {
+        statsDiv.style.display = 'none';
+        downloadBtn.disabled = true;
+      }
+    }
+
+    toggleBtn.addEventListener('click', async () => {
+      try {
+        console.log('Toggle button clicked, isCollecting:', isCollecting);
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        console.log('Current tab:', tab);
+        
+        if (!isCollecting) {
+          console.log('Starting collection...');
+          showStatus('Injecting collector script...', 'collecting');
+          
+          // Start collecting
+          await chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            files: ['simple-collector.js']
+          });
+          
+          console.log('Script injected, starting collector...');
+          
+          await chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            func: () => {
+              console.log('Collector starting on page...');
+              if (window.techScanCollector) {
+                window.techScanCollector.startCollecting();
+                return true;
+              } else {
+                console.error('techScanCollector not found!');
+                return false;
+              }
+            }
+          });
+          
+          isCollecting = true;
+          toggleBtn.textContent = '⏹️ Stop & Collect Data';
+          toggleBtn.className = 'button stop';
+          showStatus('Collecting network requests... (browse the site now)', 'collecting');
+          
+        } else {
+          console.log('Stopping collection...');
+          showStatus('Stopping collection and gathering data...', 'collecting');
+          
+          // Stop and collect
+          const result = await chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            func: () => {
+              console.log('Stopping collector and getting data...');
+              if (window.techScanCollector) {
+                window.techScanCollector.stopCollecting();
+                return window.techScanCollector.getAllData();
+              } else {
+                console.error('techScanCollector not found during stop!');
+                return null;
+              }
+            }
+          });
+          
+          console.log('Collection result:', result);
+          collectedData = result[0].result;
+          isCollecting = false;
+          toggleBtn.textContent = '🔍 Start Collecting';
+          toggleBtn.className = 'button';
+          
+          if (collectedData) {
+            showStatus('Collection complete!', 'success');
+            updateStats(collectedData);
+          } else {
+            showStatus('No data collected', 'error');
+          }
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        showStatus('Error: ' + error.message, 'error');
+        isCollecting = false;
+        toggleBtn.textContent = '🔍 Start Collecting';
+        toggleBtn.className = 'button';
+      }
+    });
+
+    downloadBtn.addEventListener('click', () => {
+      if (!collectedData) return;
+      
+      // Create comprehensive report
+      const report = {
+        timestamp: new Date().toISOString(),
+        source: 'TechScan Simple Collector',
+        url: collectedData.url,
+        title: collectedData.title,
+        
+        summary: {
+          totalNetworkRequests: collectedData.networkRequests?.length || 0,
+          totalScripts: collectedData.scripts?.length || 0,
+          totalStyles: collectedData.styles?.length || 0,
+          pageLoadTime: collectedData.performance?.loadTime || 0
+        },
+        
+        fullData: collectedData
+      };
+      
+      // Download as JSON
+      const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      
+      chrome.downloads.download({
+        url: url,
+        filename: `techscan-${new URL(collectedData.url).hostname}-${Date.now()}.json`
+      });
+      
+      showStatus('Data downloaded!', 'success');
+    });
+
+    clearBtn.addEventListener('click', () => {
+      if (confirm('Clear collected data?')) {
+        collectedData = null;
+        updateStats(null);
+        showStatus('Data cleared', 'success');
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "TechScan Evidence Collector",
+  "version": "1.0",
+  "description": "Comprehensive web data collection for technical due diligence",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "debugger",
+    "webRequest"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "TechScan Data Collector"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["injected.js"],
+      "matches": ["http://*/*", "https://*/*"]
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "TechScan Simple Collector",
+  "version": "2.0",
+  "description": "Simple network and source code collector",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "downloads"
+  ],
+  "action": {
+    "default_popup": "simple-popup-fixed.html",
+    "default_title": "TechScan Network Collector"
+  }
+}
