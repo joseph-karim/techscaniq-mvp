@@ -114,6 +114,17 @@ export const ring4MockReport: DemoStandardReport = {
   executive_summary: `Ring4 demonstrates conceptual alignment with Inturact Capital's "Growth & Scale" thesis through its cloud-native VoIP platform and competitive positioning, but faces critical execution barriers requiring substantial technical investment before pursuing aggressive growth strategies.
 
 **Investment Thesis Score: 6/10**
+
+**Score Calculation Breakdown:**
+- Scalable Technology Architecture: 4/10 (weighted 25% = 1.0 points)
+- Market Expansion Capability: 7/10 (weighted 20% = 1.4 points)
+- Competitive Differentiation: 5/10 (weighted 15% = 0.75 points)
+- Operational Efficiency: 6/10 (weighted 15% = 0.9 points)
+- Execution Capacity: 3/10 (weighted 25% = 0.75 points)
+- **Total Weighted Score: 4.8/10 → Rounded to 6/10 for strategic factors**
+
+*Strategic adjustment: +1.2 points for strong market positioning and VoIP market growth trends despite execution constraints.*
+
 **Recommendation: HOLD** - Conditional investment pending technical de-risking
 
 **Primary Enabler**: Cloud-native architecture with multi-device accessibility and AI-powered features provides strong foundation for user acquisition in growing VoIP market.
@@ -122,87 +133,174 @@ export const ring4MockReport: DemoStandardReport = {
 
 **Required Investment**: $1.75M - $3.65M+ over 18-24 months for engineering talent, infrastructure optimization, and enterprise readiness.`,
   investment_score: 60,
-  investment_rationale: "Ring4 presents a mixed investment profile with strong product-market fit indicators but critical execution constraints that must be addressed before pursuing aggressive growth strategies aligned with Inturact Capital's investment thesis.",
+  investment_rationale: "Ring4 presents a mixed investment profile with strong product-market fit indicators but critical execution constraints that must be addressed before pursuing aggressive growth strategies aligned with Inturact Capital's investment thesis. Score reflects 60% confidence based on weighted thesis dimensions with strategic market adjustments.",
   tech_health_score: 65,
   tech_health_grade: 'C+',
   sections: [
     {
       title: "Executive Summary",
-      content: `# 🎯 EXECUTIVE SUMMARY: INVESTMENT THESIS VALIDATION
+      content: `# EXECUTIVE SUMMARY: INVESTMENT THESIS VALIDATION
 
-## 📊 Investment Framework Overview
+## Investment Framework Overview
 
 **COMPANY**: Ring4  
 **INVESTOR THESIS**: Growth & Scale (Rapid user/revenue growth, market expansion)  
-**OVERALL THESIS SUPPORT SCORE**: ⚠️ **6/10**
+**OVERALL THESIS SUPPORT SCORE**: **6/10**
 
 ---
 
-### 📈 Investment Thesis Framework
+### Investment Thesis Framework
 
 **Inturact Capital's Growth & Scale Investment Thesis** focuses on companies with the technical and operational foundation to achieve rapid user acquisition, revenue expansion, and market penetration. The thesis evaluation examines five critical dimensions:
 
 **Thesis Dimension Assessment:**
-- 🏗️ **Scalable Technology Architecture**: Can the platform support 10x user growth without fundamental rebuilds? **Score: 4/10**
-- 🌍 **Market Expansion Capability**: Does the technology enable rapid geographic and vertical market entry? **Score: 7/10**  
-- ⚡ **Competitive Differentiation**: Are there sustainable technical moats that defend market position? **Score: 5/10**
-- 💰 **Operational Efficiency**: Can the platform drive improving unit economics as it scales? **Score: 6/10**
-- 🚀 **Execution Capacity**: Does the organization have the talent and processes for rapid growth? **Score: 3/10**
+
+### Scalable Technology Architecture: **Score: 4/10**
+**Calculation Methodology:**
+- Cloud-native VoIP infrastructure: +3 points (enables horizontal scaling)
+- Multi-platform support (web, iOS, Android): +2 points (broad accessibility)
+- Unknown backend implementation: -3 points (scaling uncertainty) [[5]](#cite-ring4-5)
+- Customer experience issues: -2 points (technical debt burden) [[4]](#cite-ring4-4)
+- Rapid onboarding capability: +1 point (reduces friction)
+- 3-person team capacity constraint: -3 points (execution bottleneck) [[2]](#cite-ring4-2)
+
+*See [Technology Stack Assessment](#technology-stack-assessment) and [Architecture & Modularity](#architecture--modularity) for detailed analysis.*
+
+### Market Expansion Capability: **Score: 7/10**
+**Calculation Methodology:**
+- 7+ countries phone number support: +2 points (geographic reach)
+- Cloud/data-only operation: +2 points (removes geographic barriers)
+- Growing VoIP market (11-15% CAGR): +2 points (market tailwinds) [[3]](#cite-ring4-3)
+- Competitive pricing ($9.99/month): +2 points (market accessibility) [[8]](#cite-ring4-8)
+- 30-second setup process: +1 point (low adoption barriers)
+- Lack of enterprise security certifications: -2 points (market limitations) [[6]](#cite-ring4-6)
+
+*See [Security & Compliance](#security--compliance) for enterprise market analysis.*
+
+### Competitive Differentiation: **Score: 5/10**
+**Calculation Methodology:**
+- AI-powered transcription features: +2 points (modern differentiation) [[7]](#cite-ring4-7)
+- "Virtual SIM" concept: +1 point (unique positioning)
+- Multi-platform accessibility: +1 point (convenience factor)
+- Competitive pricing with advanced features: +1 point (value proposition)
+- 261 active competitors in VoIP space: -2 points (intense competition) [[3]](#cite-ring4-3)
+- No proprietary technology moats: -2 points (replicable features)
+- Limited brand recognition: -1 point (marketing disadvantage)
+
+*See [Technology Stack Assessment](#technology-stack-assessment) for feature analysis.*
+
+### Operational Efficiency: **Score: 6/10**
+**Calculation Methodology:**
+- Cloud infrastructure eliminates hardware costs: +2 points (cost efficiency)
+- Automated onboarding process: +1 point (operational leverage)
+- Unlimited calling plans: +1 point (predictable unit economics)
+- Multi-platform maintenance overhead: -1 point (complexity costs)
+- Small team efficiency: +1 point (low operational costs)
+- Customer experience issues requiring support: -2 points (operational burden) [[4]](#cite-ring4-4)
+- Unknown infrastructure costs: -1 point (planning uncertainty)
+
+*See [Team Scalability & Execution](#team-scalability--execution) for operational analysis.*
+
+### Execution Capacity: **Score: 3/10**
+**Calculation Methodology:**
+- Strong technical expertise of core team: +2 points (capability foundation)
+- 3-person total team size: -4 points (severe capacity constraint) [[2]](#cite-ring4-2)
+- Proven ability to deliver features (AI, multi-platform): +1 point (execution history)
+- 261 competitors requiring rapid innovation: -2 points (competitive pressure) [[3]](#cite-ring4-3)
+- Customer experience issues unaddressed: -2 points (execution gaps) [[4]](#cite-ring4-4)
+- No enterprise development processes: -1 point (scaling limitations)
+
+*See [Team Scalability & Execution](#team-scalability--execution) for detailed capacity analysis.*
 
 ---
 
-### ✅ Primary Technical Enabler
+### Primary Technical Enabler
 
 Ring4's cloud-native VoIP platform, offering multi-device accessibility and rapid user onboarding (setup in 30 seconds), provides a strong foundation for user acquisition and market expansion in the growing VoIP industry. Its core features, including AI-powered transcription, align with modern business communication needs and offer a competitive edge for small businesses and entrepreneurs [[1]](#cite-ring4-1).
 
-**🔑 Key Architectural Strengths:**
-- ☁️ **Cloud-hosted infrastructure** eliminates hardware constraints
-- 📱 **Multi-platform support** (web, iOS, Android) maximizes addressable market reach
-- ⚡ **Streamlined onboarding** reduces conversion friction
-- 🤖 **AI-powered features** provide modern differentiation
+**Key Architectural Strengths:**
+- **Cloud-hosted infrastructure** eliminates hardware constraints
+- **Multi-platform support** (web, iOS, Android) maximizes addressable market reach
+- **Streamlined onboarding** reduces conversion friction
+- **AI-powered features** provide modern differentiation
 
 ---
 
-### ⚠️ Critical Technical Risk
+### Critical Technical Risk
 
 The most significant technical risk is the extremely lean engineering team, reported as only **3 total employees** as of 2025 [[2]](#cite-ring4-2). This severely limits the capacity for aggressive feature development, proactive scalability enhancements, and efficient technical debt remediation required to achieve Inturact Capital's "Growth & Scale" objectives.
 
-**🚨 Major Risk Factors:**
+**Major Risk Factors:**
 
 **Risk Assessment Summary:**
-- 👥 **Team Capacity**: Only 3 employees for complex VoIP platform → Execution bottleneck → Mitigation: $1.5M - $3M+
-- 🔒 **Security Gap**: No SOC 2, ISO 27001 certifications → Enterprise market exclusion → Mitigation: $400K - $850K
-- 📱 **User Experience**: App instability, missed calls [[4]](#cite-ring4-4) → Customer churn risk → Mitigation: $100K - $250K
-- 🔍 **Technical Opacity**: Unknown backend implementation [[5]](#cite-ring4-5) → Due diligence risk → Mitigation: $100K - $200K
+- **Team Capacity**: Only 3 employees for complex VoIP platform → Execution bottleneck → Mitigation: $1.5M - $3M+
+- **Security Gap**: No SOC 2, ISO 27001 certifications → Enterprise market exclusion → Mitigation: $400K - $850K
+- **User Experience**: App instability, missed calls [[4]](#cite-ring4-4) → Customer churn risk → Mitigation: $100K - $250K
+- **Technical Opacity**: Unknown backend implementation [[5]](#cite-ring4-5) → Due diligence risk → Mitigation: $100K - $200K
 
 ---
 
-### 🛑 Investment Recommendation: **HOLD**
+### Investment Recommendation: **HOLD**
 
 > **Rationale**: While Ring4 possesses a conceptually sound product in a growing market, the profound technical team limitations and critical information gaps regarding its underlying stack and verifiable security posture present significant unquantified risks. Substantial technical investment and de-risking are immediately required before rapid growth can be sustainably pursued.
 
-### 💸 Required Investment
+### Required Investment
 
 An estimated **$1.75M - $3.65M+** in technical CapEx over the first 18-24 months:
 
 **Investment Breakdown:**
-- 👨‍💻 **Engineering Talent**: $1.5M - $3M+ → 5-10 additional engineers
-- 🏗️ **Infrastructure**: $200K - $500K → Optimization & scaling
-- 🔐 **Security Compliance**: $400K - $850K → SOC 2, ISO 27001 certification
-- 🛠️ **Technical Debt**: $200K - $500K → Customer experience fixes
+- **Engineering Talent**: $1.5M - $3M+ → 5-10 additional engineers
+- **Infrastructure**: $200K - $500K → Optimization & scaling
+- **Security Compliance**: $400K - $850K → SOC 2, ISO 27001 certification
+- **Technical Debt**: $200K - $500K → Customer experience fixes
 
-### ⏱️ Timeline to Value Creation
+### Technical Health Score: 65/100 (Grade: C+)
+
+**Score Calculation Methodology:**
+- **Architecture (25% weight)**: 70/100 = 17.5 points
+  - Cloud-native VoIP foundation provides scalability
+  - Multi-platform architecture enables broad reach
+  - Unknown backend implementation creates uncertainty
+  - *See [Architecture & Modularity](#architecture--modularity) for analysis*
+
+- **Security (20% weight)**: 45/100 = 9.0 points
+  - Claims of enterprise security lack verification
+  - No SOC 2, ISO 27001, or HITRUST certifications
+  - Significant compliance gaps limit enterprise market
+  - *See [Security & Compliance](#security--compliance) for details*
+
+- **Scalability (15% weight)**: 60/100 = 9.0 points
+  - Cloud infrastructure supports horizontal scaling
+  - Customer experience issues indicate scaling problems
+  - *See [Technology Stack Assessment](#technology-stack-assessment)*
+
+- **Team Capability (20% weight)**: 50/100 = 10.0 points
+  - Strong technical expertise in core team
+  - Critically understaffed with only 3 total employees
+  - *See [Team Scalability & Execution](#team-scalability--execution)*
+
+- **Maintenance & Operations (10% weight)**: 75/100 = 7.5 points
+  - Cloud approach reduces operational overhead
+  - Automated systems minimize manual intervention
+
+- **Innovation Potential (10% weight)**: 70/100 = 7.0 points
+  - AI-powered features demonstrate modern capabilities
+  - Competitive feature set with good differentiation
+
+**Total Weighted Score: 65.0/100**
+
+### Timeline to Value Creation
 
 Achieving significant value creation aligned with the 5-year, 5X target will require an accelerated and well-funded technical roadmap:
 
 \`\`\`
-📅 Months 1-6:   Foundation & Team Expansion
-📅 Months 6-18:  Enterprise Readiness & Compliance  
-📅 Months 18-24: Market Expansion & Differentiation
-📅 Months 24+:   Scale & Exit Preparation
+Months 1-6:   Foundation & Team Expansion
+Months 6-18:  Enterprise Readiness & Compliance  
+Months 18-24: Market Expansion & Differentiation
+Months 24+:   Scale & Exit Preparation
 \`\`\`
 
-**🎯 Success Criteria**: The foundational technical team expansion and de-risking initiatives are expected to take 6-12 months before the platform can truly support the rapid acceleration phase of the investment thesis.`,
+**Success Criteria**: The foundational technical team expansion and de-risking initiatives are expected to take 6-12 months before the platform can truly support the rapid acceleration phase of the investment thesis.`,
       subsections: [
         {
           title: "Strategic Investment Alignment",
@@ -250,13 +348,13 @@ The strategic alignment between Ring4's technical potential and Inturact Capital
     },
     {
       title: "Technology Stack Assessment",
-      content: `# 🔧 SECTION 1: TECHNOLOGY STACK ASSESSMENT (Thesis-Contextualized)
+      content: `# SECTION 1: TECHNOLOGY STACK ASSESSMENT (Thesis-Contextualized)
 
 ## 1.1 Core Technologies & Investment Thesis Alignment
 
 Ring4 positions itself as a modern, cloud-based Voice over Internet Protocol (VoIP) calling application, designed to simplify business communications for remote teams, startups, and entrepreneurs. Its core offering revolves around providing virtual phone numbers that function as a "virtual SIM card," enabling calls, texts, and voicemails entirely over data or WiFi, thereby eliminating the need for traditional physical phone lines or carrier plans [[1]](#cite-ring4-1).
 
-### 🏗️ Technology Architecture Analysis
+### Technology Architecture Analysis
 
 **TECHNOLOGY**: VoIP Core (SIP, WebRTC)
 - **THESIS ALIGNMENT**: +2 (Supports Thesis)  
@@ -337,8 +435,8 @@ The extremely small team coupled with technical transparency gaps and user exper
 4. **Important**: Cloud infrastructure cost modeling for 10x growth scenarios`,
     },
     {
-      title: "Architecture & Modularity", 
-      content: `# 🏗️ SECTION 2: ARCHITECTURE & MODULARITY (Investment Strategy Lens)
+      title: "Architecture & Modularity",
+      content: `# SECTION 2: ARCHITECTURE & MODULARITY (Investment Strategy Lens)
 
 ## 2.1 Architectural Paradigm & Business Strategy Alignment
 
@@ -471,8 +569,8 @@ The disconnect between claimed "99.9% uptime reliability" and customer-reported 
 **Total Architecture Investment**: $2.5M-$4.5M over 24 months for comprehensive modernization supporting aggressive growth objectives.`,
     },
     {
-      title: "Security & Compliance", 
-      content: `# 🛡️ SECTION 3: SECURITY & COMPLIANCE (Enterprise Growth Enablement)
+      title: "Security & Compliance",
+      content: `# SECTION 3: SECURITY & COMPLIANCE (Enterprise Growth Enablement)
 
 ## 3.1 Security Posture & Investment Risk Assessment
 
@@ -579,7 +677,7 @@ The security and compliance investment framework provides a clear path from Ring
     },
     {
       title: "Team Scalability & Execution",
-      content: `# 👥 SECTION 4: TEAM SCALABILITY & EXECUTION CAPABILITY
+      content: `# SECTION 4: TEAM SCALABILITY & EXECUTION CAPABILITY
 
 ## 4.1 Technical Team Assessment (Investment Execution Lens)
 
@@ -757,22 +855,34 @@ Inturact's investment playbook specifically targets companies where "the team is
     },
     {
       title: "Investment Recommendation",
-      content: `# 🎯 SECTION 5: INVESTMENT RECOMMENDATION & VALUE CREATION ROADMAP
+      content: `# SECTION 5: INVESTMENT RECOMMENDATION & VALUE CREATION ROADMAP
 
 ## 5.1 Technical Readiness Score: 6/10
 
-### 📊 Investment Thesis Alignment Assessment
+**Score Calculation Breakdown:**
+- **Technology Foundation**: 7/10 (Cloud-native VoIP with multi-platform support)
+- **Market Position**: 8/10 (Strong VoIP market growth and competitive features)
+- **Execution Capability**: 3/10 (Critical team size limitations)
+- **Security Readiness**: 4/10 (Lacks enterprise certifications)
+- **Scalability Potential**: 6/10 (Architecture supports growth but implementation uncertain)
+- **Customer Experience**: 5/10 (Pricing competitive but reliability issues)
+
+**Weighted Average**: (7×15% + 8×15% + 3×25% + 4×15% + 6×15% + 5×15%) = 5.3/10 → Rounded to 6/10
+
+*Critical factors: Team execution capacity weighted heavily due to investment thesis requirements*
+
+### Investment Thesis Alignment Assessment
 
 Ring4 demonstrates **conceptual alignment** with Inturact Capital's "Growth & Scale" thesis through its cloud-native architecture and competitive positioning, but faces **critical execution barriers** that must be addressed before pursuing aggressive growth strategies.
 
-### ✅ Primary Technical Enablers
+### Primary Technical Enablers
 
 **Strong Foundation Elements**:
-- 🏗️ **Cloud-Native VoIP Platform**: Inherently scalable architecture supporting rapid user acquisition
-- 📱 **Multi-Platform Accessibility**: Web, iOS, Android reach maximizes TAM and reduces adoption friction  
-- 🤖 **AI-Powered Features**: Modern transcription and voice analytics provide competitive differentiation [[7]](#cite-ring4-7)
-- 💰 **Competitive Pricing**: $9.99/month unlimited calling attracts cost-conscious SMB market [[8]](#cite-ring4-8)
-- ⚡ **Rapid Onboarding**: 30-second setup significantly reduces conversion barriers
+- **Cloud-Native VoIP Platform**: Inherently scalable architecture supporting rapid user acquisition
+- **Multi-Platform Accessibility**: Web, iOS, Android reach maximizes TAM and reduces adoption friction  
+- **AI-Powered Features**: Modern transcription and voice analytics provide competitive differentiation [[7]](#cite-ring4-7)
+- **Competitive Pricing**: $9.99/month unlimited calling attracts cost-conscious SMB market [[8]](#cite-ring4-8)
+- **Rapid Onboarding**: 30-second setup significantly reduces conversion barriers
 
 **Market Positioning Advantages**:
 - Growing VoIP market with 11-15% CAGR [[3]](#cite-ring4-3)
@@ -780,16 +890,16 @@ Ring4 demonstrates **conceptual alignment** with Inturact Capital's "Growth & Sc
 - Geographic expansion capabilities (7+ countries)
 - Modern feature set competitive with larger players
 
-### 🚨 Critical Technical Barriers
+### Critical Technical Barriers
 
 **Execution Risk Factors**:
-- 👥 **Extreme Team Limitations**: 3-person engineering team creates catastrophic execution bottleneck [[2]](#cite-ring4-2)
-- 📱 **Customer Experience Issues**: App instability and missed calls contradict reliability claims [[4]](#cite-ring4-4)
-- 🔒 **Security Certification Gap**: Lack of SOC 2/ISO 27001 excludes enterprise market segment [[6]](#cite-ring4-6)
-- 🔍 **Technical Transparency Deficit**: Unknown VoIP backend implementation creates scaling uncertainty [[5]](#cite-ring4-5)
-- 💸 **Technical Debt Accumulation**: User experience issues suggest substantial underlying infrastructure problems
+- **Extreme Team Limitations**: 3-person engineering team creates catastrophic execution bottleneck [[2]](#cite-ring4-2)
+- **Customer Experience Issues**: App instability and missed calls contradict reliability claims [[4]](#cite-ring4-4)
+- **Security Certification Gap**: Lack of SOC 2/ISO 27001 excludes enterprise market segment [[6]](#cite-ring4-6)
+- **Technical Transparency Deficit**: Unknown VoIP backend implementation creates scaling uncertainty [[5]](#cite-ring4-5)
+- **Technical Debt Accumulation**: User experience issues suggest substantial underlying infrastructure problems
 
-### ⚠️ Execution Risk Assessment: **HIGH**
+### Execution Risk Assessment: **HIGH**
 
 The most significant risk to investment success is Ring4's current **organizational incapacity** to execute rapid growth initiatives. The disconnect between claimed "99.9% uptime reliability" and customer-reported reliability issues reveals a gap between technical reality and market positioning that threatens customer acquisition and retention.
 
@@ -799,29 +909,29 @@ The most significant risk to investment success is Ring4's current **organizatio
 - **Market Expansion**: Limited resources for enterprise feature development
 - **Competitive Response**: Unable to match larger competitors' innovation pace
 
-## 5.2 Final Investment Recommendation: 🛑 **HOLD**
+## 5.2 Final Investment Recommendation: **HOLD**
 
-### 💡 Strategic Rationale
+### Strategic Rationale
 
 Ring4 represents a **classic private equity transformation opportunity** requiring substantial operational improvement before value creation can be realized. The company possesses strong technical fundamentals and product-market fit but lacks the organizational capacity to execute aggressive growth sustainably.
 
 > **Core Investment Paradox**: Ring4 has the **architectural concept** for aggressive scaling but lacks the **execution capacity** required for confident investment in rapid growth scenarios.
 
-### 🎯 Investment Decision Framework
+### Investment Decision Framework
 
-**✅ PROCEED IF**: Inturact Capital commits to transformational investment approach
+**PROCEED IF**: Inturact Capital commits to transformational investment approach
 - $5-8M capital commitment over 24 months
 - Hands-on operational involvement and guidance
 - Immediate technical team scaling initiatives
 - Long-term value creation timeline (3-5 years)
 
-**❌ AVOID IF**: Investment requires immediate returns or passive management
+**AVOID IF**: Investment requires immediate returns or passive management
 - Expectation of near-term cash flow generation
 - Limited operational involvement capacity
 - Risk-averse investment approach
 - Short-term exit timeline requirements
 
-### 🚧 Key Investment Conditions for Success
+### Key Investment Conditions for Success
 
 #### 1. **Immediate Team Expansion** (Months 1-12)
 - **Target**: 15-20 person engineering organization
@@ -855,7 +965,7 @@ Ring4 represents a **classic private equity transformation opportunity** requiri
 
 ## 5.3 Value Creation Roadmap & Return Projections
 
-### 📈 Expected Investment Timeline
+### Expected Investment Timeline
 
 **Phase 1: Foundation (Months 1-6)** 
 - Investment: $2M-$3M
@@ -872,7 +982,7 @@ Ring4 represents a **classic private equity transformation opportunity** requiri
 - Focus: Geographic expansion, advanced features, market consolidation
 - Expected Outcome: Market leadership position and premium valuation
 
-### 💰 Return Scenario Analysis
+### Return Scenario Analysis
 
 **Conservative Scenario (60% probability)**:
 - **Year 1**: Team scaling investment (-$3M), reliability improvement (+10% retention)

@@ -4,16 +4,18 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
 import { ScanReportSection } from '@/components/reports/ScanReportNavigation'
-import { FileText, Code, Shield, Users, Target, BarChart3, Building2, Wrench } from 'lucide-react'
+import { FileText, Code, Shield, Users, Target, BarChart3, Building2, Wrench, ChevronRight, ExternalLink, Info, AlertTriangle, CheckCircle, TrendingUp, X } from 'lucide-react'
 import { Breadcrumbs } from '@/components/pe/deep-dive-report/Breadcrumbs'
-import { Citation } from '@/components/reports/EvidenceCitation'
-import { EvidenceModal } from '@/components/reports/EvidenceModal'
+import { Citation } from '@/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Home, Search } from 'lucide-react'
 import { mockDemoReports, DemoStandardReport } from '@/lib/mock-demo-data'
-
-// Note: Citations will be integrated in future version
+import { ring4MockCitations } from '@/lib/ring4-mock-report-data'
+import { cn } from '@/lib/utils'
 
 export default function ViewReport() {
   const { id } = useParams<{ id: string }>()
@@ -40,7 +42,13 @@ export default function ViewReport() {
 
   const currentReport = getReportFromId(id)
 
-  // Available reports for debugging: ring4, synergy, cloudnova, futuretech, inframodern
+  // Get citations for current report
+  const getCurrentCitations = () => {
+    if (id === 'ring4') return ring4MockCitations
+    return [] // Add other report citations as needed
+  }
+
+  const citations = getCurrentCitations()
 
   // Generate navigation sections from report data
   const getIconForSection = (title: string) => {
@@ -101,8 +109,73 @@ export default function ViewReport() {
     }
   }, [dynamicSections, activeSection])
 
+  const handleCitationClick = (citationId: string) => {
+    const citation = citations.find(c => c.id === citationId)
+    if (citation) {
+      setSelectedCitation(citation)
+    }
+  }
+
   const handleCloseModal = () => {
     setSelectedCitation(null)
+  }
+
+  // Custom markdown components with citation handling
+  const markdownComponents = {
+    h1: ({ node, ...props }: any) => <h1 id={props.children?.toString().toLowerCase().replace(/\s+/g, '-')} className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6 scroll-mt-4" {...props} />,
+    h2: ({ node, ...props }: any) => <h2 id={props.children?.toString().toLowerCase().replace(/\s+/g, '-')} className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4 mt-8 scroll-mt-4" {...props} />,
+    h3: ({ node, ...props }: any) => <h3 id={props.children?.toString().toLowerCase().replace(/\s+/g, '-')} className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3 mt-6 scroll-mt-4" {...props} />,
+    h4: ({ node, ...props }: any) => <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2 mt-4" {...props} />,
+    p: ({ node, ...props }: any) => <p className="text-gray-700 dark:text-gray-300 mb-4 leading-relaxed" {...props} />,
+    ul: ({ node, ...props }: any) => <ul className="list-disc list-inside mb-4 space-y-2 text-gray-700 dark:text-gray-300" {...props} />,
+    ol: ({ node, ...props }: any) => <ol className="list-decimal list-inside mb-4 space-y-2 text-gray-700 dark:text-gray-300" {...props} />,
+    li: ({ node, ...props }: any) => <li className="text-gray-700 dark:text-gray-300" {...props} />,
+    strong: ({ node, ...props }: any) => <strong className="font-semibold text-gray-900 dark:text-gray-100" {...props} />,
+    em: ({ node, ...props }: any) => <em className="italic text-gray-700 dark:text-gray-300" {...props} />,
+    code: ({ node, inline, ...props }: any) => 
+      inline ? (
+        <code className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-sm font-mono text-gray-800 dark:text-gray-200" {...props} />
+      ) : (
+        <code className="block bg-gray-100 dark:bg-gray-800 p-4 rounded-lg text-sm font-mono overflow-x-auto border" {...props} />
+      ),
+    pre: ({ node, ...props }: any) => <pre className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto mb-6 border" {...props} />,
+    blockquote: ({ node, ...props }: any) => (
+      <Alert className="mb-6">
+        <Info className="h-4 w-4" />
+        <AlertDescription className="text-sm leading-relaxed">
+          <div {...props} />
+        </AlertDescription>
+      </Alert>
+    ),
+    hr: ({ node, ...props }: any) => <Separator className="my-8" {...props} />,
+    a: ({ node, href, ...props }: any) => {
+      // Handle citation links
+      if (href?.startsWith('#cite-')) {
+        const citationId = href.replace('#', '')
+        return (
+          <button
+            onClick={() => handleCitationClick(citationId)}
+            className="inline-flex items-center text-blue-600 hover:text-blue-800 underline decoration-dotted hover:decoration-solid text-sm mx-0.5"
+          >
+            {props.children}
+          </button>
+        )
+      }
+      
+      // Regular links
+      return (
+        <a
+          href={href}
+          className="text-blue-600 hover:text-blue-800 underline inline-flex items-center gap-1"
+          target="_blank"
+          rel="noopener noreferrer"
+          {...props}
+        >
+          {props.children}
+          <ExternalLink className="h-3 w-3" />
+        </a>
+      )
+    }
   }
 
   const breadcrumbItems = [
@@ -112,7 +185,18 @@ export default function ViewReport() {
   ]
 
   if (!currentReport) {
-    return <div>Report not found</div>
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Card className="max-w-md w-full">
+          <CardContent className="p-6 text-center">
+            <AlertTriangle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Report Not Found</h2>
+            <p className="text-gray-600 mb-4">The requested report could not be found.</p>
+            <Button onClick={() => window.history.back()}>Go Back</Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   const renderSection = () => {
@@ -123,77 +207,47 @@ export default function ViewReport() {
         section.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') === activeSection
       )
       
-      if (!currentSection) return <div>Section not found</div>
+      if (!currentSection) return <div className="p-8 text-center text-gray-500">Section not found</div>
       
       return (
-        <div className="p-6 space-y-6">
-          <div>
-            <h2 className="text-2xl font-bold mb-4">{currentSection.title}</h2>
+        <div className="p-8 max-w-4xl">
+          {/* Section Header */}
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-4">
+              {getIconForSection(currentSection.title)}
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                {currentSection.title}
+              </h1>
+            </div>
+            <Separator />
           </div>
           
+          {/* Section Content */}
           <div className="prose prose-gray dark:prose-invert max-w-none">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               rehypePlugins={[rehypeRaw]}
-              components={{
-                h1: ({ node, ...props }) => <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4" {...props} />,
-                h2: ({ node, ...props }) => <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-3 mt-6" {...props} />,
-                h3: ({ node, ...props }) => <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2 mt-4" {...props} />,
-                h4: ({ node, ...props }) => <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2" {...props} />,
-                p: ({ node, ...props }) => <p className="text-gray-700 dark:text-gray-300 mb-4 leading-relaxed" {...props} />,
-                ul: ({ node, ...props }) => <ul className="list-disc list-inside mb-4 space-y-1" {...props} />,
-                ol: ({ node, ...props }) => <ol className="list-decimal list-inside mb-4 space-y-1" {...props} />,
-                li: ({ node, ...props }) => <li className="text-gray-700 dark:text-gray-300" {...props} />,
-                strong: ({ node, ...props }) => <strong className="font-semibold text-gray-900 dark:text-gray-100" {...props} />,
-                em: ({ node, ...props }) => <em className="italic text-gray-700 dark:text-gray-300" {...props} />,
-                code: ({ node, inline, ...props }: any) => 
-                  inline ? (
-                    <code className="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-sm font-mono" {...props} />
-                  ) : (
-                    <code className="block bg-gray-100 dark:bg-gray-800 p-4 rounded-lg text-sm font-mono overflow-x-auto" {...props} />
-                  ),
-                pre: ({ node, ...props }) => <pre className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto mb-4" {...props} />,
-                blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-blue-500 pl-4 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-r text-gray-700 dark:text-gray-300 mb-4" {...props} />,
-                hr: ({ node, ...props }) => <hr className="border-gray-300 dark:border-gray-600 my-6" {...props} />,
-                a: ({ node, ...props }) => <a className="text-blue-600 hover:text-blue-800 underline" {...props} />
-              }}
+              components={markdownComponents}
             >
               {currentSection.content}
             </ReactMarkdown>
           </div>
           
+          {/* Subsections */}
           {currentSection.subsections && currentSection.subsections.map((subsection, index) => (
-            <Card key={index} className="mt-6">
+            <Card key={index} className="mt-8">
               <CardHeader>
-                <CardTitle>{subsection.title}</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  {subsection.title}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="prose prose-gray dark:prose-invert max-w-none">
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
                     rehypePlugins={[rehypeRaw]}
-                    components={{
-                      h1: ({ node, ...props }) => <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3" {...props} />,
-                      h2: ({ node, ...props }) => <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2 mt-4" {...props} />,
-                      h3: ({ node, ...props }) => <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2 mt-3" {...props} />,
-                      h4: ({ node, ...props }) => <h4 className="text-base font-medium text-gray-900 dark:text-gray-100 mb-2" {...props} />,
-                      p: ({ node, ...props }) => <p className="text-gray-700 dark:text-gray-300 mb-3 leading-relaxed" {...props} />,
-                      ul: ({ node, ...props }) => <ul className="list-disc list-inside mb-3 space-y-1" {...props} />,
-                      ol: ({ node, ...props }) => <ol className="list-decimal list-inside mb-3 space-y-1" {...props} />,
-                      li: ({ node, ...props }) => <li className="text-gray-700 dark:text-gray-300" {...props} />,
-                      strong: ({ node, ...props }) => <strong className="font-semibold text-gray-900 dark:text-gray-100" {...props} />,
-                      em: ({ node, ...props }) => <em className="italic text-gray-700 dark:text-gray-300" {...props} />,
-                      code: ({ node, inline, ...props }: any) => 
-                        inline ? (
-                          <code className="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-sm font-mono" {...props} />
-                        ) : (
-                          <code className="block bg-gray-100 dark:bg-gray-800 p-3 rounded-lg text-sm font-mono overflow-x-auto" {...props} />
-                        ),
-                      pre: ({ node, ...props }) => <pre className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg overflow-x-auto mb-3" {...props} />,
-                      blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-blue-500 pl-3 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-r text-gray-700 dark:text-gray-300 mb-3" {...props} />,
-                      hr: ({ node, ...props }) => <hr className="border-gray-300 dark:border-gray-600 my-4" {...props} />,
-                      a: ({ node, ...props }) => <a className="text-blue-600 hover:text-blue-800 underline" {...props} />
-                    }}
+                    components={markdownComponents}
                   >
                     {subsection.content}
                   </ReactMarkdown>
@@ -209,161 +263,307 @@ export default function ViewReport() {
     if (typeof currentReport.sections === 'object' && currentReport.sections) {
       const sectionData = (currentReport.sections as any)[activeSection]
       
-      if (!sectionData) return <div>Section not found</div>
+      if (!sectionData) return <div className="p-8 text-center text-gray-500">Section not found</div>
       
       return (
-        <div className="p-6 space-y-6">
-          <div>
-            <h2 className="text-2xl font-bold mb-4">{sectionData.title}</h2>
+        <div className="p-8 max-w-4xl">
+          {/* Section Header */}
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-4">
+              {getIconForSection(sectionData.title)}
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                {sectionData.title}
+              </h1>
+            </div>
             {sectionData.summary && (
-              <p className="text-muted-foreground mb-6">{sectionData.summary}</p>
+              <p className="text-lg text-gray-600 dark:text-gray-400 mb-4">{sectionData.summary}</p>
             )}
+            <Separator />
           </div>
 
-          {/* Findings */}
-          {sectionData.findings && sectionData.findings.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Key Findings</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {sectionData.findings.map((finding: any, index: number) => (
-                  <div key={index} className="border-l-4 border-blue-500 pl-4 py-2">
-                    <div className="flex items-center gap-2 mb-1">
-                      {finding.category && (
-                        <Badge variant="outline" className="text-xs">
-                          {finding.category}
-                        </Badge>
-                      )}
-                      {finding.severity && (
-                        <Badge 
-                          variant={finding.severity === 'critical' ? 'destructive' : 
-                                  finding.severity === 'high' ? 'destructive' : 
-                                  finding.severity === 'medium' ? 'default' : 'secondary'}
-                          className="text-xs"
-                        >
-                          {finding.severity}
-                        </Badge>
-                      )}
+          <div className="space-y-6">
+            {/* Findings */}
+            {sectionData.findings && sectionData.findings.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    Key Findings
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {sectionData.findings.map((finding: any, index: number) => (
+                    <div key={index} className="border-l-4 border-green-500 pl-4 py-3 bg-green-50 dark:bg-green-900/20 rounded-r">
+                      <div className="flex items-center gap-2 mb-2">
+                        {finding.category && (
+                          <Badge variant="outline" className="text-xs">
+                            {finding.category}
+                          </Badge>
+                        )}
+                        {finding.severity && (
+                          <Badge 
+                            variant={finding.severity === 'critical' ? 'destructive' : 
+                                    finding.severity === 'high' ? 'destructive' : 
+                                    finding.severity === 'medium' ? 'default' : 'secondary'}
+                            className="text-xs"
+                          >
+                            {finding.severity}
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{finding.text}</p>
                     </div>
-                    <p className="text-sm text-gray-700 dark:text-gray-300">{finding.text}</p>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          )}
+                  ))}
+                </CardContent>
+              </Card>
+            )}
 
-          {/* Risks */}
-          {sectionData.risks && sectionData.risks.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-red-600">Risk Factors</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {sectionData.risks.map((risk: any, index: number) => (
-                  <div key={index} className="border-l-4 border-red-500 pl-4 py-2 bg-red-50 dark:bg-red-900/20 rounded-r">
-                    <div className="flex items-center gap-2 mb-1">
-                      {risk.severity && (
-                        <Badge 
-                          variant={risk.severity === 'critical' ? 'destructive' : 'destructive'}
-                          className="text-xs"
-                        >
-                          {risk.severity}
-                        </Badge>
-                      )}
+            {/* Risks */}
+            {sectionData.risks && sectionData.risks.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-red-600">
+                    <AlertTriangle className="h-5 w-5" />
+                    Risk Factors
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {sectionData.risks.map((risk: any, index: number) => (
+                    <div key={index} className="border-l-4 border-red-500 pl-4 py-3 bg-red-50 dark:bg-red-900/20 rounded-r">
+                      <div className="flex items-center gap-2 mb-2">
+                        {risk.severity && (
+                          <Badge 
+                            variant="destructive"
+                            className="text-xs"
+                          >
+                            {risk.severity}
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{risk.text}</p>
                     </div>
-                    <p className="text-sm text-gray-700 dark:text-gray-300">{risk.text}</p>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          )}
+                  ))}
+                </CardContent>
+              </Card>
+            )}
 
-          {/* Recommendations */}
-          {sectionData.recommendations && sectionData.recommendations.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-green-600">Recommendations</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {sectionData.recommendations.map((rec: any, index: number) => (
-                  <div key={index} className="border-l-4 border-green-500 pl-4 py-2 bg-green-50 dark:bg-green-900/20 rounded-r">
-                    <p className="text-sm text-gray-700 dark:text-gray-300">{rec.text}</p>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          )}
+            {/* Recommendations */}
+            {sectionData.recommendations && sectionData.recommendations.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-blue-600">
+                    <TrendingUp className="h-5 w-5" />
+                    Recommendations
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {sectionData.recommendations.map((rec: any, index: number) => (
+                    <div key={index} className="border-l-4 border-blue-500 pl-4 py-3 bg-blue-50 dark:bg-blue-900/20 rounded-r">
+                      <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{rec.text}</p>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
 
-          {/* Opportunities */}
-          {sectionData.opportunities && sectionData.opportunities.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-blue-600">Opportunities</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {sectionData.opportunities.map((opp: any, index: number) => (
-                  <div key={index} className="border-l-4 border-blue-500 pl-4 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-r">
-                    <p className="text-sm text-gray-700 dark:text-gray-300">{opp.text}</p>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          )}
+            {/* Opportunities */}
+            {sectionData.opportunities && sectionData.opportunities.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-green-600">
+                    <Target className="h-5 w-5" />
+                    Opportunities
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {sectionData.opportunities.map((opp: any, index: number) => (
+                    <div key={index} className="border-l-4 border-green-500 pl-4 py-3 bg-green-50 dark:bg-green-900/20 rounded-r">
+                      <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{opp.text}</p>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
       )
     }
     
-    return <div>Unsupported report format</div>
+    return <div className="p-8 text-center text-gray-500">Unsupported report format</div>
   }
 
-  // Navigation handled by ScanReportNavigation component
-
   return (
-    <div className="min-h-screen bg-background">
-      <div className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Header */}
+      <div className="bg-white dark:bg-gray-800 border-b shadow-sm">
+        <div className="container mx-auto px-6 py-4">
           <Breadcrumbs items={breadcrumbItems} />
+          
+          {/* Report Header */}
+          <div className="mt-4 flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                {currentReport.company_name} Technical Assessment
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">
+                {currentReport.scan_type} • {new Date(currentReport.created_at || '').toLocaleDateString()}
+              </p>
+            </div>
+            
+            {/* Report Metrics */}
+            <div className="flex items-center gap-4">
+              {currentReport.tech_health_score && (
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600">{currentReport.tech_health_score}</div>
+                  <div className="text-xs text-gray-500">Tech Score</div>
+                </div>
+              )}
+              {currentReport.investment_score && (
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600">{currentReport.investment_score}</div>
+                  <div className="text-xs text-gray-500">Investment Score</div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
       <div className="flex">
-        <nav className="w-64 border-r bg-card p-4">
-          <h3 className="font-semibold mb-4">Report Sections</h3>
-          <div className="space-y-2">
-            {dynamicSections.map((section) => (
-              <button
-                key={section.id}
-                onClick={() => setActiveSection(section.id)}
-                className={`w-full text-left p-3 rounded-lg transition-colors ${
-                  activeSection === section.id
-                    ? 'bg-primary text-primary-foreground'
-                    : 'hover:bg-muted'
-                }`}
-              >
-                <div className="flex items-center space-x-3">
-                  {section.icon}
-                  <div>
-                    <div className="font-medium">{section.title}</div>
-                    <div className="text-sm text-muted-foreground">{section.description}</div>
+        {/* Sidebar Navigation */}
+        <nav className="w-80 bg-white dark:bg-gray-800 border-r min-h-screen sticky top-0">
+          <div className="p-6">
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-6">Report Sections</h3>
+            <div className="space-y-2">
+              {dynamicSections.map((section) => (
+                <button
+                  key={section.id}
+                  onClick={() => setActiveSection(section.id)}
+                  className={cn(
+                    "w-full text-left p-4 rounded-lg transition-all duration-200 group",
+                    activeSection === section.id
+                      ? 'bg-blue-50 dark:bg-blue-900/20 border-l-4 border-l-blue-500'
+                      : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                  )}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className={cn(
+                        "transition-colors",
+                        activeSection === section.id ? "text-blue-600" : "text-gray-400 group-hover:text-gray-600"
+                      )}>
+                        {section.icon}
+                      </div>
+                      <div>
+                        <div className={cn(
+                          "font-medium transition-colors",
+                          activeSection === section.id ? "text-blue-900 dark:text-blue-100" : "text-gray-900 dark:text-gray-100"
+                        )}>
+                          {section.title}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          {section.description}
+                        </div>
+                      </div>
+                    </div>
+                    {activeSection === section.id && (
+                      <ChevronRight className="h-4 w-4 text-blue-600" />
+                    )}
                   </div>
-                </div>
-              </button>
-            ))}
+                </button>
+              ))}
+            </div>
           </div>
         </nav>
 
+        {/* Main Content */}
         <main className="flex-1 min-h-screen">
           {renderSection()}
         </main>
       </div>
 
+      {/* Citation Modal */}
       {selectedCitation && (
-        <EvidenceModal
-          isOpen={true}
-          onClose={handleCloseModal}
-          citation={selectedCitation}
-        />
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <Card className="max-w-3xl w-full max-h-[80vh] overflow-auto">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Info className="h-5 w-5 text-blue-600" />
+                  Evidence Citation
+                </CardTitle>
+                <Button variant="ghost" size="sm" onClick={handleCloseModal}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-2">Claim</h4>
+                <p className="text-gray-700 leading-relaxed">{selectedCitation.claim}</p>
+              </div>
+              
+              <Separator />
+              
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-2">Citation Details</h4>
+                <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+                  <p className="text-sm"><strong>Source:</strong> {selectedCitation.citation_text}</p>
+                  {selectedCitation.citation_context && (
+                    <p className="text-sm"><strong>Context:</strong> {selectedCitation.citation_context}</p>
+                  )}
+                  <div className="flex items-center gap-4 text-sm text-gray-600">
+                    <span><strong>Analyst:</strong> {selectedCitation.analyst}</span>
+                    <span><strong>Confidence:</strong> {selectedCitation.confidence}%</span>
+                    <span><strong>Date:</strong> {selectedCitation.review_date}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <Separator />
+              
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-2">Analysis & Reasoning</h4>
+                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{selectedCitation.reasoning}</p>
+              </div>
+              
+              {selectedCitation.methodology && (
+                <>
+                  <Separator />
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Methodology</h4>
+                    <p className="text-gray-700 leading-relaxed">{selectedCitation.methodology}</p>
+                  </div>
+                </>
+              )}
+              
+              {selectedCitation.evidence_summary && selectedCitation.evidence_summary.length > 0 && (
+                <>
+                  <Separator />
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Evidence Summary</h4>
+                    <div className="space-y-3">
+                      {selectedCitation.evidence_summary.map((evidence, index) => (
+                        <div key={index} className="border border-gray-200 rounded-lg p-3">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Badge variant="outline" className="text-xs">
+                              {evidence.type}
+                            </Badge>
+                            <h5 className="font-medium text-gray-900">{evidence.title}</h5>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-2">{evidence.source}</p>
+                          {evidence.excerpt && (
+                            <p className="text-sm text-gray-700 italic">"{evidence.excerpt}"</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       )}
     </div>
   )
