@@ -76,32 +76,90 @@ export default function AIWorkflowResults() {
           completed_at: new Date().toISOString(),
           total_processing_time_ms: 245000,
           performance_metrics: {
-            total_evidence_collected: 18,
-            total_citations_generated: 12,
-            average_confidence_score: 0.89,
-            processing_efficiency: 0.94
+            total_evidence_collected: 47,
+            total_citations_generated: 28,
+            average_confidence_score: 0.91,
+            processing_efficiency: 0.94,
+            data_quality_score: 0.93,
+            market_analysis_depth: 0.88,
+            technical_analysis_depth: 0.95,
+            financial_analysis_depth: 0.87
           }
         },
         scan: {
           id: 'demo-scan-ring4-001',
           company_name: 'Ring4',
-          website_url: 'https://ring4.ai',
+          website_url: 'https://ring4.com',
           status: 'complete',
-          ai_workflow_status: 'completed'
+          ai_workflow_status: 'completed',
+          industry_vertical: 'Enterprise Communications',
+          company_stage: 'Growth Stage',
+          employee_count: '50-200',
+          founding_year: 2019,
+          headquarters: 'San Francisco, CA'
         },
         report: {
           id: 'demo-report-ring4-001',
           company_name: 'Ring4',
-          investment_score: 82,
-          tech_health_score: 8.2,
-          tech_health_grade: 'A-',
+          investment_score: 84,
+          tech_health_score: 8.7,
+          tech_health_grade: 'A',
           ai_model_used: 'claude-3-sonnet',
-          executive_summary: 'Ring4 demonstrates strong potential as an investment opportunity with modern technology stack, robust security measures, and clear market positioning in the growing VoIP sector.',
-          investment_rationale: 'Strong recommendation based on: (1) Modern, scalable technology stack (React/Node.js/AWS), (2) Enterprise-grade security with industry certifications (SOC 2, ISO 27001), (3) Clear market positioning in growing $50B+ VoIP market.',
-          evidence_count: 18,
-          citation_count: 12,
-          quality_score: 0.89,
-          processing_time_ms: 245000
+          executive_summary: `Ring4 presents a compelling investment opportunity in the rapidly expanding global VoIP and unified communications market. The company has established itself as a modern, cloud-native communications platform that bridges traditional telephony with digital-first business operations.
+
+Key Investment Highlights:
+• Market Position: Operating in the $85B+ global VoIP market with 15%+ annual growth
+• Technology Excellence: Modern, scalable architecture built on React, Node.js, WebRTC, and AWS
+• Security Leadership: Enterprise-grade security with SOC 2 Type II, ISO 27001, and GDPR compliance
+• Product-Market Fit: Strong customer adoption with 200%+ net revenue retention
+• Financial Health: Achieving 40%+ gross margins with clear path to profitability
+
+Ring4's differentiated approach to business communications, combined with strong technical execution and market timing, positions it well for continued growth and potential market leadership in the SMB and mid-market segments.`,
+          investment_rationale: `STRONG BUY recommendation based on comprehensive technical and market analysis:
+
+TECHNOLOGY STRENGTHS (Weight: 35% | Score: 9.2/10)
+• Modern cloud-native architecture ensuring scalability and reliability
+• WebRTC-based real-time communications with sub-100ms latency
+• Microservices architecture enabling rapid feature development
+• 99.9% uptime SLA with multi-region deployment across AWS
+• API-first design supporting extensive integrations
+
+MARKET OPPORTUNITY (Weight: 25% | Score: 8.8/10)
+• TAM: $85B global VoIP market growing at 15% CAGR
+• SAM: $12B SMB communications market with low penetration
+• Competitive positioning against legacy providers (Cisco, Avaya)
+• Strong defensibility through network effects and switching costs
+
+FINANCIAL METRICS (Weight: 20% | Score: 8.1/10)
+• ARR growth: 180% YoY with $8M+ annual recurring revenue
+• Gross margins: 42% and improving due to scale efficiencies
+• CAC payback: 14 months with strong unit economics
+• Net revenue retention: 215% indicating strong customer expansion
+
+EXECUTION & TEAM (Weight: 20% | Score: 8.5/10)
+• Experienced founding team with prior exits in enterprise software
+• Strong engineering culture with 40%+ of team in R&D
+• Proven ability to scale operations and maintain quality
+• Strategic partnerships with AWS, Microsoft, and Salesforce`,
+          evidence_count: 47,
+          citation_count: 28,
+          quality_score: 0.91,
+          processing_time_ms: 245000,
+          risk_factors: [
+            'Market competition from established players (Cisco, Microsoft Teams)',
+            'Regulatory changes in telecommunications industry',
+            'Customer concentration risk in SMB segment',
+            'Dependency on third-party infrastructure providers'
+          ],
+          key_metrics: {
+            arr_growth: '180%',
+            gross_margin: '42%',
+            net_retention: '215%',
+            cac_payback: '14 months',
+            monthly_active_users: '25000+',
+            enterprise_customers: '450+',
+            api_calls_per_month: '15M+'
+          }
         },
         citations: [
           {
@@ -151,7 +209,7 @@ export default function AIWorkflowResults() {
               processed: 'Ring4 offers VoIP services with global reach, targeting business communications.'
             },
             source_data: {
-              url: 'https://ring4.ai',
+              url: 'https://ring4.com',
               query: 'Ring4 business model'
             },
             confidence_score: 0.95,
@@ -166,7 +224,7 @@ export default function AIWorkflowResults() {
               processed: 'Modern tech stack: React, Node.js, AWS, WebRTC, PostgreSQL.'
             },
             source_data: {
-              url: 'https://ring4.ai/technology',
+              url: 'https://ring4.com/features',
               query: 'Ring4 technology architecture'
             },
             confidence_score: 0.88,
@@ -181,7 +239,7 @@ export default function AIWorkflowResults() {
               processed: 'Strong security: E2E encryption, SSL/TLS, SOC 2, ISO 27001.'
             },
             source_data: {
-              url: 'https://ring4.ai/security',
+              url: 'https://ring4.com/security',
               query: 'Ring4 security compliance'
             },
             confidence_score: 0.92,
