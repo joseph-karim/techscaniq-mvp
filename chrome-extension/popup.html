@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      width: 350px;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    .button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      margin: 8px 0;
+      font-size: 14px;
+    }
+    .button:hover {
+      background: #1d4ed8;
+    }
+    .button:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+    }
+    .status {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .status.collecting {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .status.success {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    .stats {
+      margin: 10px 0;
+      font-size: 12px;
+      color: #64748b;
+    }
+    .export-section {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #e2e8f0;
+    }
+    .page-type {
+      margin: 10px 0;
+    }
+    .page-type select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h3>TechScan Evidence Collector</h3>
+  
+  <div class="page-type">
+    <label for="pageType">Page Type:</label>
+    <select id="pageType">
+      <option value="homepage">Homepage</option>
+      <option value="app">Application/Dashboard</option>
+      <option value="pricing">Pricing Page</option>
+      <option value="features">Features Page</option>
+      <option value="about">About/Team Page</option>
+      <option value="docs">Documentation</option>
+      <option value="login">Login Page</option>
+      <option value="other">Other</option>
+    </select>
+  </div>
+
+  <button id="collectBtn" class="button">🔍 Collect & Refresh Page</button>
+  
+  <div id="status" class="status" style="display: none;"></div>
+  
+  <div id="stats" class="stats" style="display: none;"></div>
+
+  <div class="export-section">
+    <button id="viewDataBtn" class="button" disabled>📋 View Collected Data</button>
+    <button id="exportBtn" class="button" disabled>💾 Export to TechScan</button>
+    <button id="clearBtn" class="button" style="background: #dc2626;">🗑️ Clear Data</button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

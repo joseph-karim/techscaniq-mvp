@@ -200,7 +200,14 @@ async function analyzeWithClaude(
   investorProfile: any
 ): Promise<ReportData> {
   const apiKey = Deno.env.get('ANTHROPIC_API_KEY')
+  console.log('Environment check:', {
+    hasAnthropicKey: !!apiKey,
+    keyLength: apiKey?.length,
+    allEnvKeys: Object.keys(Deno.env.toObject()).filter(k => k.includes('ANTHROPIC') || k.includes('API'))
+  })
+  
   if (!apiKey) {
+    console.error('Available environment variables:', Object.keys(Deno.env.toObject()))
     throw new Error('Anthropic API key not configured')
   }
 
@@ -721,24 +728,12 @@ Deno.serve(async (req) => {
     
     let result: ReportData
     
-    // Try Claude first (better quality, less rate limiting)
-    try {
-      result = await analyzeWithClaude(
-        request.company,
-        request.evidenceSummary,
-        request.investorProfile
-      )
-    } catch (claudeError) {
-      console.error('Claude failed, falling back to Gemini:', claudeError)
-      
-      // Fall back to Gemini
-      result = await analyzeWithGemini(
-        request.company,
-        request.evidenceSummary,
-        request.investorProfile,
-        req
-      )
-    }
+    // Use Claude exclusively (as requested by user)
+    result = await analyzeWithClaude(
+      request.company,
+      request.evidenceSummary,
+      request.investorProfile
+    )
     
     // Calculate investment score and other derived fields
     const investmentScore = result.investmentRecommendation.score

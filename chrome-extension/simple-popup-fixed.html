@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      width: 300px;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    .button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      margin: 8px 0;
+      font-size: 14px;
+    }
+    .button:hover { background: #1d4ed8; }
+    .button:disabled { background: #94a3b8; cursor: not-allowed; }
+    .button.stop { background: #dc2626; }
+    .button.stop:hover { background: #b91c1c; }
+    .status {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      background: #f1f5f9;
+      color: #475569;
+    }
+    .status.collecting { background: #fef3c7; color: #92400e; }
+    .status.success { background: #d1fae5; color: #065f46; }
+    .status.error { background: #fee2e2; color: #dc2626; }
+    .stats {
+      margin: 10px 0;
+      font-size: 12px;
+      color: #64748b;
+      background: #f8fafc;
+      padding: 8px;
+      border-radius: 4px;
+      white-space: pre-line;
+    }
+  </style>
+</head>
+<body>
+  <h3>📡 Network Collector</h3>
+  
+  <button id="toggleBtn" class="button">🔍 Start Collecting</button>
+  
+  <div id="status" class="status" style="display: none;"></div>
+  
+  <div id="stats" class="stats" style="display: none;"></div>
+
+  <button id="downloadBtn" class="button" disabled>💾 Download All Data</button>
+  <button id="clearBtn" class="button" style="background: #dc2626;">🗑️ Clear Data</button>
+
+  <script src="simple-popup-fixed.js"></script>
+</body>
+</html>

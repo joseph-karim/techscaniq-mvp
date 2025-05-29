@@ -414,8 +414,8 @@ const deepDiveMockDataInternal = {
       ]
     },
     recommendations: [
-      'Implement database sharding strategy (Q2 2024, $200k investment)',
-      'Complete SOC2 Type II certification (Q1 2024, $80k cost)',
+      'Implement database sharding strategy (Q2 2025, $200k investment)',
+      'Complete SOC2 Type II certification (Q1 2025, $80k cost)',
       'Modernize authentication service with zero-downtime migration',
       'Establish multi-cloud strategy for vendor risk mitigation',
       'Hire senior architect to reduce key person dependency',
@@ -498,7 +498,7 @@ export const mockRing4ReportLegacy: DemoStandardReport = {
         { text: "Legacy PHP authentication service (5% of auth flows) uses bcrypt instead of modern Argon2id. While not immediately exploitable, represents technical debt that could become vulnerability with future cryptographic advances", severity: "low", evidence_ids: ["ring4-legacy-code-audit"] }
       ],
       recommendations: [
-        { text: "Complete Twilio redundancy project by Q2 2024, implementing intelligent routing between providers based on cost, quality, and availability metrics. Estimated 99.99% uptime post-implementation", evidence_ids: ["ring4-redundancy-plan"] },
+        { text: "Complete Twilio redundancy project by Q2 2025, implementing intelligent routing between providers based on cost, quality, and availability metrics. Estimated 99.99% uptime post-implementation", evidence_ids: ["ring4-redundancy-plan"] },
         { text: "Hire 3 additional security engineers targeting expertise in application security, cloud security, and privacy engineering. Implement security champions program embedding security expertise in each feature team", evidence_ids: ["ring4-security-hiring-plan"] },
         { text: "Accelerate HIPAA compliance to capture healthcare opportunity - 15,000+ providers on waitlist representing $3M potential ARR. Timeline acceleration would provide first-mover advantage", evidence_ids: ["ring4-healthcare-opportunity"] },
         { text: "Implement runtime application self-protection (RASP) for legacy PHP components during migration period, providing additional security layer without full rewrite", evidence_ids: ["ring4-legacy-protection-plan"] }
@@ -1007,114 +1007,161 @@ Object.assign(mockDemoReports, {
 export const deepDiveMockData = {
   executiveSummary: {
     companyName: 'Ring4',
-    overallAssessment: 'Strong technical foundation with exceptional execution and proven scalability',
-    investmentScore: 87,
-    investmentGrade: 'A-',
-    keyStrengths: [
-      'Sophisticated microservices architecture with 99.97% uptime',
-      'Full internal access provided including 23 repositories and team interviews',
-      'Advanced security practices including zero-trust architecture implementation',
-      'Automated testing coverage at 94% with comprehensive CI/CD pipeline'
+    evaluationDate: '2025-01-15',
+    overallScore: 87,
+    investmentThesis: 'Ring4 demonstrates exceptional technical execution with internal access revealing sophisticated engineering practices, robust security implementations, and clear scalability roadmap. The deep dive analysis confirms strong operational fundamentals and identifies specific optimization opportunities worth $2.3M in annual savings.',
+    keyFindings: {
+      enablers: [
+        'Sophisticated microservices architecture with 99.97% uptime',
+        'Advanced security practices including zero-trust architecture',
+        'Automated testing coverage at 94% with comprehensive CI/CD',
+        'Strong engineering culture with detailed code review processes',
+        'Clear technical roadmap with quarterly OKRs and milestone tracking',
+        'Efficient cost management with $180k annual cloud optimization',
+        'Robust disaster recovery with 15-minute RTO/RPO targets'
+      ],
+      blockers: [
+        'Legacy authentication service requires $120k modernization investment',
+        'Database sharding needed for 10x scale ($200k implementation cost)',
+        'Missing SOC2 Type II certification limiting enterprise sales',
+        'Technical debt in payment processing system (6-month remediation)'
+      ],
+      risks: [
+        'Key person dependency on lead architect (succession planning needed)',
+        'Vendor concentration risk with 70% infrastructure on single provider',
+        'Compliance gaps for international expansion (GDPR, SOX readiness)',
+        'Performance bottlenecks identified at 50k concurrent users'
+      ]
+    },
+    recommendations: [
+      'Implement database sharding strategy (Q2 2025, $200k investment)',
+      'Complete SOC2 Type II certification (Q1 2025, $80k cost)',
+      'Modernize authentication service with zero-downtime migration',
+      'Establish multi-cloud strategy for vendor risk mitigation',
+      'Hire senior architect to reduce key person dependency',
+      'Implement performance optimization for 100k+ user scale'
     ],
-    keyRisks: [
-      'Database sharding needed for 10x scale with $200k implementation cost',
-      'Legacy authentication service requires $120k modernization investment',
-      'Key person dependency on lead architect requiring succession planning'
-    ],
-    investmentRecommendation: 'STRONG BUY - Exceptional technical execution with clear scaling path. Management team demonstrates deep technical competence and operational excellence.',
-    nextSteps: [
-      'Complete technical due diligence within 2 weeks',
-      'Schedule follow-up sessions with engineering leadership',
-      'Review and approve scaling investment budget',
-      'Finalize partnership terms and investment structure'
-    ]
+    dealBreakers: []
   },
   
   internalCodeAnalysis: {
     companyName: 'Ring4',
-    accessLevel: 'Full Internal Access',
+    analysisDate: '2025-01-15',
     repositoriesAnalyzed: 23,
-    linesOfCodeReviewed: 847623,
+    totalLinesOfCode: 487000,
     overallCodeQuality: 88,
-    analysisScore: 91,
-    codebaseHealth: {
-      testCoverage: 94,
-      documentationCoverage: 78,
-      codeComplexity: 'Low to Moderate',
-      technicalDebt: 'Manageable',
-      securityCompliance: 'Excellent'
+    securityScore: 85,
+    maintainabilityScore: 82,
+    codebaseMetrics: {
+      languages: [
+        {
+          name: 'TypeScript',
+          lines: 195000,
+          percentage: 40,
+          quality: 'excellent',
+          testCoverage: 94
+        },
+        {
+          name: 'JavaScript',
+          lines: 146000,
+          percentage: 30,
+          quality: 'good',
+          testCoverage: 87
+        },
+        {
+          name: 'Python',
+          lines: 97000,
+          percentage: 20,
+          quality: 'good',
+          testCoverage: 91
+        },
+        {
+          name: 'Go',
+          lines: 49000,
+          percentage: 10,
+          quality: 'excellent',
+          testCoverage: 96
+        }
+      ],
+      complexity: {
+        averageCyclomaticComplexity: 3.2,
+        highComplexityFunctions: 12,
+        technicalDebtRatio: 8.5,
+        duplicatedCodePercentage: 2.1
+      },
+      dependencies: {
+        totalPackages: 342,
+        outdatedPackages: 23,
+        vulnerablePackages: 4,
+        licenseIssues: 1
+      }
     },
-    architecturalPatterns: [
+    securityAnalysis: {
+      vulnerabilities: [
+        { severity: 'high', count: 2, trend: 'decreasing' },
+        { severity: 'medium', count: 8, trend: 'stable' },
+        { severity: 'low', count: 15, trend: 'decreasing' }
+      ],
+      securityPractices: [
+        { practice: 'Dependency Scanning', implemented: true, score: 95 },
+        { practice: 'Static Code Analysis', implemented: true, score: 88 },
+        { practice: 'Secret Detection', implemented: true, score: 92 },
+        { practice: 'Container Scanning', implemented: false, score: 0 },
+        { practice: 'License Compliance', implemented: true, score: 78 }
+      ]
+    },
+    technicalDebt: [
       {
-        pattern: 'Microservices',
-        implementation: 'Excellent',
-        maturity: 95,
-        benefits: ['High availability', 'Independent scaling', 'Technology diversity']
+        category: 'Legacy Authentication Service',
+        severity: 'high' as const,
+        impact: 'Blocking enterprise features and SOC2 compliance',
+        effort: '6 months',
+        cost: '$120,000',
+        priority: 1,
+        affectedComponents: ['User Service', 'API Gateway', 'Admin Dashboard']
       },
       {
-        pattern: 'Event-Driven Architecture',
-        implementation: 'Good',
-        maturity: 82,
-        benefits: ['Loose coupling', 'Asynchronous processing', 'Scalability']
+        category: 'Database Schema Optimization',
+        severity: 'medium' as const,
+        impact: 'Performance degradation at scale',
+        effort: '3 months',
+        cost: '$60,000',
+        priority: 2,
+        affectedComponents: ['User Service', 'Analytics Service', 'Reporting']
       },
       {
-        pattern: 'CQRS (Command Query Responsibility Segregation)',
-        implementation: 'Fair',
-        maturity: 65,
-        benefits: ['Read/write optimization', 'Complex business logic handling']
+        category: 'Frontend Code Duplication',
+        severity: 'low' as const,
+        impact: 'Increased maintenance overhead',
+        effort: '2 months',
+        cost: '$30,000',
+        priority: 3,
+        affectedComponents: ['Web App', 'Mobile App', 'Admin Panel']
       }
     ],
-    teamPractices: {
-      codeReviewCoverage: 98,
+    codeReviewProcess: {
       averageReviewTime: '4.2 hours',
-      deploymentFrequency: 'Multiple times per day',
-      leadTimeForChanges: '2.3 hours',
-      meanTimeToRecovery: '15 minutes',
-      changeFailureRate: '2.1%'
+      reviewParticipation: 98,
+      automatedChecks: true,
+      requiredApprovals: 2,
+      branchProtection: true
     },
-    keyFindings: [
-      {
-        area: 'Architecture',
-        finding: 'Exemplary microservices implementation with proper service boundaries',
-        impact: 'Enables independent team scaling and technology choices',
-        recommendation: 'Continue current practices, consider service mesh for complexity management'
-      },
-      {
-        area: 'Testing',
-        finding: '94% test coverage with comprehensive integration tests',
-        impact: 'High confidence in deployments and refactoring safety',
-        recommendation: 'Maintain current testing standards, add chaos engineering'
-      },
-      {
-        area: 'Security',
-        finding: 'Zero-trust security model with comprehensive authentication',
-        impact: 'Enterprise-ready security posture',
-        recommendation: 'Complete SOC2 certification process'
-      }
-    ],
-    riskFactors: [
-      {
-        risk: 'Legacy Authentication Service',
-        severity: 'Medium',
-        impact: 'Security and compliance limitations',
-        mitigation: '$120k modernization investment planned',
-        timeline: '6 months'
-      },
-      {
-        risk: 'Database Scaling Bottlenecks',
-        severity: 'Medium',
-        impact: 'Performance degradation at 10x scale',
-        mitigation: 'Database sharding implementation',
-        timeline: '4 months'
-      }
+    recommendations: [
+      'Prioritize modernization of legacy authentication service to enable enterprise features',
+      'Implement container security scanning in CI/CD pipeline',
+      'Address high-severity vulnerabilities in payment processing module',
+      'Establish technical debt tracking and quarterly remediation goals',
+      'Implement automated dependency updates with security monitoring',
+      'Create coding standards documentation and enforce through linting',
+      'Set up performance monitoring for database queries and API endpoints'
     ]
   },
 
   stackEvolution: {
     companyName: 'Ring4',
-    foundingYear: 2019,
-    currentYear: 2024,
-    evolutionScore: 92,
+    foundingYear: '2019',
+    currentYear: '2025',
+    overallEvolution: 'Ring4 has demonstrated exceptional technical evolution, transitioning from a monolithic MVP to a sophisticated microservices architecture.',
     timeline: [
       {
         year: '2019',
@@ -1149,7 +1196,7 @@ export const deepDiveMockData = {
         quarter: '2',
         title: 'Microservices Migration',
         description: 'Decomposed monolith into microservices to support growing user base and team.',
-        category: 'architecture' as const,
+        category: 'infrastructure' as const,
         confidence: 90,
         keyDevelopments: [
           'User service extraction',
@@ -1163,7 +1210,7 @@ export const deepDiveMockData = {
         quarter: '1',
         title: 'Enterprise Security Implementation',
         description: 'Added enterprise-grade security features including SSO and advanced encryption.',
-        category: 'security' as const,
+        category: 'technology' as const,
         confidence: 88,
         keyDevelopments: [
           'SAML/OAuth SSO integration',
@@ -1205,7 +1252,7 @@ export const deepDiveMockData = {
         quarter: '4',
         title: 'Scale Readiness & Performance',
         description: 'Current state: 75K users, enterprise-ready platform with strong technical foundation.',
-        category: 'scaling' as const,
+        category: 'product' as const,
         confidence: 96,
         keyDevelopments: [
           '75K active users',
