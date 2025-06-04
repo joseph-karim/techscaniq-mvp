@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -274,6 +274,7 @@ const FOCUS_AREAS = [
 
 export function InvestmentThesisSelector({ value, onChange }: InvestmentThesisSelectorProps) {
   const [showCustomization, setShowCustomization] = useState(false)
+  const lastProcessedValue = useRef<string>('')
   
   console.log(`InvestmentThesisSelector render, value:`, value?.thesisType)
   
@@ -285,6 +286,21 @@ export function InvestmentThesisSelector({ value, onChange }: InvestmentThesisSe
     console.log('Thesis type changed to:', thesisType) // Debug log
     console.log('Current value before change:', currentValue.thesisType)
     console.log('Value prop from parent:', value?.thesisType)
+    console.log('Last processed value:', lastProcessedValue.current)
+    
+    // Debounce: ignore if we just processed this exact same value
+    if (lastProcessedValue.current === thesisType) {
+      console.log('Ignoring duplicate value change to:', thesisType)
+      return
+    }
+    
+    // Only process if this is actually a new value different from current
+    if (thesisType === currentValue.thesisType) {
+      console.log('Ignoring same value change to:', thesisType)
+      return
+    }
+    
+    lastProcessedValue.current = thesisType
     
     if (thesisType === 'custom') {
       onChange({
