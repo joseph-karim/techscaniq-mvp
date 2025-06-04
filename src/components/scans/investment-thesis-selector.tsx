@@ -276,27 +276,17 @@ export function InvestmentThesisSelector({ value, onChange }: InvestmentThesisSe
   const [showCustomization, setShowCustomization] = useState(false)
   const lastProcessedValue = useRef<string>('')
   
-  console.log(`InvestmentThesisSelector render, value:`, value?.thesisType)
-  
   // Since parent now initializes with proper default, value should never be null
   const currentValue = value!
   
   const handleThesisTypeChange = (thesisType: ThesisType | 'custom') => {
-    console.log('=== handleThesisTypeChange START ===')
-    console.log('Thesis type changed to:', thesisType) // Debug log
-    console.log('Current value before change:', currentValue.thesisType)
-    console.log('Value prop from parent:', value?.thesisType)
-    console.log('Last processed value:', lastProcessedValue.current)
-    
     // Debounce: ignore if we just processed this exact same value
     if (lastProcessedValue.current === thesisType) {
-      console.log('Ignoring duplicate value change to:', thesisType)
       return
     }
     
     // Only process if this is actually a new value different from current
     if (thesisType === currentValue.thesisType) {
-      console.log('Ignoring same value change to:', thesisType)
       return
     }
     
@@ -426,21 +416,6 @@ export function InvestmentThesisSelector({ value, onChange }: InvestmentThesisSe
                   </SelectItem>
                 </SelectContent>
               </Select>
-              
-              {/* Debug: Test with native select */}
-              <div className="text-xs text-muted-foreground">
-                Debug test - Native select: 
-                <select 
-                  value={currentValue.thesisType} 
-                  onChange={(e) => handleThesisTypeChange(e.target.value as any)}
-                  className="ml-2 p-1 border rounded"
-                >
-                  {Object.entries(PE_THESIS_TYPES).map(([key, thesis]) => (
-                    <option key={key} value={key}>{thesis.name}</option>
-                  ))}
-                  <option value="custom">Custom Thesis</option>
-                </select>
-              </div>
             </div>
           </div>
           

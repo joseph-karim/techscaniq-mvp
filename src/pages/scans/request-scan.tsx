@@ -56,20 +56,13 @@ export default function RequestScanPage() {
     notes: ''
   }))
   
-  // Debug logging for parent state changes with debouncing
   const handleInvestmentThesisChange = (newThesis: InvestmentThesisData) => {
-    console.log('Parent: setInvestmentThesis called with:', newThesis.thesisType)
-    console.log('Parent: current investmentThesis state:', investmentThesis.thesisType)
-    console.trace('Parent: Call stack for setInvestmentThesis')
-    
     // Debounce: ignore if trying to set the same value
     if (newThesis.thesisType === investmentThesis.thesisType) {
-      console.log('Parent: Ignoring duplicate state change to:', newThesis.thesisType)
       return
     }
     
     setInvestmentThesis(newThesis)
-    console.log('Parent: after setState call')
   }
 
   const form = useForm<RequestScanForm>({
