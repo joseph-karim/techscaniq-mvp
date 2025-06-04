@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -250,7 +250,7 @@ export interface InvestmentThesisData {
 }
 
 interface InvestmentThesisSelectorProps {
-  value: InvestmentThesisData | null
+  value: InvestmentThesisData
   onChange: (value: InvestmentThesisData) => void
 }
 
@@ -277,22 +277,8 @@ export function InvestmentThesisSelector({ value, onChange }: InvestmentThesisSe
   
   console.log(`InvestmentThesisSelector render, value:`, value?.thesisType)
   
-  // Memoize default value to prevent infinite re-renders
-  const defaultValue = useMemo(() => ({
-    thesisType: 'accelerate-organic-growth' as const,
-    criteria: PE_THESIS_TYPES['accelerate-organic-growth'].criteria.map((c, i) => ({
-      id: `criterion-${i}`,
-      name: c.name,
-      weight: c.weight,
-      description: c.description
-    })),
-    focusAreas: [...PE_THESIS_TYPES['accelerate-organic-growth'].focusAreas],
-    timeHorizon: PE_THESIS_TYPES['accelerate-organic-growth'].timeHorizon,
-    targetMultiple: PE_THESIS_TYPES['accelerate-organic-growth'].targetMultiple,
-    notes: ''
-  }), [])
-  
-  const currentValue = value || defaultValue
+  // Since parent now initializes with proper default, value should never be null
+  const currentValue = value!
   
   const handleThesisTypeChange = (thesisType: ThesisType | 'custom') => {
     console.log('=== handleThesisTypeChange START ===')

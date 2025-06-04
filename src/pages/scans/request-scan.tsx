@@ -41,12 +41,25 @@ export default function RequestScanPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
-  const [investmentThesis, setInvestmentThesis] = useState<InvestmentThesisData | null>(null)
+  // Initialize with default thesis instead of null
+  const [investmentThesis, setInvestmentThesis] = useState<InvestmentThesisData>(() => ({
+    thesisType: 'accelerate-organic-growth',
+    criteria: [
+      { id: 'criterion-0', name: 'Cloud Architecture Scalability', weight: 30, description: 'Auto-scaling capabilities, microservices architecture, infrastructure headroom for 10x growth' },
+      { id: 'criterion-1', name: 'Development Velocity & Pipeline', weight: 25, description: 'CI/CD maturity, test coverage, deployment frequency, feature delivery speed' },
+      { id: 'criterion-2', name: 'Market Expansion Readiness', weight: 25, description: 'Geographic reach, customer acquisition systems, product-market fit indicators' },
+      { id: 'criterion-3', name: 'Code Quality & Technical Debt', weight: 20, description: 'Modular architecture, maintainability, technical debt burden affecting velocity' }
+    ],
+    focusAreas: ['cloud-native', 'scalable-architecture', 'devops-maturity', 'test-coverage', 'microservices'],
+    timeHorizon: '3-5 years',
+    targetMultiple: '5-10x',
+    notes: ''
+  }))
   
   // Debug logging for parent state changes
   const handleInvestmentThesisChange = (newThesis: InvestmentThesisData) => {
     console.log('Parent: setInvestmentThesis called with:', newThesis.thesisType)
-    console.log('Parent: current investmentThesis state:', investmentThesis?.thesisType)
+    console.log('Parent: current investmentThesis state:', investmentThesis.thesisType)
     console.trace('Parent: Call stack for setInvestmentThesis')
     setInvestmentThesis(newThesis)
     console.log('Parent: after setState call')
@@ -69,12 +82,8 @@ export default function RequestScanPage() {
     setError(null)
     setSuccess(false)
     
-    // Validate that investment thesis is completed
-    if (!investmentThesis) {
-      setError('Please complete the investment thesis configuration.')
-      setIsSubmitting(false)
-      return
-    }
+    // Investment thesis is now always available (initialized with default)
+    // No validation needed since it can't be null
     
     try {
       // Create the scan request in the database
@@ -84,9 +93,9 @@ export default function RequestScanPage() {
           company_name: data.companyName,
           website_url: data.websiteUrl,
           company_description: data.description || null,
-          thesis_tags: data.thesisTags || investmentThesis?.focusAreas || [],
-          primary_criteria: data.primaryCriteria || investmentThesis?.criteria?.[0]?.description || '',
-          secondary_criteria: data.secondaryCriteria || investmentThesis?.criteria?.[1]?.description || null,
+          thesis_tags: data.thesisTags || investmentThesis.focusAreas || [],
+          primary_criteria: data.primaryCriteria || investmentThesis.criteria?.[0]?.description || '',
+          secondary_criteria: data.secondaryCriteria || investmentThesis.criteria?.[1]?.description || null,
           requested_by: user?.id,
           requestor_name: user?.user_metadata?.name || user?.email || 'Unknown',
           organization_name: user?.user_metadata?.workspace_name || 'Unknown Organization',
@@ -95,9 +104,9 @@ export default function RequestScanPage() {
           risks: [],
           investment_thesis_data: {
             ...investmentThesis,
-            thesis_tags: data.thesisTags || investmentThesis?.focusAreas || [],
-            primary_criteria: data.primaryCriteria || investmentThesis?.criteria?.[0]?.description || '',
-            secondary_criteria: data.secondaryCriteria || investmentThesis?.criteria?.[1]?.description || '',
+            thesis_tags: data.thesisTags || investmentThesis.focusAreas || [],
+            primary_criteria: data.primaryCriteria || investmentThesis.criteria?.[0]?.description || '',
+            secondary_criteria: data.secondaryCriteria || investmentThesis.criteria?.[1]?.description || '',
             submitted_at: new Date().toISOString()
           }
         })
@@ -109,7 +118,20 @@ export default function RequestScanPage() {
       // Success
       setSuccess(true)
       form.reset()
-      setInvestmentThesis(null)
+      // Reset to default thesis
+      setInvestmentThesis({
+        thesisType: 'accelerate-organic-growth',
+        criteria: [
+          { id: 'criterion-0', name: 'Cloud Architecture Scalability', weight: 30, description: 'Auto-scaling capabilities, microservices architecture, infrastructure headroom for 10x growth' },
+          { id: 'criterion-1', name: 'Development Velocity & Pipeline', weight: 25, description: 'CI/CD maturity, test coverage, deployment frequency, feature delivery speed' },
+          { id: 'criterion-2', name: 'Market Expansion Readiness', weight: 25, description: 'Geographic reach, customer acquisition systems, product-market fit indicators' },
+          { id: 'criterion-3', name: 'Code Quality & Technical Debt', weight: 20, description: 'Modular architecture, maintainability, technical debt burden affecting velocity' }
+        ],
+        focusAreas: ['cloud-native', 'scalable-architecture', 'devops-maturity', 'test-coverage', 'microservices'],
+        timeHorizon: '3-5 years',
+        targetMultiple: '5-10x',
+        notes: ''
+      })
       
       // Navigate to the scan details page after a short delay
       setTimeout(() => {
