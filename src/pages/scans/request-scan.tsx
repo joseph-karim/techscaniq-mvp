@@ -28,8 +28,8 @@ const requestScanSchema = z.object({
   companyName: z.string().min(2, { message: 'Company name must be at least 2 characters' }),
   websiteUrl: z.string().url({ message: 'Please enter a valid URL' }),
   description: z.string().optional(),
-  thesisTags: z.array(z.string()).min(1, { message: 'Please select at least one thesis tag' }),
-  primaryCriteria: z.string().max(200, { message: 'Primary criteria must be 200 characters or less' }),
+  thesisTags: z.array(z.string()).optional(), // Made optional since we now use investment thesis
+  primaryCriteria: z.string().max(200, { message: 'Primary criteria must be 200 characters or less' }).optional(),
   secondaryCriteria: z.string().max(200, { message: 'Secondary criteria must be 200 characters or less' }).optional(),
 })
 
@@ -75,9 +75,9 @@ export default function RequestScanPage() {
           company_name: data.companyName,
           website_url: data.websiteUrl,
           company_description: data.description || null,
-          thesis_tags: data.thesisTags,
-          primary_criteria: data.primaryCriteria,
-          secondary_criteria: data.secondaryCriteria || null,
+          thesis_tags: data.thesisTags || investmentThesis?.focusAreas || [],
+          primary_criteria: data.primaryCriteria || investmentThesis?.criteria?.[0]?.description || '',
+          secondary_criteria: data.secondaryCriteria || investmentThesis?.criteria?.[1]?.description || null,
           requested_by: user?.id,
           requestor_name: user?.user_metadata?.name || user?.email || 'Unknown',
           organization_name: user?.user_metadata?.workspace_name || 'Unknown Organization',
@@ -86,9 +86,9 @@ export default function RequestScanPage() {
           risks: [],
           investment_thesis_data: {
             ...investmentThesis,
-            thesis_tags: data.thesisTags,
-            primary_criteria: data.primaryCriteria,
-            secondary_criteria: data.secondaryCriteria,
+            thesis_tags: data.thesisTags || investmentThesis?.focusAreas || [],
+            primary_criteria: data.primaryCriteria || investmentThesis?.criteria?.[0]?.description || '',
+            secondary_criteria: data.secondaryCriteria || investmentThesis?.criteria?.[1]?.description || '',
             submitted_at: new Date().toISOString()
           }
         })
@@ -258,7 +258,7 @@ export default function RequestScanPage() {
                         <FormLabel>Technical Focus Tags</FormLabel>
                         <FormControl>
                           <ThesisTagSelector 
-                            value={field.value}
+                            value={field.value || []}
                             onChange={field.onChange}
                           />
                         </FormControl>
@@ -286,7 +286,7 @@ export default function RequestScanPage() {
                         <FormDescription>
                           Your most important technical evaluation criteria (max 200 chars)
                           <div className="mt-1 text-right text-xs">
-                            {field.value.length}/200 characters
+                            {(field.value || '').length}/200 characters
                           </div>
                         </FormDescription>
                         <FormMessage />
