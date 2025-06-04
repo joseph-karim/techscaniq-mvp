@@ -132,16 +132,21 @@ async function collectEvidence(
   companyName: string, 
   companyWebsite: string,
   depth: 'shallow' | 'deep' | 'comprehensive' = 'deep',
+  investmentThesis?: any,
   req?: Request
 ): Promise<any> {
   console.log(`Collecting evidence with depth: ${depth}`)
+  if (investmentThesis) {
+    console.log(`Using investment thesis: ${investmentThesis.thesisType}`)
+  }
   
-  // Use the new v7 evidence collector with all tools
-  const response = await callSupabaseFunction('evidence-collector-v7', {
+  // Use the new v7 evidence collector with all tools and thesis data
+  const response = await callSupabaseFunction('evidence-orchestrator', {
     companyName,
     companyWebsite,
     evidenceTypes: ['technical', 'security', 'team', 'financial', 'market'],
-    depth
+    depth,
+    investmentThesis
   }, req)
   
   if (!response.success) {
@@ -304,7 +309,7 @@ async function analyzeWithGemini(company: any, evidence: any, investorProfile?: 
     metadata: {
       analysisDepth: 'comprehensive',
       processingTime: Date.now(),
-      servicesUsed: ['evidence-collector-v7', 'tech-intelligence-v3'],
+      servicesUsed: ['evidence-orchestrator', 'tech-intelligence-v3'],
       confidenceScore: evidence.summary.confidence_avg
     }
   }
@@ -479,6 +484,7 @@ Deno.serve(async (req) => {
       company.name,
       company.website,
       request.analysisDepth || 'comprehensive',
+      investorProfile?.investmentThesisData,
       req
     )
     console.log(`${logPrefix} [1/3] Evidence collection complete. Evidence count: ${evidenceData?.evidence?.length ?? 0}`)
@@ -645,7 +651,16 @@ Deno.serve(async (req) => {
           report.investmentScore >= 60 ? 'C' :
           report.investmentScore >= 50 ? 'D' : 'F',
         evidence_collection_id: evidenceData.collectionId,
-        metadata: report.metadata,
+        metadata: {
+          ...report.metadata,
+          investmentThesis: investorProfile?.investmentThesisData,
+          thesisAlignmentScore: (report as any).thesisAlignment?.overallAlignment,
+          analysisCriteriaUsed: investorProfile?.investmentThesisData?.criteria?.map((c: any) => ({
+            name: c.name,
+            weight: c.weight,
+            description: c.description
+          }))
+        },
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })

@@ -64,7 +64,7 @@ async function updateScanStatus() {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${supabaseAnonKey}`,
         // Pass the Google API key via a custom header for local dev
-        'x-google-api-key': 'AIzaSyA3_4HWUD371ulHhKo_xsTr9tz5C3RD3lg'
+        'x-google-api-key': process.env.GOOGLE_API_KEY || 'your-google-api-key'
       },
       body: JSON.stringify({
         scan_request_id: scanRequestId,

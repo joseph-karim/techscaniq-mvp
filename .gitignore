@@ -39,4 +39,7 @@ tasks/
 
 # Ignore environment files and local Supabase config
 .env
+.env.local
+.env.*
+supabase/.env*
 supabase/config.toml 

@@ -219,23 +219,47 @@ async function analyzeWithClaude(
     return acc
   }, {} as Record<string, any[]>)
 
-  const prompt = `You are a senior technology due diligence analyst conducting a comprehensive investment analysis of ${company.name} (${company.website}). Your task is to create an extremely detailed, evidence-based report similar in depth and quality to professional due diligence reports.
+  // Extract investment thesis data for analysis
+  const investmentThesis = investorProfile?.investmentThesisData
+  const thesisType = investmentThesis?.thesisType || 'general'
+  const thesisCriteria = investmentThesis?.criteria || []
+  const scoreReweighting = investmentThesis?.scoreReweighting || {}
 
-IMPORTANT GUIDELINES:
-1. Be EXTREMELY detailed and specific. Do not use placeholder text.
-2. Infer and extrapolate from the evidence to create a comprehensive narrative.
-3. Include confidence scores (as percentages) for key findings.
-4. Reference evidence with bracketed numbers like [1], [2] etc.
-5. Write in a professional, analytical tone suitable for investment committees.
-6. If data is limited, make intelligent inferences based on industry knowledge and available evidence.
-7. Each section should be 3-5 paragraphs minimum with specific details.
+  const prompt = `You are a senior technology due diligence analyst conducting a comprehensive investment analysis of ${company.name} (${company.website}). Your task is to create an extremely detailed, evidence-based report aligned with the specific PE investment thesis and scoring framework.
+
+CRITICAL: This analysis must be optimized for the "${thesisType}" investment thesis.
+
+INVESTMENT THESIS CONTEXT:
+${investmentThesis ? `
+Investment Strategy: ${thesisType}
+Thesis Description: ${investmentThesis.customThesisDescription || 'Professional PE investment strategy'}
+Investment Timeline: ${investmentThesis.timeHorizon}
+Target Multiple: ${investmentThesis.targetMultiple}
+
+WEIGHTED EVALUATION CRITERIA (CRITICAL - Use these exact weights for scoring):
+${thesisCriteria.map((criteria: any, i: number) => `${i + 1}. ${criteria.name} (${criteria.weight}% weight): ${criteria.description}`).join('\n')}
+
+FOCUS AREAS FOR THIS THESIS: ${investmentThesis.focusAreas?.join(', ')}
+
+SCORE REWEIGHTING ADJUSTMENTS:
+${Object.entries(scoreReweighting).map(([area, config]: [string, any]) => `- ${area}: ${config.change} ${config.weight}% (${config.change === '↑' ? 'PRIORITIZE' : config.change === '↓' ? 'DE-EMPHASIZE' : 'MAINTAIN'})`).join('\n')}` : ''}
+
+ANALYSIS GUIDELINES:
+1. WEIGHT YOUR ASSESSMENT according to the thesis criteria percentages above
+2. PRIORITIZE findings that align with the specified focus areas
+3. APPLY score reweighting to emphasize/de-emphasize areas per the thesis
+4. Be EXTREMELY detailed and specific. Do not use placeholder text.
+5. Include confidence scores (as percentages) for key findings.
+6. Reference evidence with bracketed numbers like [1], [2] etc.
+7. Write in a professional, analytical tone suitable for PE investment committees.
+8. If data is limited, make intelligent inferences based on industry knowledge and available evidence.
+9. Each section should be 3-5 paragraphs minimum with specific details.
 
 Evidence collected:
 ${JSON.stringify(evidenceByCategory, null, 2)}
 
 ${investorProfile ? `Investor Profile:
 - Firm: ${investorProfile.firmName}
-- Thesis: ${investorProfile.thesis}
 - Primary Criteria: ${investorProfile.primaryCriteria}
 - Secondary Criteria: ${investorProfile.secondaryCriteria}` : ''}
 
@@ -366,14 +390,20 @@ Return ONLY valid JSON matching this exact structure, but with MUCH MORE DETAIL 
     "financialRisks": ["[List 3-4 financial risks or concerns]"]
   },
   "investmentRecommendation": {
-    "score": [0-100 overall investment score],
-    "grade": "[A/B/C/D/F]",
-    "recommendation": "[strong-buy/buy/hold/pass]",
-    "rationale": "[Write 3-4 sentences explaining the investment thesis, key value drivers, and why this rating was given. Be specific and reference evidence]",
-    "keyStrengths": ["[List 5-6 specific reasons to invest]"],
-    "keyRisks": ["[List 4-5 specific investment risks]"],
-    "dueDiligenceGaps": ["[List 3-4 specific areas needing further investigation]"],
-    "nextSteps": ["[List 4-5 specific next steps for the investment process]"]
+    "score": [CRITICAL: Calculate this weighted score using the thesis criteria above. For each criterion, assign a 0-100 score and multiply by its weight percentage, then sum for final score],
+    "grade": "[A/B/C/D/F based on weighted score]",
+    "recommendation": "[strong-buy/buy/hold/pass aligned with thesis objectives]",
+    "rationale": "[CRITICAL: Explain how this score aligns with the ${thesisType} investment thesis. Reference specific criterion scores and weights. Be explicit about thesis alignment.]",
+    "keyStrengths": ["[List 5-6 specific reasons to invest that align with thesis criteria]"],
+    "keyRisks": ["[List 4-5 investment risks that could impact thesis success]"],
+    "dueDiligenceGaps": ["[List 3-4 areas needing investigation, prioritized by thesis importance]"],
+    "nextSteps": ["[List 4-5 next steps aligned with thesis validation and risk mitigation]"],
+    "thesisAlignment": {
+      "criteriaScores": [${thesisCriteria.map((criteria: any) => `{"criterion": "${criteria.name}", "score": [0-100], "weight": ${criteria.weight}, "rationale": "[Explain scoring for this criterion]"}`).join(', ')}],
+      "overallAlignment": "[Excellent/Good/Fair/Poor alignment with ${thesisType} thesis]",
+      "keyEnabler": "[Primary technical factor that supports thesis success]",
+      "primaryRisk": "[Main technical risk that could undermine thesis]"
+    }
   }
 }`
 
