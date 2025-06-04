@@ -386,6 +386,7 @@ export function InvestmentThesisSelector({ value, onChange }: InvestmentThesisSe
             <Label htmlFor="thesis-type">Thesis Type</Label>
             <div className="space-y-2">
               <Select
+                key={currentValue.thesisType} 
                 value={currentValue.thesisType}
                 onValueChange={handleThesisTypeChange}
               >
