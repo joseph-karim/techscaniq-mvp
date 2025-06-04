@@ -359,26 +359,28 @@ async function collectAllEvidence(
     htmlPromise.then(async (htmlData) => {
       if (htmlData?.html) {
         try {
-          const wappalyzerResult = await callSupabaseFunction('wappalyzer-analyzer', {
+          const webtechResult = await callSupabaseFunction('webtech-analyzer', {
             url: companyWebsite,
             html: htmlData.html
           }, 15000, req)
           
-          if (wappalyzerResult?.success) {
-            console.log('Wappalyzer analysis completed')
+          if (webtechResult?.success && webtechResult?.data) {
+            console.log('WebTech + retire.js analysis completed')
             return createEvidence('technology_stack', 'technology', {
               url: companyWebsite,
-              technologies: wappalyzerResult.technologies || [],
-              categories: wappalyzerResult.categories || [],
+              technologies: webtechResult.data.technologies || [],
+              byCategory: webtechResult.data.byCategory || {},
+              vulnerabilities: webtechResult.data.vulnerabilities || {},
+              summary: webtechResult.data.summary || {},
               htmlSource: htmlData.source,
-              source: 'wappalyzer'
+              source: 'webtech-analyzer'
             })
           }
         } catch (err) {
-          console.error('Wappalyzer failed:', err)
+          console.error('WebTech analysis failed:', err)
         }
       } else {
-        console.log('No HTML available for Wappalyzer analysis')
+        console.log('No HTML available for WebTech analysis')
       }
       return null
     })
@@ -429,14 +431,18 @@ async function collectAllEvidence(
   // Performance metrics
   phase2Promises.push(
     callSupabaseFunction('performance-analyzer', {
-      url: companyWebsite
-    }, 15000, req).then(result => {
-      if (result?.success) {
+      url: companyWebsite,
+      strategy: 'mobile'
+    }, 30000, req).then(result => {
+      if (result?.success && result?.data) {
         console.log('Performance analysis completed')
         return createEvidence('performance_metrics', 'infrastructure', {
           url: companyWebsite,
-          metrics: result.metrics || {},
-          score: result.score || 0,
+          metrics: result.data.metrics || {},
+          audits: result.data.audits || [],
+          opportunities: result.data.opportunities || [],
+          strategy: result.data.strategy || 'mobile',
+          lighthouseVersion: result.data.lighthouseVersion,
           source: 'performance-analyzer'
         })
       }
@@ -447,6 +453,35 @@ async function collectAllEvidence(
     })
   )
 
+  // Wait for HTML data to be available for nuclei scanner
+  const htmlDataResult = await htmlPromise
+  
+  // Run nuclei scanner with HTML data if available (only in deep/comprehensive mode)
+  if (depth !== 'shallow' && htmlDataResult?.html) {
+    phase2Promises.push(
+      callSupabaseFunction('nuclei-scanner', {
+        url: companyWebsite,
+        html: htmlDataResult.html,
+        deep: depth === 'comprehensive'
+      }, 30000, req).then(result => {
+        if (result?.success && result?.data) {
+          console.log('Vulnerability scan completed')
+          return createEvidence('vulnerability_scan', 'security', {
+            url: companyWebsite,
+            vulnerabilities: result.data.vulnerabilities || [],
+            summary: result.data.summary || {},
+            scansPerformed: result.data.scansPerformed || [],
+            source: 'nuclei-scanner'
+          })
+        }
+        return null
+      }).catch(err => {
+        console.error('Nuclei scanner failed:', err)
+        return null
+      })
+    )
+  }
+  
   // Wait for Phase 2 to complete
   const phase2Results = await Promise.allSettled(phase2Promises)
   phase2Results.forEach((result, index) => {
@@ -559,27 +594,6 @@ async function collectAllEvidence(
       })
     )
 
-    // Vulnerability scanning
-    phase3Promises.push(
-      callSupabaseFunction('nuclei-scanner', {
-        url: companyWebsite,
-        templates: ['basic', 'security']
-      }, 30000, req).then(result => {
-        if (result?.success) {
-          console.log('Vulnerability scan completed')
-          return createEvidence('vulnerability_scan', 'security', {
-            url: companyWebsite,
-            findings: result.findings || [],
-            summary: result.summary || {},
-            source: 'nuclei-scanner'
-          })
-        }
-        return null
-      }).catch(err => {
-        console.error('Nuclei scanner failed:', err)
-        return null
-      })
-    )
 
     // Wait for Phase 3 to complete
     const phase3Results = await Promise.allSettled(phase3Promises)
