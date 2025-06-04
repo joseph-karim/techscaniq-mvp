@@ -2,52 +2,49 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-google-api-key',
   'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
   'Access-Control-Max-Age': '86400',
 }
 
 interface PerformanceRequest {
   url: string
-  html?: string
-  resources?: Array<{
-    url: string
-    type: string
-    size?: number
-    loadTime?: number
-  }>
+  category?: 'performance' | 'accessibility' | 'best-practices' | 'seo'
+  strategy?: 'mobile' | 'desktop'
 }
 
-interface PerformanceMetrics {
-  // Core Web Vitals
-  lcp: number // Largest Contentful Paint
-  fid: number // First Input Delay
-  cls: number // Cumulative Layout Shift
+interface PageSpeedMetrics {
+  // Core Web Vitals from PageSpeed
+  lcp?: number // Largest Contentful Paint
+  fid?: number // First Input Delay (deprecated)
+  cls?: number // Cumulative Layout Shift
+  inp?: number // Interaction to Next Paint (new metric)
   
-  // Other metrics
-  fcp: number // First Contentful Paint
-  ttfb: number // Time to First Byte
-  tti: number // Time to Interactive
-  tbt: number // Total Blocking Time
+  // Other Lighthouse metrics
+  fcp?: number // First Contentful Paint
+  ttfb?: number // Time to First Byte
+  tti?: number // Time to Interactive
+  tbt?: number // Total Blocking Time
+  si?: number // Speed Index
   
-  // Resource metrics
-  totalSize: number
-  jsSize: number
-  cssSize: number
-  imageSize: number
-  fontSize: number
-  requestCount: number
+  // Overall scores
+  performanceScore: number
+  accessibilityScore?: number
+  bestPracticesScore?: number
+  seoScore?: number
 }
 
 interface PerformanceReport {
   url: string
-  score: number
-  metrics: PerformanceMetrics
-  diagnostics: Array<{
+  strategy: string
+  lighthouseVersion: string
+  metrics: PageSpeedMetrics
+  audits: Array<{
     id: string
     title: string
     description: string
-    score: number
+    score: number | null
+    displayValue?: string
     details?: any
   }>
   opportunities: Array<{
@@ -61,213 +58,139 @@ interface PerformanceReport {
   }>
 }
 
-// Simulate performance metrics based on HTML and resources
-function analyzePerformance(html: string, resources: any[]): PerformanceMetrics {
-  // Calculate resource sizes
-  let totalSize = 0
-  let jsSize = 0
-  let cssSize = 0
-  let imageSize = 0
-  let fontSize = 0
+// Timeout wrapper
+async function fetchWithTimeout(url: string, options: RequestInit, timeout = 30000): Promise<Response> {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), timeout)
   
-  for (const resource of resources) {
-    const size = resource.size || estimateResourceSize(resource.url)
-    totalSize += size
-    
-    if (resource.type === 'script' || resource.url.match(/\.(js|mjs)$/i)) {
-      jsSize += size
-    } else if (resource.type === 'stylesheet' || resource.url.match(/\.css$/i)) {
-      cssSize += size
-    } else if (resource.type === 'image' || resource.url.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i)) {
-      imageSize += size
-    } else if (resource.type === 'font' || resource.url.match(/\.(woff|woff2|ttf|otf)$/i)) {
-      fontSize += size
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal
+    })
+    clearTimeout(timeoutId)
+    return response
+  } catch (error) {
+    clearTimeout(timeoutId)
+    if (error.name === 'AbortError') {
+      throw new Error(`Request timeout after ${timeout}ms`)
     }
+    throw error
+  }
+}
+
+async function analyzeWithPageSpeed(
+  url: string, 
+  strategy: 'mobile' | 'desktop' = 'mobile', 
+  req?: Request
+): Promise<PerformanceReport> {
+  // Check for API key in environment first, then in headers for local dev
+  let apiKey = Deno.env.get('GOOGLE_API_KEY')
+  if (!apiKey && req) {
+    apiKey = req.headers.get('x-google-api-key') || ''
   }
   
-  // Simulate Core Web Vitals based on resource analysis
-  const baseLoadTime = 500 // Base time in ms
-  const sizeImpact = totalSize / 10000 // 10KB = 1ms impact
-  const jsImpact = jsSize / 5000 // JS has higher impact
-  
+  if (!apiKey) {
+    throw new Error('Google API key not configured')
+  }
+
+  const apiUrl = new URL('https://www.googleapis.com/pagespeedonline/v5/runPagespeed')
+  apiUrl.searchParams.set('url', url)
+  apiUrl.searchParams.set('key', apiKey)
+  apiUrl.searchParams.set('strategy', strategy)
+  apiUrl.searchParams.set('category', 'performance')
+  apiUrl.searchParams.set('category', 'accessibility')
+  apiUrl.searchParams.set('category', 'best-practices')
+  apiUrl.searchParams.set('category', 'seo')
+
+  console.log(`Running PageSpeed Insights analysis for: ${url} (${strategy})`)
+
+  const response = await fetchWithTimeout(apiUrl.toString(), {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json'
+    }
+  }, 30000)
+
+  if (!response.ok) {
+    const errorText = await response.text()
+    console.error('PageSpeed API error:', response.status, errorText)
+    throw new Error(`PageSpeed API error: ${response.status} - ${errorText}`)
+  }
+
+  const data = await response.json()
+  console.log('PageSpeed analysis completed')
+
+  // Extract metrics from Lighthouse results
+  const lighthouseResult = data.lighthouseResult
+  const audits = lighthouseResult.audits
+  const categories = lighthouseResult.categories
+
+  const metrics: PageSpeedMetrics = {
+    performanceScore: Math.round((categories.performance?.score || 0) * 100),
+    accessibilityScore: Math.round((categories.accessibility?.score || 0) * 100),
+    bestPracticesScore: Math.round((categories['best-practices']?.score || 0) * 100),
+    seoScore: Math.round((categories.seo?.score || 0) * 100),
+    
+    // Core Web Vitals (in milliseconds or ratio)
+    lcp: audits['largest-contentful-paint']?.numericValue,
+    fcp: audits['first-contentful-paint']?.numericValue,
+    cls: audits['cumulative-layout-shift']?.numericValue,
+    tti: audits['interactive']?.numericValue,
+    tbt: audits['total-blocking-time']?.numericValue,
+    si: audits['speed-index']?.numericValue,
+    ttfb: audits['server-response-time']?.numericValue,
+    inp: audits['experimental-interaction-to-next-paint']?.numericValue
+  }
+
+  // Extract important audits
+  const importantAudits = [
+    'largest-contentful-paint',
+    'first-contentful-paint',
+    'cumulative-layout-shift',
+    'interactive',
+    'total-blocking-time',
+    'speed-index',
+    'server-response-time'
+  ]
+
+  const auditResults = importantAudits.map(auditId => {
+    const audit = audits[auditId]
+    return {
+      id: auditId,
+      title: audit?.title || auditId,
+      description: audit?.description || '',
+      score: audit?.score,
+      displayValue: audit?.displayValue,
+      details: audit?.details
+    }
+  }).filter(audit => audit.score !== undefined)
+
+  // Extract opportunities (performance improvements)
+  const opportunities = Object.keys(audits)
+    .filter(auditId => audits[auditId].details?.type === 'opportunity')
+    .map(auditId => {
+      const audit = audits[auditId]
+      return {
+        id: auditId,
+        title: audit.title,
+        description: audit.description,
+        estimatedSavings: {
+          bytes: audit.details?.overallSavingsBytes,
+          ms: audit.details?.overallSavingsMs
+        }
+      }
+    })
+    .filter(opp => opp.estimatedSavings.bytes || opp.estimatedSavings.ms)
+
   return {
-    // Simulate LCP based on largest image or total size
-    lcp: baseLoadTime + sizeImpact * 2 + Math.random() * 500,
-    
-    // Simulate FID based on JS size
-    fid: 50 + jsImpact + Math.random() * 50,
-    
-    // Simulate CLS based on number of images and fonts
-    cls: (imageSize > 0 ? 0.05 : 0) + (fontSize > 0 ? 0.03 : 0) + Math.random() * 0.02,
-    
-    // Other metrics
-    fcp: baseLoadTime + sizeImpact + Math.random() * 200,
-    ttfb: 100 + Math.random() * 200,
-    tti: baseLoadTime + sizeImpact * 3 + jsImpact * 2,
-    tbt: jsImpact * 10 + Math.random() * 100,
-    
-    // Resource metrics
-    totalSize,
-    jsSize,
-    cssSize,
-    imageSize,
-    fontSize,
-    requestCount: resources.length
+    url,
+    strategy,
+    lighthouseVersion: lighthouseResult.lighthouseVersion,
+    metrics,
+    audits: auditResults,
+    opportunities
   }
-}
-
-function estimateResourceSize(url: string): number {
-  // Estimate size based on file type
-  if (url.match(/\.(js|mjs)$/i)) return 50000 // 50KB average
-  if (url.match(/\.css$/i)) return 20000 // 20KB average
-  if (url.match(/\.(jpg|jpeg|png)$/i)) return 100000 // 100KB average
-  if (url.match(/\.(gif|webp)$/i)) return 80000 // 80KB average
-  if (url.match(/\.svg$/i)) return 5000 // 5KB average
-  if (url.match(/\.(woff|woff2)$/i)) return 30000 // 30KB average
-  return 10000 // 10KB default
-}
-
-function generateDiagnostics(metrics: PerformanceMetrics, html: string): any[] {
-  const diagnostics: any[] = []
-  
-  // LCP diagnostic
-  diagnostics.push({
-    id: 'largest-contentful-paint',
-    title: 'Largest Contentful Paint',
-    description: `LCP marks the time at which the largest text or image is painted`,
-    score: metrics.lcp < 2500 ? 1 : metrics.lcp < 4000 ? 0.5 : 0,
-    details: {
-      value: metrics.lcp,
-      displayValue: `${(metrics.lcp / 1000).toFixed(1)} s`
-    }
-  })
-  
-  // FID diagnostic
-  diagnostics.push({
-    id: 'first-input-delay',
-    title: 'First Input Delay',
-    description: `FID measures the time from user interaction to browser response`,
-    score: metrics.fid < 100 ? 1 : metrics.fid < 300 ? 0.5 : 0,
-    details: {
-      value: metrics.fid,
-      displayValue: `${metrics.fid.toFixed(0)} ms`
-    }
-  })
-  
-  // CLS diagnostic
-  diagnostics.push({
-    id: 'cumulative-layout-shift',
-    title: 'Cumulative Layout Shift',
-    description: `CLS measures visual stability`,
-    score: metrics.cls < 0.1 ? 1 : metrics.cls < 0.25 ? 0.5 : 0,
-    details: {
-      value: metrics.cls,
-      displayValue: metrics.cls.toFixed(3)
-    }
-  })
-  
-  // JavaScript size diagnostic
-  if (metrics.jsSize > 200000) { // 200KB
-    diagnostics.push({
-      id: 'javascript-size',
-      title: 'JavaScript Bundle Size',
-      description: 'Large JavaScript bundles can impact performance',
-      score: metrics.jsSize < 100000 ? 1 : metrics.jsSize < 300000 ? 0.5 : 0,
-      details: {
-        value: metrics.jsSize,
-        displayValue: `${(metrics.jsSize / 1024).toFixed(0)} KB`
-      }
-    })
-  }
-  
-  return diagnostics
-}
-
-function generateOpportunities(metrics: PerformanceMetrics, html: string): any[] {
-  const opportunities: any[] = []
-  
-  // Image optimization
-  if (metrics.imageSize > 500000) { // 500KB
-    opportunities.push({
-      id: 'image-optimization',
-      title: 'Optimize Images',
-      description: 'Use modern formats like WebP and proper sizing',
-      estimatedSavings: {
-        bytes: metrics.imageSize * 0.4, // 40% potential savings
-        ms: 500
-      }
-    })
-  }
-  
-  // JavaScript reduction
-  if (metrics.jsSize > 300000) { // 300KB
-    opportunities.push({
-      id: 'reduce-javascript',
-      title: 'Reduce JavaScript Bundle Size',
-      description: 'Use code splitting and remove unused code',
-      estimatedSavings: {
-        bytes: metrics.jsSize * 0.3, // 30% potential savings
-        ms: 300
-      }
-    })
-  }
-  
-  // Minification check
-  if (html.includes('    ') || html.includes('\n\n')) {
-    opportunities.push({
-      id: 'minify-resources',
-      title: 'Minify HTML, CSS, and JavaScript',
-      description: 'Remove unnecessary characters from your code',
-      estimatedSavings: {
-        bytes: metrics.totalSize * 0.1, // 10% potential savings
-        ms: 100
-      }
-    })
-  }
-  
-  // Too many requests
-  if (metrics.requestCount > 50) {
-    opportunities.push({
-      id: 'reduce-requests',
-      title: 'Reduce Number of HTTP Requests',
-      description: 'Combine files and use resource hints',
-      estimatedSavings: {
-        ms: (metrics.requestCount - 20) * 10
-      }
-    })
-  }
-  
-  return opportunities
-}
-
-function calculateScore(metrics: PerformanceMetrics): number {
-  // Weight each metric
-  const weights = {
-    lcp: 0.25,
-    fid: 0.25,
-    cls: 0.25,
-    fcp: 0.1,
-    tti: 0.1,
-    tbt: 0.05
-  }
-  
-  // Score each metric (0-100)
-  const scores = {
-    lcp: metrics.lcp < 2500 ? 100 : metrics.lcp < 4000 ? 50 : 0,
-    fid: metrics.fid < 100 ? 100 : metrics.fid < 300 ? 50 : 0,
-    cls: metrics.cls < 0.1 ? 100 : metrics.cls < 0.25 ? 50 : 0,
-    fcp: metrics.fcp < 1800 ? 100 : metrics.fcp < 3000 ? 50 : 0,
-    tti: metrics.tti < 3800 ? 100 : metrics.tti < 7300 ? 50 : 0,
-    tbt: metrics.tbt < 200 ? 100 : metrics.tbt < 600 ? 50 : 0
-  }
-  
-  // Calculate weighted score
-  let totalScore = 0
-  for (const [metric, weight] of Object.entries(weights)) {
-    totalScore += scores[metric as keyof typeof scores] * weight
-  }
-  
-  return Math.round(totalScore)
 }
 
 Deno.serve(async (req) => {
@@ -284,50 +207,8 @@ Deno.serve(async (req) => {
     
     console.log(`Performance analysis for: ${request.url}`)
     
-    // Extract resources from HTML if not provided
-    const resources = request.resources || []
-    if (request.html && resources.length === 0) {
-      // Extract script tags
-      const scripts = request.html.match(/<script[^>]*src=["']([^"']+)["'][^>]*>/gi) || []
-      scripts.forEach(tag => {
-        const match = tag.match(/src=["']([^"']+)["']/)
-        if (match) {
-          resources.push({ url: match[1], type: 'script' })
-        }
-      })
-      
-      // Extract stylesheets
-      const stylesheets = request.html.match(/<link[^>]*href=["']([^"']+)["'][^>]*rel=["']stylesheet["'][^>]*>/gi) || []
-      stylesheets.forEach(tag => {
-        const match = tag.match(/href=["']([^"']+)["']/)
-        if (match) {
-          resources.push({ url: match[1], type: 'stylesheet' })
-        }
-      })
-      
-      // Extract images
-      const images = request.html.match(/<img[^>]*src=["']([^"']+)["'][^>]*>/gi) || []
-      images.forEach(tag => {
-        const match = tag.match(/src=["']([^"']+)["']/)
-        if (match) {
-          resources.push({ url: match[1], type: 'image' })
-        }
-      })
-    }
-    
-    // Analyze performance
-    const metrics = analyzePerformance(request.html || '', resources)
-    const diagnostics = generateDiagnostics(metrics, request.html || '')
-    const opportunities = generateOpportunities(metrics, request.html || '')
-    const score = calculateScore(metrics)
-    
-    const report: PerformanceReport = {
-      url: request.url,
-      score,
-      metrics,
-      diagnostics,
-      opportunities
-    }
+    const strategy = request.strategy || 'mobile'
+    const report = await analyzeWithPageSpeed(request.url, strategy, req)
     
     return new Response(
       JSON.stringify({
@@ -352,4 +233,4 @@ Deno.serve(async (req) => {
       }
     )
   }
-}) 
+})
