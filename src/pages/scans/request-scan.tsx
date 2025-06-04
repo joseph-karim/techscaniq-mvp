@@ -47,6 +47,7 @@ export default function RequestScanPage() {
   const handleInvestmentThesisChange = (newThesis: InvestmentThesisData) => {
     console.log('Parent: setInvestmentThesis called with:', newThesis.thesisType)
     console.log('Parent: current investmentThesis state:', investmentThesis?.thesisType)
+    console.trace('Parent: Call stack for setInvestmentThesis')
     setInvestmentThesis(newThesis)
     console.log('Parent: after setState call')
   }

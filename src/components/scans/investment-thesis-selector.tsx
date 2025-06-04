@@ -275,6 +275,8 @@ const FOCUS_AREAS = [
 export function InvestmentThesisSelector({ value, onChange }: InvestmentThesisSelectorProps) {
   const [showCustomization, setShowCustomization] = useState(false)
   
+  console.log(`InvestmentThesisSelector render, value:`, value?.thesisType)
+  
   // Memoize default value to prevent infinite re-renders
   const defaultValue = useMemo(() => ({
     thesisType: 'accelerate-organic-growth' as const,
@@ -293,6 +295,7 @@ export function InvestmentThesisSelector({ value, onChange }: InvestmentThesisSe
   const currentValue = value || defaultValue
   
   const handleThesisTypeChange = (thesisType: ThesisType | 'custom') => {
+    console.log('=== handleThesisTypeChange START ===')
     console.log('Thesis type changed to:', thesisType) // Debug log
     console.log('Current value before change:', currentValue.thesisType)
     console.log('Value prop from parent:', value?.thesisType)
