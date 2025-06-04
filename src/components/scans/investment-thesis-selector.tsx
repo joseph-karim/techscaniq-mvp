@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -275,8 +275,8 @@ const FOCUS_AREAS = [
 export function InvestmentThesisSelector({ value, onChange }: InvestmentThesisSelectorProps) {
   const [showCustomization, setShowCustomization] = useState(false)
   
-  // Initialize with default if no value and sync with parent
-  const defaultValue = {
+  // Memoize default value to prevent infinite re-renders
+  const defaultValue = useMemo(() => ({
     thesisType: 'accelerate-organic-growth' as const,
     criteria: PE_THESIS_TYPES['accelerate-organic-growth'].criteria.map((c, i) => ({
       id: `criterion-${i}`,
@@ -288,19 +288,22 @@ export function InvestmentThesisSelector({ value, onChange }: InvestmentThesisSe
     timeHorizon: PE_THESIS_TYPES['accelerate-organic-growth'].timeHorizon,
     targetMultiple: PE_THESIS_TYPES['accelerate-organic-growth'].targetMultiple,
     notes: ''
-  }
+  }), [])
   
   // Initialize the parent with default value if no value is provided
   useEffect(() => {
     if (!value) {
       onChange(defaultValue)
     }
-  }, []) // Only run on mount
+  }, [value, onChange, defaultValue])
   
   const currentValue = value || defaultValue
   
   const handleThesisTypeChange = (thesisType: ThesisType | 'custom') => {
     console.log('Thesis type changed to:', thesisType) // Debug log
+    console.log('Current value before change:', currentValue.thesisType)
+    console.log('Value prop from parent:', value?.thesisType)
+    
     if (thesisType === 'custom') {
       onChange({
         thesisType: 'custom',
