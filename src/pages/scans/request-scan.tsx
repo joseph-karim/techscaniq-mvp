@@ -42,6 +42,14 @@ export default function RequestScanPage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [investmentThesis, setInvestmentThesis] = useState<InvestmentThesisData | null>(null)
+  
+  // Debug logging for parent state changes
+  const handleInvestmentThesisChange = (newThesis: InvestmentThesisData) => {
+    console.log('Parent: setInvestmentThesis called with:', newThesis.thesisType)
+    console.log('Parent: current investmentThesis state:', investmentThesis?.thesisType)
+    setInvestmentThesis(newThesis)
+    console.log('Parent: after setState call')
+  }
 
   const form = useForm<RequestScanForm>({
     resolver: zodResolver(requestScanSchema),
@@ -237,7 +245,7 @@ export default function RequestScanPage() {
             <TabsContent value="thesis" className="space-y-6">
               <InvestmentThesisSelector 
                 value={investmentThesis}
-                onChange={setInvestmentThesis}
+                onChange={handleInvestmentThesisChange}
               />
             </TabsContent>
             
