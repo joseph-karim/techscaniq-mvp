@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -289,13 +289,6 @@ export function InvestmentThesisSelector({ value, onChange }: InvestmentThesisSe
     targetMultiple: PE_THESIS_TYPES['accelerate-organic-growth'].targetMultiple,
     notes: ''
   }), [])
-  
-  // Initialize the parent with default value if no value is provided
-  useEffect(() => {
-    if (!value) {
-      onChange(defaultValue)
-    }
-  }, [value, onChange, defaultValue])
   
   const currentValue = value || defaultValue
   
