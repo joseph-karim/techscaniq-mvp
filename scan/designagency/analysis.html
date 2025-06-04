@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Performance Audit: TheDesignAgency.ca</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+        }
+        /* Custom scrollbar for webkit browsers */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        .content-card {
+            background-color: white;
+            border-radius: 0.75rem; /* 12px */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 1.5rem; /* 24px */
+            margin-bottom: 1.5rem; /* 24px */
+        }
+        .content-card h3 {
+            font-size: 1.25rem; /* 20px */
+            font-weight: 600;
+            color: #1f2937; /* Dark gray text */
+            margin-bottom: 0.75rem; /* 12px */
+            border-bottom: 2px solid #e5e7eb; /* Light gray border */
+            padding-bottom: 0.5rem; /* 8px */
+        }
+         .content-card h4 {
+            font-size: 1.1rem; /* 18px */
+            font-weight: 600;
+            color: #374151; /* Medium gray text */
+            margin-top: 1rem; /* 16px */
+            margin-bottom: 0.5rem; /* 8px */
+        }
+        .content-card p, .content-card ul {
+            font-size: 0.95rem; /* 15px */
+            line-height: 1.6;
+            color: #4b5563; /* Gray text */
+            margin-bottom: 0.75rem; /* 12px */
+        }
+        .content-card ul {
+            list-style-type: disc;
+            padding-left: 1.5rem; /* 24px */
+        }
+        .content-card li {
+            margin-bottom: 0.25rem; /* 4px */
+        }
+        .nav-link {
+            display: block;
+            padding: 0.75rem 1rem; /* 12px 16px */
+            border-radius: 0.5rem; /* 8px */
+            color: #374151; /* Medium gray text */
+            font-weight: 500;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        .nav-link:hover {
+            background-color: #e5e7eb; /* Light gray hover */
+            color: #1f2937; /* Dark gray text hover */
+        }
+        .nav-link.active {
+            background-color: #3b82f6; /* Blue active */
+            color: white;
+            font-weight: 600;
+        }
+        .nav-link.active:hover {
+            background-color: #2563eb; /* Darker blue hover */
+        }
+        /* Mobile menu button */
+        #mobileMenuButton {
+            display: none; /* Hidden by default, shown on mobile */
+        }
+        @media (max-width: 768px) {
+            #mobileMenuButton {
+                display: block;
+            }
+            #sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+                z-index: 40; /* Ensure sidebar is above content but below overlay */
+            }
+            #sidebar.open {
+                transform: translateX(0);
+            }
+            #sidebarOverlay {
+                display: none; /* Hidden by default */
+                position: fixed;
+                inset: 0;
+                background-color: rgba(0,0,0,0.5);
+                z-index: 30; /* Below sidebar */
+            }
+            #sidebarOverlay.active {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <div class="flex flex-col md:flex-row min-h-screen">
+        <!-- Mobile Menu Button -->
+        <button id="mobileMenuButton" class="md:hidden fixed top-4 left-4 z-50 p-2 bg-blue-500 text-white rounded-md shadow-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+        </button>
+
+        <!-- Sidebar / Navigation -->
+        <nav id="sidebar" class="fixed md:static inset-y-0 left-0 w-64 bg-white shadow-lg p-6 space-y-2 overflow-y-auto transform md:transform-none">
+            <h2 class="text-xl font-semibold text-gray-800 mb-6 border-b pb-2">Audit Sections</h2>
+            <a href="#" class="nav-link active" data-section="overview">Overview</a>
+            <a href="#" class="nav-link" data-section="technical">Technical Performance</a>
+            <a href="#" class="nav-link" data-section="seo">SEO Performance</a>
+            <a href="#" class="nav-link" data-section="ux-ui">UX/UI Evaluation</a>
+            <a href="#" class="nav-link" data-section="benchmarking">Benchmarking</a>
+            <a href="#" class="nav-link" data-section="recommendations">Recommendations</a>
+            <a href="#" class="nav-link" data-section="conclusion">Conclusion</a>
+            <a href="#" class="nav-link" data-section="sources">Sources</a>
+        </nav>
+
+        <!-- Sidebar Overlay for Mobile -->
+        <div id="sidebarOverlay" class=""></div>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 p-6 md:p-10 overflow-y-auto">
+            <header class="mb-8">
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Website Performance Audit: TheDesignAgency.ca</h1>
+                <p class="text-gray-600 mt-1">A Comprehensive Review and Roadmap for Optimization</p>
+            </header>
+            <div id="contentArea">
+                <!-- Content will be loaded here by JavaScript -->
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- Data for the SPA ---
+        const auditData = {
+            overview: {
+                title: "Audit Overview",
+                content: `
+                    <div class="content-card">
+                        <h3>Introduction</h3>
+                        <p>This audit examines TheDesignAgency.ca's website across three critical pillars:</p>
+                        <ul>
+                            <li><strong>Technical Performance:</strong> How fast and efficiently the site loads and functions.</li>
+                            <li><strong>SEO Performance:</strong> How well the site is optimized for search engines.</li>
+                            <li><strong>UX/UI Evaluation:</strong> The overall user experience, design clarity, and accessibility.</li>
+                        </ul>
+                        <p><strong>Goal:</strong> Identify strengths, weaknesses, and actionable recommendations to enhance online presence and effectiveness.</p>
+                    </div>
+                `
+            },
+            technical: {
+                title: "Technical Performance",
+                content: `
+                    <div class="content-card">
+                        <h3>Page Load Speed (Desktop & Mobile)</h3>
+                        <p>TheDesignAgency.ca’s page load speed shows room for improvement, especially on mobile devices. Desktop performance is generally faster. The site’s visually rich design can slow initial load on both platforms.</p>
+                        <ul>
+                            <li><strong>Mobile:</strong> Initial paint and fully loaded times are likely several seconds, above recommended thresholds. Target LCP ≤2.5 seconds. Slower mobile load could lead to higher bounce rates.</li>
+                            <li><strong>Desktop:</strong> LCP probably better (2–3s range) but should also aim for <2.5s.</li>
+                        </ul>
+                    </div>
+                    <div class="content-card">
+                        <h3>Core Web Vitals (LCP, FID, CLS)</h3>
+                        <p>Critical indicators of page experience. Google thresholds for “Good”: LCP ≤2.5s, FID ≤100ms, CLS ≤0.1.</p>
+                        <ul>
+                            <li><strong>LCP (Largest Contentful Paint):</strong> Likely longer than 2.5s due to imagery. Slow server responses or unoptimized images contribute.</li>
+                            <li><strong>FID (First Input Delay):</strong> Should be <100ms. Heavy JavaScript (animations, portfolio filtering) could delay interactivity. Defer/optimize main-thread blocking scripts.</li>
+                            <li><strong>CLS (Cumulative Layout Shift):</strong> Should be <0.1. Dynamic content (sliders, galleries) needs careful implementation (e.g., width/height attributes for images).</li>
+                        </ul>
+                        <p>Likely TheDesignAgency.ca does not fully meet all Web Vitals thresholds on mobile. Addressing these will boost UX and SEO.</p>
+                    </div>
+                    <div class="content-card">
+                        <h3>Server Response Times (TTFB)</h3>
+                        <p>Time to First Byte (TTFB) appears to be an area to improve. Google’s Lighthouse flags TTFB over 600ms.</p>
+                        <ul>
+                            <li>The site's server (dsl4u.ca host) may not use a high-performance CDN.</li>
+                            <li>If current TTFB is ~800ms or above, it's a clear target for optimization. Ideal: few hundred ms. Best practice: <200ms.</li>
+                            <li><strong>Improvements:</strong> Optimize backend/database, upgrade hosting, enable server-side caching.</li>
+                        </ul>
+                    </div>
+                    <div class="content-card">
+                        <h3>Asset Optimization (Images, CSS, JS)</h3>
+                        <p>Key opportunity. High-quality imagery often means large files.</p>
+                        <ul>
+                            <li><strong>Images:</strong> Compress JPEGs/PNGs. Serve in WebP or AVIF (reduces size by ~25-30%). Use proper dimensions, <code>srcset</code> for responsive loading, and lazy loading for off-screen images.</li>
+                            <li><strong>CSS/JS:</strong> Combine and minify files. Remove unused CSS. Inline critical CSS, defer non-critical styles. Minify and defer/async load non-essential JS.</li>
+                            <li><strong>Webfonts:</strong> Load with <code>font-display: swap</code>.</li>
+                        </ul>
+                        <p>Image compression alone can yield significant byte savings (20-50%).</p>
+                    </div>
+                    <div class="content-card">
+                        <h3>CDN and Caching Strategy</h3>
+                        <p>No evidence of CDN usage. Implementing one (Cloudflare, AWS CloudFront) is a strong improvement for global load times and scalability.</p>
+                        <ul>
+                            <li><strong>Caching:</strong> Send proper <code>cache-control</code> headers for static resources (cache for days/weeks). Enable server-side page caching (especially for mostly static sites).</li>
+                        </ul>
+                        <p>Quick wins: Add CDN, maximize browser and server-level caching. This improves speed and LCP.</p>
+                    </div>
+                `
+            },
+            seo: {
+                title: "SEO Performance",
+                content: `
+                    <div class="content-card">
+                        <h3>On-Page SEO (Meta Tags, Headers, Content)</h3>
+                        <p>Fundamentals need evaluation for crawlability and signaling.</p>
+                        <ul>
+                            <li><strong>Title Tags:</strong> Unique, descriptive, <60 characters, include keywords. Tailor for each page.</li>
+                            <li><strong>Meta Descriptions:</strong> ~150-160 characters, summarize content, entice clicks. Fix missing/duplicate ones.</li>
+                            <li><strong>Header Structure:</strong> One H1 per page (clear topic, keywords). Hierarchical H2-H6 for structure.</li>
+                            <li><strong>Content:</strong> Include textual content (descriptions, services) for indexing, not just images.</li>
+                        </ul>
+                    </div>
+                    <div class="content-card">
+                        <h3>Off-Page Signals and Backlinks</h3>
+                        <p>Appears moderate. Backlinks from press and industry (Hospitality Design, Canadian Architect). These are valuable.</p>
+                        <ul>
+                            <li>Profile: Few hundred referring domains (blogs, news, portfolio listings). Quality > quantity.</li>
+                            <li>No indication of spammy/toxic backlinks.</li>
+                            <li>Compared to top global agencies, backlink count might be lower. Domain Rating/Authority likely mid-range.</li>
+                            <li><strong>Strategy:</strong> Create shareable content, guest posting, relevant directories, leverage press for links. Active social media helps visibility.</li>
+                        </ul>
+                    </div>
+                    <div class="content-card">
+                        <h3>Sitemap and Robots.txt Integrity</h3>
+                        <p>Essential technical SEO. Access issues encountered during audit; verification needed.</p>
+                        <ul>
+                            <li><strong>robots.txt:</strong> Allow search engines to crawl public pages. Should not block important resources. Link to sitemap.</li>
+                            <li><strong>XML Sitemap:</strong> List all important URLs. Submit to Google/Bing. Crucial for indexation. Generate if missing. Ensure URLs are 200 OK.</li>
+                        </ul>
+                        <p>Check Search Console for crawl errors/indexing warnings.</p>
+                    </div>
+                    <div class="content-card">
+                        <h3>Indexing Status and Crawl Issues</h3>
+                        <p>Main pages appear indexed (via <code>site:</code> search). No obvious de-indexing.</p>
+                        <ul>
+                            <li>Verify all key pages (portfolio, case studies) are indexed. Missing pages could indicate crawl depth or internal linking issues.</li>
+                            <li>Check for inadvertent <code>noindex</code> tags or improper canonicals.</li>
+                            <li>No severe crawl issues found. Run crawl (Screaming Frog) for broken links (404s), redirect loops. Optimize internal linking anchor text.</li>
+                            <li>Review Search Console coverage report. Ensure preferred version (HTTPS + www) is indexed.</li>
+                        </ul>
+                    </div>
+                    <div class="content-card">
+                        <h3>Structured Data / Schema Usage</h3>
+                        <p>Currently a **missed opportunity**. Enhances search appearance.</p>
+                        <ul>
+                            <li><strong>Minimum:</strong> Implement <code>Organization</code> schema on homepage (name, logo, contact, social).</li>
+                            <li><strong>Consider:</strong> <code>BreadcrumbList</code> for navigation, <code>CreativeWork</code> or <code>Project</code> for portfolio items, <code>LocalBusiness</code> for physical office.</li>
+                            <li>Test with Google’s Rich Results Test. Improves machine readability and can improve CTR.</li>
+                        </ul>
+                    </div>
+                `
+            },
+            'ux-ui': {
+                title: "UX/UI Evaluation",
+                content: `
+                    <div class="content-card">
+                        <h3>Design Clarity and Brand Expression</h3>
+                        <p>Strong visual impression, highly visual and brand-forward (clean, modern, bold imagery). Clearly communicates creative, style-driven agency identity. Site acts as a live showcase.</p>
+                        <ul>
+                            <li>Ensure design clarity isn't sacrificed (e.g., clear homepage headline, concise overview).</li>
+                            <li>Watch for elements impeding clarity: light gray text on white, fancy fonts affecting legibility.</li>
+                            <li><strong>Contrast:</strong> Sufficient text/background contrast (WCAG: ≥4.5:1 for body text).</li>
+                        </ul>
+                        <p>Likely excels in brand/design, but maintain balance with clarity.</p>
+                    </div>
+                    <div class="content-card">
+                        <h3>Navigation and Usability</h3>
+                        <p>Should be intuitive. Main menu likely standard (Portfolio, About, Services, Careers, Contact).</p>
+                        <ul>
+                            <li>Desktop/Mobile: Ensure easy menu access and functionality.</li>
+                            <li>Usability: Pages within 1-2 clicks. Filters/sub-menus for categories. No dead-ends. Footer links.</li>
+                            <li>Page load/transitions: Use loading indicators for AJAX/fancy transitions.</li>
+                            <li>Interactive elements (sliders, galleries): Obvious controls, swipe-friendly on mobile. User-friendly contact forms.</li>
+                            <li><strong>Consistency:</strong> Heading styles, button colors.</li>
+                        </ul>
+                        <p>Minor enhancements: "Back to top" button, logical keyboard navigation.</p>
+                    </div>
+                    <div class="content-card">
+                        <h3>Accessibility (WCAG 2.1 Compliance)</h3>
+                        <p>Aim for WCAG 2.1 Level AA. Often overlooked in visual sites.</p>
+                        <ul>
+                            <li><strong>Alternative Text:</strong> All meaningful images need appropriate <code>alt</code> attributes (descriptive for portfolio). Empty <code>alt=""</code> for decorative.</li>
+                            <li><strong>Color Contrast:</strong> Sufficient text vs. background (test with checkers).</li>
+                            <li><strong>Keyboard Navigation:</strong> Fully usable with keyboard. Visible focus outline. Operable interactive elements.</li>
+                            <li><strong>ARIA and Semantic HTML:</strong> Proper heading nesting. Form labels/aria-labels. ARIA roles for custom components (modals, lightboxes). HTML5 landmarks (<code>&lt;nav&gt;</code>, <code>&lt;main&gt;</code>, etc.).</li>
+                            <li><strong>Media and Motion:</strong> Controls/pause for autoplay videos/animations. Captions/transcripts for narrated video.</li>
+                        </ul>
+                        <p>Use automated tools (Lighthouse, WAVE). Fixes improve general usability and SEO.</p>
+                    </div>
+                    <div class="content-card">
+                        <h3>Mobile Responsiveness</h3>
+                        <p>Critical due to majority mobile traffic. Appears to use responsive design.</p>
+                        <ul>
+                            <li>Verify: Easy navigation, no horizontal scrolling/zooming on smartphones.</li>
+                            <li><strong>Viewport Meta Tag:</strong> Ensure <code>&lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;</code>.</li>
+                            <li><strong>Fluid Images and Text:</strong> Images scale, text legible (≥16px body text on mobile).</li>
+                            <li><strong>Mobile Navigation:</strong> Hamburger menu easy to tap (≥48px touch target). No elements too small/close.</li>
+                            <li><strong>Performance on Mobile:</strong> Consider lighter assets for mobile (static image instead of video background, smaller image versions via <code>srcset</code>).</li>
+                            <li>Context: Easy access to contact info. Clickable phone numbers (<code>tel:</code> links), map links.</li>
+                        </ul>
+                        <p>Google uses mobile-first indexing. Ensure content parity desktop/mobile. Fine-tune mobile experience.</p>
+                    </div>
+                `
+            },
+            benchmarking: {
+                title: "Benchmarking",
+                content: `
+                    <div class="content-card">
+                        <h3>Comparison to Best-in-Class Design Agency Websites</h3>
+                        <p>Compared to top global agencies (e.g., Fantasy Interactive). Many showcase cutting-edge visuals with optimized speed/usability. Common theme: bold typography, immersive visuals.</p>
+                        <ul>
+                            <li>TheDesignAgency follows this trend. Peer sites excel in seamless integration of visuals with performance.</li>
+                            <li>Leading sites use unique interactive features (videos, 3D, scroll effects). TheDesignAgency appears more conservative (focus on photography), which is not bad.</li>
+                            <li>Trend: Minimalism and storytelling. TheDesignAgency aligns by letting imagery speak. Could enhance storytelling (narrative case studies).</li>
+                            <li><strong>Performance:</strong> Best-in-class sites use compression, code splitting, CDNs for good Lighthouse scores (80-90). Area for TheDesignAgency to catch up. Pass Core Web Vitals.</li>
+                            <li><strong>SEO:</strong> Top agencies have robust content strategies (blogs, SEO-optimized case studies). TheDesignAgency seems more static; content marketing is a growth opportunity.</li>
+                            <li><strong>UX:</strong> Top sites focus on accessibility, cross-platform consistency, usability testing.</li>
+                        </ul>
+                        <p>TheDesignAgency looks the part. Invisible aspects (speed, SEO, inclusivity) separate the "best".</p>
+                    </div>
+                    <div class="content-card">
+                        <h3>Industry-Leading Practices (Performance, SEO, UX)</h3>
+                        <ul>
+                            <li><strong>Performance:</strong> Prioritize as part of design. CDNs, lazy loading, preloading. Build optimizations (static site generators). Performance budgets. Continuous measurement.</li>
+                            <li><strong>SEO:</strong> Well-optimized, indexable pages. Schema markup. Quality backlinks. Fast mobile load times. International SEO if relevant.</li>
+                            <li><strong>UX & Accessibility:</strong> User-centric design. Usability testing. Microinteractions. Basic accessibility compliance (WCAG AA).</li>
+                            <li><strong>Content & Engagement:</strong> Strategic videos, interactive case studies. Optimized animations. Trust elements (client logos, awards). Careful integration of social feeds (lazy load).</li>
+                        </ul>
+                        <p>Holistic excellence: Looks great, loads fast, ranks well, accommodates all users.</p>
+                    </div>
+                `
+            },
+            recommendations: {
+                title: "Recommendations",
+                content: `
+                    <div class="content-card">
+                        <h3>Tools for Ongoing Testing & Monitoring</h3>
+                        <ul>
+                            <li><strong>Google Lighthouse / PageSpeed Insights:</strong> Regular lab performance reports.</li>
+                            <li><strong>Screaming Frog SEO Spider:</strong> Audit on-page SEO, technical issues.</li>
+                            <li><strong>Google Search Console:</strong> Monitor indexing, Core Web Vitals (field data), mobile usability, crawl errors.</li>
+                            <li><strong>Ahrefs / Moz / SEMrush:</strong> Monitor backlinks, keyword rankings, authority score.</li>
+                            <li><strong>GTmetrix / WebPageTest:</strong> Deeper performance insights, waterfall analysis.</li>
+                            <li><strong>Accessibility Testing Tools:</strong> AXE, WAVE for WCAG issues.</li>
+                            <li><strong>Analytics & Heatmaps:</strong> Google Analytics, Hotjar/Crazy Egg for user behavior insights.</li>
+                        </ul>
+                        <p>Routine use makes maintenance proactive.</p>
+                    </div>
+                    <div class="content-card">
+                        <h3>Quick Wins (Immediate Improvements)</h3>
+                        <ol class="list-decimal pl-6">
+                            <li><strong>Compress & Convert Images:</strong> Use tools (ImageOptim), serve WebP/AVIF.</li>
+                            <li><strong>Implement Lazy Loading:</strong> For off-screen images (<code>loading="lazy"</code>).</li>
+                            <li><strong>Leverage Browser Caching:</strong> Set long <code>max-age</code> headers for static assets. Enable gzip/Brotli.</li>
+                            <li><strong>Minify CSS/JS:</strong> Remove unnecessary code, bundle files.</li>
+                            <li><strong>Reduce Server Response Time (TTFB):</strong> Enable page caching (CMS). Check server plan.</li>
+                            <li><strong>Fix Low-Hanging SEO/Content Issues:</strong> Add/optimize meta tags, ensure H1s. Fix broken links.</li>
+                            <li><strong>Add Alt Text to Images:</strong> Descriptive alt attributes for all meaningful images.</li>
+                            <li><strong>Improve Tap Targets on Mobile:</strong> Ensure ~48px touch target size via CSS.</li>
+                            <li><strong>Add Organization Schema:</strong> Basic JSON-LD on homepage.</li>
+                        </ol>
+                        <p>These yield immediate boosts in speed, Lighthouse scores, and potentially SEO.</p>
+                    </div>
+                    <div class="content-card">
+                        <h3>Long-Term Improvements (Strategic Enhancements)</h3>
+                        <ul>
+                            <li><strong>Adopt a Performance-First Development Process:</strong> Culture of performance. Refactor/streamline code. Performance budgeting. CI testing.</li>
+                            <li><strong>Content Strategy for SEO:</strong> Blog/insights section for keywords, expertise, freshness. Improve domain authority.</li>
+                            <li><strong>Comprehensive Accessibility Overhaul:</strong> Aim for full WCAG 2.1 AA. Professional audit. Training.</li>
+                            <li><strong>Implement a CDN & Advanced Caching:</strong> Robust CDN. Service worker for offline caching.</li>
+                            <li><strong>Redesign for User Experience as needed:</strong> Data-driven iterative UX improvements.</li>
+                            <li><strong>Monitor and Improve Core Web Vitals (Field Data):</strong> Use real-user metrics. Adaptive loading.</li>
+                            <li><strong>Security and Technical Upkeep:</strong> Latest TLS, HTTP/2 or HTTP/3. Update CMS/plugins.</li>
+                        </ul>
+                        <p>Ensures sustained success and adaptation to evolving web standards.</p>
+                    </div>
+                `
+            },
+            conclusion: {
+                title: "Conclusion",
+                content: `
+                    <div class="content-card">
+                        <h3>Summary and Path Forward</h3>
+                        <p>TheDesignAgency.ca is a visually compelling site that effectively conveys the firm’s creative brand. By addressing the technical performance issues (speed, web vitals, server optimization), strengthening SEO foundations (on-page tweaks, content strategy, backlink growth), and refining UX/accessibility, the site can reach an exemplary level on par with the best in the industry.</p>
+                        <p>We recommend using the mentioned tools to monitor progress and ensure that improvements are verified. Many of the fixes (image optimization, caching, meta tags) can be implemented immediately, yielding quick benefits, while more strategic enhancements (content expansion, deep accessibility compliance) will ensure the site’s success in the long run.</p>
+                        <p>With these steps, TheDesignAgency’s web presence will not only <strong>look</strong> world-class but also <strong>perform</strong> and <strong>convert</strong> at a world-class level – ultimately supporting the agency’s business objectives by impressing visitors and ranking higher in search results.</p>
+                    </div>
+                `
+            },
+            sources: {
+                title: "Sources",
+                content: `
+                    <div class="content-card">
+                        <h3>Key Information Sources</h3>
+                        <p>The findings and recommendations in this audit are based on industry best practices and data from various authoritative sources, including:</p>
+                        <ul>
+                            <li>Google Web Dev / Google Search Central (Core Web Vitals, PageSpeed Insights, SEO guidelines, Schema.org)</li>
+                            <li>GTmetrix (Performance analysis, TTFB recommendations)</li>
+                            <li>Web Content Accessibility Guidelines (WCAG) 2.1</li>
+                            <li>Various SEO tool providers (Ahrefs, Moz for general principles)</li>
+                            <li>Industry publications and expert articles on web performance, SEO, and UX design.</li>
+                        </ul>
+                        <p class="mt-4 text-sm text-gray-500">Specific source links from the original document include Google Developers, Holler Digital, Web.dev (Aztekweb), WP Engine, etc., for detailed metrics and guidelines.</p>
+                    </div>
+                `
+            }
+        };
+
+        // --- SPA Logic ---
+        const navLinks = document.querySelectorAll('.nav-link');
+        const contentArea = document.getElementById('contentArea');
+        const mobileMenuButton = document.getElementById('mobileMenuButton');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        function loadContent(sectionId) {
+            // Update active link
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.dataset.section === sectionId) {
+                    link.classList.add('active');
+                }
+            });
+
+            // Load content
+            const sectionData = auditData[sectionId];
+            if (sectionData) {
+                // No need to set title here as main title is static
+                contentArea.innerHTML = sectionData.content;
+                // Scroll to top of content area
+                contentArea.scrollTop = 0; 
+                // For main page scroll on mobile after content load
+                if (window.innerWidth < 768) {
+                    window.scrollTo(0,0);
+                }
+
+            } else {
+                contentArea.innerHTML = '<p class="text-red-500">Content not found for this section.</p>';
+            }
+            
+            // Close sidebar on mobile after navigation
+            if (sidebar.classList.contains('open')) {
+                sidebar.classList.remove('open');
+                sidebarOverlay.classList.remove('active');
+            }
+        }
+
+        // Event listeners for navigation links
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const sectionId = e.target.closest('.nav-link').dataset.section;
+                loadContent(sectionId);
+            });
+        });
+
+        // Mobile menu toggle
+        mobileMenuButton.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+            sidebarOverlay.classList.toggle('active');
+        });
+        
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('active');
+        });
+
+
+        // Initial content load
+        loadContent('overview'); // Load 'overview' section by default
+
+    </script>
+</body>
+</html>
