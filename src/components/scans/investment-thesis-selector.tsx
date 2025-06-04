@@ -300,6 +300,7 @@ export function InvestmentThesisSelector({ value, onChange }: InvestmentThesisSe
   const currentValue = value || defaultValue
   
   const handleThesisTypeChange = (thesisType: ThesisType | 'custom') => {
+    console.log('Thesis type changed to:', thesisType) // Debug log
     if (thesisType === 'custom') {
       onChange({
         thesisType: 'custom',
@@ -398,30 +399,47 @@ export function InvestmentThesisSelector({ value, onChange }: InvestmentThesisSe
         <CardContent className="space-y-4">
           <div>
             <Label htmlFor="thesis-type">Thesis Type</Label>
-            <Select
-              value={currentValue.thesisType}
-              onValueChange={handleThesisTypeChange}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select investment thesis type" />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(PE_THESIS_TYPES).map(([key, thesis]) => (
-                  <SelectItem key={key} value={key}>
+            <div className="space-y-2">
+              <Select
+                value={currentValue.thesisType}
+                onValueChange={handleThesisTypeChange}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select investment thesis type" />
+                </SelectTrigger>
+                <SelectContent className="z-50">
+                  {Object.entries(PE_THESIS_TYPES).map(([key, thesis]) => (
+                    <SelectItem key={key} value={key} className="cursor-pointer">
+                      <div className="flex flex-col">
+                        <span className="font-medium">{thesis.name}</span>
+                        <span className="text-xs text-muted-foreground truncate max-w-[300px]">{thesis.description}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                  <SelectItem value="custom" className="cursor-pointer">
                     <div className="flex flex-col">
-                      <span className="font-medium">{thesis.name}</span>
-                      <span className="text-xs text-muted-foreground">{thesis.description}</span>
+                      <span className="font-medium">Custom Thesis</span>
+                      <span className="text-xs text-muted-foreground">Create your own investment framework</span>
                     </div>
                   </SelectItem>
-                ))}
-                <SelectItem value="custom">
-                  <div className="flex flex-col">
-                    <span className="font-medium">Custom Thesis</span>
-                    <span className="text-xs text-muted-foreground">Create your own investment framework</span>
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
+                </SelectContent>
+              </Select>
+              
+              {/* Debug: Test with native select */}
+              <div className="text-xs text-muted-foreground">
+                Debug test - Native select: 
+                <select 
+                  value={currentValue.thesisType} 
+                  onChange={(e) => handleThesisTypeChange(e.target.value as any)}
+                  className="ml-2 p-1 border rounded"
+                >
+                  {Object.entries(PE_THESIS_TYPES).map(([key, thesis]) => (
+                    <option key={key} value={key}>{thesis.name}</option>
+                  ))}
+                  <option value="custom">Custom Thesis</option>
+                </select>
+              </div>
+            </div>
           </div>
           
           {selectedThesis && (
