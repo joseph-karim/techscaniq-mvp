@@ -45,21 +45,32 @@ export function Header({ user }: HeaderProps) {
   }
 
   return (
-    <header className="border-b border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-deep-navy">
-      <div className="flex h-16 items-center justify-between px-4 md:px-6">
-        <div className="flex items-center gap-4">
+    <header className="border-b border-gray-100 bg-white shadow-sm dark:border-gray-800 dark:bg-brand-gunmetal-gray">
+      <div className="flex h-16 items-center justify-between px-6 md:px-8">
+        <div className="flex items-center gap-6">
           <Button variant="ghost" size="icon" className="md:hidden">
             <Menu className="h-6 w-6" />
             <span className="sr-only">Toggle menu</span>
           </Button>
-          <Link to="/dashboard" className="hidden items-center gap-2 md:flex">
+          <Link to="/dashboard" className="hidden items-center gap-3 md:flex">
             <img src="/favicon.svg" alt="TechScan IQ" className="h-8 w-8" />
-            <span className="text-lg font-bold text-deep-navy dark:text-white">TechScan IQ</span>
+            <div className="flex flex-col">
+              <span className="font-heading text-h4 font-medium text-brand-gunmetal-gray dark:text-white">
+                TechScan IQ
+              </span>
+              <span className="text-caption text-brand-digital-teal font-medium -mt-1">
+                Diligence, Decoded.
+              </span>
+            </div>
           </Link>
         </div>
         
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" className="text-slate-600 hover:bg-slate-100 hover:text-deep-navy dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white">
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="text-muted-foreground hover:bg-gray-50 hover:text-brand-gunmetal-gray dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white transition-colors"
+          >
             <HelpCircle className="h-5 w-5" />
             <span className="sr-only">Help</span>
           </Button>
@@ -67,61 +78,72 @@ export function Header({ user }: HeaderProps) {
           <Button 
             variant="ghost" 
             size="icon" 
-            className="relative text-slate-600 hover:bg-slate-100 hover:text-deep-navy dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+            className="relative text-muted-foreground hover:bg-gray-50 hover:text-brand-gunmetal-gray dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white transition-colors"
             onClick={handleNotificationClick}
           >
             <Bell className="h-5 w-5" />
             {notificationsCount > 0 && (
-              <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-risk-red text-[10px] text-white">
+              <Badge className="absolute -right-1 -top-1 h-5 w-5 rounded-full bg-risk-red text-[10px] text-white p-0 flex items-center justify-center">
                 {notificationsCount}
-              </span>
+              </Badge>
             )}
             <span className="sr-only">Notifications</span>
           </Button>
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-2 text-slate-600 hover:bg-slate-100 hover:text-deep-navy dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white">
-                <Avatar className="h-8 w-8 border border-slate-200 dark:border-slate-700">
-                  <AvatarFallback className="bg-electric-teal/10 text-electric-teal">{initials}</AvatarFallback>
+              <Button 
+                variant="ghost" 
+                className="flex items-center gap-3 text-muted-foreground hover:bg-gray-50 hover:text-brand-gunmetal-gray dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white transition-colors"
+              >
+                <Avatar className="h-8 w-8 border border-gray-200 dark:border-slate-700">
+                  <AvatarFallback className="bg-brand-digital-teal/10 text-brand-digital-teal font-medium">
+                    {initials}
+                  </AvatarFallback>
                 </Avatar>
-                <div className="hidden items-center gap-1 md:flex">
-                  <span className="text-sm font-medium">{displayName}</span>
+                <div className="hidden items-center gap-2 md:flex">
+                  <span className="text-body-sm font-medium text-brand-gunmetal-gray dark:text-white">
+                    {displayName}
+                  </span>
                   <ChevronDown className="h-4 w-4 opacity-50" />
                 </div>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <div className="px-2 py-1.5">
-                <p className="text-sm font-medium">{displayName}</p>
-                <p className="text-xs text-muted-foreground">{user.email}</p>
-                <div className="mt-1 flex items-center gap-1">
-                  <Badge className="bg-electric-teal text-[10px] px-1.5 py-0 h-4 rounded-sm font-normal">
+            <DropdownMenuContent align="end" className="w-64 p-2">
+              <div className="px-3 py-3 border-b border-gray-100">
+                <p className="text-body-sm font-medium text-brand-gunmetal-gray">{displayName}</p>
+                <p className="text-caption text-muted-foreground">{user.email}</p>
+                <div className="mt-2 flex items-center gap-2">
+                  <Badge className="bg-brand-digital-teal text-white text-[10px] px-2 py-1 h-5 rounded-sm font-medium">
                     {currentRole === 'investor' ? 'Investor' : currentRole === 'admin' ? 'Admin' : 'PE'}
                   </Badge>
-                  <span className="text-xs text-muted-foreground">{user.user_metadata?.workspace_name}</span>
+                  {user.user_metadata?.workspace_name && (
+                    <span className="text-caption text-muted-foreground">
+                      {user.user_metadata.workspace_name}
+                    </span>
+                  )}
                 </div>
               </div>
-              <DropdownMenuSeparator />
               
               <DropdownMenuItem asChild>
-                <Link to="/settings" className="flex w-full cursor-pointer">
-                  <UserIcon className="mr-2 h-4 w-4" />
-                  <span>My Profile</span>
+                <Link to="/settings" className="flex w-full cursor-pointer py-2 px-3 rounded-sm">
+                  <UserIcon className="mr-3 h-4 w-4 text-brand-digital-teal" />
+                  <span className="text-body-sm">My Profile</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link to="/settings" className="flex w-full cursor-pointer">
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
+                <Link to="/settings" className="flex w-full cursor-pointer py-2 px-3 rounded-sm">
+                  <Settings className="mr-3 h-4 w-4 text-brand-digital-teal" />
+                  <span className="text-body-sm">Settings</span>
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
+              <DropdownMenuSeparator className="my-1" />
               <DropdownMenuItem 
-                className="flex cursor-pointer" 
-                onClick={() => signOut()}>
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Sign out</span>
+                className="flex cursor-pointer py-2 px-3 rounded-sm text-risk-red hover:bg-red-50" 
+                onClick={() => signOut()}
+              >
+                <LogOut className="mr-3 h-4 w-4" />
+                <span className="text-body-sm">Sign out</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
