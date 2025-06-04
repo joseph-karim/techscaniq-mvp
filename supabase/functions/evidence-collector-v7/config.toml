@@ -1,0 +1,6 @@
+[env]
+GOOGLE_API_KEY = "secret"
+JINA_API_KEY = "secret"
+SUPABASE_URL = "secret"
+SUPABASE_ANON_KEY = "secret"
+SUPABASE_SERVICE_ROLE_KEY = "secret"

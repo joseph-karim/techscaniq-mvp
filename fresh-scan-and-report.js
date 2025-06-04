@@ -62,9 +62,9 @@ async function main() {
     headers: {
       'Authorization': `Bearer ${userToken}`,
       'Content-Type': 'application/json',
-      'x-google-api-key': 'AIzaSyA3_4HWUD371ulHhKo_xsTr9tz5C3RD3lg',
+      'x-google-api-key': process.env.GOOGLE_API_KEY || 'your-google-api-key',
       'x-anthropic-api-key': 'ANTHROPIC_API_KEY_PLACEHOLDER',
-      'x-jina-api-key': 'jina_9aa1c75a49e24353bbf005ca5798cdcaZIpoGj9_2ZEdAZpuBdEKl8bSqYZO'
+      'x-jina-api-key': process.env.JINA_API_KEY || 'your-jina-api-key'
     },
     body: JSON.stringify({
       scan_request_id: scanRequest.id

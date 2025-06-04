@@ -8,17 +8,22 @@ const corsHeaders = {
   'Access-Control-Max-Age': '86400',
 }
 
-// Function to determine if running locally (simplified)
-function isLocal(): boolean {
-  // If Deno is not defined, assume not running in a local Supabase Edge Function environment
-  // This is a simplification and might need adjustment based on actual deployment vs. local setup.
-  return typeof Deno !== 'undefined' && (Deno.env.get('SUPABASE_URL')?.includes('localhost') || Deno.env.get('SUPABASE_URL')?.includes('127.0.0.1'));
-}
 
 interface EvidenceRequest {
   companyName: string
   companyWebsite: string
   depth?: 'shallow' | 'deep' | 'comprehensive'
+  investmentThesis?: {
+    thesisType: string
+    criteria: Array<{
+      name: string
+      weight: number
+      description: string
+    }>
+    focusAreas: string[]
+    scoreReweighting?: Record<string, { weight: number; change: string }>
+  }
+  evidenceTypes?: string[]
 }
 
 interface Evidence {
@@ -45,37 +50,18 @@ interface Evidence {
 
 // Call another Supabase function with timeout
 async function callSupabaseFunction(functionName: string, payload: any, timeout: number = 30000, req?: Request): Promise<any> {
-  // Ensure SUPABASE_URL and SUPABASE_ANON_KEY are retrieved safely
-  const supabaseUrl = typeof Deno !== 'undefined' ? Deno.env.get('SUPABASE_URL') : undefined;
-  let anonKey = typeof Deno !== 'undefined' ? Deno.env.get('SUPABASE_ANON_KEY') : undefined;
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')
+  const anonKey = Deno.env.get('SUPABASE_ANON_KEY')
 
   if (!supabaseUrl || !anonKey) {
-    console.error('Supabase URL or Anon Key is not defined. Ensure environment variables are set.');
-    // Potentially throw an error or return a more specific error response
-    // For now, let's attempt to proceed but log the critical issue.
-    // This might still fail if the URL/key are essential for the fetch call.
+    throw new Error('Missing required environment variables for function calls')
   }
 
   const url = `${supabaseUrl}/functions/v1/${functionName}`
   
-  if (isLocal()) {
-    // In local dev, supabase-js might handle auth differently, 
-    // or we might use a service_role key for direct calls if not simulating user context.
-    // For direct function-to-function calls locally, often a test/anon key is fine if JWT isn't strictly enforced by the called function.
-    anonKey = anonKey || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' // Fallback to a generic anon key for local if needed
-  }
-  
   const headers: any = {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${anonKey}`
-  }
-  
-  // Forward the Google API key header if present (for local dev)
-  if (req) {
-    const googleApiKey = req.headers.get('x-google-api-key')
-    if (googleApiKey) {
-      headers['x-google-api-key'] = googleApiKey
-    }
   }
   
   const response = await Promise.race([
@@ -173,6 +159,81 @@ function getClassifications(evidence: Evidence): Array<{ category: string; score
   }
   
   return classifications
+}
+
+// Determine evidence collection priorities based on investment thesis
+function determinePrioritizedEvidenceTypes(investmentThesis?: EvidenceRequest['investmentThesis']): string[] {
+  if (!investmentThesis) {
+    return ['technical', 'security', 'team', 'financial', 'market'] // Default comprehensive collection
+  }
+
+  const thesisType = investmentThesis.thesisType
+  const focusAreas = investmentThesis.focusAreas || []
+  
+  // Base evidence types for all thesis types
+  let prioritizedTypes = ['technical', 'security', 'team']
+  
+  // Thesis-specific evidence prioritization
+  switch (thesisType) {
+    case 'accelerate-organic-growth':
+      // Focus on scalability, dev velocity, market expansion
+      prioritizedTypes = ['technical', 'infrastructure', 'devops', 'market', 'performance']
+      if (focusAreas.includes('cloud-native')) prioritizedTypes.push('cloud_infrastructure')
+      if (focusAreas.includes('scalable-architecture')) prioritizedTypes.push('architecture_analysis')
+      break
+      
+    case 'buy-and-build':
+      // Focus on integration readiness, API architecture
+      prioritizedTypes = ['technical', 'api_analysis', 'architecture', 'integration_capabilities', 'team']
+      if (focusAreas.includes('api-driven')) prioritizedTypes.push('api_documentation')
+      if (focusAreas.includes('microservices')) prioritizedTypes.push('service_architecture')
+      break
+      
+    case 'margin-expansion':
+      // Focus on cost optimization, automation potential
+      prioritizedTypes = ['infrastructure', 'cost_analysis', 'automation_opportunities', 'technical', 'operational_efficiency']
+      if (focusAreas.includes('cloud-native')) prioritizedTypes.push('cloud_cost_analysis')
+      if (focusAreas.includes('devops-maturity')) prioritizedTypes.push('deployment_automation')
+      break
+      
+    case 'turnaround-distressed':
+      // Focus on security gaps, technical debt, framework obsolescence
+      prioritizedTypes = ['security', 'technical_debt', 'compliance_gaps', 'framework_analysis', 'team_risk']
+      if (focusAreas.includes('security-focus')) prioritizedTypes.push('vulnerability_assessment')
+      if (focusAreas.includes('modern-tech-stack')) prioritizedTypes.push('technology_modernization')
+      break
+      
+    case 'carve-out':
+      // Focus on dependencies, IP/licensing, separation complexity
+      prioritizedTypes = ['dependency_analysis', 'licensing_review', 'architecture', 'separation_complexity', 'team']
+      if (focusAreas.includes('microservices')) prioritizedTypes.push('service_separation')
+      if (focusAreas.includes('api-driven')) prioritizedTypes.push('api_independence')
+      break
+      
+    case 'geographic-vertical-expansion':
+      // Focus on compliance, localization, multi-region support
+      prioritizedTypes = ['compliance_analysis', 'internationalization', 'security', 'scalability', 'regulatory_requirements']
+      if (focusAreas.includes('security-focus')) prioritizedTypes.push('compliance_certifications')
+      if (focusAreas.includes('high-availability')) prioritizedTypes.push('regional_infrastructure')
+      break
+      
+    case 'digital-transformation':
+      // Focus on platform extensibility, modernization potential
+      prioritizedTypes = ['architecture', 'extensibility_analysis', 'technical', 'integration_capabilities', 'modernization_assessment']
+      if (focusAreas.includes('microservices')) prioritizedTypes.push('service_oriented_architecture')
+      if (focusAreas.includes('api-driven')) prioritizedTypes.push('platform_apis')
+      break
+      
+    default:
+      // Custom thesis - use comprehensive collection with focus area hints
+      prioritizedTypes = ['technical', 'security', 'team', 'financial', 'market']
+      if (focusAreas.includes('security-focus')) prioritizedTypes.push('security_deep_dive')
+      if (focusAreas.includes('scalable-architecture')) prioritizedTypes.push('scalability_assessment')
+      break
+  }
+  
+  // Remove duplicates and return prioritized list
+  return [...new Set(prioritizedTypes)]
 }
 
 // Helper function to create evidence objects
@@ -616,16 +677,28 @@ Deno.serve(async (req) => {
   
   try {
     const startTime = Date.now()
-    const { companyName, companyWebsite, depth = 'deep' } = await req.json() as EvidenceRequest
+    const { companyName, companyWebsite, depth = 'deep', investmentThesis, evidenceTypes } = await req.json() as EvidenceRequest
     
     console.log(`Starting evidence collection v7 for ${companyName}`)
+    if (investmentThesis) {
+      console.log(`Using investment thesis: ${investmentThesis.thesisType}`)
+      console.log(`Focus areas: ${investmentThesis.focusAreas.join(', ')}`)
+    }
+    
+    // Determine evidence collection priorities based on investment thesis
+    const prioritizedEvidenceTypes = evidenceTypes || determinePrioritizedEvidenceTypes(investmentThesis)
     
     // Collect all evidence using all available tools
-    const collectedRawEvidence = await collectAllEvidence(companyName, companyWebsite, [], depth, req)
+    const collectedRawEvidence = await collectAllEvidence(companyName, companyWebsite, prioritizedEvidenceTypes, depth, req)
     
     // Store in database
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Missing required Supabase environment variables (SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY)')
+    }
+    
     const supabase = createClient(supabaseUrl, supabaseKey)
     
     let collectionId: string | undefined = undefined;

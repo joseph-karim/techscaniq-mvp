@@ -32,7 +32,7 @@ const supabase = createClient(
 
 export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState('overview')
-  const [allScans, setAllScans] = useState<(Scan | DemoScanRequest)[]>([])
+  const [allScans, setAllScans] = useState<(Scan | (DemoScanRequest & { is_demo: boolean }))[]>([])
   const [realReports, setRealReports] = useState<any[]>([])
   const [, setRealScans] = useState<any[]>([])
   const [aiWorkflows, setAiWorkflows] = useState<any[]>([])
@@ -52,8 +52,9 @@ export default function AdminDashboardPage() {
     async function loadAndProcessScans() {
       setLoading(true);
       
-      // Load mock demo data
-      const combinedScans = [...mockDemoScanRequests];
+      // Load mock demo data and mark it as demo
+      const demoScansWithFlag = mockDemoScanRequests.map(scan => ({ ...scan, is_demo: true }))
+      const combinedScans = [...demoScansWithFlag];
 
       // Load real data from database (admin view can see all)
       try {
@@ -70,6 +71,12 @@ export default function AdminDashboardPage() {
         setRealScans(dbScans || []);
         setRealReports(dbReports || []);
         setAiWorkflows(dbWorkflows || []);
+
+        // Add real scan requests to combined scans (marked as non-demo)
+        if (dbScans && dbScans.length > 0) {
+          const realScansWithFlag = dbScans.map(scan => ({ ...scan, is_demo: false }))
+          combinedScans.push(...realScansWithFlag)
+        }
 
         console.log('Loaded real data:', { 
           scans: dbScans?.length || 0, 
