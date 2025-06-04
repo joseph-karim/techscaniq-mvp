@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -275,9 +275,9 @@ const FOCUS_AREAS = [
 export function InvestmentThesisSelector({ value, onChange }: InvestmentThesisSelectorProps) {
   const [showCustomization, setShowCustomization] = useState(false)
   
-  // Initialize with default if no value
-  const currentValue = value || {
-    thesisType: 'accelerate-organic-growth',
+  // Initialize with default if no value and sync with parent
+  const defaultValue = {
+    thesisType: 'accelerate-organic-growth' as const,
     criteria: PE_THESIS_TYPES['accelerate-organic-growth'].criteria.map((c, i) => ({
       id: `criterion-${i}`,
       name: c.name,
@@ -286,8 +286,18 @@ export function InvestmentThesisSelector({ value, onChange }: InvestmentThesisSe
     })),
     focusAreas: [...PE_THESIS_TYPES['accelerate-organic-growth'].focusAreas],
     timeHorizon: PE_THESIS_TYPES['accelerate-organic-growth'].timeHorizon,
-    targetMultiple: PE_THESIS_TYPES['accelerate-organic-growth'].targetMultiple
+    targetMultiple: PE_THESIS_TYPES['accelerate-organic-growth'].targetMultiple,
+    notes: ''
   }
+  
+  // Initialize the parent with default value if no value is provided
+  useEffect(() => {
+    if (!value) {
+      onChange(defaultValue)
+    }
+  }, []) // Only run on mount
+  
+  const currentValue = value || defaultValue
   
   const handleThesisTypeChange = (thesisType: ThesisType | 'custom') => {
     if (thesisType === 'custom') {
@@ -362,9 +372,9 @@ export function InvestmentThesisSelector({ value, onChange }: InvestmentThesisSe
   }
   
   const toggleFocusArea = (area: string) => {
-    const newFocusAreas = currentValue.focusAreas.includes(area)
+    const newFocusAreas = currentValue.focusAreas.includes(area as any)
       ? currentValue.focusAreas.filter(a => a !== area)
-      : [...currentValue.focusAreas, area]
+      : [...currentValue.focusAreas, area as any]
     onChange({ ...currentValue, focusAreas: newFocusAreas })
   }
   
@@ -611,7 +621,7 @@ export function InvestmentThesisSelector({ value, onChange }: InvestmentThesisSe
               <div key={area.value} className="flex items-center space-x-2">
                 <Checkbox
                   id={area.value}
-                  checked={currentValue.focusAreas.includes(area.value)}
+                  checked={currentValue.focusAreas.includes(area.value as any)}
                   onCheckedChange={() => toggleFocusArea(area.value)}
                 />
                 <Label
