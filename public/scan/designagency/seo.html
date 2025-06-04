@@ -1,0 +1,435 @@
+import React, { useState, useEffect } from 'react';
+import { ChevronDown, ChevronRight, LayoutDashboard, Search, BarChart2, Users, Globe, Target, Settings, BookOpen, Menu, X } from 'lucide-react';
+
+// Helper component for collapsible sections (styled as content cards)
+const AccordionItem = ({ title, children, initiallyOpen = false }) => {
+  const [isOpen, setIsOpen] = useState(initiallyOpen);
+
+  return (
+    // Simulates .content-card from the HTML example
+    <div className="bg-white rounded-xl shadow-lg mb-6 overflow-hidden">
+      <button
+        className="w-full flex items-center justify-between p-6 text-left focus:outline-none hover:bg-gray-50 transition-colors duration-150"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        {/* Styles similar to .content-card h3 */}
+        <h3 className="text-xl font-semibold text-gray-800 flex-grow">{title}</h3>
+        {isOpen ? <ChevronDown className="text-gray-700 h-5 w-5" /> : <ChevronRight className="text-gray-700 h-5 w-5" />}
+      </button>
+      {isOpen && (
+        // Content area with padding and top border
+        <div className="px-6 pb-6 pt-4 border-t border-gray-200">
+          {/* Children (p, ul, etc.) will be styled by the parent `prose` class */}
+          {children}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Data for the sections (content remains the same, only presentation changes)
+const reportData = {
+  home: {
+    title: "Audit Overview", // Changed to match HTML example's sectioning
+    content: () => (
+      // The AccordionItem will serve as the content card
+      <AccordionItem title="Introduction" initiallyOpen={true}>
+        <p>This report provides a comprehensive analysis of TheDesignAgency.ca's online presence, covering technical SEO, on-page content strategy, off-page SEO, social media performance, competitive benchmarking, and strategic recommendations for improvement.</p>
+        <p>Navigate through the sections using the sidebar to explore the detailed findings and actionable insights.</p>
+         <p><strong>Goal:</strong> Identify strengths, weaknesses, and actionable recommendations to enhance online presence and effectiveness.</p>
+      </AccordionItem>
+    )
+  },
+  technicalSeo: {
+    title: "Technical Performance", // Changed to match HTML example
+    icon: <Settings className="mr-3 h-5 w-5" />,
+    content: () => (
+      <>
+        <AccordionItem title="Page Speed & Performance" initiallyOpen={true}>
+          <p>TheDesignAgency.ca’s page load speed appears to be an area for improvement. Fast-loading sites are crucial, especially on mobile. According to Google research, 53% of mobile users abandon a site if it takes longer than 3 seconds to load. PageSpeed Insights or Lighthouse audits should be run to get specific metrics. Key indicators like Largest Contentful Paint (LCP) (should be ≤2.5s), First Input Delay (FID) (≤100ms), and Cumulative Layout Shift (CLS)(≤0.1) are critical for a “good” user experience. If the site currently fails any Core Web Vitals benchmarks, it could impact SEO rankings (Google has incorporated these metrics into its ranking algorithm).</p>
+          <h4>Likely Culprits & Recommendations:</h4>
+          <ul>
+            <li><strong>Image optimization:</strong> Compress and use next-gen formats (WebP/AVIF) for high-res project images. Ensure images have explicit width/height to reduce layout shifts (helping CLS).</li>
+            <li><strong>Caching & Minification:</strong> Leverage browser caching, and minify CSS/JS files. Use a Content Delivery Network (CDN) to speed up global load times.</li>
+            <li><strong>Lazy Loading:</strong> Implement lazy loading for offscreen images/videos to improve initial load.</li>
+            <li><strong>Fewer HTTP Requests:</strong> Combine files and eliminate any unnecessary third-party scripts or plugins.</li>
+          </ul>
+          <p>Improving load speed will not only reduce bounce rates but also potentially improve conversion. (For instance, a site that loads in 1s has a conversion rate 5× higher than one that loads in 10s.) In summary, aim for an LCP under 2.5s, FID under 100ms, and CLS below 0.1 for at least 75% of users to meet Google’s Core Web Vitals standards.</p>
+        </AccordionItem>
+        <AccordionItem title="Mobile Responsiveness">
+          <p>The site appears to be built with responsive design in mind. Mobile usability is generally good. However, a formal Mobile-Friendly Test is recommended.</p>
+          <p>Mobile-first indexing is key. Ensure the mobile site has content parity with desktop. No critical mobile errors were observed. Ensure tap targets are adequately spaced and fonts legible.</p>
+        </AccordionItem>
+        <AccordionItem title="Indexing & Crawlability">
+          <p>Google has indexed main pages. Verify all key URLs are crawlable. Review robots.txt and XML sitemap. Site architecture is shallow, which is good. Verify no orphan pages. Internal linking can be improved.</p>
+          <p>Check for index bloat. No major duplicate content issues noticed. Ensure canonical versions are indexed.</p>
+        </AccordionItem>
+        <AccordionItem title="Core Web Vitals (LCP, FID, CLS)">
+          <p>LCP might be affected by large hero images/videos. FID might be fine if the site is not script-heavy. CLS could occur if images/embeds lack fixed dimensions.</p>
+          <p>Aim for “Good” scores: LCP {'<'}2.5s, FID {'<'}100ms, CLS {'<'}0.1. Monitor via Search Console.</p>
+          <p><em>(Technical SEO Summary: Improve page speed significantly. A faster, mobile-optimized site with clean crawlability is foundational. Addressing Core Web Vitals helps rankings and user retention.)</em></p>
+        </AccordionItem>
+      </>
+    )
+  },
+  onPageSeo: { // Renamed key to match HTML data-section
+    title: "SEO Performance", // Changed to match HTML example
+    icon: <Search className="mr-3 h-5 w-5" />,
+    content: () => (
+      <>
+        <AccordionItem title="Keyword Strategy & Rankings" initiallyOpen={true}>
+          <p>Site likely ranks for brand name but not many generic industry keywords. Minimal presence for non-branded queries. This is a missed opportunity.</p>
+          <h4>Keyword Categories to Target:</h4>
+          <ul>
+            <li><strong>Service keywords:</strong> e.g., “interior design studio in Toronto”.</li>
+            <li><strong>Project-specific keywords:</strong> e.g., “Pendry Washington DC interior design”.</li>
+            <li><strong>Thought leadership keywords:</strong> e.g., “hotel design trends 2025”. Lacks a blog currently.</li>
+          </ul>
+          <p>A ranking keywords report would provide insights.</p>
+        </AccordionItem>
+        <AccordionItem title="Metadata Optimization (Titles & Descriptions)">
+          <p>Some pages have simplistic meta titles. Titles should be unique, descriptive, and keyword-rich (~50-60 chars). Homepage title could include a tagline. Meta descriptions (~150-160 chars) influence CTR.</p>
+          <p>Portfolio item pages could have more descriptive titles. Ensure all meta tags are filled. Use schema markup.</p>
+        </AccordionItem>
+        <AccordionItem title="Content Quality & Depth">
+          <p>Site is visually rich but text-light. Thin content can be an SEO problem. Average top 10 Google result: ~1,447 words. Add more context to project pages (case study narrative).</p>
+          <p>Conduct a content audit. Consider a dedicated services section. Add fresh content regularly (News & Insights). Ensure content uniqueness.</p>
+          <p><em>(On-Page SEO Summary: Expand and optimize content for targeted keywords, ensure metadata is on-point, and weave an internal link web that helps both users and search engines navigate the site’s content.)</em></p>
+        </AccordionItem>
+         <AccordionItem title="Internal Linking Structure">
+          <p>Internal linking revolves around main navigation. Opportunity for more contextual links within content. Use descriptive anchor text. No broken internal links found, which is good.</p>
+        </AccordionItem>
+      </>
+    )
+  },
+  offPageSeo: {
+    title: "Off-Page SEO Evaluation", // Adjusted title for clarity
+    icon: <Globe className="mr-3 h-5 w-5" />,
+    content: () => (
+      <>
+        <AccordionItem title="Backlink Profile – Volume & Quality" initiallyOpen={true}>
+          <p>Backlink quantity is modest but many are from high-quality, relevant sources (press, design magazines). Continue earning quality links. Increase domain diversity.</p>
+          <h4>Recommendations:</h4>
+          <ul>
+            <li>PR & Outreach for new projects.</li>
+            <li>Thought leadership articles on external platforms.</li>
+            <li>Awards & Directory submissions.</li>
+            <li>Partner links.</li>
+          </ul>
+          <p>Avoid spammy backlinks. No obvious toxic links detected.</p>
+        </AccordionItem>
+        <AccordionItem title="Domain Authority & Competitiveness">
+          <p>DA is moderate (~30s). Leading global agencies have DA in 70-80+. This makes ranking for broad terms challenging. DA can be improved by earning quality links. Domain age (~1998) adds some credibility.</p>
+        </AccordionItem>
+        <AccordionItem title="Anchor Text Distribution">
+          <p>Most backlinks use brand name or company name anchors, which is natural. No evidence of over-optimized keyword anchors. Maintain diversity. Favor branded or contextual anchors for new links.</p>
+          <p><em>(Off-Page SEO Summary: Build on reputation by increasing authoritative backlinks. Focus on quality and diversity. Maintain natural anchor text. This will boost site authority.)</em></p>
+        </AccordionItem>
+      </>
+    )
+  },
+  socialMedia: { // Key for Social Media
+    title: "Social Media Analysis", // Adjusted for clarity
+    icon: <Users className="mr-3 h-5 w-5" />,
+    content: () => (
+      <>
+        <AccordionItem title="Active Platforms & Audience Size" initiallyOpen={true}>
+          <ul>
+            {/* Corrected the > character here */}
+            <li><strong>Instagram (@thedesignagency):</strong> ~35k followers, {'>'}550 posts. Standout platform.</li>
+            <li><strong>LinkedIn:</strong> ~10.5k followers. Professional updates, job postings.</li>
+            <li><strong>Facebook:</strong> ~1.9k likes/followers. Lower activity.</li>
+            <li><strong>Twitter (X) (@thedesignagency):</strong> Moderate followers. Quick updates.</li>
+            <li><strong>Pinterest:</strong> Profile exists.</li>
+          </ul>
+        </AccordionItem>
+        <AccordionItem title="Follower Growth & Engagement Rates">
+          <p>Strong growth on Instagram & LinkedIn. Engagement on Instagram ~1-2%. LinkedIn shows decent peer interaction. Facebook engagement is low.</p>
+        </AccordionItem>
+        <AccordionItem title="Content Types, Frequency, and Resonance">
+          <p><strong>Instagram:</strong> Visual, 1-2 posts/week. Storytelling/success resonates. <strong>LinkedIn:</strong> Professional, few times/month. News/projects do well. <strong>Facebook/Twitter:</strong> Lower frequency/engagement.</p>
+          <p>Social media drives 5-15% of site traffic (est.), mainly from LinkedIn/Instagram.</p>
+        </AccordionItem>
+        <AccordionItem title="Recommendations for Social Strategy Optimization">
+         <ul>
+            <li><strong>Instagram:</strong> More Reels, carousels, user-generated content.</li>
+            <li><strong>LinkedIn:</strong> Increase thought leadership (Articles), explore Newsletters/Live events.</li>
+            <li><strong>Pinterest:</strong> Optimize boards if SEO traffic is a goal.</li>
+            <li><strong>General:</strong> Consistency, cross-promotion, integrate feeds on website.</li>
+          </ul>
+          <p><em>(Social Media Summary: Leverage strong Instagram/LinkedIn. Convert followers to traffic/leads. Align content with platform strengths.)</em></p>
+        </AccordionItem>
+      </>
+    )
+  },
+  competitiveBenchmarking: { // Key for Benchmarking
+    title: "Competitive Benchmarking",
+    icon: <BarChart2 className="mr-3 h-5 w-5" />,
+    content: () => (
+      <>
+        <AccordionItem title="SEO Authority & Visibility vs. Global Agencies" initiallyOpen={true}>
+          <p>Compared to Pentagram, IDEO, Landor, frog. Their DAs are much higher (70-80s vs. DesignAgency's ~30-40). They rank for broad terms. Competitors have robust content strategies (blogs, reports), which DesignAgency lacks.</p>
+        </AccordionItem>
+        <AccordionItem title="Social Media Presence vs. Global Agencies">
+          <p><strong>Instagram:</strong> Pentagram 1M+, IDEO 231k. DesignAgency's 35k is respectable for its size. <strong>LinkedIn:</strong> IDEO 648k, Landor 224k. DesignAgency's 10k is solid. Competitors use YouTube more.</p>
+        </AccordionItem>
+        <AccordionItem title="Strengths, Weaknesses, Opportunities (SWOT)">
+          <ul>
+            <li><strong>Strengths:</strong> Strong hospitality portfolio, global locations, agile, good Instagram.</li>
+            <li><strong>Weaknesses:</strong> Less globally known, fewer backlinks, lacks extensive content.</li>
+            <li><strong>Opportunities:</strong> Dominate hospitality design niche content, local SEO, newer platforms.</li>
+          </ul>
+        </AccordionItem>
+        <AccordionItem title="Comparative Snapshot Table">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200 border border-gray-300">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Agency</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DA (Moz)</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ref. Domains</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IG Followers</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">LI Followers</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                <tr><td className="px-4 py-3 text-sm">DesignAgency</td><td className="px-4 py-3 text-sm">~35–40</td><td className="px-4 py-3 text-sm">few hundred</td><td className="px-4 py-3 text-sm">~35K</td><td className="px-4 py-3 text-sm">~10K</td></tr>
+                <tr><td className="px-4 py-3 text-sm">Pentagram</td><td className="px-4 py-3 text-sm">~80+</td><td className="px-4 py-3 text-sm">thousands</td><td className="px-4 py-3 text-sm">1M+</td><td className="px-4 py-3 text-sm">Partners active</td></tr>
+                <tr><td className="px-4 py-3 text-sm">IDEO</td><td className="px-4 py-3 text-sm">~88</td><td className="px-4 py-3 text-sm">18k+</td><td className="px-4 py-3 text-sm">231K</td><td className="px-4 py-3 text-sm">648K</td></tr>
+              </tbody>
+            </table>
+          </div>
+           <p><em>(Competitive Benchmark Summary: DesignAgency can compete in its niche by leveraging visual content and specialization. Adopt content marketing like global players.)</em></p>
+        </AccordionItem>
+      </>
+    )
+  },
+  strategicRecommendations: { // Key for Recommendations
+    title: "Strategic Recommendations",
+    icon: <Target className="mr-3 h-5 w-5" />,
+    content: () => (
+      <>
+        <AccordionItem title="1. Technical SEO Enhancements" initiallyOpen={true}>
+          <ul>
+            <li>Improve Page Speed (target scores {'>'}90).</li>
+            <li>Monitor Core Web Vitals.</li>
+            <li>Ensure Mobile-First Best Practices.</li>
+            <li>Implement Structured Data (Schema).</li>
+            <li>Consider International SEO (hreflang if needed).</li>
+          </ul>
+        </AccordionItem>
+        <AccordionItem title="2. On-Page Content & SEO Strategy">
+          <ul>
+            <li>Develop a Content Calendar (Blog/Insights, aim for {'>'}1000 words).</li>
+            <li>Optimize Existing Pages (expand text, alt text).</li>
+            <li>Overhaul Meta Titles & Descriptions.</li>
+            <li>Target Keywords with dedicated pages/articles.</li>
+            <li>Improve Internal Linking.</li>
+            <li>Focus on Local SEO for office locations.</li>
+          </ul>
+        </AccordionItem>
+         <AccordionItem title="3. Off-Page & Backlink Strategy">
+          <ul>
+            <li>Digital PR Campaigns.</li>
+            <li>Guest Posting / Thought Leadership.</li>
+            <li>Create Case Studies & Whitepapers.</li>
+            <li>Submit to Awards & Directories.</li>
+            <li>Amplify Social Links.</li>
+            <li>Monitor mentions and maintain link quality.</li>
+          </ul>
+        </AccordionItem>
+        <AccordionItem title="4. Social Media & Brand Strategy">
+           <ul>
+            <li>Integrated Content Strategy (repurpose blog content for social).</li>
+            <li>Encourage Employee Advocacy.</li>
+            <li>Engage with Community (reply to comments, join discussions).</li>
+            <li>Platform-specific ideas (IG Live, LinkedIn Newsletter, YouTube videos).</li>
+            <li>Use Analytics to adjust strategy and add CTAs for conversion.</li>
+          </ul>
+        </AccordionItem>
+        <AccordionItem title="5. Site Architecture & UX Improvements">
+          <ul>
+            <li>Review Navigation and Site UX (consider "Expertise" section, portfolio filters).</li>
+            <li>Ensure Multimedia Accessibility (alt text, video transcripts).</li>
+            <li>Monitor Technical Health (Search Console, CDN).</li>
+            <li>Optimize for Conversions (clear CTAs).</li>
+            <li>Track and Measure with GA4.</li>
+          </ul>
+        </AccordionItem>
+      </>
+    )
+  },
+  sources: {
+    title: "Sources",
+    icon: <BookOpen className="mr-3 h-5 w-5" />,
+    content: () => (
+      <AccordionItem title="Key Information Sources" initiallyOpen={true}>
+        <p>The findings and recommendations in this audit are based on industry best practices and data from various authoritative sources, including:</p>
+        <ul>
+          <li>Martin Wolf – Mobile user behavior stat</li>
+          <li>Google’s Core Web Vitals thresholds / Google Web Dev / Google Search Central</li>
+          <li>LinkedIn / Instagram – Company follower counts & engagement data</li>
+          <li>General SEO best practices (meta tags, content length, internal linking, backlink quality, anchor text)</li>
+          <li>Social media stats for competitors (publicly available data)</li>
+          <li>GTmetrix, Web Content Accessibility Guidelines (WCAG) 2.1</li>
+        </ul>
+      </AccordionItem>
+    )
+  }
+};
+
+const App = () => {
+  const [activeSectionKey, setActiveSectionKey] = useState('home');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Map keys from HTML example to reportData keys if different
+  const sectionKeyMap = {
+    'overview': 'home',
+    'technical': 'technicalSeo',
+    'seo': 'onPageSeo', // Matches HTML data-section="seo"
+    'ux-ui': 'socialMedia', // Placeholder - UX/UI was not a top-level key in original React, mapping to social for now
+    'benchmarking': 'competitiveBenchmarking', // Matches HTML data-section="benchmarking"
+    'recommendations': 'strategicRecommendations', // Matches HTML data-section="recommendations"
+    // 'conclusion': 'conclusion', // No direct match in React structure, can be part of recommendations or overview
+    'sources': 'sources' // Matches HTML data-section="sources"
+  };
+  
+  const currentReportSection = reportData[activeSectionKey] || reportData.home;
+  const SectionContent = currentReportSection.content;
+
+  const navItems = [
+    // These titles and data-sections should match the HTML example for navigation
+    { id: 'overview', title: 'Overview', icon: <LayoutDashboard className="mr-3 h-5 w-5" />, dataSection: 'overview' },
+    { id: 'technical', title: 'Technical Performance', icon: <Settings className="mr-3 h-5 w-5" />, dataSection: 'technical' },
+    { id: 'seo', title: 'SEO Performance', icon: <Search className="mr-3 h-5 w-5" />, dataSection: 'seo' },
+    // The HTML example has UX/UI, which is split across technical/on-page in the detailed text.
+    // For simplicity, I'm using the Social Media section from React for the "UX/UI" nav item, or you can create a dedicated UX/UI summary.
+    { id: 'ux-ui', title: 'Social Media (UX/UI Placeholder)', icon: <Users className="mr-3 h-5 w-5" />, dataSection: 'ux-ui' },
+    { id: 'benchmarking', title: 'Benchmarking', icon: <BarChart2 className="mr-3 h-5 w-5" />, dataSection: 'benchmarking' },
+    { id: 'recommendations', title: 'Recommendations', icon: <Target className="mr-3 h-5 w-5" />, dataSection: 'recommendations' },
+    { id: 'sources', title: 'Sources', icon: <BookOpen className="mr-3 h-5 w-5" />, dataSection: 'sources' },
+  ];
+  
+  const handleNavClick = (dataSection) => {
+    setActiveSectionKey(sectionKeyMap[dataSection] || 'home');
+    if (isSidebarOpen) {
+      setIsSidebarOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    // Optional: Close sidebar on section change if it was open (already handled in handleNavClick)
+  }, [activeSectionKey]);
+
+  return (
+    <>
+      <style>{`
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        /* Tailwind's prose adjustments for closer match to HTML example */
+        .prose-custom p, .prose-custom ul, .prose-custom ol, .prose-custom li, .prose-custom strong, .prose-custom em {
+            color: #4b5563; /* text-gray-600 */
+        }
+        .prose-custom h4 { /* For subheadings within accordion items */
+            font-size: 1.1rem; /* 18px */
+            font-weight: 600;
+            color: #374151; /* Medium gray text */
+            margin-top: 1rem; /* 16px */
+            margin-bottom: 0.5rem; /* 8px */
+        }
+        .prose-custom ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+        }
+         .prose-custom ol {
+            list-style-type: decimal;
+            padding-left: 1.5rem;
+        }
+        .prose-custom li {
+            margin-bottom: 0.25rem;
+        }
+      `}</style>
+      <div className="flex flex-col md:flex-row min-h-screen">
+        {/* Mobile Menu Button - styled like HTML example */}
+        <button 
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="md:hidden fixed top-4 left-4 z-50 p-2 bg-blue-600 text-white rounded-md shadow-lg"
+          aria-label="Open menu"
+        >
+          {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+
+        {/* Sidebar / Navigation */}
+        <aside 
+            id="sidebar"
+            className={`fixed inset-y-0 left-0 w-64 bg-white shadow-xl p-6 space-y-1 overflow-y-auto transform transition-transform duration-300 ease-in-out md:static md:translate-x-0 ${isSidebarOpen ? 'translate-x-0 z-40' : '-translate-x-full z-10'}`}
+        >
+          {/* Sidebar Title from HTML example */}
+          <h2 className="text-xl font-semibold text-gray-800 mb-6 border-b border-gray-200 pb-3">Audit Sections</h2>
+          <nav>
+            {navItems.map(item => (
+              <button
+                key={item.id}
+                onClick={() => handleNavClick(item.dataSection)}
+                // Applying .nav-link styles from HTML example via Tailwind
+                className={`w-full flex items-center text-left px-4 py-2.5 mb-1 rounded-lg text-sm font-medium transition-colors duration-150
+                  ${(sectionKeyMap[item.dataSection] || 'home') === activeSectionKey
+                    ? 'bg-blue-600 text-white font-semibold shadow-md' // .nav-link.active
+                    : 'text-gray-600 hover:bg-gray-200 hover:text-gray-800' // .nav-link & :hover
+                  }`}
+              >
+                {item.icon}
+                {item.title}
+              </button>
+            ))}
+          </nav>
+        </aside>
+
+        {/* Sidebar Overlay for Mobile */}
+        {isSidebarOpen && (
+            <div 
+                id="sidebarOverlay"
+                className="fixed inset-0 bg-black opacity-50 z-30 md:hidden"
+                onClick={() => setIsSidebarOpen(false)}
+            ></div>
+        )}
+
+        {/* Main Content Area */}
+        <main className="flex-1 p-6 md:p-10 overflow-y-auto">
+          {/* Main Report Header from HTML example */}
+          <header className="mb-10">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-800">
+              Website Performance Audit: TheDesignAgency.ca
+            </h1>
+            <p className="text-gray-600 mt-2 text-lg">
+              A Comprehensive Review and Roadmap for Optimization
+            </p>
+          </header>
+          
+          {/* Applying prose-custom for text styling within accordion content */}
+          <div className="max-w-4xl mx-auto prose prose-custom">
+            <SectionContent />
+          </div>
+        </main>
+      </div>
+    </>
+  );
+};
+
+export default App;
