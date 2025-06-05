@@ -23,12 +23,7 @@ import { Scan } from '@/types'
 import { mockDemoScanRequests, DemoScanRequest } from '@/lib/mock-demo-data'
 import { ScanStatusBadge } from '@/components/dashboard/recent-scans-table'
 import { formatDate } from '@/lib/utils'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-)
+import { supabase } from '@/lib/supabase'
 
 export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState('overview')
@@ -37,6 +32,7 @@ export default function AdminDashboardPage() {
   const [, setRealScans] = useState<any[]>([])
   const [aiWorkflows, setAiWorkflows] = useState<any[]>([])
   const [loading, setLoading] = useState(true);
+  const [recentErrors, setRecentErrors] = useState<any[]>([]);
 
   const [scanStats, setScanStats] = useState({
     pendingRequests: 0,
@@ -61,16 +57,23 @@ export default function AdminDashboardPage() {
         const [
           { data: dbScans },
           { data: dbReports },
-          { data: dbWorkflows }
+          { data: dbWorkflows },
+          { data: failedCollections }
         ] = await Promise.all([
           supabase.from('scan_requests').select('*').order('created_at', { ascending: false }),
           supabase.from('reports').select('*').order('created_at', { ascending: false }),
-          supabase.from('ai_workflow_runs').select('*').order('created_at', { ascending: false })
+          supabase.from('ai_workflow_runs').select('*').order('created_at', { ascending: false }),
+          supabase.from('evidence_collections')
+            .select('*')
+            .eq('status', 'failed')
+            .order('created_at', { ascending: false })
+            .limit(5)
         ]);
 
         setRealScans(dbScans || []);
         setRealReports(dbReports || []);
         setAiWorkflows(dbWorkflows || []);
+        setRecentErrors(failedCollections || []);
 
         // Add real scan requests to combined scans (marked as non-demo)
         if (dbScans && dbScans.length > 0) {
@@ -399,6 +402,52 @@ export default function AdminDashboardPage() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Recent Errors Section */}
+          {recentErrors.length > 0 && (
+            <Card className="border-red-200 bg-red-50/50">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-red-600" />
+                  <CardTitle>Recent Collection Failures</CardTitle>
+                </div>
+                <CardDescription>
+                  Evidence collection errors requiring attention
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {recentErrors.map((error) => (
+                    <div key={error.id} className="rounded-lg border border-red-200 bg-white p-3">
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-medium">{error.company_name}</h4>
+                            <Badge variant="destructive" className="text-xs">
+                              Failed
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            {error.collection_type} collection • {formatDate(error.created_at)}
+                          </p>
+                          {error.metadata?.error && (
+                            <p className="text-xs text-red-600 font-mono mt-1">
+                              {error.metadata.error}
+                            </p>
+                          )}
+                        </div>
+                        <Button size="sm" variant="outline" asChild>
+                          <Link to={`/admin/scan-config/${error.scan_request_id || ''}`}>
+                            Retry
+                          </Link>
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="requests" className="space-y-4">

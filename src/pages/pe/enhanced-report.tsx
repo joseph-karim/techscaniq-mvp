@@ -4,6 +4,7 @@ import { ExecutiveSummary } from '@/components/pe/enhanced-report/sections/Execu
 import { StackEvolutionTimeline } from '@/components/pe/enhanced-report/sections/StackEvolutionTimeline'
 import { TechnicalLeadership } from '@/components/pe/enhanced-report/sections/TechnicalLeadership'
 import { CloudVendorDependencies } from '@/components/pe/enhanced-report/sections/CloudVendorDependencies'
+import { EvidenceAppendix } from '@/components/reports/EvidenceAppendix'
 
 // Mock data for the enhanced report
 const enhancedReportData = {
@@ -274,6 +275,14 @@ export default function PEEnhancedReportPage() {
         <section id="code-quality" className="p-8">
           <h2 className="text-2xl font-bold mb-4">Codebase Quality Signals</h2>
           <p className="text-gray-600">Code quality metrics, testing coverage, and development practices assessment.</p>
+        </section>
+
+        {/* Evidence Appendix */}
+        <section id="evidence-appendix" className="p-8">
+          <EvidenceAppendix 
+            companyName={enhancedReportData.executiveSummary.companyName}
+            reportId={id}
+          />
         </section>
       </div>
     </PEReportLayout>

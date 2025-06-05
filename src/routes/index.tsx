@@ -15,6 +15,7 @@ const AdvisorReviewPage = lazy(() => import('@/pages/advisor/review'))
 const AdvisorQueuePage = lazy(() => import('@/pages/advisor/queue'))
 const AdminDashboardPage = lazy(() => import('@/pages/admin/dashboard'))
 const AdminScanConfigPage = lazy(() => import('@/pages/admin/scan-config'))
+const AdminPipelineConfigPage = lazy(() => import('@/pages/admin/pipeline-config'))
 const PortfolioPage = lazy(() => import('@/pages/pe/portfolio'))
 const ThesisTrackingPage = lazy(() => import('@/pages/pe/thesis-tracking'))
 const DeepDivePEReportPaginated = lazy(() => import('@/pages/pe/deep-dive-report-paginated'))
@@ -171,6 +172,13 @@ export const routeConfig: RouteConfig[] = [
         label: 'Scan Configuration',
         requireAdmin: true,
         showInNav: false
+      },
+      {
+        path: 'admin/pipeline-config',
+        element: <AdminPipelineConfigPage />,
+        label: 'Pipeline Configuration',
+        requireAdmin: true,
+        showInNav: true
       },
       {
         path: 'advisor/queue',
