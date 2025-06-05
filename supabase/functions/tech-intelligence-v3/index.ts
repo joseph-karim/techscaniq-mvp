@@ -1,11 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-  'Access-Control-Max-Age': '86400',
-}
+import { corsHeaders, getCorsHeaders } from '../_shared/cors.ts'
 
 interface AnalysisRequest {
   company: {
@@ -756,14 +750,26 @@ Deno.serve(async (req) => {
     
     console.log(`Analyzing ${request.company.name} with ${request.evidenceSummary.length} pieces of evidence`)
     
+    // Check environment variables first
+    const apiKey = Deno.env.get('ANTHROPIC_API_KEY')
+    
+    if (!apiKey) {
+      throw new Error('AI service not configured')
+    }
+    
     let result: ReportData
     
-    // Use Claude exclusively (as requested by user)
-    result = await analyzeWithClaude(
-      request.company,
-      request.evidenceSummary,
-      request.investorProfile
-    )
+    try {
+      // Use Claude exclusively (as requested by user)
+      result = await analyzeWithClaude(
+        request.company,
+        request.evidenceSummary,
+        request.investorProfile
+      )
+    } catch (analysisError) {
+      console.error('Claude analysis failed:', analysisError)
+      throw new Error(`AI analysis failed: ${analysisError.message}`)
+    }
     
     // Calculate investment score and other derived fields
     const investmentScore = result.investmentRecommendation.score
