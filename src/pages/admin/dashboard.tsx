@@ -12,7 +12,7 @@ import {
   Zap,
   Database,
   Brain,
-  ExternalLink
+  ExternalLink,
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -24,6 +24,8 @@ import { mockDemoScanRequests, DemoScanRequest } from '@/lib/mock-demo-data'
 import { ScanStatusBadge } from '@/components/dashboard/recent-scans-table'
 import { formatDate } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
+import { EvidenceCollectionPipeline } from '@/components/admin/evidence-collection-pipeline'
+import { AnalysisReportConfig } from '@/components/admin/analysis-report-config'
 
 export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState('overview')
@@ -258,13 +260,15 @@ export default function AdminDashboardPage() {
       </div>
 
       <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-9">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="requests">Scan Requests</TabsTrigger>
           <TabsTrigger value="active">Active Scans</TabsTrigger>
           <TabsTrigger value="review">Review Queue</TabsTrigger>
           <TabsTrigger value="reports">All Reports</TabsTrigger>
           <TabsTrigger value="workflows">AI Workflows</TabsTrigger>
+          <TabsTrigger value="evidence">Evidence Pipeline</TabsTrigger>
+          <TabsTrigger value="analysis">AI Analysis</TabsTrigger>
           <TabsTrigger value="config">Configuration</TabsTrigger>
         </TabsList>
 
@@ -814,6 +818,14 @@ export default function AdminDashboardPage() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="evidence" className="space-y-4">
+          <EvidenceCollectionPipeline />
+        </TabsContent>
+
+        <TabsContent value="analysis" className="space-y-4">
+          <AnalysisReportConfig />
         </TabsContent>
       </Tabs>
     </div>
