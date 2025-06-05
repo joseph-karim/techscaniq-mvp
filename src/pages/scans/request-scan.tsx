@@ -87,7 +87,7 @@ export default function RequestScanPage() {
     
     try {
       // Create the scan request in the database
-      const { data: scanRequest, error: dbError } = await supabase
+      const { error: dbError } = await supabase
         .from('scan_requests')
         .insert({
           company_name: data.companyName,
@@ -110,8 +110,6 @@ export default function RequestScanPage() {
             submitted_at: new Date().toISOString()
           }
         })
-        .select()
-        .single()
 
       if (dbError) throw dbError
       
