@@ -120,7 +120,7 @@ export default function PortfolioPage() {
       setLoadingActiveScans(true);
       const { data, error } = await supabase
         .from('scan_requests')
-        .select('*, reports(id)')
+        .select('*, reports!scan_requests_report_id_fkey(id)')
         .in('status', ['pending', 'processing'])
         .order('created_at', { ascending: false });
 

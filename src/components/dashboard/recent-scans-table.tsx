@@ -23,7 +23,7 @@ export function RecentScansTable({ showAll = false }: RecentScansTableProps) {
       let fetchedScans: Scan[] = []
       const { data, error } = await supabase
         .from('scan_requests')
-        .select('*, reports(id)')
+        .select('*, reports!scan_requests_report_id_fkey(id)')
         .order('created_at', { ascending: false })
         .limit(showAll ? 100 : 10)
 
