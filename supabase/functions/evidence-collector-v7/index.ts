@@ -2,11 +2,22 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 
 // CORS headers for handling cross-origin requests
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-  'Access-Control-Max-Age': '86400',
+const allowedOrigins = [
+  'https://scan.techscaniq.com',
+  'https://techscaniq.com', 
+  'http://localhost:5173',
+  'http://localhost:3000'
+]
+
+const getCorsHeaders = (origin: string | null) => {
+  const isAllowed = origin && allowedOrigins.includes(origin)
+  return {
+    'Access-Control-Allow-Origin': isAllowed ? origin : allowedOrigins[0],
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+    'Access-Control-Max-Age': '86400',
+    'Access-Control-Allow-Credentials': 'true'
+  }
 }
 
 
@@ -673,6 +684,9 @@ async function collectAllEvidence(
 
 // Main handler
 Deno.serve(async (req) => {
+  const origin = req.headers.get('origin')
+  const corsHeaders = getCorsHeaders(origin)
+  
   // Handle CORS preflight immediately
   if (req.method === 'OPTIONS') {
     return new Response(null, { 
