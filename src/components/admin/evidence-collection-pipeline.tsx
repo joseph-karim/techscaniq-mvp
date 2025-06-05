@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { 
   Globe, Shield, Zap, Search, Database, 
   CheckCircle2, Code, Lock, Package, 
-  FileSearch, Bug, Key,
+  FileSearch, Bug, Key, Layers,
   RefreshCw, ChevronRight, Info
 } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
