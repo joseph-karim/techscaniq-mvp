@@ -68,7 +68,7 @@ export default function ReportsListPage() {
       try {
         let query = supabase
           .from('scan_requests')
-          .select('*, reports (*)')
+          .select('*, reports!reports_scan_request_id_fkey (*)')
         
         // Filter based on user role
         if (!isAdmin) {
@@ -144,8 +144,10 @@ export default function ReportsListPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="in-progress">In Progress</SelectItem>
+                  <SelectItem value="complete">Completed</SelectItem>
+                  <SelectItem value="processing">Processing</SelectItem>
+                  <SelectItem value="awaiting_review">Awaiting Review</SelectItem>
+                  <SelectItem value="in_review">In Review</SelectItem>
                   <SelectItem value="pending">Pending</SelectItem>
                 </SelectContent>
               </Select>
