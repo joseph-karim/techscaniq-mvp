@@ -140,8 +140,8 @@ async function collectEvidence(
     console.log(`Using investment thesis: ${investmentThesis.thesisType}`)
   }
   
-  // Use the new v7 evidence collector with all tools and thesis data
-  const response = await callSupabaseFunction('evidence-orchestrator', {
+  // Use the comprehensive v7 evidence collector with all tools and thesis data
+  const response = await callSupabaseFunction('evidence-collector-v7', {
     companyName,
     companyWebsite,
     evidenceTypes: ['technical', 'security', 'team', 'financial', 'market'],
