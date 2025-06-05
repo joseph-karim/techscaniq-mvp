@@ -24,8 +24,6 @@ import { mockDemoScanRequests, DemoScanRequest } from '@/lib/mock-demo-data'
 import { ScanStatusBadge } from '@/components/dashboard/recent-scans-table'
 import { formatDate } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
-import { EvidenceCollectionPipeline } from '@/components/admin/evidence-collection-pipeline'
-import { AnalysisReportConfig } from '@/components/admin/analysis-report-config'
 
 export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState('overview')
@@ -260,15 +258,13 @@ export default function AdminDashboardPage() {
       </div>
 
       <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-9">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="requests">Scan Requests</TabsTrigger>
           <TabsTrigger value="active">Active Scans</TabsTrigger>
           <TabsTrigger value="review">Review Queue</TabsTrigger>
           <TabsTrigger value="reports">All Reports</TabsTrigger>
           <TabsTrigger value="workflows">AI Workflows</TabsTrigger>
-          <TabsTrigger value="evidence">Evidence Pipeline</TabsTrigger>
-          <TabsTrigger value="analysis">AI Analysis</TabsTrigger>
           <TabsTrigger value="config">Configuration</TabsTrigger>
         </TabsList>
 
@@ -360,7 +356,7 @@ export default function AdminDashboardPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="h-2 w-2 rounded-full bg-green-500"></div>
-                      <span className="text-sm font-medium">Claude-3 Sonnet</span>
+                      <span className="text-sm font-medium">Claude 4 Opus</span>
                     </div>
                     <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-green-50 text-green-600">
                       Active
@@ -598,84 +594,48 @@ export default function AdminDashboardPage() {
         </TabsContent>
 
         <TabsContent value="config" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>AI Model Configuration</CardTitle>
-                <CardDescription>
-                  Configure AI models for different analysis types
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Architecture Analysis</p>
-                      <p className="text-sm text-muted-foreground">Claude-3 Sonnet</p>
+          <Card>
+            <CardHeader>
+              <CardTitle>Pipeline Configuration</CardTitle>
+              <CardDescription>
+                Access the comprehensive pipeline configuration dashboard
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="p-6 border rounded-lg bg-muted/30">
+                  <h3 className="font-semibold mb-2">Evidence Collection & AI Analysis</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Configure evidence collection tools, AI models, prompts, and scan configurations all in one place.
+                  </p>
+                  <div className="grid gap-3 mb-4">
+                    <div className="flex items-center gap-2 text-sm">
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      <span>Evidence Collection Pipeline - View all 9 collection tools</span>
                     </div>
-                    <Button variant="outline" size="sm">Configure</Button>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Security Assessment</p>
-                      <p className="text-sm text-muted-foreground">GPT-4 Turbo</p>
+                    <div className="flex items-center gap-2 text-sm">
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      <span>AI Analysis Configuration - Claude 4 Opus integration</span>
                     </div>
-                    <Button variant="outline" size="sm">Configure</Button>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Code Quality</p>
-                      <p className="text-sm text-muted-foreground">Gemini-Pro</p>
+                    <div className="flex items-center gap-2 text-sm">
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      <span>Prompt Management - Edit and test AI prompts</span>
                     </div>
-                    <Button variant="outline" size="sm">Configure</Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Scan Templates</CardTitle>
-                <CardDescription>
-                  Pre-configured scan templates for different use cases
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Standard Due Diligence</p>
-                      <p className="text-sm text-muted-foreground">Full technical assessment</p>
+                    <div className="flex items-center gap-2 text-sm">
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      <span>Edge Function Monitoring - Real-time performance metrics</span>
                     </div>
-                    <Button variant="outline" size="sm">Edit</Button>
                   </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Security Focus</p>
-                      <p className="text-sm text-muted-foreground">Enhanced security analysis</p>
-                    </div>
-                    <Button variant="outline" size="sm">Edit</Button>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Quick Assessment</p>
-                      <p className="text-sm text-muted-foreground">Rapid overview scan</p>
-                    </div>
-                    <Button variant="outline" size="sm">Edit</Button>
-                  </div>
-                  
-                  <Button className="w-full" variant="outline">
-                    <Play className="mr-2 h-4 w-4" />
-                    Create New Template
+                  <Button className="w-full" asChild>
+                    <Link to="/admin/pipeline-config">
+                      <Cog className="mr-2 h-4 w-4" />
+                      Open Pipeline Configuration
+                    </Link>
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="reports" className="space-y-4">
@@ -820,13 +780,6 @@ export default function AdminDashboardPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="evidence" className="space-y-4">
-          <EvidenceCollectionPipeline />
-        </TabsContent>
-
-        <TabsContent value="analysis" className="space-y-4">
-          <AnalysisReportConfig />
-        </TabsContent>
       </Tabs>
     </div>
   )

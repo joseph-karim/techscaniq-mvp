@@ -413,7 +413,7 @@ Return ONLY valid JSON matching this exact structure, but with MUCH MORE DETAIL 
           'anthropic-version': '2023-06-01'
         },
         body: JSON.stringify({
-          model: 'claude-3-5-sonnet-20241022',
+          model: 'claude-opus-4-20250514',
           max_tokens: 8192,
           temperature: 0.3,
           messages: [{

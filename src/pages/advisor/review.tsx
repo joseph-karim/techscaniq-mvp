@@ -285,15 +285,7 @@ export default function AdvisorReviewPage() {
     fetchScanRequest()
   }, [id, toast])
   
-  if (loading) {
-    return <div className="flex items-center justify-center h-64">Loading...</div>
-  }
-  
-  if (!scanData) {
-    return <div className="flex items-center justify-center h-64">Scan request not found</div>
-  }
-  
-  // Initialize reviewData when scanData loads
+  // Initialize reviewData when scanData loads - MOVED BEFORE CONDITIONAL RETURNS
   useEffect(() => {
     if (scanData?.sections) {
       setReviewData(scanData.sections.map((section: any) => ({
@@ -305,6 +297,14 @@ export default function AdvisorReviewPage() {
       setActiveSection(scanData.sections[0]?.id || '')
     }
   }, [scanData])
+  
+  if (loading) {
+    return <div className="flex items-center justify-center h-64">Loading...</div>
+  }
+  
+  if (!scanData) {
+    return <div className="flex items-center justify-center h-64">Scan request not found</div>
+  }
   
   const handleSectionUpdate = (sectionId: string, updates: Partial<typeof reviewData[0]>) => {
     setReviewData(prevData => 

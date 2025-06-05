@@ -40,10 +40,10 @@ interface ModelConfig {
 
 const modelConfigs: ModelConfig[] = [
   {
-    id: 'claude-3-opus',
-    name: 'Claude 3 Opus',
+    id: 'claude-opus-4',
+    name: 'Claude 4 Opus',
     provider: 'anthropic',
-    version: '20240514',
+    version: '20250514',
     contextWindow: 200000,
     costPer1kTokens: { input: 0.015, output: 0.075 },
     capabilities: ['Complex reasoning', 'Code analysis', 'Long context', 'Investment analysis'],
@@ -85,7 +85,7 @@ const analysisStages: AnalysisStage[] = [
     id: 'tech-analysis',
     name: 'Technical Stack Analysis',
     description: 'Analyzes technology stack, architecture, and infrastructure',
-    model: 'claude-3-opus',
+    model: 'claude-opus-4',
     prompt: `You are an expert technical due diligence analyst for a PE firm...
 
 Analyze the technology stack focusing on:
@@ -149,7 +149,7 @@ Tone: Professional, data-driven, action-oriented...`,
 
 export function AnalysisReportConfig() {
   const [selectedStage, setSelectedStage] = useState<AnalysisStage | null>(null)
-  const [selectedModel, setSelectedModel] = useState<string>('claude-3-opus')
+  const [selectedModel, setSelectedModel] = useState<string>('claude-opus-4')
   const [testMode] = useState(false)
   const [editingPrompt, setEditingPrompt] = useState<string>('')
   const [stats] = useState({
