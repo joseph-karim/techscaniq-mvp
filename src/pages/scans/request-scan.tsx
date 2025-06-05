@@ -87,7 +87,7 @@ export default function RequestScanPage() {
     
     try {
       // Create the scan request in the database
-      const { error: dbError } = await supabase
+      const { data: scanRequest, error: dbError } = await supabase
         .from('scan_requests')
         .insert({
           company_name: data.companyName,
@@ -110,8 +110,31 @@ export default function RequestScanPage() {
             submitted_at: new Date().toISOString()
           }
         })
+        .select()
+        .single()
 
       if (dbError) throw dbError
+
+      // FIXED: Now automatically trigger report generation
+      console.log('✅ Scan request created:', scanRequest.id)
+      console.log('🚀 Triggering report generation...')
+      
+      // Call the report orchestrator to start analysis
+      const { data: reportResult, error: reportError } = await supabase.functions.invoke('report-orchestrator-v3', {
+        body: {
+          scan_request_id: scanRequest.id,
+          analysisDepth: 'comprehensive'
+        }
+      })
+
+      if (reportError) {
+        console.error('⚠️ Report generation failed:', reportError)
+        // Don't throw error - scan is created, just report generation failed
+        // User can still see the scan in their list and it can be manually triggered
+      } else {
+        console.log('✅ Report generation initiated successfully')
+        console.log('📊 Report ID:', reportResult.reportId)
+      }
       
       // Success
       setSuccess(true)
