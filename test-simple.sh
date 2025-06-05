@@ -1,7 +1,13 @@
 #!/bin/bash
 
 # Simple test to validate JINA API and pipeline
-curl -i -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJzdWIiOiJhZG1pbl9pZCIsImF1ZCI6ImF1dGhlbnRpY2F0ZWQiLCJpc3MiOiJzdXBhYmFzZS1kZW1vIiwiaWF0IjoxNzQ4MzczMzM5LCJleHAiOjE3NDgzNzY5Mzl9.vwIAPsL4i5B-7dlzHg24zje0R_SGHiFI4MZUs2Uotqw" \
+if [ -z "$JWT_TOKEN" ]; then
+  echo "Error: Please set JWT_TOKEN environment variable"
+  echo "Generate token with: node generate-jwt.js"
+  exit 1
+fi
+
+curl -i -H "Authorization: Bearer $JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "company": {

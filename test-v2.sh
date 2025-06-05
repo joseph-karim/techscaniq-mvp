@@ -1,12 +1,16 @@
 #!/bin/bash
 
 # Test the new v2 pipeline with concurrent evidence collection
-JWT="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJzdWIiOiJhZG1pbl9pZCIsImF1ZCI6ImF1dGhlbnRpY2F0ZWQiLCJpc3MiOiJzdXBhYmFzZS1kZW1vIiwiaWF0IjoxNzQ4MzkwMzY0LCJleHAiOjE3NDgzOTM5NjR9.LFvd7ibWgu2_P73Ewe-t2zCMLPgVLwbUhZ_RlbwxabA"
+if [ -z "$JWT_TOKEN" ]; then
+  echo "Error: Please set JWT_TOKEN environment variable"
+  echo "Generate token with: node generate-jwt.js"
+  exit 1
+fi
 
 echo "Testing new v2 pipeline with concurrent evidence collection..."
 echo ""
 
-curl -i -H "Authorization: Bearer $JWT" \
+curl -i -H "Authorization: Bearer $JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "company": {

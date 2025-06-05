@@ -1,6 +1,13 @@
 #!/bin/bash
 
-curl -i -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJzdWIiOiJhZG1pbl9pZCIsImF1ZCI6ImF1dGhlbnRpY2F0ZWQiLCJpc3MiOiJzdXBhYmFzZS1kZW1vIiwiaWF0IjoxNzQ4MzY2ODgwLCJleHAiOjE3NDgzNzA0ODB9.MSN5WucW19IBw7XJlcPjQKpZem5yewmm27emwtgp2BA" \
+# Check if JWT token is set
+if [ -z "$JWT_TOKEN" ]; then
+  echo "Error: Please set JWT_TOKEN environment variable"
+  echo "Generate token with: node generate-jwt.js"
+  exit 1
+fi
+
+curl -i -H "Authorization: Bearer $JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "company": {
