@@ -31,6 +31,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
+import { EvidenceCollectionPipeline } from '@/components/admin/evidence-collection-pipeline'
+import { AnalysisReportConfig } from '@/components/admin/analysis-report-config'
 
 interface AiPrompt {
   id: string
@@ -81,7 +83,7 @@ interface AdminSetting {
 
 export default function PipelineConfigPage() {
   const { toast } = useToast()
-  const [activeTab, setActiveTab] = useState('prompts')
+  const [activeTab, setActiveTab] = useState('evidence')
   const [prompts, setPrompts] = useState<AiPrompt[]>([])
   const [scanConfigs, setScanConfigs] = useState<ScanConfiguration[]>([])
   const [functionLogs, setFunctionLogs] = useState<EdgeFunctionLog[]>([])
@@ -290,7 +292,7 @@ export default function PipelineConfigPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Pipeline Configuration</h1>
           <p className="text-muted-foreground">
-            Configure prompts, scan settings, and monitor the data pipeline
+            Comprehensive dashboard for evidence collection, AI analysis, and system configuration
           </p>
         </div>
         <Button onClick={loadAllData}>
@@ -300,11 +302,13 @@ export default function PipelineConfigPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-6">
+          <TabsTrigger value="evidence">Evidence Collection</TabsTrigger>
+          <TabsTrigger value="analysis">AI Analysis</TabsTrigger>
           <TabsTrigger value="prompts">AI Prompts</TabsTrigger>
-          <TabsTrigger value="scan-configs">Scan Configurations</TabsTrigger>
+          <TabsTrigger value="scan-configs">Scan Configs</TabsTrigger>
           <TabsTrigger value="functions">Edge Functions</TabsTrigger>
-          <TabsTrigger value="settings">System Settings</TabsTrigger>
+          <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
 
         <TabsContent value="prompts" className="space-y-4">
@@ -358,9 +362,10 @@ export default function PipelineConfigPage() {
                     <SelectContent>
                       <SelectItem value="all">All Categories</SelectItem>
                       <SelectItem value="evidence_collection">Evidence Collection</SelectItem>
+                      <SelectItem value="tech_analysis">Technical Analysis</SelectItem>
+                      <SelectItem value="security_analysis">Security Analysis</SelectItem>
                       <SelectItem value="report_generation">Report Generation</SelectItem>
-                      <SelectItem value="analysis">Analysis</SelectItem>
-                      <SelectItem value="classification">Classification</SelectItem>
+                      <SelectItem value="investment_thesis">Investment Thesis</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -710,6 +715,14 @@ export default function PipelineConfigPage() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="evidence" className="space-y-4">
+          <EvidenceCollectionPipeline />
+        </TabsContent>
+
+        <TabsContent value="analysis" className="space-y-4">
+          <AnalysisReportConfig />
+        </TabsContent>
       </Tabs>
 
       {/* Prompt Edit Dialog */}
@@ -745,9 +758,10 @@ export default function PipelineConfigPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="evidence_collection">Evidence Collection</SelectItem>
+                      <SelectItem value="tech_analysis">Technical Analysis</SelectItem>
+                      <SelectItem value="security_analysis">Security Analysis</SelectItem>
                       <SelectItem value="report_generation">Report Generation</SelectItem>
-                      <SelectItem value="analysis">Analysis</SelectItem>
-                      <SelectItem value="classification">Classification</SelectItem>
+                      <SelectItem value="investment_thesis">Investment Thesis</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
