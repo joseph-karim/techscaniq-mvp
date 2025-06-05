@@ -20,7 +20,7 @@ console.log(colors.bold(colors.blue('\n🔧 Supabase CORS Configuration Update\n
 console.log(colors.yellow('To update authorized URLs for scan.techscaniq.com:\n'));
 
 console.log(colors.green('1. Visit Supabase Dashboard:'));
-console.log('   https://app.supabase.com/project/xngbtpbtivygkxnsexjg\n');
+console.log('   https://app.supabase.com/project/YOUR_PROJECT_ID\n');
 
 console.log(colors.green('2. Navigate to Authentication > URL Configuration\n'));
 
