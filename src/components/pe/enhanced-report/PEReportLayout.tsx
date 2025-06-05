@@ -166,6 +166,14 @@ const reportSections: Section[] = [
     title: 'Final Narrative Summary',
     icon: BookOpen,
     tier: 'detailed'
+  },
+  
+  // Appendix
+  {
+    id: 'evidence-appendix',
+    title: 'Evidence Appendix',
+    icon: Search,
+    tier: 'detailed'
   }
 ]
 

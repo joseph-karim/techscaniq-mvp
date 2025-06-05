@@ -18,15 +18,11 @@ import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
+import { useToast } from '@/hooks/use-toast'
 import { Textarea } from '@/components/ui/textarea'
-import { createClient } from '@supabase/supabase-js'
+import { supabase } from '@/lib/supabase'
 import { mockDemoScanRequests } from '@/lib/mock-demo-data'
 import { formatDate } from '@/lib/utils'
-
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-)
 
 interface ScanRequest {
   id: string
@@ -58,6 +54,7 @@ interface EvidenceCollection {
 
 export default function ScanConfigPage() {
   const { id } = useParams<{ id: string }>()
+  const { toast } = useToast()
   
   const [scanRequest, setScanRequest] = useState<ScanRequest | null>(null)
   const [selectedDepth, setSelectedDepth] = useState<'shallow' | 'deep' | 'comprehensive'>('deep')
@@ -128,8 +125,8 @@ export default function ScanConfigPage() {
     setCollectionStatus('Initializing evidence collection...')
     
     try {
-      // Call the evidence-collector-v7 function
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/evidence-collector-v7`, {
+      // Call the evidence-orchestrator function
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/evidence-orchestrator`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
@@ -144,6 +141,18 @@ export default function ScanConfigPage() {
 
       setCollectionProgress(30)
       setCollectionStatus('Evidence collection in progress...')
+
+      if (!response.ok) {
+        // Try to parse error response
+        let errorMessage = `HTTP ${response.status}: ${response.statusText}`
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.error || errorData.message || errorMessage
+        } catch (e) {
+          // If JSON parsing fails, use the default error message
+        }
+        throw new Error(errorMessage)
+      }
 
       const result = await response.json()
       
@@ -199,7 +208,24 @@ export default function ScanConfigPage() {
       
     } catch (error) {
       console.error('Evidence collection failed:', error)
-      setCollectionStatus(`Failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      
+      // Check if it's a CORS or network error
+      if (error instanceof TypeError && error.message === 'Failed to fetch') {
+        setCollectionStatus('Failed: Unable to connect to evidence collection service')
+        toast({
+          title: 'Connection Error',
+          description: 'Unable to connect to the evidence collection service. Please check if the service is running.',
+          variant: 'destructive'
+        })
+      } else {
+        setCollectionStatus(`Failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+        toast({
+          title: 'Evidence Collection Failed',
+          description: error instanceof Error ? error.message : 'An unexpected error occurred',
+          variant: 'destructive'
+        })
+      }
+      
       setCurrentCollection(null)
     } finally {
       setIsCollecting(false)

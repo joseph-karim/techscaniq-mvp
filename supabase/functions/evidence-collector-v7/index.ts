@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 
+// CORS headers for handling cross-origin requests
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -54,6 +55,7 @@ async function callSupabaseFunction(functionName: string, payload: any, timeout:
   const anonKey = Deno.env.get('SUPABASE_ANON_KEY')
 
   if (!supabaseUrl || !anonKey) {
+    console.error('Missing SUPABASE_URL or SUPABASE_ANON_KEY environment variables')
     throw new Error('Missing required environment variables for function calls')
   }
 
@@ -671,8 +673,23 @@ async function collectAllEvidence(
 
 // Main handler
 Deno.serve(async (req) => {
+  // Handle CORS preflight immediately
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, { 
+      status: 200,
+      headers: corsHeaders 
+    })
+  }
+  
+  // Only allow POST requests
+  if (req.method !== 'POST') {
+    return new Response(JSON.stringify({
+      success: false,
+      error: 'Method not allowed'
+    }), {
+      status: 405,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
   }
   
   try {
@@ -696,6 +713,7 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
     
     if (!supabaseUrl || !supabaseKey) {
+      console.error('Missing required Supabase environment variables')
       throw new Error('Missing required Supabase environment variables (SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY)')
     }
     

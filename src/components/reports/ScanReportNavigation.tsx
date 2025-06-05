@@ -6,7 +6,8 @@ import {
   TrendingUp,
   Code,
   CheckCircle,
-  ChevronRight
+  ChevronRight,
+  Search
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -15,7 +16,7 @@ export interface ScanReportSection {
   title: string
   icon: React.ReactNode
   description: string
-  category: 'overview' | 'technical' | 'security' | 'recommendations'
+  category: 'overview' | 'technical' | 'security' | 'recommendations' | 'appendix'
 }
 
 export const scanReportSections: ScanReportSection[] = [
@@ -63,6 +64,15 @@ export const scanReportSections: ScanReportSection[] = [
     icon: <TrendingUp className="h-4 w-4" />,
     description: 'Financial metrics and funding history',
     category: 'overview'
+  },
+  
+  // Appendix
+  {
+    id: 'evidence-appendix',
+    title: 'Evidence Appendix',
+    icon: <Search className="h-4 w-4" />,
+    description: 'Complete evidence trail and source materials',
+    category: 'appendix'
   }
 ]
 
@@ -77,10 +87,11 @@ export function ScanReportNavigation({ currentSection, onSectionChange, classNam
     'overview': true,
     'technical': false,
     'security': false,
-    'recommendations': false
+    'recommendations': false,
+    'appendix': false
   })
 
-  const toggleCategory = (category: 'overview' | 'technical' | 'security' | 'recommendations') => {
+  const toggleCategory = (category: 'overview' | 'technical' | 'security' | 'recommendations' | 'appendix') => {
     setExpandedCategories(prev => ({
       ...prev,
       [category]: !prev[category]
@@ -93,11 +104,12 @@ export function ScanReportNavigation({ currentSection, onSectionChange, classNam
       case 'technical': return 'Technical Analysis'
       case 'security': return 'Security & Compliance'
       case 'recommendations': return 'Recommendations'
+      case 'appendix': return 'Appendix'
       default: return category
     }
   }
 
-  const renderSectionGroup = (category: 'overview' | 'technical' | 'security' | 'recommendations') => {
+  const renderSectionGroup = (category: 'overview' | 'technical' | 'security' | 'recommendations' | 'appendix') => {
     const items = scanReportSections.filter(section => section.category === category)
     const title = getCategoryTitle(category)
     
@@ -171,7 +183,7 @@ export function ScanReportNavigation({ currentSection, onSectionChange, classNam
           </p>
         </div>
 
-        {(['overview', 'technical', 'security', 'recommendations'] as const).map(category => 
+        {(['overview', 'technical', 'security', 'recommendations', 'appendix'] as const).map(category => 
           renderSectionGroup(category)
         )}
       </div>
