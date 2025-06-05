@@ -482,9 +482,9 @@ export default function ViewReport() {
   const [selectedCitation, setSelectedCitation] = useState<Citation | null>(null)
   const [activeSection, setActiveSection] = useState('executive-summary')
 
-  // Get report based on URL parameter or default to Ring4
+  // Get report based on URL parameter
   const getReportFromId = (reportId: string | undefined): DemoStandardReport | null => {
-    if (!reportId) return mockDemoReports['report-ring4-comprehensive']
+    if (!reportId) return null
     
     // Try exact match first
     const exactMatch = mockDemoReports[`report-${reportId}-comprehensive`]
@@ -496,8 +496,26 @@ export default function ViewReport() {
     )
     if (reportByName) return reportByName
     
-    // Default to Ring4
-    return mockDemoReports['report-ring4-comprehensive']
+    // Try finding by scan ID (for real scans like Snowplow)
+    if (reportId.includes('-')) {
+      // This is likely a scan ID, create a placeholder report
+      return {
+        id: reportId,
+        company_name: 'Loading...',
+        website_url: 'https://example.com',
+        created_at: new Date().toISOString(),
+        report_type: 'standard',
+        executive_summary: 'Report data is being loaded. Please check back shortly.',
+        investment_score: 0,
+        investment_rationale: 'Report generation in progress',
+        tech_health_score: 0,
+        tech_health_grade: 'N/A',
+        sections: []
+      }
+    }
+    
+    // If nothing found, return null to show error
+    return null
   }
 
   const currentReport = getReportFromId(id)
