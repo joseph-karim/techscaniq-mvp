@@ -116,6 +116,11 @@ export default function PipelineConfigPage() {
         supabase.from('admin_settings').select('*').order('category, setting_key')
       ])
 
+      if (promptsRes.error) console.error('Error loading prompts:', promptsRes.error)
+      if (configsRes.error) console.error('Error loading configs:', configsRes.error)
+      if (logsRes.error) console.error('Error loading logs:', logsRes.error)
+      if (settingsRes.error) console.error('Error loading settings:', settingsRes.error)
+
       setPrompts(promptsRes.data || [])
       setScanConfigs(configsRes.data || [])
       setFunctionLogs(logsRes.data || [])
