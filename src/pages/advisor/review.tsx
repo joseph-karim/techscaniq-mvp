@@ -219,8 +219,13 @@ export default function AdvisorReviewPage() {
   const navigate = useNavigate()
   const { toast } = useToast()
   
+  // All useState hooks must be at the top, before any conditional returns
   const [scanData, setScanData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [reviewData, setReviewData] = useState<any[]>([])
+  const [activeSection, setActiveSection] = useState<string>('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showPublishDialog, setShowPublishDialog] = useState(false)
   
   // Fetch scan request data
   useEffect(() => {
@@ -287,11 +292,6 @@ export default function AdvisorReviewPage() {
   if (!scanData) {
     return <div className="flex items-center justify-center h-64">Scan request not found</div>
   }
-
-  const [reviewData, setReviewData] = useState<any[]>([])
-  const [activeSection, setActiveSection] = useState<string>('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [showPublishDialog, setShowPublishDialog] = useState(false)
   
   // Initialize reviewData when scanData loads
   useEffect(() => {
