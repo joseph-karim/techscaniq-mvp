@@ -424,9 +424,9 @@ export default function ScanConfigPage() {
                 
                 {currentCollection && (
                   <Button variant="outline" asChild>
-                    <Link to={`/admin/evidence-review/${currentCollection.id}`}>
+                    <Link to={`/scans/${id}`}>
                       <Eye className="h-4 w-4 mr-2" />
-                      Review Evidence
+                      View Scan Details
                     </Link>
                   </Button>
                 )}
