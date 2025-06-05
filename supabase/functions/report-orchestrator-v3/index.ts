@@ -1,5 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
-import { corsHeaders } from '../_shared/cors.ts'
+import { corsHeaders, getCorsHeaders } from '../_shared/cors.ts'
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 
 interface OrchestratorRequest {
@@ -413,6 +413,9 @@ Deno.serve(async (req) => {
   const timeoutId = setTimeout(() => controller.abort(), 380000)
 
   try {
+    const origin = req.headers.get('origin')
+    const corsHeaders = getCorsHeaders(origin)
+    
     if (req.method === 'OPTIONS') {
       return new Response('ok', { headers: corsHeaders })
     }
