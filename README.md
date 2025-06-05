@@ -29,7 +29,7 @@ Before you begin, ensure you have the following:
 
    ```bash
    git clone <repository-url>
-   cd codeguide-vite-supabase
+   cd techscaniq-mvp
    ```
 
 2. **Install dependencies**
@@ -44,23 +44,48 @@ Before you begin, ensure you have the following:
 
 3. **Environment Variables Setup**
 
-   - Copy the `.env.example` file to `.env`:
+   - Copy the `.env.example` file to `.env.local`:
      ```bash
-     cp .env.example .env
+     cp .env.example .env.local
      ```
-   - Fill in the environment variables in `.env` (see Configuration section below)
 
-4. **Start the development server**
+4. **Quick Setup (Recommended)**
 
    ```bash
-   npm run dev
-   # or
-   yarn dev
-   # or
-   pnpm dev
+   # Run automated setup script
+   npm run setup
    ```
 
+   Or manually:
+
+   ```bash
+   # Recommended: Start on port 5173 (default)
+   npm run dev
+   
+   # Alternative: Start on port 3000  
+   npm run dev:3000
+   ```
+
+   📖 **Important:** See [Development Setup Guide](docs/development-setup.md) for detailed CORS configuration and troubleshooting.
+
 5. **Open [http://localhost:5173](http://localhost:5173) with your browser to see the result.**
+
+## Development Commands
+
+```bash
+npm run dev          # Start development server on port 5173
+npm run dev:3000     # Start development server on port 3000
+npm run build        # Build for production
+npm run preview      # Preview production build
+npm run setup        # Run automated development setup
+npm run cors-help    # Show CORS configuration instructions
+```
+
+## Documentation
+
+- **[Development Setup](docs/development-setup.md)** - Complete guide for local development and CORS configuration
+- **[CORS Troubleshooting](docs/cors-troubleshooting.md)** - Quick reference for resolving CORS issues
+- **[Setup Guide](docs/setup-guide.md)** - Additional setup instructions
 
 ## Configuration
 
