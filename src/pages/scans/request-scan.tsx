@@ -133,9 +133,9 @@ export default function RequestScanPage() {
         notes: ''
       })
       
-      // Navigate to the scan details page after a short delay
+      // Navigate to the reports list page after a short delay
       setTimeout(() => {
-        navigate(`/scans/${scanRequest.id}`)
+        navigate('/reports')
       }, 2000)
     } catch (err) {
       setError('Failed to submit scan request. Please try again.')
@@ -165,7 +165,11 @@ export default function RequestScanPage() {
         <Alert className="border-green-200 bg-green-50 text-green-800 dark:border-green-900 dark:bg-green-950 dark:text-green-300">
           <CheckCircle2 className="h-4 w-4" />
           <AlertDescription>
-            Scan request submitted successfully! You'll be notified when the analysis is complete.
+            <div className="space-y-2">
+              <p className="font-medium">Scan request submitted successfully!</p>
+              <p className="text-sm">Your request for {form.getValues('companyName')} has been added to the queue. The technical analysis will begin shortly.</p>
+              <p className="text-sm">Redirecting to your reports dashboard...</p>
+            </div>
           </AlertDescription>
         </Alert>
       )}
