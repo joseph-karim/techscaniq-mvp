@@ -16,6 +16,8 @@ dist-ssr
 .env
 .env.local
 .env.production
+.env.test
+.env.development
 
 # Editor directories and files
 .vscode/*
@@ -42,9 +44,28 @@ node_modules/
 tasks.json
 tasks/
 
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+venv/
+.Python
+
 # Ignore environment files and local Supabase config
 .env
 .env.local
 .env.*
 supabase/.env*
-supabase/config.toml 
+supabase/config.toml
+
+# Deep research specific
+deep-searcher-review/
+research_results_*.json
+*_test_*.json
+
+# API keys and sensitive data
+*.pem
+*.key
+secrets/
+credentials/ 
