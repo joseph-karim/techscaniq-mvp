@@ -1,9 +1,3 @@
-#!/usr/bin/env node
-
-/**
- * Test minimal report generation to isolate the issue
- */
-
 import { createClient } from '@supabase/supabase-js'
 import 'dotenv/config'
 
@@ -12,94 +6,109 @@ const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY
 
 const supabase = createClient(supabaseUrl, supabaseKey)
 
-async function testReportComponents() {
-  console.log('🧪 Testing Report Generation Components\n')
-
+async function testMinimalReport() {
+  console.log('🧪 Testing Minimal Report Generation\n')
+  
   try {
-    // Test 1: Evidence collection only
-    console.log('1️⃣ Testing evidence collection...')
-    const { data: evidenceResult, error: evidenceError } = await supabase.functions.invoke('evidence-orchestrator', {
+    // Step 1: Test with direct company info (no scan request)
+    console.log('1. Testing direct report generation (no scan request)...')
+    
+    const { data: directResult, error: directError } = await supabase.functions.invoke('report-orchestrator-v3', {
       body: {
-        companyName: "Example Company",
-        companyWebsite: "https://example.com",
-        evidenceTypes: ['technical'],
+        company: {
+          name: 'Vercel',
+          website: 'https://vercel.com'
+        },
+        analysisDepth: 'shallow'  // Use shallow for speed
+      }
+    })
+    
+    if (directError) {
+      console.error('❌ Direct generation failed:', directError)
+    } else {
+      console.log('✅ Direct generation succeeded')
+      console.log('   Report ID:', directResult?.reportId)
+      console.log('   Score:', directResult?.investmentScore)
+      console.log('   Time:', directResult?.metadata?.processingTime, 'ms')
+    }
+    
+    // Step 2: Check evidence collection separately
+    console.log('\n2. Testing evidence collection only...')
+    
+    const { data: evidenceResult, error: evidenceError } = await supabase.functions.invoke('evidence-collector-v7', {
+      body: {
+        companyName: 'Vercel',
+        companyWebsite: 'https://vercel.com',
+        evidenceTypes: ['technical'],  // Just technical for speed
         depth: 'shallow'
       }
     })
-
+    
     if (evidenceError) {
-      console.error('❌ Evidence collection failed:', evidenceError.message)
-      return
+      console.error('❌ Evidence collection failed:', evidenceError)
     } else {
       console.log('✅ Evidence collection succeeded')
-      console.log(`   - Evidence count: ${evidenceResult?.evidence?.length || 0}`)
-      console.log(`   - Collection ID: ${evidenceResult?.collectionId}`)
+      console.log('   Evidence count:', evidenceResult?.evidence?.length || 0)
+      console.log('   Collection ID:', evidenceResult?.collectionId)
+      console.log('   Success:', evidenceResult?.success)
+      
+      if (evidenceResult?.evidence?.length > 0) {
+        console.log('\n   Sample evidence:')
+        evidenceResult.evidence.slice(0, 3).forEach((e, i) => {
+          console.log(`   ${i+1}. ${e.type}: "${e.summary?.substring(0, 50)}..."`)
+        })
+      }
     }
-
-    // Test 2: Tech intelligence analysis
-    console.log('\n2️⃣ Testing tech intelligence...')
-    const { data: intelligenceResult, error: intelligenceError } = await supabase.functions.invoke('tech-intelligence-v3', {
+    
+    // Step 3: Test AI analysis separately
+    console.log('\n3. Testing AI analysis (tech-intelligence-v3)...')
+    
+    const { data: aiResult, error: aiError } = await supabase.functions.invoke('tech-intelligence-v3', {
       body: {
-        company: { name: "Example Company", website: "https://example.com" },
-        evidenceSummary: evidenceResult?.evidence?.slice(0, 5).map(e => ({
-          id: e.id,
-          type: e.type,
-          category: 'technical',
-          summary: e.content?.summary || 'Test evidence',
-          confidence: 0.8
-        })) || [],
-        analysisType: 'comprehensive_report'
+        company: {
+          name: 'Vercel',
+          website: 'https://vercel.com'
+        },
+        evidenceSummary: [
+          {
+            id: 'test-1',
+            type: 'website_content',
+            category: 'technical',
+            summary: 'Vercel is a platform for frontend developers',
+            source: 'https://vercel.com',
+            confidence: 0.9
+          }
+        ],
+        analysisType: 'technical_only'
       }
     })
-
-    if (intelligenceError) {
-      console.error('❌ Tech intelligence failed:', intelligenceError.message)
-    } else {
-      console.log('✅ Tech intelligence succeeded')
-      console.log(`   - Report generated: ${!!intelligenceResult?.report_data}`)
-    }
-
-    // Test 3: Create a manual report in database
-    console.log('\n3️⃣ Testing direct database report insert...')
     
-    const { data: reportRecord, error: reportError } = await supabase
-      .from('reports')
-      .insert({
-        company_name: 'Test Manual Insert',
-        report_data: {
-          sections: {},
-          company_name: 'Test Company',
-          investment_score: 75,
-          executiveSummary: 'Test report created manually'
-        },
-        executive_summary: 'Test report for debugging',
-        investment_score: 75,
-        investment_rationale: 'Good technical foundation',
-        tech_health_score: 7.5,
-        tech_health_grade: 'B',
-        evidence_collection_id: evidenceResult?.collectionId,
-        metadata: { test: true },
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
-      .select()
-      .single()
-
-    if (reportError) {
-      console.error('❌ Direct database insert failed:', reportError)
-      console.error('   Error details:', reportError.message)
+    if (aiError) {
+      console.error('❌ AI analysis failed:', aiError)
     } else {
-      console.log('✅ Direct database insert succeeded')
-      console.log(`   - Report ID: ${reportRecord.id}`)
-      
-      // Clean up
-      await supabase.from('reports').delete().eq('id', reportRecord.id)
-      console.log('   - Cleaned up test record')
+      console.log('✅ AI analysis succeeded')
+      console.log('   Success:', aiResult?.success)
+      console.log('   Score:', aiResult?.investment_score)
     }
-
+    
+    // Step 4: Check environment
+    console.log('\n4. Checking environment variables...')
+    
+    // Check if API keys are configured
+    const { data: envCheck } = await supabase.functions.invoke('report-orchestrator-v3', {
+      body: {
+        test: true  // Special test mode
+      }
+    })
+    
+    console.log('\n✨ Test Summary:')
+    console.log('- Direct generation:', directResult ? '✅' : '❌')
+    console.log('- Evidence collection:', evidenceResult?.success ? '✅' : '❌')
+    console.log('- AI analysis:', aiResult?.success ? '✅' : '❌')
+    
   } catch (error) {
-    console.error('❌ Test failed:', error)
+    console.error('💥 Test failed:', error)
   }
 }
 
-testReportComponents()
+testMinimalReport()

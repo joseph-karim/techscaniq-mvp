@@ -1,0 +1,324 @@
+{
+  "success": true,
+  "evidence_count": 30,
+  "pages_crawled": 30,
+  "evidence_items": [
+    {
+      "type": "growth_metrics",
+      "source": "https://mixpanel.com",
+      "confidence": 0.7,
+      "content": {
+        "title": "Mixpanel - Digital Analytics Platform",
+        "url": "https://mixpanel.com",
+        "summary": "Fintech, how do you measure up to the rest of the industry?\n[Get the benchmark report \u2192](https://mixpanel.com/m/benchmarks-report-2025-fintech)\n[Mixpanel](https://mixpanel.com/home)\n  * Copy wordmark as SVG\n  * [Brand guidelines](https://brand.mixpanel.com/)\n\n\n  * Platform\nPlatform\n    * [Product AnalyticsMeasure & optimize products](https://mixpanel.com/features)\n    * [Warehouse ConnectorsSync trusted data](https://mixpanel.com/releases/data-warehouse-connectors)\n    * [Session ReplayWatch use...",
+        "word_count": 883,
+        "key_terms": [
+          "product",
+          "mixpanel",
+          "analytics",
+          "trusted",
+          "platform",
+          "customer",
+          "marketing",
+          "teams",
+          "business",
+          "started"
+        ],
+        "phase": "initial_context"
+      }
+    },
+    {
+      "type": "growth_metrics",
+      "source": "https://mixpanel.com/features",
+      "confidence": 0.7,
+      "content": {
+        "title": "Mixpanel: Product Analytics for Mobile, Web & More",
+        "url": "https://mixpanel.com/features",
+        "summary": "Fintech, how do you measure up to the rest of the industry?\n[Get the benchmark report \u2192](https://mixpanel.com/m/benchmarks-report-2025-fintech)\n[Mixpanel](https://mixpanel.com/home)\n  * Copy wordmark as SVG\n  * [Brand guidelines](https://brand.mixpanel.com/)\n\n\n  * Platform\nPlatform\n    * [Product AnalyticsMeasure & optimize products](https://mixpanel.com/features)\n    * [Warehouse ConnectorsSync trusted data](https://mixpanel.com/releases/data-warehouse-connectors)\n    * [Session ReplayWatch use...",
+        "word_count": 982,
+        "key_terms": [
+          "product",
+          "mixpanel",
+          "analytics",
+          "teams",
+          "platform",
+          "customer",
+          "started",
+          "trusted",
+          "growth",
+          "understand"
+        ],
+        "phase": "initial_context"
+      }
+    },
+    {
+      "type": "business_model",
+      "source": "https://mixpanel.com/partners/integrations",
+      "confidence": 0.72,
+      "content": {
+        "title": "Find the right Mixpanel Integration",
+        "url": "https://mixpanel.com/partners/integrations",
+        "summary": "[ ![mixpanel](https://s3-us-west-1.amazonaws.com/partnerpage.prod/media/logo/065c8f19-5715-4cdd-99c1-2f5143d340a2/124d41b5-f790-48f5-9c2b-9db2f883f062.png) ](https://mixpanel.com/home)\n  * [Log In](https://mixpanel.com/login)\n  * [Get Started](https://mixpanel.com/register)\n\n\nIntegrations\nMixpanel\u2019s integrations seamlessly integrate to deliver best-of-breed solutions to customers, empowered by our user insights. \n[Become a Partner](https://mixpanel.com/partners/becomeapartner-technology/)\n![](ht...",
+        "word_count": 1878,
+        "key_terms": [
+          "partner",
+          "customer",
+          "platform",
+          "their",
+          "integration",
+          "mixpanel",
+          "development",
+          "customers",
+          "business",
+          "product"
+        ],
+        "phase": "initial_context"
+      }
+    },
+    {
+      "type": "market_size",
+      "source": "https://brand.mixpanel.com",
+      "confidence": 0.7,
+      "content": {
+        "title": "Heliograph",
+        "url": "https://brand.mixpanel.com",
+        "summary": "# Heliograph\nMixpanel\u2019s brand design system\nh\u0113-l\u0113-\u014d-graf | noun\nHeliographs are tools used for optical communication. Typically, mirrors are used to reflect sunlight as flashes of light, transmitting Morse code over vast distances. \nFor us, the heliograph symbolizes our mission to convey our identity to the world and to maintain clear, concise, and easily understood information.\nLogos\n[![Frame 6408 \\(1\\).png](https://brand.mixpanel.com/uploads/252/doc/d1a43ed6-aa95-45b3-990b-2023ae357434/7d777d8...",
+        "word_count": 622,
+        "key_terms": [
+          "heliograph",
+          "builders",
+          "brand",
+          "world",
+          "mixpanel",
+          "analysis",
+          "through",
+          "design",
+          "system",
+          "heliographs"
+        ],
+        "phase": "initial_context"
+      }
+    },
+    {
+      "type": "scalability",
+      "source": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AbF9wXEF5A1brDdeYA2tsCwNT3CmPER6HvahIcSSbIiMFxLUYDV7oKE2UYDgDACHCMIhudfgJZdMuzhw2O63UvNLbOs5UsM2XLxX1bn6zIuTKi7S1ndmg4KmYugsU0z73hc9NkUiH83AZL017IVb1UG11gfNFMCDKWHeA4JMsaN4rg==",
+      "confidence": 0.92,
+      "content": {
+        "title": "Case Study: Paid Acquisition Optimization for Mixpanel",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AbF9wXEF5A1brDdeYA2tsCwNT3CmPER6HvahIcSSbIiMFxLUYDV7oKE2UYDgDACHCMIhudfgJZdMuzhw2O63UvNLbOs5UsM2XLxX1bn6zIuTKi7S1ndmg4KmYugsU0z73hc9NkUiH83AZL017IVb1UG11gfNFMCDKWHeA4JMsaN4rg==",
+        "targeted_gaps": [
+          "api_capabilities",
+          "integration_ecosystem",
+          "platform_extensibility"
+        ],
+        "gap_relevance": 0.1,
+        "phase": "gap_filling"
+      }
+    },
+    {
+      "type": "business_model",
+      "source": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AbF9wXFko-b4IJck35_cmWHNHPZBu2XhhkgRtO6bfJ_lLElxuPYDAHk3BmYzxFh0nATJAiD3NrAurmfXdwM_I_7_5TkmMBsBUrA2xCyzO1jqbg1_U17ObOpmt-973Jg3IjzTtLDQ6mREgdxzrLebTehbefweMoaSlA==",
+      "confidence": 0.92,
+      "content": {
+        "title": "Mixpanel Uses ABM to Shift to Freemium, Product-Led Growth",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AbF9wXFko-b4IJck35_cmWHNHPZBu2XhhkgRtO6bfJ_lLElxuPYDAHk3BmYzxFh0nATJAiD3NrAurmfXdwM_I_7_5TkmMBsBUrA2xCyzO1jqbg1_U17ObOpmt-973Jg3IjzTtLDQ6mREgdxzrLebTehbefweMoaSlA==",
+        "targeted_gaps": [
+          "api_capabilities",
+          "integration_ecosystem",
+          "platform_extensibility"
+        ],
+        "gap_relevance": 0.1,
+        "phase": "gap_filling"
+      }
+    },
+    {
+      "type": "product_roadmap",
+      "source": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AbF9wXG0BOiVBSeWPN1wcVan_o1qoMWcbPSNsfESdGIu5RkeYQ1lfiTudTU9ea4bJ2X-lNjP5p0feL4-uuRkHwlVWnN_TI7jqlEhM4n4FWCmx2fzzWNujRkIp_dyCJHhUP01mjt2JpO-6ZdQsCxTHVTjj0sbMPs_mO0Dpmvuo-JTXdU7BAgcXrM1S7gUbl_oeHudeiXCmk2DCIA1bCx-7kwZ-7hGfJPxkZCOqxqKYdUGWLafKsm1aYRNDduZvQxYNUaOGYiI1TNLG0ZYqlWu0cGSLmb0DDoaVV-pHnkg11Dg2U05fyrG62bjgeNSEjthp5I=",
+      "confidence": 0.92,
+      "content": {
+        "title": "Product Analytics Leader Mixpanel Secures $200 Million Growth Investment to Help More Teams Build Winning Digital Products",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AbF9wXG0BOiVBSeWPN1wcVan_o1qoMWcbPSNsfESdGIu5RkeYQ1lfiTudTU9ea4bJ2X-lNjP5p0feL4-uuRkHwlVWnN_TI7jqlEhM4n4FWCmx2fzzWNujRkIp_dyCJHhUP01mjt2JpO-6ZdQsCxTHVTjj0sbMPs_mO0Dpmvuo-JTXdU7BAgcXrM1S7gUbl_oeHudeiXCmk2DCIA1bCx-7kwZ-7hGfJPxkZCOqxqKYdUGWLafKsm1aYRNDduZvQxYNUaOGYiI1TNLG0ZYqlWu0cGSLmb0DDoaVV-pHnkg11Dg2U05fyrG62bjgeNSEjthp5I=",
+        "targeted_gaps": [
+          "api_capabilities",
+          "integration_ecosystem",
+          "platform_extensibility"
+        ],
+        "gap_relevance": 0.4,
+        "phase": "gap_filling"
+      }
+    },
+    {
+      "type": "business_model",
+      "source": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AbF9wXFjeO3632Gf3Ks35x0Zxkz827KgM2qwPHSsAwvJxryC8W9Wv1hv6WMhXZUh8BaAMh3inSWnGyTsbz3kXURhIziAaJA3gzKuzd3ur5xt4BasVt3Fwr_FPyZCyQ2i93ltZF-tIC9xO6adA4bZy_FaGbg=",
+      "confidence": 0.92,
+      "content": {
+        "title": "The next evolution of Product Analytics",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AbF9wXFjeO3632Gf3Ks35x0Zxkz827KgM2qwPHSsAwvJxryC8W9Wv1hv6WMhXZUh8BaAMh3inSWnGyTsbz3kXURhIziAaJA3gzKuzd3ur5xt4BasVt3Fwr_FPyZCyQ2i93ltZF-tIC9xO6adA4bZy_FaGbg=",
+        "targeted_gaps": [
+          "api_capabilities",
+          "integration_ecosystem",
+          "platform_extensibility"
+        ],
+        "gap_relevance": 0.1,
+        "phase": "gap_filling"
+      }
+    },
+    {
+      "type": "api_capabilities",
+      "source": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AbF9wXHbazlCPoRITLXdow0Pvey-no5eEINMEQyFRGUEKiNi4RZRhXqV6S0wBMzK00Y8kW5_2U09iORaERLODPpeiJxCDqLeE0IaH1CmxG2JhSRxVCt6OdkOaQ9uAIb4D11TV_SQmxP3mhOrbuZpAPI=",
+      "confidence": 0.95,
+      "content": {
+        "title": "Overview",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AbF9wXHbazlCPoRITLXdow0Pvey-no5eEINMEQyFRGUEKiNi4RZRhXqV6S0wBMzK00Y8kW5_2U09iORaERLODPpeiJxCDqLeE0IaH1CmxG2JhSRxVCt6OdkOaQ9uAIb4D11TV_SQmxP3mhOrbuZpAPI=",
+        "targeted_gaps": [
+          "api_capabilities",
+          "integration_ecosystem",
+          "platform_extensibility"
+        ],
+        "gap_relevance": 0.2,
+        "phase": "gap_filling"
+      }
+    },
+    {
+      "type": "growth_metrics",
+      "source": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AbF9wXEnnMlYRe_km5kpkkjQISYwSt-Rbw5bAXt31ca789Tj9D2JdyB3bJkGPFWnlMiAhtbzJk_lw4kNcYiXvDMGaT_IOEoTRbpqH0YRRLpvSNiMPj9xsfEPnsNpyh_O1ZeZxiS0TfGbzu5mTIM=",
+      "confidence": 0.92,
+      "content": {
+        "title": "Amplitude Vs. Mixpanel: A Strategic Choice For Your Product Analytics Needs | E-CENS",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AbF9wXEnnMlYRe_km5kpkkjQISYwSt-Rbw5bAXt31ca789Tj9D2JdyB3bJkGPFWnlMiAhtbzJk_lw4kNcYiXvDMGaT_IOEoTRbpqH0YRRLpvSNiMPj9xsfEPnsNpyh_O1ZeZxiS0TfGbzu5mTIM=",
+        "targeted_gaps": [
+          "api_capabilities",
+          "integration_ecosystem",
+          "platform_extensibility"
+        ],
+        "gap_relevance": 0.4,
+        "phase": "gap_filling"
+      }
+    }
+  ],
+  "research_iterations": 6,
+  "evidence_coverage": {
+    "collected": [
+      "integration_ecosystem",
+      "business_model",
+      "growth_metrics",
+      "security_posture",
+      "customer_segments",
+      "market_size",
+      "scalability",
+      "api_capabilities",
+      "product_roadmap"
+    ],
+    "missing": [
+      "platform_extensibility",
+      "developer_resources",
+      "partner_network",
+      "technical_architecture",
+      "modularity",
+      "acquisition_readiness"
+    ]
+  },
+  "key_insights": {
+    "discovered_features": [
+      "mixpanel",
+      "product",
+      "platform",
+      "customer",
+      "analytics",
+      "trusted",
+      "teams",
+      "business",
+      "started",
+      "marketing",
+      "growth",
+      "understand",
+      "partner",
+      "their",
+      "integration",
+      "development",
+      "customers",
+      "heliograph",
+      "builders",
+      "brand"
+    ],
+    "discovered_keywords": [
+      "brand",
+      "system",
+      "development",
+      "mixpanel",
+      "heliograph",
+      "platform",
+      "through",
+      "builders",
+      "integration",
+      "understand",
+      "their",
+      "teams",
+      "marketing",
+      "design",
+      "heliographs",
+      "customers",
+      "partner",
+      "started",
+      "growth",
+      "product",
+      "analytics",
+      "analysis",
+      "trusted",
+      "customer",
+      "world",
+      "business"
+    ]
+  },
+  "synthesis": {
+    "investment_thesis": "buy-and-build",
+    "domain": "mixpanel.com",
+    "research_iterations": 6,
+    "evidence_completeness": 1.125,
+    "key_findings": {
+      "api_capabilities": {
+        "found": true,
+        "sources": 4,
+        "quality": 0.95
+      },
+      "integration_ecosystem": {
+        "found": true,
+        "sources": 3,
+        "quality": 0.9499999999999998
+      },
+      "platform_extensibility": {
+        "found": false,
+        "sources": 0,
+        "quality": 0
+      },
+      "developer_resources": {
+        "found": false,
+        "sources": 0,
+        "quality": 0
+      },
+      "partner_network": {
+        "found": false,
+        "sources": 0,
+        "quality": 0
+      },
+      "technical_architecture": {
+        "found": false,
+        "sources": 0,
+        "quality": 0
+      },
+      "modularity": {
+        "found": false,
+        "sources": 0,
+        "quality": 0
+      },
+      "acquisition_readiness": {
+        "found": false,
+        "sources": 0,
+        "quality": 0
+      }
+    },
+    "recommendations": [
+      "High evidence coverage - proceed with detailed analysis"
+    ]
+  }
+}

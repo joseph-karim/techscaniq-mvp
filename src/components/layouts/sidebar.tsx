@@ -1,5 +1,5 @@
 import { Link, NavLink, useLocation } from 'react-router-dom'
-import { BarChart3, FileText, Home, List, PanelLeft, Settings, PenSquare as SquarePen, Building2, TrendingUp } from 'lucide-react'
+import { BarChart3, FileText, Home, List, PanelLeft, Settings, PenSquare as SquarePen, Building2, TrendingUp, Activity } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -15,6 +15,9 @@ const iconMap = {
   'Portfolio Companies': Building2,
   'Thesis Tracking': TrendingUp,
   'Review Queue': List,
+  'Pipeline Monitor': Activity,
+  'Pipeline Configuration': Settings,
+  'Admin Dashboard': Home,
   'Settings': Settings,
 }
 

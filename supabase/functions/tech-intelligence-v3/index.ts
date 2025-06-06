@@ -191,7 +191,8 @@ async function retryWithBackoff<T>(
 async function analyzeWithClaude(
   company: any,
   evidenceSummary: any[],
-  investorProfile: any
+  investorProfile: any,
+  analysisType?: string
 ): Promise<ReportData> {
   const apiKey = Deno.env.get('ANTHROPIC_API_KEY')
   console.log('Environment check:', {
@@ -219,7 +220,12 @@ async function analyzeWithClaude(
   const thesisCriteria = investmentThesis?.criteria || []
   const scoreReweighting = investmentThesis?.scoreReweighting || {}
 
-  const prompt = `You are a senior technology due diligence analyst conducting a comprehensive investment analysis of ${company.name} (${company.website}). Your task is to create an extremely detailed, evidence-based report aligned with the specific PE investment thesis and scoring framework.
+  // Always use comprehensive analysis for highest quality
+  const prompt = `You are a world-class technology due diligence analyst with 20+ years of experience evaluating companies for top-tier PE firms. You are conducting an EXHAUSTIVE investment analysis of ${company.name} (${company.website}).
+
+Your task is to create an EXCEPTIONALLY DETAILED, evidence-based report that would satisfy the most demanding investment committee. This is a critical investment decision involving potentially hundreds of millions of dollars.
+
+IMPORTANT: Take your time. Be thorough. Think deeply about every aspect. Quality and accuracy are paramount.
 
 CRITICAL: This analysis must be optimized for the "${thesisType}" investment thesis.
 
@@ -413,9 +419,9 @@ Return ONLY valid JSON matching this exact structure, but with MUCH MORE DETAIL 
           'anthropic-version': '2023-06-01'
         },
         body: JSON.stringify({
-          model: 'claude-opus-4-20250514',
-          max_tokens: 8192,
-          temperature: 0.3,
+          model: 'claude-opus-4-20250514',  // Use latest Opus 4 for highest quality
+          max_tokens: 8192,  // Maximum tokens for comprehensive analysis
+          temperature: 0.7,  // Higher temperature for more creative insights
           messages: [{
             role: 'user',
             content: prompt
@@ -474,19 +480,13 @@ async function analyzeWithGemini(
     return acc
   }, {} as Record<string, any[]>)
 
-  const prompt = `You are a senior technology due diligence analyst conducting a comprehensive investment analysis of ${company.name} (${company.website}). Your task is to create an extremely detailed, evidence-based report similar in depth and quality to professional due diligence reports.
+  // Shorter prompt for faster processing
+  const prompt = `Analyze ${company.name} (${company.website}) for investment potential.
 
-IMPORTANT GUIDELINES:
-1. Be EXTREMELY detailed and specific. Do not use placeholder text.
-2. Infer and extrapolate from the evidence to create a comprehensive narrative.
-3. Include confidence scores (as percentages) for key findings.
-4. Reference evidence with bracketed numbers like [1], [2] etc.
-5. Write in a professional, analytical tone suitable for investment committees.
-6. If data is limited, make intelligent inferences based on industry knowledge and available evidence.
-7. Each section should be 3-5 paragraphs minimum with specific details.
+Evidence summary (${evidenceSummary.length} items):
+${JSON.stringify(evidenceByCategory, null, 2).substring(0, 2000)}...
 
-Evidence collected:
-${JSON.stringify(evidenceByCategory, null, 2)}
+Provide a concise investment analysis with scores and recommendations.
 
 ${investorProfile ? `Investor Profile:
 - Firm: ${investorProfile.firmName}
@@ -613,7 +613,25 @@ Return ONLY valid JSON with this exact structure, filling in DETAILED, SPECIFIC 
             topP: 0.95,
             maxOutputTokens: 8192,
             responseMimeType: "application/json"
-          }
+          },
+          safetySettings: [
+            {
+              category: "HARM_CATEGORY_HARASSMENT",
+              threshold: "BLOCK_NONE"
+            },
+            {
+              category: "HARM_CATEGORY_HATE_SPEECH",
+              threshold: "BLOCK_NONE"
+            },
+            {
+              category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+              threshold: "BLOCK_NONE"
+            },
+            {
+              category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+              threshold: "BLOCK_NONE"
+            }
+          ]
         })
       }
     )
@@ -760,15 +778,40 @@ Deno.serve(async (req) => {
     let result: ReportData
     
     try {
-      // Use Claude exclusively (as requested by user)
+      // Always use Claude Opus for highest quality analysis
+      console.log('Starting deep analysis with Claude Opus...')
+      console.log(`Evidence items: ${request.evidenceSummary.length}`)
+      console.log('This may take several minutes for comprehensive analysis...')
+      
       result = await analyzeWithClaude(
         request.company,
         request.evidenceSummary,
-        request.investorProfile
+        request.investorProfile,
+        request.analysisType
       )
+      
+      console.log('Deep analysis completed successfully')
     } catch (analysisError) {
       console.error('Claude analysis failed:', analysisError)
-      throw new Error(`AI analysis failed: ${analysisError.message}`)
+      
+      // For quality, we don't fall back - we retry with Claude
+      console.log('Retrying with Claude (quality is paramount)...')
+      try {
+        // Retry with slightly reduced evidence if needed
+        const reducedEvidence = request.evidenceSummary
+          .sort((a, b) => b.confidence - a.confidence)
+          .slice(0, Math.min(50, request.evidenceSummary.length))
+        
+        result = await analyzeWithClaude(
+          request.company,
+          reducedEvidence,
+          request.investorProfile,
+          request.analysisType
+        )
+      } catch (retryError) {
+        console.error('Retry also failed:', retryError)
+        throw new Error(`Deep analysis failed after retries: ${retryError.message}`)
+      }
     }
     
     // Calculate investment score and other derived fields
