@@ -7,9 +7,9 @@ import { ScanReportSection } from '@/components/reports/ScanReportNavigation'
 import { 
   FileText, Code, Shield, Users, Target, BarChart3, Building2, Wrench, 
   ChevronRight, ExternalLink, Info, AlertTriangle, CheckCircle, TrendingUp, 
-  X, ArrowRight, Hash, Star, Award, Zap, 
+  ArrowRight, Hash, Star, Award, Zap, 
   Calendar, Clock, Download, Share2, BookmarkPlus, Eye,
-  Brain, Database, Layers, Activity, AlertCircle
+  Layers, Activity, AlertCircle, Loader2
 } from 'lucide-react'
 import { Breadcrumbs } from '@/components/pe/deep-dive-report/Breadcrumbs'
 import { Citation } from '@/types'
@@ -22,9 +22,11 @@ import { Progress } from '@/components/ui/progress'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Home, Search } from 'lucide-react'
-import { mockDemoReports, DemoStandardReport } from '@/lib/mock-demo-data'
-import { ring4MockCitations } from '@/lib/ring4-mock-report-data'
 import { cn } from '@/lib/utils'
+import { fetchReportWithEvidence, transformCitationForFrontend } from '@/lib/api/reports'
+import type { ReportWithEvidence } from '@/lib/api/reports'
+import { EvidenceAppendix } from '@/components/reports/EvidenceAppendix'
+import { EvidenceModal } from '@/components/reports/EvidenceModal'
 
 // Executive-grade score visualization component following investment banking presentation standards
 const ExecutiveScoreCard = ({ 
@@ -481,52 +483,48 @@ export default function ViewReport() {
   const { id } = useParams<{ id: string }>()
   const [selectedCitation, setSelectedCitation] = useState<Citation | null>(null)
   const [activeSection, setActiveSection] = useState('executive-summary')
+  const [loading, setLoading] = useState(true)
+  const [reportData, setReportData] = useState<ReportWithEvidence | null>(null)
 
-  // Get report based on URL parameter
-  const getReportFromId = (reportId: string | undefined): DemoStandardReport | null => {
-    if (!reportId) return null
-    
-    // Try exact match first
-    const exactMatch = mockDemoReports[`report-${reportId}-comprehensive`]
-    if (exactMatch) return exactMatch
-    
-    // Try finding by company name
-    const reportByName = Object.values(mockDemoReports).find(report => 
-      report.company_name.toLowerCase() === reportId.toLowerCase()
-    )
-    if (reportByName) return reportByName
-    
-    // Try finding by scan ID (for real scans like Snowplow)
-    if (reportId.includes('-')) {
-      // This is likely a scan ID, create a placeholder report
-      return {
-        id: reportId,
-        company_name: 'Loading...',
-        website_url: 'https://example.com',
-        created_at: new Date().toISOString(),
-        report_type: 'standard',
-        executive_summary: 'Report data is being loaded. Please check back shortly.',
-        investment_score: 0,
-        investment_rationale: 'Report generation in progress',
-        tech_health_score: 0,
-        tech_health_grade: 'N/A',
-        sections: []
+  // Fetch report data with evidence and citations
+  useEffect(() => {
+    async function loadReport() {
+      if (!id) return
+      
+      setLoading(true)
+      try {
+        const data = await fetchReportWithEvidence(id)
+        if (data) {
+          setReportData(data)
+        }
+      } catch (error) {
+        console.error('Error loading report:', error)
+      } finally {
+        setLoading(false)
       }
     }
-    
-    // If nothing found, return null to show error
-    return null
-  }
 
-  const currentReport = getReportFromId(id)
+    loadReport()
+  }, [id])
 
-  // Get citations for current report
-  const getCurrentCitations = () => {
-    if (id === 'ring4') return ring4MockCitations
-    return [] // Add other report citations as needed
-  }
+  // Transform report data to match expected format
+  const currentReport = reportData ? {
+    id: reportData.id,
+    company_name: reportData.company_name || reportData.report_data?.company_name || 'Unknown Company',
+    website_url: reportData.report_data?.website_url || '',
+    created_at: reportData.created_at,
+    report_type: 'standard',
+    executive_summary: reportData.executive_summary || reportData.report_data?.executive_summary || '',
+    investment_score: reportData.investment_score || reportData.report_data?.investment_score || 0,
+    investment_rationale: reportData.investment_rationale || reportData.report_data?.investment_rationale || '',
+    tech_health_score: reportData.tech_health_score || reportData.report_data?.tech_health_score || 0,
+    tech_health_grade: reportData.tech_health_grade || reportData.report_data?.tech_health_grade || 'N/A',
+    sections: reportData.report_data?.sections || [],
+    scan_type: reportData.report_data?.scan_type || 'standard'
+  } : null
 
-  const citations = getCurrentCitations()
+  // Get citations from report data
+  const citations = reportData?.citations?.map(transformCitationForFrontend) || []
 
   // Generate navigation sections from report data
   const getIconForSection = (title: string) => {
@@ -590,7 +588,7 @@ export default function ViewReport() {
   const handleCitationClick = (citationId: string) => {
     const citation = citations.find(c => c.id === citationId)
     if (citation) {
-      setSelectedCitation(citation)
+      setSelectedCitation(citation as Citation)
     }
   }
 
@@ -719,6 +717,20 @@ export default function ViewReport() {
     { label: 'Reports', href: '/reports', icon: <FileText className="h-4 w-4" /> },
     { label: currentReport?.company_name || 'Report', icon: <Search className="h-4 w-4" /> }
   ]
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Card className="max-w-md w-full shadow-xl">
+          <CardContent className="p-8 text-center">
+            <Loader2 className="h-16 w-16 text-blue-600 mx-auto mb-4 animate-spin" />
+            <h2 className="text-2xl font-semibold text-gray-900 mb-3">Loading Report</h2>
+            <p className="text-gray-600 mb-6 leading-relaxed">Fetching report data and evidence...</p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   if (!currentReport) {
     return (
@@ -852,7 +864,7 @@ export default function ViewReport() {
                       Detailed Technical Analysis
                     </h3>
                     <Accordion type="single" collapsible className="space-y-4">
-                      {currentSection.subsections.map((subsection, index) => (
+                      {currentSection.subsections.map((subsection: any, index: number) => (
                         <AccordionItem key={index} value={`subsection-${index}`} className="border rounded-xl bg-gradient-to-r from-gray-50 to-white shadow-sm">
                           <AccordionTrigger className="px-8 py-6 hover:no-underline text-left">
                             <div className="flex items-center gap-4 text-left">
@@ -995,115 +1007,45 @@ export default function ViewReport() {
           </main>
         </div>
 
+        {/* Evidence Appendix Section */}
+        {currentReport && (
+          <div className="container mx-auto px-8 py-12 bg-gray-50">
+            <EvidenceAppendix 
+              companyName={currentReport.company_name}
+              reportId={currentReport.id}
+              className=""
+            />
+          </div>
+        )}
+
         {/* Enhanced Citation Modal */}
         {selectedCitation && (
-          <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-            <Card className="max-w-5xl w-full max-h-[90vh] overflow-auto shadow-2xl border-0">
-              <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl flex items-center gap-3">
-                    <Brain className="h-6 w-6" />
-                    Evidence-Based Analysis
-                  </CardTitle>
-                  <Button variant="ghost" size="sm" onClick={handleCloseModal} className="text-white hover:bg-white/20">
-                    <X className="h-5 w-5" />
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="p-8 space-y-8">
-                {/* Enhanced Key Finding */}
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200">
-                  <h4 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-3">
-                    <Target className="h-5 w-5 text-blue-600" />
-                    Key Finding
-                  </h4>
-                  <p className="text-gray-800 leading-relaxed font-medium text-lg mb-4">{selectedCitation.claim}</p>
-                  <div className="flex items-center gap-6 text-sm">
-                    <Badge className={cn(
-                      "px-3 py-1 font-semibold",
-                      selectedCitation.confidence >= 90 ? "bg-green-100 text-green-800 border-green-300" :
-                      selectedCitation.confidence >= 70 ? "bg-yellow-100 text-yellow-800 border-yellow-300" :
-                      "bg-red-100 text-red-800 border-red-300"
-                    )}>
-                      {selectedCitation.confidence}% Confidence
-                    </Badge>
-                    <span className="text-gray-600">Analyst: {selectedCitation.analyst}</span>
-                    <span className="text-gray-600">Date: {selectedCitation.review_date}</span>
-                  </div>
-                </div>
-                
-                {/* Professional Grid Layout for Details */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  {/* Citation Source */}
-                  <div className="bg-gray-50 p-6 rounded-xl border">
-                    <h4 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-3">
-                      <Database className="h-5 w-5 text-green-600" />
-                      Citation Source
-                    </h4>
-                    <div className="space-y-3">
-                      <p className="text-gray-700 leading-relaxed">{selectedCitation.citation_text}</p>
-                      {selectedCitation.citation_context && (
-                        <div className="border-t pt-3">
-                          <span className="text-sm font-medium text-gray-500">Context: </span>
-                          <span className="text-sm text-gray-700">{selectedCitation.citation_context}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Analysis & Reasoning */}
-                  <div className="bg-purple-50 p-6 rounded-xl border border-purple-200">
-                    <h4 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-3">
-                      <Brain className="h-5 w-5 text-purple-600" />
-                      Analysis & Reasoning
-                    </h4>
-                    <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{selectedCitation.reasoning}</p>
-                  </div>
-                </div>
-                
-                {/* Methodology */}
-                {selectedCitation.methodology && (
-                  <div className="bg-orange-50 p-6 rounded-xl border border-orange-200">
-                    <h4 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-3">
-                      <Wrench className="h-5 w-5 text-orange-600" />
-                      Research Methodology
-                    </h4>
-                    <p className="text-gray-700 leading-relaxed">{selectedCitation.methodology}</p>
-                  </div>
-                )}
-                
-                {/* Evidence Summary */}
-                {selectedCitation.evidence_summary && selectedCitation.evidence_summary.length > 0 && (
-                  <div>
-                    <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-3">
-                      <FileText className="h-5 w-5 text-indigo-600" />
-                      Supporting Evidence ({selectedCitation.evidence_summary.length} sources)
-                    </h4>
-                    <div className="grid gap-4">
-                      {selectedCitation.evidence_summary.map((evidence, index) => (
-                        <div key={index} className="bg-white border rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
-                          <div className="flex items-start gap-3">
-                            <Badge variant="outline" className="text-xs font-medium">
-                              {evidence.type}
-                            </Badge>
-                            <div className="flex-1">
-                              <h5 className="font-semibold text-gray-900 mb-2">{evidence.title}</h5>
-                              <p className="text-sm text-gray-600 mb-3">{evidence.source}</p>
-                              {evidence.excerpt && (
-                                <blockquote className="text-sm text-gray-700 italic border-l-4 border-blue-300 pl-4 bg-blue-50 p-3 rounded-r-lg">
-                                  "{evidence.excerpt}"
-                                </blockquote>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+          <EvidenceModal
+            isOpen={!!selectedCitation}
+            onClose={handleCloseModal}
+            citation={{
+              id: selectedCitation.id,
+              claim: selectedCitation.claim,
+              confidence: selectedCitation.confidence,
+              analyst: selectedCitation.analyst,
+              reviewDate: new Date(selectedCitation.review_date).toLocaleDateString(),
+              evidence: selectedCitation.evidence_summary?.map((e: any, idx: number) => ({
+                id: `${selectedCitation.id}-evidence-${idx}`,
+                type: e.type === 'webpage_content' ? 'web' : 
+                      e.type === 'api_response' ? 'api' : 
+                      e.type === 'deepsearch_finding' ? 'analysis' : 'document',
+                title: e.title,
+                source: e.source,
+                excerpt: e.excerpt,
+                url: e.url,
+                metadata: {
+                  confidence: selectedCitation.confidence
+                }
+              })) || [],
+              reasoning: selectedCitation.reasoning,
+              methodology: selectedCitation.methodology
+            }}
+          />
         )}
       </div>
     </TooltipProvider>
