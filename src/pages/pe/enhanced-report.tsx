@@ -4,7 +4,7 @@ import { ExecutiveSummary } from '@/components/pe/enhanced-report/sections/Execu
 import { StackEvolutionTimeline } from '@/components/pe/enhanced-report/sections/StackEvolutionTimeline'
 import { TechnicalLeadership } from '@/components/pe/enhanced-report/sections/TechnicalLeadership'
 import { CloudVendorDependencies } from '@/components/pe/enhanced-report/sections/CloudVendorDependencies'
-import { EvidenceAppendix } from '@/components/reports/EvidenceAppendix'
+import { EnhancedEvidenceAppendix } from '@/components/reports/EnhancedEvidenceAppendix'
 
 // Mock data for the enhanced report
 const enhancedReportData = {
@@ -279,9 +279,10 @@ export default function PEEnhancedReportPage() {
 
         {/* Evidence Appendix */}
         <section id="evidence-appendix" className="p-8">
-          <EvidenceAppendix 
+          <EnhancedEvidenceAppendix 
             companyName={enhancedReportData.executiveSummary.companyName}
             reportId={id}
+            comprehensiveScore={undefined} // TODO: Pass actual comprehensive score from report metadata
           />
         </section>
       </div>

@@ -1,3 +1,0 @@
-[env]
-SUPABASE_URL = "secret"
-SUPABASE_ANON_KEY = "secret"

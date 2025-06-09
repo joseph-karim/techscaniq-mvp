@@ -25,8 +25,9 @@ import { Home, Search } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { fetchReportWithEvidence, transformCitationForFrontend } from '@/lib/api/reports'
 import type { ReportWithEvidence } from '@/lib/api/reports'
-import { EvidenceAppendix } from '@/components/reports/EvidenceAppendix'
+import { EnhancedEvidenceAppendix } from '@/components/reports/EnhancedEvidenceAppendix'
 import { EvidenceModal } from '@/components/reports/EvidenceModal'
+import { ConfidenceVisualization } from '@/components/reports/ConfidenceVisualization'
 
 // Executive-grade score visualization component following investment banking presentation standards
 const ExecutiveScoreCard = ({ 
@@ -790,8 +791,15 @@ export default function ViewReport() {
               </div>
             </div>
             
-            {/* Add executive score cards for Executive Summary */}
-            {currentSection.title === 'Executive Summary' && currentReport && (
+            {/* Add comprehensive scoring visualization for Executive Summary */}
+            {currentSection.title === 'Executive Summary' && currentReport && reportData?.metadata?.comprehensiveScore && (
+              <div className="mb-8">
+                <ConfidenceVisualization score={reportData.metadata.comprehensiveScore} />
+              </div>
+            )}
+            
+            {/* Add executive score cards for Executive Summary if no comprehensive score */}
+            {currentSection.title === 'Executive Summary' && currentReport && !reportData?.metadata?.comprehensiveScore && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                 <ExecutiveScoreCard
                   title="Investment Thesis Score"
@@ -1010,9 +1018,10 @@ export default function ViewReport() {
         {/* Evidence Appendix Section */}
         {currentReport && (
           <div className="container mx-auto px-8 py-12 bg-gray-50">
-            <EvidenceAppendix 
+            <EnhancedEvidenceAppendix 
               companyName={currentReport.company_name}
               reportId={currentReport.id}
+              comprehensiveScore={reportData?.metadata?.comprehensiveScore}
               className=""
             />
           </div>
