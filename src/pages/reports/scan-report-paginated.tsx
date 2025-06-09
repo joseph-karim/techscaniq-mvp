@@ -4,7 +4,7 @@ import { ScanReportNavigation, scanReportSections } from '@/components/reports/S
 import { Breadcrumbs } from '@/components/pe/deep-dive-report/Breadcrumbs'
 import { InlineCitation, Citation } from '@/components/reports/EvidenceCitation'
 import { EvidenceModal } from '@/components/reports/EvidenceModal'
-import { EvidenceAppendix } from '@/components/reports/EvidenceAppendix'
+import { EnhancedEvidenceAppendix } from '@/components/reports/EnhancedEvidenceAppendix'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
@@ -1635,9 +1635,10 @@ export default function ScanReportPaginated() {
       case 'evidence-appendix':
         return (
           <div id="evidence-appendix" className="p-6">
-            <EvidenceAppendix 
+            <EnhancedEvidenceAppendix 
               companyName="Ring4" // This should be dynamic based on the actual report
               reportId={id}
+              comprehensiveScore={undefined} // TODO: Pass actual comprehensive score from report metadata
             />
           </div>
         )
