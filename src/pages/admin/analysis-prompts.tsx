@@ -5,11 +5,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { 
-  Save, RotateCcw, Copy, Check, AlertCircle, 
+  Save, RotateCcw, Check, AlertCircle, 
   Code, FileText, Cpu, DollarSign, Shield, Target,
   Edit3, Eye, ChevronDown, ChevronUp
 } from 'lucide-react';

@@ -174,7 +174,10 @@ class AnalysisOrchestrator {
           Object.entries(techKeywords).forEach(([category, keywords]) => {
             keywords.forEach(keyword => {
               if (content.toLowerCase().includes(keyword)) {
-                parsedData.technologies[category as keyof typeof parsedData.technologies].push(keyword)
+                const techArray = parsedData.technologies[category as keyof typeof parsedData.technologies]
+                if (Array.isArray(techArray)) {
+                  techArray.push(keyword)
+                }
               }
             })
           })
@@ -189,7 +192,9 @@ class AnalysisOrchestrator {
           const competitorKeywords = ['competes with', 'competitors include', 'vs', 'alternative to']
           competitorKeywords.forEach(keyword => {
             const match = content.match(new RegExp(`${keyword}.*?([A-Z][a-zA-Z]+)`, 'i'))
-            if (match) parsedData.market.competitors.push(match[1])
+            if (match && Array.isArray(parsedData.market?.competitors)) {
+              parsedData.market.competitors.push(match[1])
+            }
           })
         }
         
@@ -204,7 +209,9 @@ class AnalysisOrchestrator {
           const certs = ['SOC2', 'ISO27001', 'HIPAA', 'GDPR']
           certs.forEach(cert => {
             if (content.includes(cert)) {
-              parsedData.security.certifications.push(cert)
+              if (Array.isArray(parsedData.security?.certifications)) {
+                parsedData.security.certifications.push(cert)
+              }
             }
           })
         }
@@ -428,7 +435,7 @@ ${prompt.outputFormat}`
 
       const comprehensiveScore = scoringService.calculateComprehensiveScore(
         evidenceItems,
-        { type: this.investmentThesis }
+        { type: this.investmentThesis, name: this.investmentThesis }
       )
 
       // Get synthesis prompt
@@ -585,7 +592,7 @@ Provide the final investment recommendation in JSON format with the following st
       },
       
       // Top-level metrics for the reports table
-      investment_score: Math.round(analyses.synthesis?.investmentScore || 75),
+      // investment_score already defined above, removed duplicate
       tech_health_score: Math.round((analyses.technology?.scalabilityScore || 0.75) * 100),
       tech_health_grade: this.calculateGrade(analyses.synthesis?.investmentScore || 75),
       investment_rationale: analyses.synthesis?.executiveSummary || ''
