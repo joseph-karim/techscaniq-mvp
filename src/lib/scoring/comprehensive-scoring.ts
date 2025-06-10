@@ -235,7 +235,7 @@ export class ComprehensiveScoringService {
     return Math.round(baseScore * qualityMultiplier);
   }
 
-  private analyzeEvidenceForScore(evidence: EvidenceItem[], category: string): number {
+  private analyzeEvidenceForScore(evidence: EvidenceItem[], _category: string): number {
     // This would be enhanced with AI analysis in production
     // For now, using a simplified scoring based on evidence patterns
     
@@ -318,7 +318,7 @@ export class ComprehensiveScoringService {
     return scores.reduce((sum, score) => sum + score, 0) / scores.length;
   }
 
-  private calculateConsistencyScore(evidence: EvidenceItem[]): number {
+  private calculateConsistencyScore(_evidence: EvidenceItem[]): number {
     // Simplified consistency check - in production would use NLP
     // to detect conflicting evidence
     return 0.85; // Default high consistency
@@ -387,7 +387,7 @@ export class ComprehensiveScoringService {
 
   private scoreToRecommendation(
     score: number,
-    thesis: InvestmentThesis
+    _thesis: InvestmentThesis
   ): 'Strong Buy' | 'Buy' | 'Hold' | 'Pass' {
     if (score >= 80) return 'Strong Buy';
     if (score >= 65) return 'Buy';

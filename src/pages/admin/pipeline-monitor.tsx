@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -10,8 +10,8 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { 
   Play, Pause, RotateCcw, SkipForward, XCircle, 
-  AlertTriangle, CheckCircle2, Clock, Activity,
-  Settings, Eye, RefreshCw, Download
+  AlertTriangle, 
+  Settings, RefreshCw
 } from 'lucide-react'
 import { format } from 'date-fns'
 
@@ -32,6 +32,7 @@ interface PipelineExecution {
     company_name: string
     company_domain: string
   }
+  evidence_by_type?: Record<string, number>
 }
 
 interface PipelineStage {

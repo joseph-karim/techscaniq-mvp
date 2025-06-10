@@ -22,7 +22,7 @@ function getSupabase() {
 }
 
 // Create a new scan with background processing
-router.post('/api/scans', async (req, res) => {
+router.post('/api/scans', async (req: any, res: any) => {
   try {
     const {
       company_name,
@@ -81,7 +81,7 @@ router.post('/api/scans', async (req, res) => {
           reportJobId,
         },
       })
-      .eq('id', scanRequest.id)
+      .eq('id', scanRequest.id) as any
     
     res.status(201).json({
       success: true,
@@ -103,7 +103,7 @@ router.post('/api/scans', async (req, res) => {
 })
 
 // Get scan status with job progress
-router.get('/api/scans/:id/status', async (req, res) => {
+router.get('/api/scans/:id/status', async (req: any, res: any) => {
   try {
     const { id } = req.params
     
@@ -187,7 +187,7 @@ router.get('/api/scans/:id/status', async (req, res) => {
 })
 
 // Get queue metrics for admin dashboard
-router.get('/api/admin/queue-metrics', async (_req, res) => {
+router.get('/api/admin/queue-metrics', async (_req: any, res: any) => {
   try {
     const metrics = await getQueueMetrics()
     
@@ -206,13 +206,13 @@ router.get('/api/admin/queue-metrics', async (_req, res) => {
 })
 
 // Retry a failed job
-router.post('/api/scans/:id/retry', async (req, res) => {
+router.post('/api/scans/:id/retry', async (req: any, res: any) => {
   try {
     const { id } = req.params
     const { jobType } = req.body // 'evidence' or 'report'
     
     // Get scan request
-    const { data: scanRequest, error: dbError } = await supabase
+    const { data: scanRequest, error: dbError } = await getSupabase()
       .from('scan_requests')
       .select('*')
       .eq('id', id)

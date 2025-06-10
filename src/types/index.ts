@@ -1,3 +1,11 @@
+// Investment thesis type
+export interface InvestmentThesis {
+  type: string
+  name: string
+  description?: string
+  criteria?: string[]
+}
+
 // User types
 export interface User {
   id: string

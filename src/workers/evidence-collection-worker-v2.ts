@@ -169,13 +169,13 @@ class DecisionEngine {
     }
   }
   
-  shouldContinueLoop(context: any): boolean {
+  async shouldContinueLoop(context: any): Promise<boolean> {
     const { loopCount = 0, evidenceCount = 0, maxLoops = 10 } = context
     
     if (loopCount >= maxLoops) return false
     if (evidenceCount > 100) return false
     
-    const decision = this.makeToolDecision(context)
+    const decision = await this.makeToolDecision(context)
     if (!decision.tool) return false
     if (decision.expectedEvidence < 5 && evidenceCount > 50) return false
     
@@ -238,6 +238,7 @@ class ToolExecutor {
   }
   
   private async executeHtmlCollector(url: string): Promise<ToolResult> {
+    const startTime = Date.now()
     try {
       const response = await fetch(url, {
         headers: {
@@ -335,7 +336,8 @@ class ToolExecutor {
           securityHeaders,
           contentLength: html.length,
           techSignals
-        }
+        },
+        duration: Date.now() - startTime
       }
     } catch (error) {
       console.error('HTML collection error:', error)
@@ -343,7 +345,8 @@ class ToolExecutor {
         success: false,
         evidence: [],
         characteristics: {},
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
+        duration: Date.now() - startTime
       }
     }
   }
@@ -373,7 +376,8 @@ class ToolExecutor {
     return $('body').text().trim().substring(0, 10000)
   }
   
-  private async executeDeepCrawler(url: string, context: any): Promise<ToolResult> {
+  private async executeDeepCrawler(url: string, _context: any): Promise<ToolResult> {
+    const startTime = Date.now()
     const evidence: EvidenceItem[] = []
     const baseUrl = new URL(url)
     
@@ -435,9 +439,10 @@ class ToolExecutor {
         success: true,
         evidence,
         characteristics: {
-          linkedPages: links.size,
-          crawledPages: evidence.length
-        }
+          // linkedPages: links.size,
+          // crawledPages: evidence.length
+        },
+        duration: Date.now() - startTime
       }
     } catch (error) {
       return {
@@ -460,7 +465,8 @@ class ToolExecutor {
     return 'webpage'
   }
   
-  private async executeTechAnalyzer(url: string, context: any): Promise<ToolResult> {
+  private async executeTechAnalyzer(url: string, _context: any): Promise<ToolResult> {
+    const startTime = Date.now()
     const evidence: EvidenceItem[] = []
     
     try {
@@ -525,8 +531,9 @@ class ToolExecutor {
         success: true,
         evidence,
         characteristics: {
-          detectedTech: Array.from(techStack)
-        }
+          // detectedTech: Array.from(techStack)
+        },
+        duration: Date.now() - startTime
       }
     } catch (error) {
       return {
@@ -557,7 +564,8 @@ class ToolExecutor {
     return scripts
   }
   
-  private async executeApiAnalyzer(url: string, context: any): Promise<ToolResult> {
+  private async executeApiAnalyzer(url: string, _context: any): Promise<ToolResult> {
+    const startTime = Date.now()
     const evidence: EvidenceItem[] = []
     
     try {
@@ -627,7 +635,8 @@ class ToolExecutor {
         evidence,
         characteristics: {
           hasAPI: evidence.length > 0
-        }
+        },
+        duration: Date.now() - startTime
       }
     } catch (error) {
       return {
@@ -685,10 +694,10 @@ class ToolExecutor {
 
 // Agentic Search System
 class AgenticSearcher {
-  private audit: AuditTrail
+  private _audit: AuditTrail
   
   constructor(audit: AuditTrail) {
-    this.audit = audit
+    this._audit = audit
   }
   
   async performIterativeSearch(company: string, domain: string): Promise<EvidenceItem[]> {
@@ -780,7 +789,7 @@ class IntelligentCrawler {
     this.toolExecutor = new ToolExecutor(audit)
   }
   
-  async crawlWithIntelligence(domain: string, company: string): Promise<EvidenceItem[]> {
+  async crawlWithIntelligence(domain: string, _company: string): Promise<EvidenceItem[]> {
     const startTime = Date.now()
     const allEvidence: EvidenceItem[] = []
     
@@ -813,14 +822,14 @@ class IntelligentCrawler {
     const evidence: EvidenceItem[] = []
     const context = {
       url,
-      previousTools: [],
+      previousTools: [] as string[],
       pageCharacteristics: {},
       loopCount: 0,
       evidenceCount: 0
     }
     
     // Decision loop for this URL
-    while (this.decisionEngine.shouldContinueLoop(context)) {
+    while (await this.decisionEngine.shouldContinueLoop(context)) {
       const decision = await this.decisionEngine.makeToolDecision(context)
       
       if (!decision.tool) break

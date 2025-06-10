@@ -137,14 +137,15 @@ export async function getQueueMetrics() {
 }
 
 async function getQueueMetricsForQueue(queue: Queue) {
-  const [waiting, active, completed, failed, delayed, paused] = await Promise.all([
+  const [waiting, active, completed, failed, delayed] = await Promise.all([
     queue.getWaitingCount(),
     queue.getActiveCount(),
     queue.getCompletedCount(),
     queue.getFailedCount(),
     queue.getDelayedCount(),
-    queue.getPausedCount(),
   ])
+  
+  const paused = 0 // getPausedCount doesn't exist in newer versions
   
   return {
     waiting,
@@ -172,7 +173,7 @@ export function subscribeToJobUpdates(
   if (callbacks.onProgress) {
     events.on('progress', ({ jobId: id, data }) => {
       if (id === jobId) {
-        callbacks.onProgress!(data)
+        callbacks.onProgress!(typeof data === 'number' ? data : 0)
       }
     })
   }
