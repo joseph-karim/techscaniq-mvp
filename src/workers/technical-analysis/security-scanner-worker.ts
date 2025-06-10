@@ -76,7 +76,7 @@ class SecurityScanner {
       findings.push(...this.checkCommonVulnerabilities(url, response.data))
       
       // SSL/TLS Analysis
-      const ssl = await this.analyzeSsl(parsedUrl.hostname, parsedUrl.port || (parsedUrl.protocol === 'https:' ? 443 : 80))
+      const ssl = await this.analyzeSsl(parsedUrl.hostname, parseInt(parsedUrl.port || (parsedUrl.protocol === 'https:' ? '443' : '80')))
       findings.push(...this.checkSslSecurity(ssl))
       
       // Calculate overall security score
@@ -213,7 +213,7 @@ class SecurityScanner {
     return findings
   }
   
-  private checkCommonVulnerabilities(url: string, body: string): SecurityFinding[] {
+  private checkCommonVulnerabilities(_url: string, body: string): SecurityFinding[] {
     const findings: SecurityFinding[] = []
     
     // Check for common vulnerable patterns
@@ -252,7 +252,7 @@ class SecurityScanner {
     }
     
     // Check for common admin/test paths
-    const testPaths = ['/admin', '/test', '/debug', '/api/docs', '/swagger', '/.env', '/config']
+    // const _testPaths = ['/admin', '/test', '/debug', '/api/docs', '/swagger', '/.env', '/config']
     // Note: In a real implementation, you'd test these paths separately
     
     return findings

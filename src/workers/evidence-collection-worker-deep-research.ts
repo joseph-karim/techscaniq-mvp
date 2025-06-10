@@ -127,13 +127,14 @@ class DeepResearchCollector {
     private company: string,
     private domain: string,
     private investmentThesis: string,
-    private apiKey?: string
+    private _apiKey?: string,
+    private collectionId?: string
   ) {
     this.strategy = THESIS_STRATEGIES[investmentThesis] || THESIS_STRATEGIES['accelerate-organic-growth']
     this.strategy.initial_keywords.forEach(k => this.keywords.add(k))
     
-    if (apiKey) {
-      this.genAI = new GoogleGenerativeAI(apiKey)
+    if (this._apiKey) {
+      this.genAI = new GoogleGenerativeAI(this._apiKey)
     }
     
     // Initialize Anthropic for technical analysis orchestration
@@ -199,7 +200,7 @@ class DeepResearchCollector {
     return phaseMap[iteration] || ResearchPhase.TARGETED_SEARCH
   }
   
-  private async executePhase(phase: ResearchPhase, job: Job, maxPages: number): Promise<number> {
+  private async executePhase(phase: ResearchPhase, _job: Job, maxPages: number): Promise<number> {
     let pagesCollected = 0
     
     switch (phase) {
@@ -403,7 +404,7 @@ class DeepResearchCollector {
       })
       
       // Extract keywords from content
-      const text = $.text()
+      const text = ($ as any).text()
       this.extractKeywords(text)
       
       // Determine evidence type
@@ -411,7 +412,7 @@ class DeepResearchCollector {
       this.evidenceTypes.add(evidenceType)
       
       // Extract structured data
-      const structuredData = this.extractStructuredData($, url)
+      const structuredData = this.extractStructuredData($ as any, url)
       
       return {
         id: crypto.randomUUID(),
@@ -675,9 +676,9 @@ class DeepResearchCollector {
     }
   }
   
-  private determineEvidenceType(url: string, title: string, content: string): string {
+  private determineEvidenceType(url: string, _title: string, content: string): string {
     const urlLower = url.toLowerCase()
-    const titleLower = title.toLowerCase()
+    // const _titleLower = title.toLowerCase() // Not currently used in evidence type detection
     const contentLower = content.toLowerCase()
     
     // URL-based detection (using only VALID types from database)
@@ -781,7 +782,7 @@ class DeepResearchCollector {
   }
   
   // Claude-orchestrated technical analysis phase
-  private async runTechnicalAnalysisPhase(maxPages: number): Promise<number> {
+  private async runTechnicalAnalysisPhase(_maxPages: number): Promise<number> {
     if (!this.anthropic) {
       console.log('⚠️  Skipping technical analysis - no Anthropic API key configured')
       return 0
@@ -813,7 +814,7 @@ Your goal is to determine which technical analysis tools should be run to gather
             content: `Analyze ${this.company} (${this.domain}) for ${this.investmentThesis} investment thesis.
 
 Current evidence summary:
-${this.collectedEvidence.slice(0, 5).map(e => `- ${e.type}: ${e.summary?.substring(0, 100)}...`).join('\\n')}
+${this.collectedEvidence.slice(0, 5).map(e => `- ${e.type}: ${(e as any).summary?.substring(0, 100) || (typeof e.content === 'string' ? e.content : e.content.raw || '').substring(0, 100)}...`).join('\\n')}
 
 What technical analysis should we run? Consider:
 1. Product quality assessment through code/architecture analysis
@@ -872,7 +873,7 @@ Respond with JSON format:
                 url: `https://${this.domain}`,
                 domain: this.domain,
                 company: this.company,
-                collectionId: collectionId,
+                collectionId: this.collectionId || '00000000-0000-0000-0000-000000000000',
                 depth: toolConfig.priority === 'high' ? 2 : 1,
                 extractionTargets: toolConfig.targets
               })

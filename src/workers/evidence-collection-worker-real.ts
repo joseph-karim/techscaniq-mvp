@@ -240,7 +240,7 @@ async function collectGitHubData(company: string): Promise<EvidenceItem[]> {
   return evidence
 }
 
-async function collectNewsAndMedia(company: string, domain: string): Promise<EvidenceItem[]> {
+async function collectNewsAndMedia(company: string, _domain: string): Promise<EvidenceItem[]> {
   const evidence: EvidenceItem[] = []
   
   try {
@@ -283,11 +283,11 @@ async function collectNewsAndMedia(company: string, domain: string): Promise<Evi
     }
     
     // Try RSS feeds from major tech news sites
-    const techNewsFeeds = [
-      `https://news.ycombinator.com/rss`, // Would need to search/filter
-      `https://techcrunch.com/feed/`,
-      `https://venturebeat.com/feed/`
-    ]
+    // const techNewsFeeds = [
+    //   `https://news.ycombinator.com/rss`, // Would need to search/filter
+    //   `https://techcrunch.com/feed/`,
+    //   `https://venturebeat.com/feed/`
+    // ]
     
     // Note: In production, you'd parse these RSS feeds and search for company mentions
     

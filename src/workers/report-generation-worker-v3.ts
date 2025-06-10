@@ -262,7 +262,7 @@ function extractMission(evidence: any[]): string | null {
   return missionEvidence?.content_data?.summary || null
 }
 
-function generateHighlights(evidence: any[], score: any): string[] {
+function generateHighlights(_evidence: any[], score: any): string[] {
   const highlights: string[] = []
   
   if (score.technicalScore > 70 && score.technicalConfidence > 0.7) {
@@ -365,7 +365,7 @@ function generateInvestmentRationale(company: string, score: any, evidence: any[
       'All critical evidence areas were covered.')
 }
 
-function generateKeyStrengths(evidence: any[], score: any): string[] {
+function generateKeyStrengths(_evidence: any[], score: any): string[] {
   const strengths: string[] = []
   
   if (score.technicalScore > 70 && score.technicalConfidence > 0.6) {
@@ -387,7 +387,7 @@ function generateKeyStrengths(evidence: any[], score: any): string[] {
   return strengths.length > 0 ? strengths : ['Limited high-confidence strengths identified']
 }
 
-function generateKeyRisks(evidence: any[], score: any): string[] {
+function generateKeyRisks(_evidence: any[], score: any): string[] {
   const risks: string[] = []
   
   if (score.confidenceBreakdown.overallConfidence < 70) {
@@ -437,36 +437,36 @@ function generateNextSteps(score: any): string[] {
 }
 
 // Stub functions for evidence extraction - implement based on your evidence structure
-function extractTechStack(evidence: any[]): any[] { return [] }
-function extractArchitectureHighlights(evidence: any[]): string[] { return [] }
-function extractScalabilityFeatures(evidence: any[]): string[] { return [] }
-function extractInnovativeAspects(evidence: any[]): string[] { return [] }
-function extractMarketSize(evidence: any[]): string | null { return null }
-function extractTargetMarket(evidence: any[]): string | null { return null }
-function extractCompetitors(evidence: any[]): any[] { return [] }
-function extractCompetitivePosition(evidence: any[]): string | null { return null }
-function extractGrowthRate(evidence: any[]): string | null { return null }
-function extractMarketTrends(evidence: any[]): string[] { return [] }
-function extractOpportunities(evidence: any[]): string[] { return [] }
-function extractThreats(evidence: any[]): string[] { return [] }
-function extractDifferentiators(evidence: any[]): string[] { return [] }
-function extractTeamMembers(evidence: any[]): any[] { return [] }
-function extractTeamStrengths(evidence: any[]): string[] { return [] }
-function extractTeamGaps(evidence: any[]): string[] { return [] }
-function extractCulture(evidence: any[]): string | null { return null }
-function extractFinancialGrowthRate(evidence: any[]): string | null { return null }
-function extractBurnRate(evidence: any[]): string | null { return null }
-function extractRunway(evidence: any[]): string | null { return null }
-function extractKeyMetrics(evidence: any[]): any[] { return [] }
-function extractFundingHistory(evidence: any[]): any[] { return [] }
-function extractFinancialStrengths(evidence: any[]): string[] { return [] }
-function extractFinancialRisks(evidence: any[]): string[] { return [] }
-function generateSecuritySummary(evidence: any[]): string { return 'Security assessment based on available evidence' }
-function extractSecurityScore(evidence: any[]): number { return 70 }
-function extractCompliance(evidence: any[]): string[] { return [] }
-function extractSecurityStrengths(evidence: any[]): string[] { return [] }
-function extractVulnerabilities(evidence: any[]): any[] { return [] }
-function generateSecurityRecommendations(evidence: any[]): string[] { return [] }
+function extractTechStack(_evidence: any[]): any[] { return [] }
+function extractArchitectureHighlights(_evidence: any[]): string[] { return [] }
+function extractScalabilityFeatures(_evidence: any[]): string[] { return [] }
+function extractInnovativeAspects(_evidence: any[]): string[] { return [] }
+function extractMarketSize(_evidence: any[]): string | null { return null }
+function extractTargetMarket(_evidence: any[]): string | null { return null }
+function extractCompetitors(_evidence: any[]): any[] { return [] }
+function extractCompetitivePosition(_evidence: any[]): string | null { return null }
+function extractGrowthRate(_evidence: any[]): string | null { return null }
+function extractMarketTrends(_evidence: any[]): string[] { return [] }
+function extractOpportunities(_evidence: any[]): string[] { return [] }
+function extractThreats(_evidence: any[]): string[] { return [] }
+function extractDifferentiators(_evidence: any[]): string[] { return [] }
+function extractTeamMembers(_evidence: any[]): any[] { return [] }
+function extractTeamStrengths(_evidence: any[]): string[] { return [] }
+function extractTeamGaps(_evidence: any[]): string[] { return [] }
+function extractCulture(_evidence: any[]): string | null { return null }
+function extractFinancialGrowthRate(_evidence: any[]): string | null { return null }
+function extractBurnRate(_evidence: any[]): string | null { return null }
+function extractRunway(_evidence: any[]): string | null { return null }
+function extractKeyMetrics(_evidence: any[]): any[] { return [] }
+function extractFundingHistory(_evidence: any[]): any[] { return [] }
+function extractFinancialStrengths(_evidence: any[]): string[] { return [] }
+function extractFinancialRisks(_evidence: any[]): string[] { return [] }
+function generateSecuritySummary(_evidence: any[]): string { return 'Security assessment based on available evidence' }
+function extractSecurityScore(_evidence: any[]): number { return 70 }
+function extractCompliance(_evidence: any[]): string[] { return [] }
+function extractSecurityStrengths(_evidence: any[]): string[] { return [] }
+function extractVulnerabilities(_evidence: any[]): any[] { return [] }
+function generateSecurityRecommendations(_evidence: any[]): string[] { return [] }
 
 export const reportGenerationWorker = new Worker<ReportGenerationJob>(
   'report-generation',
@@ -640,7 +640,7 @@ export const reportGenerationWorker = new Worker<ReportGenerationJob>(
         .from('scan_requests')
         .update({
           ai_workflow_status: 'failed',
-          ai_workflow_error: error.message
+          ai_workflow_error: error instanceof Error ? error.message : 'Unknown error'
         })
         .eq('id', scanRequestId)
       

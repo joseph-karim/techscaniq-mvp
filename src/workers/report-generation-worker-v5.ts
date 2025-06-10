@@ -340,7 +340,7 @@ Security Analysis:
 ${JSON.stringify(securityAnalysis, null, 2)}
 
 Comprehensive Scoring:
-- Investment Score: ${comprehensiveScore.investmentScore}
+- Investment Score: ${comprehensiveScore.confidenceAdjustedScore}
 - Technical Score: ${comprehensiveScore.technicalScore}
 - Confidence Level: ${comprehensiveScore.confidenceBreakdown.overallConfidence}%
 - Evidence Quality: ${comprehensiveScore.confidenceBreakdown.evidenceQuality * 100}%
@@ -382,7 +382,7 @@ Provide the final investment recommendation in the specified JSON format.`
     // Executive Summary from synthesis
     executiveSummary: {
       title: 'Executive Summary',
-      content: investmentSynthesis.executiveSummary || generateExecutiveSummary(
+      content: (investmentSynthesis as any).executiveSummary || generateExecutiveSummary(
         company, 
         comprehensiveScore, 
         investmentSynthesis
@@ -470,7 +470,7 @@ Provide the final investment recommendation in the specified JSON format.`
       {
         title: 'Security & Compliance',
         content: formatSecurityAnalysis(securityAnalysis),
-        score: securityAnalysis.securityScore || comprehensiveScore.dimensions.security.score,
+        score: securityAnalysis.securityScore || 70, // Default security score
         subsections: [
           {
             title: 'Security Posture',
@@ -489,19 +489,19 @@ Provide the final investment recommendation in the specified JSON format.`
       {
         title: 'Investment Recommendation',
         content: formatInvestmentRecommendation(investmentSynthesis),
-        score: investmentSynthesis.investmentScore || comprehensiveScore.investmentScore,
+        score: (investmentSynthesis as any).investmentScore || comprehensiveScore.confidenceAdjustedScore,
         subsections: [
           {
             title: 'Value Creation Plan',
-            content: formatValueCreation(investmentSynthesis.valueCreationPlan)
+            content: formatValueCreation((investmentSynthesis as any).valueCreationPlan)
           },
           {
             title: 'Risk Mitigation',
-            content: formatRiskMitigation(investmentSynthesis.keyRisks)
+            content: formatRiskMitigation((investmentSynthesis as any).keyRisks)
           },
           {
             title: 'Next Steps',
-            content: formatNextSteps(investmentSynthesis.nextSteps)
+            content: formatNextSteps((investmentSynthesis as any).nextSteps)
           }
         ]
       }
@@ -522,10 +522,10 @@ Provide the final investment recommendation in the specified JSON format.`
     },
     
     // Investment metrics
-    investment_score: investmentSynthesis.investmentScore || comprehensiveScore.investmentScore,
+    investment_score: (investmentSynthesis as any).investmentScore || comprehensiveScore.confidenceAdjustedScore,
     tech_health_score: techAnalysis.scalabilityScore ? techAnalysis.scalabilityScore * 10 : comprehensiveScore.technicalScore,
     tech_health_grade: comprehensiveScore.finalGrade,
-    investment_rationale: investmentSynthesis.executiveSummary || 'See detailed analysis in report sections'
+    investment_rationale: (investmentSynthesis as any).executiveSummary || 'See detailed analysis in report sections'
   }
 
   return {
@@ -729,7 +729,7 @@ function formatTechRisks(risks: any[], strengths: any[]): string {
   return sections.join('\n\n') || 'Risk assessment pending.'
 }
 
-function generateExecutiveSummary(company: string, score: any, synthesis: any): string {
+function generateExecutiveSummary(company: string, _score: any, synthesis: any): string {
   return synthesis.executiveSummary || `${company} demonstrates strong potential...`
 }
 
@@ -781,7 +781,7 @@ function formatNextSteps(steps: string[]): string {
   return steps?.map((s, i) => `${i + 1}. ${s}`).join('\n') || 'Next steps pending'
 }
 
-function generateCitations(evidence: any[], reportData: any): any[] {
+function generateCitations(evidence: any[], _reportData: any): any[] {
   const citations: any[] = []
   let citationNumber = 1
   

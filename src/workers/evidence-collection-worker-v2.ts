@@ -107,16 +107,16 @@ class AuditTrail {
 
 // Decision Engine - Intelligent tool selection
 class DecisionEngine {
-  private audit: AuditTrail
+  private _audit: AuditTrail
   private collectedEvidence: Map<string, EvidenceItem[]> = new Map()
-  private pageAnalysis: Map<string, any> = new Map()
+  private _pageAnalysis: Map<string, any> = new Map()
   
   constructor(audit: AuditTrail) {
-    this.audit = audit
+    this._audit = audit
   }
   
   async makeToolDecision(context: any): Promise<ToolDecision> {
-    const { url, previousTools = [], pageCharacteristics = {}, evidenceCount = 0 } = context
+    const { url: _url, previousTools = [], pageCharacteristics = {}, evidenceCount = 0 } = context
     
     // Analyze current state
     const hasBasicHTML = previousTools.includes('html-collector')
@@ -192,10 +192,10 @@ class DecisionEngine {
 
 // Tool Executor - Handles actual tool execution
 class ToolExecutor {
-  private audit: AuditTrail
+  private _audit: AuditTrail
   
   constructor(audit: AuditTrail) {
-    this.audit = audit
+    this._audit = audit
   }
   
   async executeTool(toolName: string, url: string, context: any): Promise<ToolResult> {
@@ -287,7 +287,7 @@ class ToolExecutor {
         {
           url,
           title: `${title} - Page Content`,
-          content: this.extractMainContent($),
+          content: this.extractMainContent($ as any),
           type: 'webpage',
           metadata: {
             contentLength: html.length,
@@ -420,7 +420,7 @@ class ToolExecutor {
             evidence.push({
               url: link,
               title: pageTitle,
-              content: this.extractMainContent($page),
+              content: this.extractMainContent($page as any),
               type: this.classifyPageType(link),
               metadata: {
                 parent: url,
@@ -449,7 +449,8 @@ class ToolExecutor {
         success: false,
         evidence: [],
         characteristics: {},
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
+        duration: Date.now() - startTime
       }
     }
   }
@@ -540,7 +541,8 @@ class ToolExecutor {
         success: false,
         evidence: [],
         characteristics: {},
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
+        duration: Date.now() - startTime
       }
     }
   }
@@ -608,7 +610,7 @@ class ToolExecutor {
             } else {
               // HTML API documentation
               const $ = cheerio.load(content)
-              const apiEndpoints = this.extractApiEndpointsFromHtml($)
+              const apiEndpoints = this.extractApiEndpointsFromHtml($ as any)
               
               if (apiEndpoints.length > 0) {
                 evidence.push({
@@ -643,7 +645,8 @@ class ToolExecutor {
         success: false,
         evidence: [],
         characteristics: {},
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
+        duration: Date.now() - startTime
       }
     }
   }
@@ -694,10 +697,9 @@ class ToolExecutor {
 
 // Agentic Search System
 class AgenticSearcher {
-  private _audit: AuditTrail
   
-  constructor(audit: AuditTrail) {
-    this._audit = audit
+  constructor(_audit: AuditTrail) {
+    // Audit trail can be used for logging search actions if needed
   }
   
   async performIterativeSearch(company: string, domain: string): Promise<EvidenceItem[]> {

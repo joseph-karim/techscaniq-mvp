@@ -232,7 +232,7 @@ class AuditTrailManager {
 
 // Agentic Decision Engine
 class AgenticDecisionEngine {
-  private _context: Map<string, any> = new Map() // Currently unused but may be needed for future enhancements
+  // private _context: Map<string, any> = new Map() // Currently unused but may be needed for future enhancements
   private auditTrail: AuditTrailManager
 
   constructor(auditTrail: AuditTrailManager) {

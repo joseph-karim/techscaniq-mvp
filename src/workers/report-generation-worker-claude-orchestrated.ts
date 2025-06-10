@@ -106,12 +106,12 @@ class AnalysisOrchestrator {
           businessModel: null
         },
         technologies: {
-          frontend: [],
-          backend: [],
-          databases: [],
-          infrastructure: [],
-          tools: [],
-          languages: []
+          frontend: [] as string[],
+          backend: [] as string[],
+          databases: [] as string[],
+          infrastructure: [] as string[],
+          tools: [] as string[],
+          languages: [] as string[]
         },
         metrics: {
           performance: {},
@@ -120,20 +120,20 @@ class AnalysisOrchestrator {
         },
         team: {
           size: null,
-          keyPeople: [],
-          culture: [],
+          keyPeople: [] as any[],
+          culture: [] as string[],
           hiring: null
         },
         market: {
-          competitors: [],
+          competitors: [] as string[],
           marketSize: null,
-          customers: [],
+          customers: [] as string[],
           position: null
         },
         security: {
-          certifications: [],
-          practices: [],
-          incidents: []
+          certifications: [] as string[],
+          practices: [] as string[],
+          incidents: [] as string[]
         },
         financial: {
           revenue: null,
@@ -175,7 +175,7 @@ class AnalysisOrchestrator {
             keywords.forEach(keyword => {
               if (content.toLowerCase().includes(keyword)) {
                 const techArray = parsedData.technologies[category as keyof typeof parsedData.technologies]
-                if (Array.isArray(techArray)) {
+                if (Array.isArray(techArray) && !techArray.includes(keyword)) {
                   techArray.push(keyword)
                 }
               }
@@ -192,7 +192,7 @@ class AnalysisOrchestrator {
           const competitorKeywords = ['competes with', 'competitors include', 'vs', 'alternative to']
           competitorKeywords.forEach(keyword => {
             const match = content.match(new RegExp(`${keyword}.*?([A-Z][a-zA-Z]+)`, 'i'))
-            if (match && Array.isArray(parsedData.market?.competitors)) {
+            if (match && Array.isArray(parsedData.market?.competitors) && !parsedData.market.competitors.includes(match[1])) {
               parsedData.market.competitors.push(match[1])
             }
           })
@@ -209,7 +209,7 @@ class AnalysisOrchestrator {
           const certs = ['SOC2', 'ISO27001', 'HIPAA', 'GDPR']
           certs.forEach(cert => {
             if (content.includes(cert)) {
-              if (Array.isArray(parsedData.security?.certifications)) {
+              if (Array.isArray(parsedData.security?.certifications) && !parsedData.security.certifications.includes(cert)) {
                 parsedData.security.certifications.push(cert)
               }
             }
@@ -416,7 +416,7 @@ ${prompt.outputFormat}`
   }
 
   // Synthesize final investment recommendation
-  private async synthesizeInvestmentRecommendation(analyses: any, parsedData: any): Promise<any> {
+  private async synthesizeInvestmentRecommendation(analyses: any, _parsedData: any): Promise<any> {
     const startTime = Date.now()
     this.addTrace('synthesis', 'Synthesizing investment recommendation')
 

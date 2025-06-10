@@ -79,9 +79,9 @@ router.post('/api/scans', async (req: any, res: any) => {
         metadata: {
           evidenceJobId,
           reportJobId,
-        },
+        } as any,
       })
-      .eq('id', scanRequest.id) as any
+      .eq('id', scanRequest.id as string)
     
     res.status(201).json({
       success: true,
@@ -124,16 +124,17 @@ router.get('/api/scans/:id/status', async (req: any, res: any) => {
     let evidenceJobStatus = null
     let reportJobStatus = null
     
-    if (scanRequest.metadata?.evidenceJobId) {
+    const metadata = scanRequest.metadata as any
+    if (metadata?.evidenceJobId) {
       evidenceJobStatus = await getJobStatus(
-        scanRequest.metadata.evidenceJobId,
+        metadata.evidenceJobId,
         'evidence-collection'
       )
     }
     
-    if (scanRequest.metadata?.reportJobId) {
+    if (metadata?.reportJobId) {
       reportJobStatus = await getJobStatus(
-        scanRequest.metadata.reportJobId,
+        metadata.reportJobId,
         'report-generation'
       )
     }
@@ -234,11 +235,11 @@ router.post('/api/scans/:id/retry', async (req: any, res: any) => {
         .update({
           status: 'processing',
           metadata: {
-            ...scanRequest.metadata,
+            ...(scanRequest.metadata || {}),
             evidenceJobId,
             reportJobId,
-            retryCount: (scanRequest.metadata?.retryCount || 0) + 1,
-          },
+            retryCount: ((scanRequest.metadata as any)?.retryCount || 0) + 1,
+          } as any,
         })
         .eq('id', id)
       
