@@ -5,29 +5,30 @@ import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
 import { ScanReportSection } from '@/components/reports/ScanReportNavigation'
 import { 
-  FileText, Code, Shield, Users, Target, BarChart3, Building2, Wrench, 
-  ChevronRight, ExternalLink, Info, AlertTriangle, CheckCircle, TrendingUp, 
-  ArrowRight, Hash, Star, Award, Zap, 
-  Calendar, Clock, Download, Share2, BookmarkPlus, Eye,
-  Layers, Activity, AlertCircle, Loader2
+  Code, Shield, Users, Target, BarChart3, Building2, Wrench, 
+  ExternalLink, Info, AlertTriangle, TrendingUp, 
+  ArrowRight, Star, Award, Zap, 
+  Clock, Download, Share2, BookmarkPlus, Eye,
+  Layers, AlertCircle, Loader2, ArrowLeft, Globe, Hash
 } from 'lucide-react'
-import { Breadcrumbs } from '@/components/pe/deep-dive-report/Breadcrumbs'
+// import { Breadcrumbs } from '@/components/pe/deep-dive-report/Breadcrumbs' // Not used in tabbed interface
 import { Citation } from '@/types'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Progress } from '@/components/ui/progress'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { Home, Search } from 'lucide-react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
 import { fetchReportWithEvidence, transformCitationForFrontend } from '@/lib/api/reports'
 import type { ReportWithEvidence } from '@/lib/api/reports'
 import { EnhancedEvidenceAppendix } from '@/components/reports/EnhancedEvidenceAppendix'
 import { EvidenceModal } from '@/components/reports/EvidenceModal'
 import { ConfidenceVisualization } from '@/components/reports/ConfidenceVisualization'
+import { TechHealthScoreGauge } from '@/components/dashboard/tech-health-score-gauge'
+import { RiskSummaryCards } from '@/components/dashboard/risk-summary-cards'
 
 // Executive-grade score visualization component following investment banking presentation standards
 const ExecutiveScoreCard = ({ 
@@ -189,174 +190,14 @@ const ExecutiveScoreCard = ({
   )
 }
 
-// Professional table of contents with investment banking hierarchy
-const ProfessionalTableOfContents = ({ 
-  sections, 
-  activeSection, 
-  onSectionChange,
-  reportMetrics 
-}: {
-  sections: ScanReportSection[]
-  activeSection: string
-  onSectionChange: (sectionId: string) => void
-  reportMetrics?: {
-    investment_score?: number
-    tech_health_score?: number
-    tech_health_grade?: string
-  }
-}) => {
-  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({
-    overview: true,
-    technical: true,
-    security: true,
-    recommendations: true
-  })
-
-  const groupedSections = sections.reduce((acc, section) => {
-    if (!acc[section.category]) acc[section.category] = []
-    acc[section.category].push(section)
-    return acc
-  }, {} as Record<string, ScanReportSection[]>)
-
-  const categoryConfig = {
-    overview: { 
-      title: 'Executive Summary', 
-      icon: <Award className="h-4 w-4" />, 
-      color: 'text-blue-700',
-      bgColor: 'bg-blue-50'
-    },
-    technical: { 
-      title: 'Technical Analysis', 
-      icon: <Code className="h-4 w-4" />, 
-      color: 'text-purple-700',
-      bgColor: 'bg-purple-50'
-    },
-    security: { 
-      title: 'Risk Assessment', 
-      icon: <Shield className="h-4 w-4" />, 
-      color: 'text-red-700',
-      bgColor: 'bg-red-50'
-    },
-    recommendations: { 
-      title: 'Investment Decision', 
-      icon: <Target className="h-4 w-4" />, 
-      color: 'text-green-700',
-      bgColor: 'bg-green-50'
-    }
-  }
-
-  return (
-    <div className="space-y-3">
-      {/* Report Status Summary */}
-      <div className="mb-6 p-4 bg-gradient-to-r from-slate-50 to-slate-100 rounded-lg border">
-        <h3 className="font-bold text-sm text-gray-900 mb-3 flex items-center gap-2">
-          <Activity className="h-4 w-4" />
-          Report Status
-        </h3>
-        <div className="space-y-2">
-          {reportMetrics?.investment_score && (
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-600">Investment Score</span>
-              <div className="flex items-center gap-2">
-                <div className="w-12 h-1.5 bg-gray-200 rounded-full">
-                  <div 
-                    className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all"
-                    style={{ width: `${reportMetrics.investment_score}%` }}
-                  />
-                </div>
-                <span className="text-xs font-bold text-blue-700">{reportMetrics.investment_score}/100</span>
-              </div>
-            </div>
-          )}
-          {reportMetrics?.tech_health_score && (
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-600">Technical Health</span>
-              <div className="flex items-center gap-2">
-                <div className="w-12 h-1.5 bg-gray-200 rounded-full">
-                  <div 
-                    className="h-full bg-gradient-to-r from-green-500 to-green-600 rounded-full transition-all"
-                    style={{ width: `${reportMetrics.tech_health_score}%` }}
-                  />
-                </div>
-                <span className="text-xs font-bold text-green-700">{reportMetrics.tech_health_score}/100</span>
-              </div>
-            </div>
-          )}
-          {reportMetrics?.tech_health_grade && (
-            <div className="flex items-center justify-between pt-2 border-t border-gray-200">
-              <span className="text-xs text-gray-600">Overall Grade</span>
-              <Badge variant="outline" className="text-xs font-bold">
-                {reportMetrics.tech_health_grade}
-              </Badge>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Navigation sections */}
-      {Object.entries(groupedSections).map(([category, categorySections]) => {
-        const config = categoryConfig[category as keyof typeof categoryConfig]
-        return (
-          <div key={category} className="border rounded-lg overflow-hidden">
-            <button
-              onClick={() => setExpandedCategories(prev => ({ ...prev, [category]: !prev[category] }))}
-              className={cn(
-                "w-full flex items-center justify-between p-4 text-left font-semibold transition-all hover:bg-gray-50",
-                config?.bgColor
-              )}
-            >
-              <div className="flex items-center gap-3">
-                <span className={config?.color}>{config?.icon}</span>
-                <span className={cn("text-sm", config?.color)}>{config?.title}</span>
-                <Badge variant="outline" className="text-xs">
-                  {categorySections.length}
-                </Badge>
-              </div>
-              <ChevronRight className={cn(
-                "h-4 w-4 transition-transform",
-                expandedCategories[category] && "rotate-90",
-                config?.color
-              )} />
-            </button>
-            
-            {expandedCategories[category] && (
-              <div className="bg-white border-t">
-                {categorySections.map((section, index) => (
-                  <button
-                    key={section.id}
-                    onClick={() => onSectionChange(section.id)}
-                    className={cn(
-                      "w-full flex items-start gap-3 p-3 text-left text-xs transition-all group border-l-2 hover:bg-gray-50",
-                      activeSection === section.id
-                        ? 'bg-blue-50 border-l-blue-500 text-blue-900'
-                        : 'border-l-transparent text-gray-700 hover:border-l-gray-300',
-                      index !== categorySections.length - 1 && "border-b border-gray-100"
-                    )}
-                  >
-                    <Hash className="h-3 w-3 mt-0.5 text-gray-400" />
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium truncate">{section.title}</div>
-                      <div className="text-gray-500 text-xs mt-0.5 truncate">{section.description}</div>
-                    </div>
-                    {activeSection === section.id && (
-                      <ArrowRight className="h-3 w-3 text-blue-600 flex-shrink-0" />
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )
-      })}
-    </div>
-  )
-}
 
 // Enhanced sidebar with professional insights
 const ExecutiveInsightsSidebar = ({ 
-  onNavigate 
+  onNavigate,
+  reportData 
 }: {
   onNavigate: (target: string) => void
+  reportData?: any
 }) => {
   return (
     <div className="space-y-6">
@@ -369,35 +210,28 @@ const ExecutiveInsightsSidebar = ({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="p-3 bg-white rounded-lg border border-blue-200 shadow-sm">
-            <div className="flex items-center gap-2 mb-2">
-              <CheckCircle className="h-4 w-4 text-green-600" />
-              <span className="text-sm font-semibold text-gray-900">Key Strength</span>
+          {reportData?.investment_rationale && (
+            <div className="p-3 bg-white rounded-lg border border-blue-200 shadow-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingUp className="h-4 w-4 text-blue-600" />
+                <span className="text-sm font-semibold text-gray-900">Investment Thesis</span>
+              </div>
+              <p className="text-xs text-gray-700 leading-relaxed">
+                {reportData.investment_rationale.slice(0, 100)}...
+              </p>
             </div>
-            <p className="text-xs text-gray-700 leading-relaxed">
-              Cloud-native architecture provides strong foundation for scalable growth
-            </p>
-          </div>
-          
-          <div className="p-3 bg-white rounded-lg border border-orange-200 shadow-sm">
-            <div className="flex items-center gap-2 mb-2">
-              <AlertTriangle className="h-4 w-4 text-orange-600" />
-              <span className="text-sm font-semibold text-gray-900">Critical Risk</span>
+          )}
+          {reportData?.executive_summary && (
+            <div className="p-3 bg-white rounded-lg border border-blue-200 shadow-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <Info className="h-4 w-4 text-blue-600" />
+                <span className="text-sm font-semibold text-gray-900">Executive Summary</span>
+              </div>
+              <p className="text-xs text-gray-700 leading-relaxed">
+                {reportData.executive_summary.slice(0, 100)}...
+              </p>
             </div>
-            <p className="text-xs text-gray-700 leading-relaxed">
-              Severe team capacity constraints threaten execution capability
-            </p>
-          </div>
-
-          <div className="p-3 bg-white rounded-lg border border-blue-200 shadow-sm">
-            <div className="flex items-center gap-2 mb-2">
-              <TrendingUp className="h-4 w-4 text-blue-600" />
-              <span className="text-sm font-semibold text-gray-900">Investment Thesis</span>
-            </div>
-            <p className="text-xs text-gray-700 leading-relaxed">
-              Conditional investment pending technical de-risking and team expansion
-            </p>
-          </div>
+          )}
         </CardContent>
       </Card>
 
@@ -483,7 +317,7 @@ const ExecutiveInsightsSidebar = ({
 export default function ViewReport() {
   const { id } = useParams<{ id: string }>()
   const [selectedCitation, setSelectedCitation] = useState<Citation | null>(null)
-  const [activeSection, setActiveSection] = useState('executive-summary')
+  const [activeTab, setActiveTab] = useState('executive-summary')
   const [loading, setLoading] = useState(true)
   const [reportData, setReportData] = useState<ReportWithEvidence | null>(null)
 
@@ -579,12 +413,13 @@ export default function ViewReport() {
 
   const dynamicSections = generateSections()
 
-  // Set initial section to first available section
+  // Set initial tab to first available section or evidence appendix
   useEffect(() => {
-    if (dynamicSections.length > 0 && activeSection === 'executive-summary') {
-      setActiveSection(dynamicSections[0].id)
+    if (!activeTab || (activeTab === 'executive-summary' && dynamicSections.length > 0)) {
+      // If we have sections, use the first one, otherwise default to evidence appendix
+      setActiveTab(dynamicSections.length > 0 ? dynamicSections[0].id : 'evidence-appendix')
     }
-  }, [dynamicSections, activeSection])
+  }, [dynamicSections]) // Remove activeTab from dependencies to avoid infinite loop
 
   const handleCitationClick = (citationId: string) => {
     const citation = citations.find(c => c.id === citationId)
@@ -598,12 +433,7 @@ export default function ViewReport() {
   }
 
   const scrollToSection = (sectionId: string) => {
-    setActiveSection(sectionId)
-    // Optionally, you can add smooth scrolling to the section
-    const element = document.getElementById(sectionId)
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }
+    setActiveTab(sectionId)
   }
 
   // Enhanced markdown components with professional styling and citation handling
@@ -715,11 +545,12 @@ export default function ViewReport() {
     td: ({ node, ...props }: any) => <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" {...props} />
   }
 
-  const breadcrumbItems = [
-    { label: 'Dashboard', href: '/dashboard', icon: <Home className="h-4 w-4" /> },
-    { label: 'Reports', href: '/reports', icon: <FileText className="h-4 w-4" /> },
-    { label: currentReport?.company_name || 'Report', icon: <Search className="h-4 w-4" /> }
-  ]
+  // Remove unused breadcrumb items
+  // const breadcrumbItems = [
+  //   { label: 'Dashboard', href: '/dashboard', icon: <Home className="h-4 w-4" /> },
+  //   { label: 'Reports', href: '/reports', icon: <FileText className="h-4 w-4" /> },
+  //   { label: currentReport?.company_name || 'Report', icon: <Search className="h-4 w-4" /> }
+  // ]
 
   if (loading) {
     return (
@@ -752,12 +583,12 @@ export default function ViewReport() {
     )
   }
 
-  const renderSection = () => {
+  const renderSection = (sectionId: string) => {
     // Check if sections is an array (new format) or object (legacy format)
     if (Array.isArray(currentReport.sections)) {
       // New format - render sections array (like Ring4)
       const currentSection = currentReport.sections.find(section => 
-        section.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') === activeSection
+        section.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') === sectionId
       )
       
       if (!currentSection) return (
@@ -800,53 +631,33 @@ export default function ViewReport() {
               </div>
             )}
             
-            {/* Add executive score cards for Executive Summary if no comprehensive score */}
+            {/* Add executive score cards for Executive Summary with dynamic data */}
             {currentSection.title === 'Executive Summary' && currentReport && !reportData?.metadata?.comprehensiveScore && (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                <ExecutiveScoreCard
-                  title="Investment Thesis Score"
-                  score={6}
-                  maxScore={10}
-                  riskLevel="medium"
-                  recommendation="Conditional investment pending technical de-risking and team expansion to support growth objectives."
-                  breakdown={[
-                    { label: "Scalable Architecture", value: 4, description: "Cloud-native VoIP with multi-platform support", weight: 25 },
-                    { label: "Market Expansion", value: 7, description: "Strong geographic reach and market growth", weight: 20 },
-                    { label: "Competitive Edge", value: 5, description: "AI features but intense competition", weight: 15 },
-                    { label: "Operational Efficiency", value: 6, description: "Good cost structure with some overhead", weight: 15 },
-                    { label: "Execution Capacity", value: 3, description: "Critical team size limitations", weight: 25 }
-                  ]}
-                />
-                <ExecutiveScoreCard
-                  title="Technical Health Score"
-                  score={65}
-                  maxScore={100}
-                  riskLevel="medium"
-                  recommendation="Solid technical foundation with critical gaps in team capacity and security compliance requiring immediate attention."
-                  breakdown={[
-                    { label: "Architecture", value: 70, description: "Strong cloud-native foundation", weight: 25 },
-                    { label: "Security", value: 45, description: "Major gaps in enterprise certifications", weight: 20 },
-                    { label: "Scalability", value: 60, description: "Conceptually sound but execution constrained", weight: 15 },
-                    { label: "Team Capability", value: 50, description: "Skilled but severely understaffed", weight: 20 },
-                    { label: "Maintenance", value: 75, description: "Low operational overhead", weight: 10 },
-                    { label: "Innovation", value: 70, description: "AI features and modern stack", weight: 10 }
-                  ]}
-                />
-                <ExecutiveScoreCard
-                  title="Technical Readiness"
-                  score={6}
-                  maxScore={10}
-                  riskLevel="high"
-                  recommendation="Strong technical foundation undermined by execution constraints. Immediate team scaling required for investment viability."
-                  breakdown={[
-                    { label: "Technology Foundation", value: 7, description: "Cloud-native VoIP platform", weight: 20 },
-                    { label: "Market Position", value: 8, description: "Strong VoIP market growth", weight: 15 },
-                    { label: "Execution Capability", value: 3, description: "Critical team limitations", weight: 25 },
-                    { label: "Security Readiness", value: 4, description: "Lacks enterprise certifications", weight: 15 },
-                    { label: "Scalability Potential", value: 6, description: "Architecture supports growth", weight: 15 },
-                    { label: "Customer Experience", value: 5, description: "Pricing competitive but reliability issues", weight: 10 }
-                  ]}
-                />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                {currentReport.investment_score !== undefined && currentReport.investment_score !== null && (
+                  <ExecutiveScoreCard
+                    title="Investment Score"
+                    score={currentReport.investment_score}
+                    maxScore={100}
+                    riskLevel={currentReport.investment_score >= 80 ? 'low' : currentReport.investment_score >= 60 ? 'medium' : 'high'}
+                    recommendation={currentReport.investment_rationale || 'No investment rationale provided'}
+                    breakdown={[
+                      { label: "Overall Score", value: currentReport.investment_score, description: "Comprehensive investment assessment", weight: 100 }
+                    ]}
+                  />
+                )}
+                {currentReport.tech_health_score !== undefined && currentReport.tech_health_score !== null && (
+                  <ExecutiveScoreCard
+                    title="Technical Health Score"
+                    score={currentReport.tech_health_score}
+                    maxScore={100}
+                    riskLevel={currentReport.tech_health_score >= 80 ? 'low' : currentReport.tech_health_score >= 60 ? 'medium' : 'high'}
+                    recommendation={currentReport.executive_summary ? currentReport.executive_summary.slice(0, 150) + '...' : 'Technical assessment completed'}
+                    breakdown={[
+                      { label: "Technical Score", value: currentReport.tech_health_score, description: "Overall technical health assessment", weight: 100 }
+                    ]}
+                  />
+                )}
               </div>
             )}
           </div>
@@ -910,7 +721,8 @@ export default function ViewReport() {
             <div className="xl:col-span-1">
               <div className="sticky top-6">
                 <ExecutiveInsightsSidebar 
-                  onNavigate={scrollToSection}
+                  onNavigate={setActiveTab}
+                  reportData={currentReport}
                 />
               </div>
             </div>
@@ -921,7 +733,7 @@ export default function ViewReport() {
     
     // Legacy object format handling
     if (typeof currentReport.sections === 'object' && currentReport.sections) {
-      const currentSection = currentReport.sections[activeSection]
+      const currentSection = currentReport.sections[sectionId]
       
       if (!currentSection) return (
         <div className="p-12 text-center text-gray-500">
@@ -1021,7 +833,8 @@ export default function ViewReport() {
             <div className="xl:col-span-1">
               <div className="sticky top-6">
                 <ExecutiveInsightsSidebar 
-                  onNavigate={scrollToSection}
+                  onNavigate={setActiveTab}
+                  reportData={currentReport}
                 />
               </div>
             </div>
@@ -1036,110 +849,129 @@ export default function ViewReport() {
 
   return (
     <TooltipProvider>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        {/* Enhanced Professional Header */}
-        <div className="bg-white border-b shadow-lg">
-          <div className="container mx-auto px-8 py-6">
-            <Breadcrumbs items={breadcrumbItems} />
-            
-            {/* Executive Report Header */}
-            <div className="mt-6 flex items-center justify-between">
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <div className="bg-white border-b">
+          <div className="container mx-auto max-w-7xl space-y-2 px-4 py-4">
+            <div className="flex flex-col space-y-2 md:flex-row md:items-center md:justify-between md:space-y-0">
               <div>
-                <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100">
-                  {currentReport.company_name} Technical Assessment
-                </h1>
-                <div className="flex items-center gap-6 mt-3 text-lg text-gray-600">
-                  <span className="flex items-center gap-2">
-                    <Building2 className="h-5 w-5" />
-                    {currentReport.scan_type}
-                  </span>
-                  <span className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5" />
-                    {new Date(currentReport.created_at || '').toLocaleDateString('en-US', { 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
-                    })}
+                <div className="flex items-center space-x-2">
+                  <Button variant="ghost" size="sm" asChild>
+                    <a href="/dashboard">
+                      <ArrowLeft className="mr-1 h-4 w-4" />
+                      Back to Dashboard
+                    </a>
+                  </Button>
+                  <Badge variant="outline" className="rounded-sm px-1 text-xs">
+                    {id}
+                  </Badge>
+                </div>
+                <h1 className="text-3xl font-bold">{currentReport.company_name}</h1>
+                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                  <Globe className="h-4 w-4" />
+                  <a 
+                    href={currentReport.website_url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center hover:text-primary"
+                  >
+                    {currentReport.website_url} <ExternalLink className="ml-1 h-3 w-3" />
+                  </a>
+                  <span className="text-muted-foreground">•</span>
+                  <span className="flex items-center">
+                    <Clock className="mr-1 h-4 w-4" />
+                    {new Date(currentReport.created_at || '').toLocaleDateString()}
                   </span>
                 </div>
               </div>
               
-              {/* Executive Metrics Dashboard */}
-              <div className="flex items-center gap-8">
-                {currentReport.tech_health_score && (
-                  <div className="text-center p-4 bg-blue-50 rounded-xl border border-blue-200">
-                    <div className="text-3xl font-bold text-blue-700">{currentReport.tech_health_score}</div>
-                    <div className="text-sm text-blue-600 font-medium">Technical Health</div>
-                    <Progress value={currentReport.tech_health_score} className="w-20 mt-2" />
-                  </div>
-                )}
-                {currentReport.investment_score && (
-                  <div className="text-center p-4 bg-green-50 rounded-xl border border-green-200">
-                    <div className="text-3xl font-bold text-green-700">{currentReport.investment_score}</div>
-                    <div className="text-sm text-green-600 font-medium">Investment Score</div>
-                    <Progress value={currentReport.investment_score} className="w-20 mt-2" />
-                  </div>
-                )}
-                {currentReport.tech_health_grade && (
-                  <div className="text-center p-4 bg-purple-50 rounded-xl border border-purple-200">
-                    <Badge variant="outline" className="text-2xl font-bold py-3 px-6 border-purple-300 text-purple-700">
-                      {currentReport.tech_health_grade}
-                    </Badge>
-                    <div className="text-sm text-purple-600 font-medium mt-2">Overall Grade</div>
-                  </div>
-                )}
-              </div>
+              <Button className="bg-electric-teal hover:bg-electric-teal/90">
+                <Download className="mr-2 h-4 w-4" />
+                Export PDF
+              </Button>
             </div>
           </div>
         </div>
-
-        <div className="flex">
-          {/* Professional Navigation Sidebar */}
-          <nav className="w-96 bg-white border-r shadow-lg min-h-screen sticky top-0 overflow-y-auto">
-            <div className="p-8">
-              {/* Navigation Header */}
-              <div className="mb-8">
-                <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center gap-3">
-                  <FileText className="h-6 w-6 text-blue-600" />
-                  Report Navigation
-                </h3>
-                <p className="text-sm text-gray-600 leading-relaxed">
-                  Professional investment-grade technical assessment with evidence-based findings and strategic recommendations.
-                </p>
-              </div>
-
-              {/* Professional Table of Contents */}
-              <ProfessionalTableOfContents
-                sections={dynamicSections}
-                activeSection={activeSection}
-                onSectionChange={setActiveSection}
-                reportMetrics={{
-                  investment_score: currentReport?.investment_score,
-                  tech_health_score: currentReport?.tech_health_score,
-                  tech_health_grade: currentReport?.tech_health_grade
-                }}
-              />
-            </div>
-          </nav>
-
-          {/* Main Content Area */}
-          <main className="flex-1 min-h-screen p-8">
-            {renderSection()}
-          </main>
-        </div>
-
-        {/* Evidence Appendix Section */}
-        {currentReport && (
-          <div className="container mx-auto px-8 py-12 bg-gray-50">
-            <EnhancedEvidenceAppendix 
-              companyName={currentReport.company_name}
-              reportId={currentReport.id}
-              comprehensiveScore={reportData?.metadata?.comprehensiveScore}
-              className=""
-            />
+        
+        {/* Tech Health Score and Risk Summary */}
+        <div className="container mx-auto max-w-7xl px-4 py-6">
+          <div className="grid gap-4 md:grid-cols-3">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg">Tech Health Score</CardTitle>
+                <CardDescription>
+                  Overall technical health assessment
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <TechHealthScoreGauge 
+                  score={currentReport.tech_health_score || 0} 
+                  grade={currentReport.tech_health_grade as any || 'N/A'}
+                />
+              </CardContent>
+            </Card>
+            
+            <Card className="md:col-span-2">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg">Risk Summary</CardTitle>
+                <CardDescription>
+                  Categorized risk assessment by severity
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <RiskSummaryCards />
+              </CardContent>
+            </Card>
           </div>
-        )}
-
+        </div>
+        
+        {/* Main report content with tabs */}
+        <div className="container mx-auto max-w-7xl px-4 pb-8">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+            <TabsList className="grid w-full" style={{ 
+              gridTemplateColumns: `repeat(${Math.min(dynamicSections.length + 1, 6)}, minmax(0, 1fr))` 
+            }}>
+              {dynamicSections.slice(0, 5).map((section) => (
+                <TabsTrigger key={section.id} value={section.id}>
+                  {section.title}
+                </TabsTrigger>
+              ))}
+              <TabsTrigger value="evidence-appendix">
+                Evidence Appendix
+              </TabsTrigger>
+            </TabsList>
+            
+            {/* Section Tabs */}
+            {dynamicSections.map((section) => (
+              <TabsContent key={section.id} value={section.id} className="mt-6">
+                {renderSection(section.id)}
+              </TabsContent>
+            ))}
+            
+            {/* Evidence Appendix Tab */}
+            <TabsContent value="evidence-appendix" className="mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Evidence Appendix</CardTitle>
+                  <CardDescription>
+                    Complete evidence repository with all citations and source documentation
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {currentReport && (
+                    <EnhancedEvidenceAppendix 
+                      companyName={currentReport.company_name}
+                      reportId={currentReport.id}
+                      comprehensiveScore={reportData?.metadata?.comprehensiveScore}
+                      className=""
+                    />
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
+        
         {/* Enhanced Citation Modal */}
         {selectedCitation && (
           <EvidenceModal

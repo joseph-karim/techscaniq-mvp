@@ -129,6 +129,7 @@ const getConfidenceIcon = (confidence: number) => {
 
 export function EnhancedEvidenceAppendix({ 
   companyName, 
+  reportId,
   comprehensiveScore,
   className 
 }: EnhancedEvidenceAppendixProps) {
@@ -148,23 +149,52 @@ export function EnhancedEvidenceAppendix({
 
   useEffect(() => {
     loadEvidenceData()
-  }, [companyName])
+  }, [companyName, reportId])
 
   const loadEvidenceData = async () => {
     if (!companyName) return
     
     setLoading(true)
     try {
-      // Load evidence items
-      const { data: evidenceData, error: evidenceError } = await supabase
+      // Build query
+      let query = supabase
         .from('evidence_items')
         .select('*')
         .eq('company_name', companyName)
+      
+      // If reportId is provided, filter by the scan_request_id associated with this report
+      if (reportId) {
+        // First get the scan_request_id from the report
+        const { data: reportData } = await supabase
+          .from('reports')
+          .select('scan_request_id')
+          .eq('id', reportId)
+          .single()
+        
+        if (reportData?.scan_request_id) {
+          query = query.eq('scan_request_id', reportData.scan_request_id)
+        }
+      }
+      
+      const { data: evidenceData, error: evidenceError } = await query
         .order('confidence_score', { ascending: false })
 
       if (evidenceError) throw evidenceError
 
-      setEvidenceItems(evidenceData || [])
+      // Deduplicate evidence items based on content and type
+      const uniqueEvidence = evidenceData?.reduce((acc: EnhancedEvidenceItem[], item) => {
+        const key = `${item.type}_${item.source_data?.url || ''}_${item.content_data?.summary?.slice(0, 100) || ''}`
+        const exists = acc.some(existing => {
+          const existingKey = `${existing.type}_${existing.source_data?.url || ''}_${existing.content_data?.summary?.slice(0, 100) || ''}`
+          return existingKey === key
+        })
+        if (!exists) {
+          acc.push(item)
+        }
+        return acc
+      }, []) || []
+
+      setEvidenceItems(uniqueEvidence)
     } catch (error) {
       console.error('Error loading evidence data:', error)
       toast({
