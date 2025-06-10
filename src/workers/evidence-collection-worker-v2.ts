@@ -107,12 +107,10 @@ class AuditTrail {
 
 // Decision Engine - Intelligent tool selection
 class DecisionEngine {
-  private _audit: AuditTrail
   private collectedEvidence: Map<string, EvidenceItem[]> = new Map()
-  private _pageAnalysis: Map<string, any> = new Map()
   
-  constructor(audit: AuditTrail) {
-    this._audit = audit
+  constructor(_audit: AuditTrail) {
+    // Audit trail can be used for logging decisions if needed
   }
   
   async makeToolDecision(context: any): Promise<ToolDecision> {
@@ -192,10 +190,9 @@ class DecisionEngine {
 
 // Tool Executor - Handles actual tool execution
 class ToolExecutor {
-  private _audit: AuditTrail
   
-  constructor(audit: AuditTrail) {
-    this._audit = audit
+  constructor(_audit: AuditTrail) {
+    // Audit trail can be used for logging tool execution if needed
   }
   
   async executeTool(toolName: string, url: string, context: any): Promise<ToolResult> {
