@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -64,6 +64,23 @@ export default function RequestScanPage() {
     
     setInvestmentThesis(newThesis)
   }
+
+  // Handle navigation after successful submission
+  useEffect(() => {
+    if (success) {
+      console.log('Success detected, setting up navigation...')
+      const timeoutId = setTimeout(() => {
+        console.log('Navigating to /reports...')
+        navigate('/reports')
+      }, 2000)
+      
+      // Cleanup timeout if component unmounts
+      return () => {
+        console.log('Cleaning up navigation timeout')
+        clearTimeout(timeoutId)
+      }
+    }
+  }, [success, navigate])
 
   const form = useForm<RequestScanForm>({
     resolver: zodResolver(requestScanSchema),
@@ -154,10 +171,7 @@ export default function RequestScanPage() {
         notes: ''
       })
       
-      // Navigate to the reports list page after a short delay
-      setTimeout(() => {
-        navigate('/reports')
-      }, 2000)
+      // Navigation will be handled by useEffect
     } catch (err) {
       setError('Failed to submit scan request. Please try again.')
       console.error(err)
