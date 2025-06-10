@@ -245,38 +245,38 @@ function scoreEvidence(evidence: any, investmentThesis: string): number {
 }
 
 // Analyze evidence with Claude
-async function analyzeWithClaude(evidence: any[], investmentThesis: string, _apiKey: string): Promise<any> {
-  // Group evidence by type
-  const groupedEvidence = evidence.reduce((acc, item) => {
-    if (!acc[item.type]) acc[item.type] = []
-    acc[item.type].push(item)
-    return acc
-  }, {} as Record<string, any[]>)
+async function analyzeWithClaude(_evidence: any[], _investmentThesis: string, _apiKey: string): Promise<any> {
+  // Would group evidence by type and use thesis criteria for Claude analysis
+  // const groupedEvidence = evidence.reduce((acc, item) => {
+  //   if (!acc[item.type]) acc[item.type] = []
+  //   acc[item.type].push(item)
+  //   return acc
+  // }, {} as Record<string, any[]>)
   
-  const thesisCriteria = INVESTMENT_THESIS_CRITERIA[investmentThesis]
+  // const thesisCriteria = INVESTMENT_THESIS_CRITERIA[investmentThesis]
   
-  // Create analysis prompt
-  const _prompt = `
-Analyze this technical evidence for a ${thesisCriteria.name} investment thesis.
-
-Evidence Summary:
-${Object.entries(groupedEvidence).map(([type, items]) => 
-  `- ${type}: ${(items as any[]).length} items`
-).join('\n')}
-
-Key Technologies Found:
-${[...new Set(evidence.flatMap(e => e.content?.technologies || []))].join(', ')}
-
-Investment Criteria:
-${thesisCriteria.criteria.map((c: any) => `- ${c.name} (${c.weight}% weight)`).join('\n')}
-
-Provide:
-1. Overall investment alignment score (0-100)
-2. Key strengths for this thesis
-3. Key risks or concerns
-4. Critical gaps in evidence
-5. Recommended deep-dive areas
-`
+  // Create analysis prompt - would be used with Claude API
+  // const prompt = `
+  // Analyze this technical evidence for a ${thesisCriteria.name} investment thesis.
+  // 
+  // Evidence Summary:
+  // ${Object.entries(groupedEvidence).map(([type, items]) => 
+  //   `- ${type}: ${(items as any[]).length} items`
+  // ).join('\n')}
+  // 
+  // Key Technologies Found:
+  // ${[...new Set(evidence.flatMap(e => e.content?.technologies || []))].join(', ')}
+  // 
+  // Investment Criteria:
+  // ${thesisCriteria.criteria.map((c: any) => `- ${c.name} (${c.weight}% weight)`).join('\n')}
+  // 
+  // Provide:
+  // 1. Overall investment alignment score (0-100)
+  // 2. Key strengths for this thesis
+  // 3. Key risks or concerns
+  // 4. Critical gaps in evidence
+  // 5. Recommended deep-dive areas
+  // `
 
   // Here you would call Claude API
   // For now, return structured analysis

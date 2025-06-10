@@ -1394,13 +1394,11 @@ class EvidenceStorageManager {
   private collectionId: string
   private auditTrail: AuditTrailManager
   private evidenceCount: number = 0
-  private investmentThesis: string
   private thesisCriteria: any
 
-  constructor(collectionId: string, auditTrail: AuditTrailManager, investmentThesis: string) { // investmentThesis is used in thesisCriteria
+  constructor(collectionId: string, auditTrail: AuditTrailManager, investmentThesis: string) {
     this.collectionId = collectionId
     this.auditTrail = auditTrail
-    this.investmentThesis = investmentThesis
     this.thesisCriteria = INVESTMENT_THESIS_CRITERIA[investmentThesis] || INVESTMENT_THESIS_CRITERIA['digital-transformation']
   }
 

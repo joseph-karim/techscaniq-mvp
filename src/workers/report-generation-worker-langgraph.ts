@@ -404,7 +404,6 @@ async function reflectionNode(state: AnalysisState): Promise<AnalysisState> {
       state.securityAnalysis
     ].every(a => a && !a.error)
     
-    const _highConfidence = state.confidenceLevel >= 70
     const belowMaxIterations = state.iterationCount < state.maxIterations
     
     if (!analysisComplete && belowMaxIterations) {
