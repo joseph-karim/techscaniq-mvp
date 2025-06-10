@@ -232,7 +232,7 @@ class AuditTrailManager {
 
 // Agentic Decision Engine
 class AgenticDecisionEngine {
-  private context: Map<string, any> = new Map()
+  private _context: Map<string, any> = new Map() // Currently unused but may be needed for future enhancements
   private auditTrail: AuditTrailManager
 
   constructor(auditTrail: AuditTrailManager) {
@@ -370,7 +370,7 @@ Respond with JSON:
     return gaps
   }
 
-  private makeRuleBasedDecision(evidenceTypes: any, gaps: string[]): AgentDecision {
+  private makeRuleBasedDecision(_evidenceTypes: any, gaps: string[]): AgentDecision {
     // Priority-based rules
     if (gaps.includes('technical_architecture')) {
       return {
@@ -510,7 +510,7 @@ class DeepCrawler {
             success: true,
             url,
             html,
-            markdown: $.text().slice(0, 10000), // Simple text extraction
+            markdown: html.replace(/<[^>]*>/g, ' ').slice(0, 10000), // Simple text extraction
             metadata: {
               title,
               description,
@@ -524,23 +524,23 @@ class DeepCrawler {
           }
           
           // Continue with existing processing logic...
-            
-            // After basic extraction, use Gemini Flash for intelligent parsing
-            post_process: async (content: string) => {
-              if (!GOOGLE_API_KEY) return null
-              
-              try {
-                const response = await fetch(
-                  `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GOOGLE_API_KEY}`,
-                  {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      contents: [{
-                        parts: [{
-                          text: `Extract structured information from this webpage content:
-                          
-${content.slice(0, 5000)}
+          // Note: Since we're using basic crawling without crawl4ai, 
+          // we'll process the result directly instead of using crawl4ai configurations
+          
+          // Use Gemini Flash for intelligent parsing if API key available
+          if (GOOGLE_API_KEY) {
+            try {
+              const response = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GOOGLE_API_KEY}`,
+                {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    contents: [{
+                      parts: [{
+                        text: `Extract structured information from this webpage content:
+                        
+${result.markdown.slice(0, 5000)}
 
 Extract:
 - Technology stack (frameworks, languages, databases, cloud)
@@ -552,67 +552,26 @@ Extract:
 - Infrastructure details
 
 Return as JSON.`
-                        }]
-                      }],
-                      generationConfig: {
-                        temperature: 0.2,
-                        maxOutputTokens: 1000
-                      }
-                    })
-                  }
-                )
-                
-                if (response.ok) {
-                  const data = await response.json()
-                  return data.candidates[0].content.parts[0].text
+                      }]
+                    }],
+                    generationConfig: {
+                      temperature: 0.2,
+                      maxOutputTokens: 1000
+                    }
+                  })
                 }
-              } catch (err) {
-                console.log('Gemini parsing failed, using basic extraction')
+              )
+              
+              if (response.ok) {
+                const data = await response.json()
+                result.extracted_content = data.candidates[0].content.parts[0].text
               }
-              return null
-            },
-            
-            // Also use CSS extraction for specific elements
-            css_extraction_patterns: [
-              { name: 'navigation', selector: 'nav a', attribute: 'href' },
-              { name: 'technologies', selector: '[class*="tech"], [class*="stack"]', type: 'text' },
-              { name: 'team', selector: '[class*="team"], [class*="founder"]', type: 'text' },
-              { name: 'testimonials', selector: '[class*="testimonial"], [class*="review"]', type: 'text' }
-            ],
-            
-            // Chunking for better analysis
-            chunking_strategy: 'RegexChunking',
-            chunk_size: 2000,
-            overlap: 200,
-            
-            // Screenshots for visual analysis
-            screenshot: depth <= 2,
-            
-            // Network capture for API discovery
-            network_capture: true,
-            
-            // Wait for dynamic content
-            wait_for: 'networkidle',
-            js_execution: true,
-            js_code: `
-              // Scroll to load lazy content
-              window.scrollTo(0, document.body.scrollHeight);
-              await new Promise(resolve => setTimeout(resolve, 2000));
-              
-              // Extract any API endpoints from JavaScript
-              const scripts = Array.from(document.scripts);
-              const apiPatterns = scripts.map(s => s.textContent)
-                .join(' ')
-                .match(/['"](\/api\/[^'"]+)|(['"](https?:\/\/[^'"]+\/api[^'"]+))/g) || [];
-              
-              return { apiEndpoints: [...new Set(apiPatterns)] };
-            `,
-            
-            // Remove popups and overlays
-            remove_overlay: true,
-            bypass_cache: true
-          })
+            } catch (err) {
+              console.log('Gemini parsing failed, using basic extraction')
+            }
+          }
           
+          // Basic result is ready to process
           if (result.success) {
             // Parse extracted content
             const extractedData = result.extracted_content ? 
@@ -628,8 +587,8 @@ Return as JSON.`
             // Extract API endpoints
             const apis = this.extractAPIs(
               result.links || [],
-              result.js_execution_result?.apiEndpoints || [],
-              result.network_capture || []
+              [], // js_execution_result not available in basic crawler
+              [] // network_capture not available in basic crawler
             )
             
             // Extract code blocks and patterns
@@ -645,7 +604,7 @@ Return as JSON.`
                 ...result.metadata,
                 description: result.metadata?.description,
                 keywords: result.metadata?.keywords,
-                ogData: result.metadata?.og,
+                ogData: {}, // OG data not extracted in basic crawler
                 structuredData: result.structured_data,
                 customExtraction: extractedData,
                 depth,
@@ -716,9 +675,7 @@ Return as JSON.`
         await new Promise(resolve => setTimeout(resolve, 1000))
       }
     } finally {
-      if (this.crawler) {
-        await this.crawler.close()
-      }
+      // No crawler to close in basic implementation
     }
     
     return results
@@ -939,7 +896,7 @@ Return as JSON.`
     return codeBlocks
   }
   
-  private analyzeCodeBlock(code: string, language: string): { purpose: string; patterns: string[]; frameworks: string[] } {
+  private analyzeCodeBlock(code: string, _language: string): { purpose: string; patterns: string[]; frameworks: string[] } {
     const patterns: string[] = []
     const frameworks: string[] = []
     let purpose = 'unknown'
@@ -1110,9 +1067,7 @@ Return as JSON.`
   }
 
   async cleanup() {
-    if (this.crawler) {
-      await this.crawler.close()
-    }
+    // No crawler to close in basic implementation
   }
 }
 
@@ -1235,7 +1190,7 @@ class IntelligentSearchEngine {
 
   async performIterativeSearch(
     company: string,
-    domain: string,
+    _domain: string,
     thesis: string,
     maxIterations: number = 5
   ): Promise<any[]> {
@@ -1442,7 +1397,7 @@ class EvidenceStorageManager {
   private investmentThesis: string
   private thesisCriteria: any
 
-  constructor(collectionId: string, auditTrail: AuditTrailManager, investmentThesis: string) {
+  constructor(collectionId: string, auditTrail: AuditTrailManager, investmentThesis: string) { // investmentThesis is used in thesisCriteria
     this.collectionId = collectionId
     this.auditTrail = auditTrail
     this.investmentThesis = investmentThesis
