@@ -598,6 +598,8 @@ export default function ViewReport() {
   }
 
   const scrollToSection = (sectionId: string) => {
+    setActiveSection(sectionId)
+    // Optionally, you can add smooth scrolling to the section
     const element = document.getElementById(sectionId)
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -917,8 +919,119 @@ export default function ViewReport() {
       )
     }
     
-    // Legacy object format handling (simplified for brevity - can be enhanced similarly)
-    return <div className="p-8 text-center text-gray-500">Legacy format - requires migration to new structure</div>
+    // Legacy object format handling
+    if (typeof currentReport.sections === 'object' && currentReport.sections) {
+      const currentSection = currentReport.sections[activeSection]
+      
+      if (!currentSection) return (
+        <div className="p-12 text-center text-gray-500">
+          <AlertCircle className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+          <h3 className="text-lg font-medium mb-2">Section Not Found</h3>
+          <p>The requested section could not be located.</p>
+        </div>
+      )
+      
+      return (
+        <div className="max-w-none">
+          {/* Enhanced Section Header */}
+          <div className="mb-10 bg-gradient-to-r from-white to-gray-50 p-8 rounded-xl border shadow-sm">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="p-3 bg-blue-100 rounded-xl">
+                {getIconForSection(currentSection.title)}
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100">
+                  {currentSection.title}
+                </h1>
+                <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
+                  <span className="flex items-center gap-1">
+                    <Clock className="h-4 w-4" />
+                    Last Updated: {new Date().toLocaleDateString()}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Eye className="h-4 w-4" />
+                    Investment Grade Analysis
+                  </span>
+                  {currentSection.score && (
+                    <Badge className="ml-2" variant="secondary">
+                      Score: {currentSection.score}/100
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Enhanced Content Layout */}
+          <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
+            {/* Main content - professional formatting */}
+            <div className="xl:col-span-3">
+              <div className="bg-white rounded-xl border shadow-sm p-8">
+                <div className="prose prose-gray dark:prose-invert max-w-none prose-lg">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    rehypePlugins={[rehypeRaw]}
+                    components={markdownComponents}
+                  >
+                    {currentSection.content}
+                  </ReactMarkdown>
+                </div>
+                
+                {/* Enhanced subsections with professional accordion design */}
+                {currentSection.subsections && currentSection.subsections.length > 0 && (
+                  <div className="mt-12 border-t pt-8">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                      <Layers className="h-6 w-6 text-blue-600" />
+                      Detailed Technical Analysis
+                    </h3>
+                    <Accordion type="single" collapsible className="space-y-4">
+                      {currentSection.subsections.map((subsection: any, index: number) => (
+                        <AccordionItem key={index} value={`subsection-${index}`} className="border rounded-xl bg-gradient-to-r from-gray-50 to-white shadow-sm">
+                          <AccordionTrigger className="px-8 py-6 hover:no-underline text-left">
+                            <div className="flex items-center gap-4 text-left">
+                              <div className="p-2 bg-blue-100 rounded-lg">
+                                <BarChart3 className="h-5 w-5 text-blue-600" />
+                              </div>
+                              <div>
+                                <span className="text-lg font-semibold text-gray-900">{subsection.title}</span>
+                                <p className="text-sm text-gray-600 mt-1">Comprehensive analysis and strategic insights</p>
+                              </div>
+                            </div>
+                          </AccordionTrigger>
+                          <AccordionContent className="px-8 pb-8">
+                            <div className="prose prose-gray dark:prose-invert max-w-none border-t pt-6">
+                              <ReactMarkdown
+                                remarkPlugins={[remarkGfm]}
+                                rehypePlugins={[rehypeRaw]}
+                                components={markdownComponents}
+                              >
+                                {subsection.content}
+                              </ReactMarkdown>
+                            </div>
+                          </AccordionContent>
+                        </AccordionItem>
+                      ))}
+                    </Accordion>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Enhanced Sidebar */}
+            <div className="xl:col-span-1">
+              <div className="sticky top-6">
+                <ExecutiveInsightsSidebar 
+                  onNavigate={scrollToSection}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    }
+    
+    // Fallback if sections format is not recognized
+    return <div className="p-8 text-center text-gray-500">Report format not recognized</div>
   }
 
   return (
