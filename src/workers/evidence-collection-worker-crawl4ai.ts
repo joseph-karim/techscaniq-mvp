@@ -245,7 +245,7 @@ function scoreEvidence(evidence: any, investmentThesis: string): number {
 }
 
 // Analyze evidence with Claude
-async function analyzeWithClaude(evidence: any[], investmentThesis: string, apiKey: string): Promise<any> {
+async function analyzeWithClaude(evidence: any[], investmentThesis: string, _apiKey: string): Promise<any> {
   // Group evidence by type
   const groupedEvidence = evidence.reduce((acc, item) => {
     if (!acc[item.type]) acc[item.type] = []
@@ -256,12 +256,12 @@ async function analyzeWithClaude(evidence: any[], investmentThesis: string, apiK
   const thesisCriteria = INVESTMENT_THESIS_CRITERIA[investmentThesis]
   
   // Create analysis prompt
-  const prompt = `
+  const _prompt = `
 Analyze this technical evidence for a ${thesisCriteria.name} investment thesis.
 
 Evidence Summary:
 ${Object.entries(groupedEvidence).map(([type, items]) => 
-  `- ${type}: ${items.length} items`
+  `- ${type}: ${(items as any[]).length} items`
 ).join('\n')}
 
 Key Technologies Found:
@@ -420,7 +420,7 @@ export const evidenceCollectionWorker = new Worker<EvidenceCollectionJob>(
         .eq('collection_id', collection.id)
       
       // Analyze evidence with Claude
-      if (anthropicKey && actualEvidenceCount > 0) {
+      if (anthropicKey && actualEvidenceCount && actualEvidenceCount > 0) {
         console.log('Analyzing evidence with Claude...')
         // Get evidence items for analysis
         const { data: evidenceForAnalysis } = await supabase

@@ -4,7 +4,7 @@ import Redis from 'ioredis'
 import { config } from 'dotenv'
 import axios from 'axios'
 import * as cheerio from 'cheerio'
-import { URL } from 'url'
+// URL is already global in Node.js
 
 config()
 
@@ -243,7 +243,7 @@ class WebtechAnalyzer {
       const performance = await this.analyzePerformance(url, html)
       
       // SEO analysis
-      const seo = this.analyzeSEO($)
+      const seo = this.analyzeSEO($ as any)
       
       console.log(`✅ Found ${technologies.length} technologies for ${url}`)
       
@@ -264,18 +264,18 @@ class WebtechAnalyzer {
     }
   }
   
-  private detectTechnologies(html: string, headers: any, $: cheerio.CheerioAPI): TechDetection[] {
+  private detectTechnologies(html: string, headers: any, $: any): TechDetection[] {
     const detected: TechDetection[] = []
     
     // Get all script sources
-    const scripts = $('script[src]').map((_, el) => $(el).attr('src')).get()
-    const inlineScripts = $('script:not([src])').map((_, el) => $(el).html()).get()
+    const scripts = $('script[src]').map((_: any, el: any) => $(el).attr('src')).get()
+    const inlineScripts = $('script:not([src])').map((_: any, el: any) => $(el).html()).get()
     
     // Get all CSS links
-    const cssLinks = $('link[rel="stylesheet"]').map((_, el) => $(el).attr('href')).get()
+    const cssLinks = $('link[rel="stylesheet"]').map((_: any, el: any) => $(el).attr('href')).get()
     
     // Get meta tags
-    const metaTags = $('meta').map((_, el) => {
+    const metaTags = $('meta').map((_: any, el: any) => {
       const name = $(el).attr('name') || $(el).attr('property')
       const content = $(el).attr('content')
       return { name, content }
@@ -391,7 +391,7 @@ class WebtechAnalyzer {
         cookies.push({
           name: name?.trim(),
           value: value?.trim(),
-          attributes: parts.slice(1).map(p => p.trim())
+          attributes: parts.slice(1).map((p: string) => p.trim())
         })
       }
     }
@@ -399,7 +399,7 @@ class WebtechAnalyzer {
     return cookies
   }
   
-  private async analyzePerformance(url: string, html: string): Promise<any> {
+  private async analyzePerformance(_url: string, html: string): Promise<any> {
     return {
       htmlSize: html.length,
       resourcesCount: (html.match(/<script|<link|<img/g) || []).length,

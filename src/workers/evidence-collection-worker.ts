@@ -63,7 +63,7 @@ async function collectBasicEvidence(domain: string): Promise<EvidenceItem[]> {
   ]
 }
 
-async function collectDeepEvidence(domain: string, company: string): Promise<EvidenceItem[]> {
+async function collectDeepEvidence(_domain: string, company: string): Promise<EvidenceItem[]> {
   console.log(`Collecting deep evidence for ${company}...`)
   
   // Simulate API calls to various sources
@@ -92,7 +92,7 @@ async function collectDeepEvidence(domain: string, company: string): Promise<Evi
   ]
 }
 
-async function collectComprehensiveEvidence(domain: string, company: string): Promise<EvidenceItem[]> {
+async function collectComprehensiveEvidence(_domain: string, company: string): Promise<EvidenceItem[]> {
   console.log(`Collecting comprehensive evidence for ${company}...`)
   
   // In production, this would use sophisticated crawling

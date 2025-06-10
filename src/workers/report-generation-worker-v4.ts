@@ -333,7 +333,7 @@ async function generateAnalyzedReport(
       {
         title: 'Security & Compliance',
         content: formatSecurityAnalysis(securityAnalysis),
-        score: securityAnalysis.securityScore || comprehensiveScore.dimensions.security.score,
+        score: securityAnalysis.securityScore || 70, // Default security score
         subsections: [
           {
             title: 'Security Posture',
@@ -352,7 +352,7 @@ async function generateAnalyzedReport(
       {
         title: 'Investment Recommendation',
         content: formatInvestmentRecommendation(investmentSynthesis),
-        score: investmentSynthesis.investmentScore || comprehensiveScore.investmentScore,
+        score: investmentSynthesis.investmentScore || comprehensiveScore.confidenceAdjustedScore,
         subsections: [
           {
             title: 'Value Creation Plan',
@@ -380,7 +380,7 @@ async function generateAnalyzedReport(
     },
     
     // Investment metrics
-    investment_score: investmentSynthesis.investmentScore || comprehensiveScore.investmentScore,
+    investment_score: investmentSynthesis.investmentScore || comprehensiveScore.confidenceAdjustedScore,
     tech_health_score: techAnalysis.scalabilityScore * 10 || comprehensiveScore.technicalScore,
     tech_health_grade: comprehensiveScore.finalGrade,
     investment_rationale: investmentSynthesis.executiveSummary || 'See detailed analysis in report sections'
@@ -549,7 +549,7 @@ function formatTechRisks(risks: any[], strengths: any[]): string {
 
 // ... (continue with other formatting functions)
 
-function generateCitations(evidence: any[], reportData: any): any[] {
+function generateCitations(evidence: any[], _reportData: any): any[] {
   const citations: any[] = []
   let citationNumber = 1
   
@@ -583,7 +583,7 @@ function determineSectionForEvidence(item: any): string {
 }
 
 // Stub functions for remaining formatters
-function extractCompanyInfo(evidence: any[], techAnalysis: any, marketAnalysis: any): any {
+function extractCompanyInfo(_evidence: any[], _techAnalysis: any, _marketAnalysis: any): any {
   return {
     headquarters: 'Location from evidence analysis',
     founded: 'Year from evidence',
@@ -593,7 +593,7 @@ function extractCompanyInfo(evidence: any[], techAnalysis: any, marketAnalysis: 
   }
 }
 
-function generateExecutiveSummary(company: string, score: any, synthesis: any): string {
+function generateExecutiveSummary(company: string, _score: any, synthesis: any): string {
   return synthesis.executiveSummary || `${company} demonstrates strong potential...`
 }
 

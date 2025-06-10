@@ -3,12 +3,21 @@ import { createClient } from '@supabase/supabase-js'
 import Redis from 'ioredis'
 import { config } from 'dotenv'
 import { ComprehensiveScoringService, EvidenceItem } from '../lib/scoring/comprehensive-scoring'
-import { getAllAnalysisPrompts, type AnalysisPrompt } from '../lib/prompts/analysis-prompts'
+import { getAllAnalysisPrompts } from '../lib/prompts/analysis-prompts'
 import Anthropic from '@anthropic-ai/sdk'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
 // Load environment variables
 config()
+
+interface ReportGenerationJob {
+  scanRequestId: string
+  company: string
+  domain: string
+  investmentThesis: string
+  evidenceJobId?: string
+  investorProfile?: any
+}
 
 // LangGraph-inspired state management
 interface AnalysisState {
@@ -395,7 +404,7 @@ async function reflectionNode(state: AnalysisState): Promise<AnalysisState> {
       state.securityAnalysis
     ].every(a => a && !a.error)
     
-    const highConfidence = state.confidenceLevel >= 70
+    const _highConfidence = state.confidenceLevel >= 70
     const belowMaxIterations = state.iterationCount < state.maxIterations
     
     if (!analysisComplete && belowMaxIterations) {
@@ -452,7 +461,7 @@ async function synthesizeNode(state: AnalysisState): Promise<AnalysisState> {
 
     const comprehensiveScore = scoringService.calculateComprehensiveScore(
       evidenceItems,
-      { type: state.investmentThesis }
+      { type: state.investmentThesis, name: state.investmentThesis }
     )
 
     // Get synthesis prompt
@@ -487,7 +496,7 @@ Security Analysis:
 ${JSON.stringify(state.securityAnalysis, null, 2)}
 
 Comprehensive Scoring:
-- Investment Score: ${comprehensiveScore.investmentScore}
+- Investment Score: ${comprehensiveScore.confidenceAdjustedScore}
 - Technical Score: ${comprehensiveScore.technicalScore}
 - Confidence Level: ${comprehensiveScore.confidenceBreakdown.overallConfidence}%
 - Evidence Quality: ${comprehensiveScore.confidenceBreakdown.evidenceQuality * 100}%
@@ -795,7 +804,7 @@ function formatInvestmentRecommendation(synthesis: any): string {
 ${synthesis.executiveSummary || 'Detailed analysis in progress.'}`
 }
 
-function generateTechSubsections(analysis: any, parsedData: any): any[] {
+function generateTechSubsections(_analysis: any, parsedData: any): any[] {
   return [
     {
       title: 'Core Technologies',
@@ -804,7 +813,7 @@ function generateTechSubsections(analysis: any, parsedData: any): any[] {
   ]
 }
 
-function generateMarketSubsections(analysis: any, parsedData: any): any[] {
+function generateMarketSubsections(_analysis: any, parsedData: any): any[] {
   return [
     {
       title: 'Competitive Landscape',
@@ -813,7 +822,7 @@ function generateMarketSubsections(analysis: any, parsedData: any): any[] {
   ]
 }
 
-function generateTeamSubsections(analysis: any, parsedData: any): any[] {
+function generateTeamSubsections(_analysis: any, _parsedData: any): any[] {
   return [
     {
       title: 'Leadership',
@@ -822,7 +831,7 @@ function generateTeamSubsections(analysis: any, parsedData: any): any[] {
   ]
 }
 
-function generateFinancialSubsections(analysis: any, parsedData: any): any[] {
+function generateFinancialSubsections(_analysis: any, parsedData: any): any[] {
   return [
     {
       title: 'Revenue Metrics',
@@ -831,7 +840,7 @@ function generateFinancialSubsections(analysis: any, parsedData: any): any[] {
   ]
 }
 
-function generateSecuritySubsections(analysis: any, parsedData: any): any[] {
+function generateSecuritySubsections(_analysis: any, parsedData: any): any[] {
   return [
     {
       title: 'Compliance',
@@ -857,7 +866,7 @@ function calculateFinancialScore(analysis: any): number {
   return analysis?.unitEconomics ? 75 : 50
 }
 
-function generateCitations(evidence: any[], reportData: any): any[] {
+function generateCitations(evidence: any[], _reportData: any): any[] {
   const citations: any[] = []
   let citationNumber = 1
   

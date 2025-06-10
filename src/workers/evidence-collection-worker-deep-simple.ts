@@ -27,19 +27,19 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-// Investment thesis criteria
-const INVESTMENT_THESIS_CRITERIA: any = {
-  'accelerate-organic-growth': {
-    name: 'Accelerate Organic Growth',
-    criteria: [
-      { name: 'Cloud Architecture Scalability', weight: 30 },
-      { name: 'Development Velocity & Pipeline', weight: 25 },
-      { name: 'Market Expansion Readiness', weight: 25 },
-      { name: 'Code Quality & Technical Debt', weight: 20 }
-    ],
-    focusAreas: ['cloud-native', 'scalable-architecture', 'devops-maturity', 'test-coverage', 'microservices']
-  }
-}
+// Investment thesis criteria - not currently used but kept for future reference
+// const INVESTMENT_THESIS_CRITERIA: any = {
+//   'accelerate-organic-growth': {
+//     name: 'Accelerate Organic Growth',
+//     criteria: [
+//       { name: 'Cloud Architecture Scalability', weight: 30 },
+//       { name: 'Development Velocity & Pipeline', weight: 25 },
+//       { name: 'Market Expansion Readiness', weight: 25 },
+//       { name: 'Code Quality & Technical Debt', weight: 20 }
+//     ],
+//     focusAreas: ['cloud-native', 'scalable-architecture', 'devops-maturity', 'test-coverage', 'microservices']
+//   }
+// }
 
 // Simple crawler using fetch and cheerio
 async function crawlWebsite(domain: string, maxPages: number = 50): Promise<any[]> {

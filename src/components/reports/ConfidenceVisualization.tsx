@@ -1,4 +1,4 @@
-import * as React from 'react';
+// React is imported implicitly in React 17+;
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';

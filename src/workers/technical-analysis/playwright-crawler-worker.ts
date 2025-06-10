@@ -49,14 +49,16 @@ class PlaywrightCrawler {
     })
   }
   
-  async crawlPage(url: string, options: any = {}): Promise<CrawlResult> {
+  async crawlPage(url: string, _options: any = {}): Promise<CrawlResult> {
     if (!this.browser) await this.initialize()
     
     const page = await this.browser!.newPage()
     
     try {
       // Set user agent and viewport
-      await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36')
+      await page.setExtraHTTPHeaders({
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
+      })
       await page.setViewportSize({ width: 1920, height: 1080 })
       
       // Track network requests for API discovery
@@ -135,7 +137,7 @@ class PlaywrightCrawler {
     try {
       // Check for common frameworks in scripts
       const scripts = await page.$$eval('script[src]', scripts => 
-        scripts.map(script => script.getAttribute('src')).filter(Boolean)
+        scripts.map(script => script.getAttribute('src')).filter((src): src is string => src !== null)
       )
       
       // Technology detection patterns
@@ -175,14 +177,14 @@ class PlaywrightCrawler {
       const windowTechs = await page.evaluate(() => {
         const techs = []
         if (typeof window !== 'undefined') {
-          if (window.React) techs.push('React')
-          if (window.Vue) techs.push('Vue.js')
-          if (window.angular) techs.push('Angular')
-          if (window.jQuery || window.$) techs.push('jQuery')
-          if (window.gtag) techs.push('Google Analytics')
-          if (window.Intercom) techs.push('Intercom')
-          if (window.analytics) techs.push('Segment')
-          if (window.mixpanel) techs.push('Mixpanel')
+          if ((window as any).React) techs.push('React')
+          if ((window as any).Vue) techs.push('Vue.js')
+          if ((window as any).angular) techs.push('Angular')
+          if ((window as any).jQuery || (window as any).$) techs.push('jQuery')
+          if ((window as any).gtag) techs.push('Google Analytics')
+          if ((window as any).Intercom) techs.push('Intercom')
+          if ((window as any).analytics) techs.push('Segment')
+          if ((window as any).mixpanel) techs.push('Mixpanel')
         }
         return techs
       })
@@ -193,7 +195,7 @@ class PlaywrightCrawler {
       const metaTechs = await page.$$eval('meta[name*="generator"], meta[name*="framework"]', metas =>
         metas.map(meta => meta.getAttribute('content')).filter(Boolean)
       )
-      technologies.push(...metaTechs)
+      technologies.push(...metaTechs.filter((tech): tech is string => tech !== null))
       
     } catch (error) {
       console.warn('Technology detection error:', error)
@@ -224,8 +226,6 @@ class PlaywrightCrawler {
   private async extractMetadata(page: Page): Promise<any> {
     try {
       return await page.evaluate(() => {
-        const meta: any = {}
-        
         // Basic meta tags
         const description = document.querySelector('meta[name="description"]')?.getAttribute('content')
         const keywords = document.querySelector('meta[name="keywords"]')?.getAttribute('content')
@@ -262,7 +262,7 @@ class PlaywrightCrawler {
           const src = script.getAttribute('src')
           const inline = script.textContent
           return src || (inline ? `inline:${inline.substring(0, 100)}...` : null)
-        }).filter(Boolean)
+        }).filter((script): script is string => script !== null)
       )
       return scripts
     } catch (error) {
