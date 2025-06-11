@@ -395,7 +395,8 @@ export default function ViewReport() {
   const citations = reportData?.citations?.map(transformCitationForFrontend) || []
 
   // Generate navigation sections from report data
-  const getIconForSection = (title: string) => {
+  const getIconForSection = (title: string | undefined) => {
+    if (!title) return <BarChart3 className="h-4 w-4" />
     const titleLower = title.toLowerCase()
     if (titleLower.includes('executive') || titleLower.includes('summary')) return <Award className="h-4 w-4" />
     if (titleLower.includes('technology') || titleLower.includes('stack') || titleLower.includes('architecture')) return <Code className="h-4 w-4" />
@@ -407,7 +408,8 @@ export default function ViewReport() {
     return <BarChart3 className="h-4 w-4" />
   }
 
-  const getCategoryForSection = (title: string): 'overview' | 'technical' | 'security' | 'recommendations' => {
+  const getCategoryForSection = (title: string | undefined): 'overview' | 'technical' | 'security' | 'recommendations' => {
+    if (!title) return 'overview'
     const titleLower = title.toLowerCase()
     if (titleLower.includes('security') || titleLower.includes('compliance')) return 'security'
     if (titleLower.includes('investment') || titleLower.includes('recommendation')) return 'recommendations'
@@ -430,13 +432,15 @@ export default function ViewReport() {
     
     // Check if it's the new array format (like Ring4)
     if (Array.isArray(currentReport.sections)) {
-      return currentReport.sections.map((section) => ({
-        id: section.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-        title: section.title,
-        icon: getIconForSection(section.title),
-        description: `Analysis and insights for ${section.title.toLowerCase()}`,
-        category: getCategoryForSection(section.title)
-      }))
+      return currentReport.sections
+        .filter((section) => section && section.title) // Filter out sections without titles
+        .map((section) => ({
+          id: section.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+          title: section.title,
+          icon: getIconForSection(section.title),
+          description: `Analysis and insights for ${section.title.toLowerCase()}`,
+          category: getCategoryForSection(section.title)
+        }))
     }
     
     // Handle legacy object format (like Synergy)

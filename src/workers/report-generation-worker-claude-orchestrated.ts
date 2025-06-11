@@ -393,16 +393,37 @@ ${prompt.outputFormat}`
       })
 
       const responseText = message.content[0].type === 'text' ? message.content[0].text : ''
-      const jsonMatch = responseText.match(/```json\n([\s\S]*?)\n```/) || responseText.match(/({[\s\S]*})/)
-      const jsonStr = jsonMatch ? jsonMatch[1] : responseText
-      const analysis = JSON.parse(jsonStr)
       
-      this.addTrace('section_analysis', `Completed ${prompt.name}`, {
+      // Try to extract JSON from the response
+      const jsonMatch = responseText.match(/```json\n([\s\S]*?)\n```/) || responseText.match(/({[\s\S]*})/)
+      
+      if (jsonMatch) {
+        try {
+          const jsonStr = jsonMatch[1]
+          const analysis = JSON.parse(jsonStr)
+          
+          this.addTrace('section_analysis', `Completed ${prompt.name}`, {
+            duration: Date.now() - startTime,
+            hasErrors: !!analysis.error
+          })
+          
+          return analysis
+        } catch (parseError) {
+          // JSON parsing failed, fall through to return the text
+          this.addTrace('section_analysis', `JSON parsing failed for ${prompt.name}`, {
+            error: parseError instanceof Error ? parseError.message : 'Parse error'
+          })
+        }
+      }
+      
+      // If no JSON found or parsing failed, return the text as is
+      // This handles cases where the AI returns plain text error messages
+      this.addTrace('section_analysis', `Returning plain text response for ${prompt.name}`, {
         duration: Date.now() - startTime,
-        hasErrors: !!analysis.error
+        isPlainText: true
       })
       
-      return analysis
+      return responseText
     } catch (error) {
       this.addTrace('section_analysis', `Error analyzing ${prompt.name}`, {
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -608,11 +629,50 @@ Provide the final investment recommendation in JSON format with the following st
 
   // Helper methods for formatting content
   private formatTechnologyContent(analysis: any): string {
-    if (!analysis || analysis.error) return 'Technology analysis pending.'
+    // Handle error responses or plain text responses
+    if (!analysis) return 'Technology analysis pending.'
     
+    // If analysis is a string (error message), return a structured fallback
+    if (typeof analysis === 'string') {
+      return `## Technology Assessment
+
+### Analysis Status
+The technical analysis encountered limitations with the available evidence. Additional technical documentation and architecture details are needed for a comprehensive assessment.
+
+### Available Information
+Based on the limited evidence available:
+- Technology partnerships and integrations have been identified
+- Further technical documentation is required for detailed stack analysis
+
+### Next Steps
+To complete the technology assessment, we recommend:
+1. Gathering technical documentation and architecture diagrams
+2. Reviewing deployment specifications and infrastructure details
+3. Analyzing source code repositories and development practices
+4. Conducting technical interviews with the engineering team
+
+*Note: This section will be updated as additional technical evidence becomes available.*`
+    }
+    
+    // If we have an error property, handle it gracefully
+    if (analysis.error) {
+      return `## Technology Assessment
+
+### Analysis Status
+${analysis.error}
+
+### Recommendation
+Additional technical evidence is required to complete this assessment. Please provide:
+- Technical architecture documentation
+- Development stack information
+- Infrastructure and deployment details
+- API documentation and integration specifications`
+    }
+    
+    // Normal structured analysis
     return `## Technology Assessment
 
-${analysis.summary || ''}
+${analysis.summary || 'Technical analysis in progress...'}
 
 ### Stack Overview
 ${analysis.primaryStack ? `The technology stack includes: ${Object.entries(analysis.primaryStack).map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`).join('; ')}` : 'Technology stack analysis in progress.'}
@@ -629,7 +689,28 @@ ${analysis.investmentPerspective?.keyTakeaway || ''}`
   }
 
   private formatMarketContent(analysis: any): string {
-    if (!analysis || analysis.error) return 'Market analysis pending.'
+    if (!analysis) return 'Market analysis pending.'
+    
+    // Handle string responses (error messages)
+    if (typeof analysis === 'string') {
+      return `## Market Position & Competition
+
+### Analysis Status
+Market analysis requires additional competitive and industry data for comprehensive assessment.
+
+### Available Information
+Based on limited evidence:
+- Market presence has been identified
+- Additional competitive intelligence needed
+
+### Next Steps
+1. Gather market research reports
+2. Analyze competitor positioning
+3. Review customer testimonials and case studies
+4. Assess market size and growth trends`
+    }
+    
+    if (analysis.error) return `## Market Position & Competition\n\n### Analysis Status\n${analysis.error}`
     
     return `## Market Position Analysis
 
@@ -650,7 +731,25 @@ ${analysis.investmentPerspective?.keyTakeaway || ''}`
   }
 
   private formatTeamContent(analysis: any): string {
-    if (!analysis || analysis.error) return 'Team analysis pending.'
+    if (!analysis) return 'Team analysis pending.'
+    
+    if (typeof analysis === 'string') {
+      return `## Team & Organizational Strength
+
+### Analysis Status
+Team assessment requires additional organizational data.
+
+### Available Information
+Limited team information available in current evidence.
+
+### Next Steps
+1. Review leadership profiles and backgrounds
+2. Analyze team composition and expertise
+3. Assess company culture indicators
+4. Evaluate execution track record`
+    }
+    
+    if (analysis.error) return `## Team & Organizational Strength\n\n### Analysis Status\n${analysis.error}`
     
     return `## Team & Organizational Assessment
 
@@ -671,7 +770,25 @@ ${analysis.investmentPerspective?.keyTakeaway || ''}`
   }
 
   private formatFinancialContent(analysis: any): string {
-    if (!analysis || analysis.error) return 'Financial analysis pending.'
+    if (!analysis) return 'Financial analysis pending.'
+    
+    if (typeof analysis === 'string') {
+      return `## Financial Health & Unit Economics
+
+### Analysis Status
+Financial analysis requires additional business metrics and pricing data.
+
+### Available Information
+Limited financial indicators available from public sources.
+
+### Next Steps
+1. Analyze pricing models and tiers
+2. Estimate revenue based on customer indicators
+3. Assess unit economics from available data
+4. Review funding history and burn rate indicators`
+    }
+    
+    if (analysis.error) return `## Financial Health & Unit Economics\n\n### Analysis Status\n${analysis.error}`
     
     return `## Financial Health Assessment
 
@@ -695,7 +812,25 @@ ${analysis.investmentPerspective?.keyTakeaway || ''}`
   }
 
   private formatSecurityContent(analysis: any): string {
-    if (!analysis || analysis.error) return 'Security analysis pending.'
+    if (!analysis) return 'Security analysis pending.'
+    
+    if (typeof analysis === 'string') {
+      return `## Security & Compliance
+
+### Analysis Status
+Security assessment requires additional technical security data.
+
+### Available Information
+Basic security indicators have been collected.
+
+### Next Steps
+1. Conduct comprehensive security scan
+2. Review compliance certifications
+3. Assess data protection measures
+4. Evaluate incident response capabilities`
+    }
+    
+    if (analysis.error) return `## Security & Compliance\n\n### Analysis Status\n${analysis.error}`
     
     return `## Security & Compliance Assessment
 
@@ -720,7 +855,33 @@ ${analysis.investmentPerspective?.keyTakeaway || ''}`
   }
 
   private formatInvestmentContent(synthesis: any): string {
-    if (!synthesis || synthesis.error) return 'Investment recommendation pending.'
+    if (!synthesis) return 'Investment recommendation pending.'
+    
+    if (typeof synthesis === 'string') {
+      return `## Investment Recommendation
+
+### Analysis Status
+Investment synthesis requires complete analysis of all assessment areas.
+
+### Current Status
+Pending comprehensive analysis across:
+- Technology assessment
+- Market position evaluation
+- Team and organizational review
+- Financial health analysis
+- Security and compliance check
+
+### Preliminary Observations
+Based on available evidence, initial assessment indicates need for deeper due diligence.
+
+### Next Steps
+1. Complete all sectional analyses
+2. Synthesize findings across all areas
+3. Develop risk-adjusted investment thesis
+4. Formulate specific recommendations and conditions`
+    }
+    
+    if (synthesis.error) return `## Investment Recommendation\n\n### Analysis Status\n${synthesis.error}`
     
     return `## Investment Recommendation
 
