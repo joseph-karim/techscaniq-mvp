@@ -162,18 +162,11 @@ export function EnhancedEvidenceAppendix({
         .select('*')
         .eq('company_name', companyName)
       
-      // If reportId is provided, filter by the scan_request_id associated with this report
+      // If reportId is provided, filter by the collection_id from evidence_collections
+      // Note: evidence_items doesn't have scan_request_id column
       if (reportId) {
-        // First get the scan_request_id from the report
-        const { data: reportData } = await supabase
-          .from('reports')
-          .select('scan_request_id')
-          .eq('id', reportId)
-          .single()
-        
-        if (reportData?.scan_request_id) {
-          query = query.eq('scan_request_id', reportData.scan_request_id)
-        }
+        // Skip filtering by reportId for now - just get all evidence for the company
+        // This is because evidence_items table doesn't have a direct link to reports
       }
       
       const { data: evidenceData, error: evidenceError } = await query
