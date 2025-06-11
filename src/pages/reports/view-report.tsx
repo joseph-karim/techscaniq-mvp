@@ -22,7 +22,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
-import { fetchReportWithEvidence, transformCitationForFrontend } from '@/lib/api/reports'
+import { fetchReportWithEvidence, transformCitationForFrontend, injectCitationsIntoReport } from '@/lib/api/reports'
 import type { ReportWithEvidence } from '@/lib/api/reports'
 import { EnhancedEvidenceAppendix } from '@/components/reports/EnhancedEvidenceAppendix'
 import { EvidenceModal } from '@/components/reports/EvidenceModal'
@@ -337,9 +337,32 @@ export default function ViewReport() {
             sectionKeys: data.report_data?.sections ? Object.keys(data.report_data.sections) : [],
             topLevelKeys: Object.keys(data),
             reportDataKeys: data.report_data ? Object.keys(data.report_data) : [],
+            citationCount: data.citations?.length || 0,
             // Log actual sections data
             sectionsData: JSON.stringify(data.report_data?.sections, null, 2)
           })
+          
+          // Inject citations into report content
+          if (data.citations && data.citations.length > 0 && data.report_data) {
+            console.log('Injecting citations into report content...', {
+              citationCount: data.citations.length,
+              sampleCitation: data.citations[0],
+              reportSections: data.report_data?.sections ? 
+                (Array.isArray(data.report_data.sections) ? 
+                  data.report_data.sections.map((s: any) => s.title) : 
+                  Object.keys(data.report_data.sections)) : 
+                []
+            })
+            data.report_data = injectCitationsIntoReport(data.report_data, data.citations)
+            console.log('Citations injected successfully')
+          } else {
+            console.log('No citations to inject:', {
+              hasCitations: !!data.citations,
+              citationLength: data.citations?.length || 0,
+              hasReportData: !!data.report_data
+            })
+          }
+          
           setReportData(data)
         }
       } catch (error) {
@@ -441,7 +464,19 @@ export default function ViewReport() {
   }, [dynamicSections]) // Remove activeTab from dependencies to avoid infinite loop
 
   const handleCitationClick = (citationId: string) => {
-    const citation = citations.find(c => c.id === citationId)
+    // Handle both formats: cite-1 and cite-claimtext
+    const citationNumber = citationId.match(/cite-(\d+)$/)?.[1]
+    let citation
+    
+    if (citationNumber) {
+      // Find by citation number (1-based index)
+      const index = parseInt(citationNumber) - 1
+      citation = citations[index]
+    } else {
+      // Find by citation ID
+      citation = citations.find(c => c.id === citationId)
+    }
+    
     if (citation) {
       setSelectedCitation(citation as Citation)
     }

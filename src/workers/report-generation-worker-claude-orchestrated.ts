@@ -252,7 +252,7 @@ class AnalysisOrchestrator {
     try {
       // First, have Claude plan the analysis approach
       const planningMessage = await anthropic.messages.create({
-        model: 'claude-3-opus-20240229',
+        model: 'claude-opus-4-20250514',
         max_tokens: 1000,
         temperature: 0.7,
         system: `You are an expert investment analyst orchestrating a comprehensive due diligence analysis. 
@@ -1132,31 +1132,122 @@ function generateCitations(evidence: any[]): any[] {
   evidence.forEach(item => {
     if (!item.content_data) return
     
-    const section = determineSectionForEvidence(item)
+    const claimText = item.content_data.summary || item.content_data.processed || ''
+    
     citations.push({
+      // Required fields
+      claim_id: `claim_${item.id}`, // Generate unique claim ID from evidence ID
+      claim: claimText, // Required 'claim' field
+      citation_text: claimText,
+      
+      // Optional fields
       citation_number: citationNumber++,
       evidence_item_id: item.id,
-      section: section,
-      claim_text: item.content_data.summary || item.content_data.processed || '',
-      confidence: item.confidence_score || 0.8,
-      source_url: item.source_url || '',
-      evidence_type: item.evidence_type || item.type
+      confidence: Math.round((item.confidence_score || 0.8) * 100), // confidence is integer in schema
+      reasoning: `Based on ${item.evidence_type || item.type} evidence from ${item.source_url || 'source'}`,
+      analyst: 'claude-3-opus',
+      review_date: new Date().toISOString(),
+      methodology: 'AI-driven analysis',
+      evidence_summary: {
+        type: item.evidence_type || item.type,
+        source: item.source_url || '',
+        confidence: item.confidence_score || 0.8,
+        content: item.content_data
+      }
     })
   })
   
   return citations
 }
 
-function determineSectionForEvidence(item: any): string {
-  const type = item.evidence_type || item.type || ''
+// Removed unused function determineSectionForEvidence
+
+// Inject citations into report content
+function injectCitationsIntoReport(reportData: any, citations: any[]): any {
+  const reportWithCitations = JSON.parse(JSON.stringify(reportData)) // Deep clone
   
-  if (type.includes('tech') || type.includes('stack')) return 'technology-stack-architecture'
-  if (type.includes('market') || type.includes('competitor')) return 'market-position-competition'
-  if (type.includes('team') || type.includes('culture')) return 'team-organizational-strength'
-  if (type.includes('financial') || type.includes('pricing')) return 'financial-health-unit-economics'
-  if (type.includes('security') || type.includes('compliance')) return 'security-compliance'
+  // Create a map of claims to citation numbers
+  const _claimToCitation = new Map<string, number>()
+  citations.forEach(citation => {
+    const claim = citation.claim.toLowerCase()
+    const keyTerms = extractKeyTerms(claim)
+    keyTerms.forEach(term => {
+      _claimToCitation.set(term, citation.citation_number)
+    })
+  })
   
-  return 'executive-summary'
+  // Inject citations into each section
+  if (reportWithCitations.sections) {
+    Object.keys(reportWithCitations.sections).forEach(_sectionKey => {
+      const section = reportWithCitations.sections[_sectionKey]
+      if (section.content) {
+        section.content = injectCitationsIntoText(section.content, _claimToCitation, citations)
+      }
+      if (section.subsections && Array.isArray(section.subsections)) {
+        section.subsections.forEach((subsection: any) => {
+          if (subsection.content) {
+            subsection.content = injectCitationsIntoText(subsection.content, _claimToCitation, citations)
+          }
+        })
+      }
+    })
+  }
+  
+  // Also inject into executive summary
+  if (reportWithCitations.executiveSummary?.content) {
+    reportWithCitations.executiveSummary.content = injectCitationsIntoText(
+      reportWithCitations.executiveSummary.content,
+      _claimToCitation,
+      citations
+    )
+  }
+  
+  return reportWithCitations
+}
+
+function extractKeyTerms(text: string): string[] {
+  // Extract meaningful terms from the claim
+  const words = text.toLowerCase().split(/\s+/)
+  return words.filter(word => 
+    word.length > 4 && 
+    !['about', 'their', 'which', 'would', 'could', 'should', 'there', 'these', 'those'].includes(word)
+  )
+}
+
+function injectCitationsIntoText(text: string, _claimToCitation: Map<string, number>, citations: any[]): string {
+  let modifiedText = text
+  const usedCitations = new Set<number>()
+  
+  // Try to match citations to sentences
+  citations.forEach(citation => {
+    const claim = citation.claim.toLowerCase()
+    const keyTerms = extractKeyTerms(claim)
+    
+    // Look for sentences containing key terms
+    const sentences = text.split(/[.!?]+/)
+    sentences.forEach((sentence, _index) => {
+      const lowerSentence = sentence.toLowerCase()
+      const matchCount = keyTerms.filter(term => lowerSentence.includes(term)).length
+      
+      // If we have a good match and haven't used this citation yet
+      if (matchCount >= 2 && !usedCitations.has(citation.citation_number)) {
+        // Find the end of this sentence in the original text
+        const sentenceEnd = text.indexOf(sentence) + sentence.length
+        const nextChar = text[sentenceEnd]
+        
+        if (nextChar === '.' || nextChar === '!' || nextChar === '?') {
+          // Insert citation after the period
+          const before = text.substring(0, sentenceEnd + 1)
+          const after = text.substring(sentenceEnd + 1)
+          modifiedText = before + ` [${citation.citation_number}](#cite-${citation.citation_number})` + after
+          usedCitations.add(citation.citation_number)
+          text = modifiedText // Update for next iteration
+        }
+      }
+    })
+  })
+  
+  return modifiedText
 }
 
 // Main worker
@@ -1225,6 +1316,9 @@ export const reportGenerationWorker = new Worker<ReportGenerationJob>(
       // Generate citations
       const citations = generateCitations(evidence)
       
+      // Inject citations into report content
+      const reportDataWithCitations = injectCitationsIntoReport(reportData, citations)
+      
       await job.updateProgress(80)
       
       // Store trace
@@ -1243,19 +1337,19 @@ export const reportGenerationWorker = new Worker<ReportGenerationJob>(
         .insert({
           scan_request_id: scanRequestId,
           company_name: company,
-          investment_score: Math.round(reportData.investment_score),
-          investment_rationale: reportData.investment_rationale,
-          tech_health_score: Math.round(reportData.tech_health_score),
-          tech_health_grade: reportData.tech_health_grade,
-          report_data: reportData,
+          investment_score: Math.round(reportDataWithCitations.investment_score),
+          investment_rationale: reportDataWithCitations.investment_rationale,
+          tech_health_score: Math.round(reportDataWithCitations.tech_health_score),
+          tech_health_grade: reportDataWithCitations.tech_health_grade,
+          report_data: reportDataWithCitations, // Use the version with citations injected
           evidence_count: evidence.length,
           citation_count: citations.length,
-          executive_summary: reportData.executiveSummary.content,
+          executive_summary: reportDataWithCitations.executiveSummary.content,
           report_version: 'claude-orchestrated',
-          ai_model_used: 'claude-3-opus + gemini-1.5-pro',
-          quality_score: Math.min(reportData.investment_score * 0.01, 1.0),
+          ai_model_used: 'claude-opus-4-20250514 + enhanced-prompts',
+          quality_score: Math.min(reportDataWithCitations.investment_score * 0.01, 1.0),
           human_reviewed: false,
-          metadata: reportData.metadata,
+          metadata: reportDataWithCitations.metadata,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         })
@@ -1274,9 +1368,16 @@ export const reportGenerationWorker = new Worker<ReportGenerationJob>(
           created_at: new Date().toISOString()
         }))
         
-        await supabase
+        const { error: citationError } = await supabase
           .from('report_citations')
           .insert(citationRecords)
+        
+        if (citationError) {
+          console.error('Error storing citations:', citationError)
+          console.error('Sample citation record:', JSON.stringify(citationRecords[0], null, 2))
+        } else {
+          console.log(`Successfully stored ${citations.length} citations`)
+        }
       }
       
       // Update scan request

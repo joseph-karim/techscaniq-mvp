@@ -14,6 +14,7 @@ import {
   Terminal, Info, TrendingUp
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { AI_MODELS, MODEL_CAPABILITIES, MODEL_BY_TASK } from '@/lib/ai-models'
 
 interface AnalysisStage {
   id: string
@@ -41,12 +42,22 @@ interface ModelConfig {
 const modelConfigs: ModelConfig[] = [
   {
     id: 'claude-opus-4',
-    name: 'Claude 4 Opus',
+    name: 'Claude Opus 4',
     provider: 'anthropic',
     version: '20250514',
     contextWindow: 200000,
     costPer1kTokens: { input: 0.015, output: 0.075 },
-    capabilities: ['Complex reasoning', 'Code analysis', 'Long context', 'Investment analysis'],
+    capabilities: ['Advanced reasoning', 'Investment analysis', 'Technical due diligence', 'Code analysis'],
+    status: 'available'
+  },
+  {
+    id: 'gemini-2-flash',
+    name: 'Gemini 2.0 Flash',
+    provider: 'google',
+    version: '2.0',
+    contextWindow: 1000000,
+    costPer1kTokens: { input: 0.001, output: 0.002 },
+    capabilities: ['Real-time search', 'Fast retrieval', 'Multi-modal', 'Research'],
     status: 'available'
   },
   {
@@ -105,7 +116,7 @@ Provide structured analysis with confidence scores...`,
     id: 'security-analysis',
     name: 'Security Assessment',
     description: 'Evaluates security posture and vulnerabilities',
-    model: 'claude-3-opus',
+    model: 'claude-opus-4',
     prompt: `Analyze security evidence for investment risk assessment...
 
 Focus areas:
@@ -484,6 +495,75 @@ export function AnalysisReportConfig() {
           </CardContent>
         </Card>
       )}
+
+      {/* Current Model Assignments */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Current Model Assignments</CardTitle>
+          <CardDescription>
+            Task-specific AI model configuration for optimal performance and cost
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <h4 className="font-medium mb-3 flex items-center gap-2">
+                <Brain className="h-4 w-4 text-blue-600" />
+                Analysis Tasks (Claude Opus 4)
+              </h4>
+              <div className="space-y-2">
+                {Object.entries(MODEL_BY_TASK)
+                  .filter(([_, model]) => model === AI_MODELS.CLAUDE_OPUS_4)
+                  .map(([task, model]) => (
+                    <div key={task} className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">{task.replace(/_/g, ' ').toLowerCase()}</span>
+                      <Badge variant="outline" className="text-xs">
+                        {MODEL_CAPABILITIES[model]?.name}
+                      </Badge>
+                    </div>
+                  ))}
+              </div>
+            </div>
+            
+            <div>
+              <h4 className="font-medium mb-3 flex items-center gap-2">
+                <Terminal className="h-4 w-4 text-green-600" />
+                Search Tasks (Gemini 2.0 Flash)
+              </h4>
+              <div className="space-y-2">
+                {Object.entries(MODEL_BY_TASK)
+                  .filter(([_, model]) => model === AI_MODELS.GEMINI_2_FLASH)
+                  .map(([task, model]) => (
+                    <div key={task} className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">{task.replace(/_/g, ' ').toLowerCase()}</span>
+                      <Badge variant="outline" className="text-xs">
+                        {MODEL_CAPABILITIES[model]?.name}
+                      </Badge>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          </div>
+          
+          <div className="mt-6 p-4 bg-muted/50 rounded-lg">
+            <div className="flex items-start gap-3">
+              <Info className="h-5 w-5 text-blue-500 mt-0.5" />
+              <div>
+                <h5 className="font-medium text-sm">Model Selection Strategy</h5>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Claude Opus 4 provides superior reasoning for investment analysis, while Gemini 2.0 Flash 
+                  offers ultra-fast search and research capabilities at 400x lower cost.
+                </p>
+                <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                  <span>• Analysis: Premium quality & accuracy</span>
+                  <span>• Search: Speed & cost optimization</span>
+                  <span>• Long context: Gemini 1.5 Pro for documents</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Cost Analysis */}
       <Card>
