@@ -330,6 +330,14 @@ export default function ViewReport() {
       try {
         const data = await fetchReportWithEvidence(id)
         if (data) {
+          console.log('Report data loaded:', {
+            hasReportData: !!data.report_data,
+            hasSections: !!data.report_data?.sections,
+            sectionsType: typeof data.report_data?.sections,
+            sectionKeys: data.report_data?.sections ? Object.keys(data.report_data.sections) : [],
+            topLevelKeys: Object.keys(data),
+            reportDataKeys: data.report_data ? Object.keys(data.report_data) : []
+          })
           setReportData(data)
         }
       } catch (error) {
@@ -354,7 +362,7 @@ export default function ViewReport() {
     investment_rationale: reportData.investment_rationale || reportData.report_data?.investment_rationale || '',
     tech_health_score: reportData.tech_health_score || reportData.report_data?.tech_health_score || 0,
     tech_health_grade: reportData.tech_health_grade || reportData.report_data?.tech_health_grade || 'N/A',
-    sections: reportData.report_data?.sections || [],
+    sections: reportData.report_data?.sections || {},
     scan_type: reportData.report_data?.scan_type || 'standard'
   } : null
 
@@ -386,6 +394,13 @@ export default function ViewReport() {
   const generateSections = (): ScanReportSection[] => {
     if (!currentReport) return []
     
+    console.log('generateSections:', {
+      sectionsType: typeof currentReport.sections,
+      isArray: Array.isArray(currentReport.sections),
+      hasContent: !!currentReport.sections,
+      keys: typeof currentReport.sections === 'object' && !Array.isArray(currentReport.sections) ? Object.keys(currentReport.sections) : []
+    })
+    
     // Check if it's the new array format (like Ring4)
     if (Array.isArray(currentReport.sections)) {
       return currentReport.sections.map((section) => ({
@@ -398,13 +413,13 @@ export default function ViewReport() {
     }
     
     // Handle legacy object format (like Synergy)
-    if (typeof currentReport.sections === 'object' && currentReport.sections) {
+    if (typeof currentReport.sections === 'object' && currentReport.sections && Object.keys(currentReport.sections).length > 0) {
       return Object.entries(currentReport.sections).map(([key, section]: [string, any]) => ({
         id: key,
-        title: section.title,
-        icon: getIconForSection(section.title),
-        description: section.summary || `Analysis and insights for ${section.title.toLowerCase()}`,
-        category: getCategoryForSection(section.title)
+        title: section.title || key,
+        icon: getIconForSection(section.title || key),
+        description: section.summary || `Analysis and insights for ${(section.title || key).toLowerCase()}`,
+        category: getCategoryForSection(section.title || key)
       }))
     }
     
@@ -584,6 +599,13 @@ export default function ViewReport() {
   }
 
   const renderSection = (sectionId: string) => {
+    console.log('renderSection called with:', {
+      sectionId,
+      sectionsType: typeof currentReport.sections,
+      isArray: Array.isArray(currentReport.sections),
+      hasSection: typeof currentReport.sections === 'object' && !Array.isArray(currentReport.sections) ? sectionId in currentReport.sections : false
+    })
+    
     // Check if sections is an array (new format) or object (legacy format)
     if (Array.isArray(currentReport.sections)) {
       // New format - render sections array (like Ring4)
