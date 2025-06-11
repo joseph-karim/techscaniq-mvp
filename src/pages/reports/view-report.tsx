@@ -336,7 +336,9 @@ export default function ViewReport() {
             sectionsType: typeof data.report_data?.sections,
             sectionKeys: data.report_data?.sections ? Object.keys(data.report_data.sections) : [],
             topLevelKeys: Object.keys(data),
-            reportDataKeys: data.report_data ? Object.keys(data.report_data) : []
+            reportDataKeys: data.report_data ? Object.keys(data.report_data) : [],
+            // Log actual sections data
+            sectionsData: JSON.stringify(data.report_data?.sections, null, 2)
           })
           setReportData(data)
         }
@@ -398,7 +400,9 @@ export default function ViewReport() {
       sectionsType: typeof currentReport.sections,
       isArray: Array.isArray(currentReport.sections),
       hasContent: !!currentReport.sections,
-      keys: typeof currentReport.sections === 'object' && !Array.isArray(currentReport.sections) ? Object.keys(currentReport.sections) : []
+      keys: typeof currentReport.sections === 'object' && !Array.isArray(currentReport.sections) ? Object.keys(currentReport.sections) : [],
+      // Log actual sections data
+      sectionsData: JSON.stringify(currentReport.sections, null, 2).substring(0, 500) + '...'
     })
     
     // Check if it's the new array format (like Ring4)
@@ -603,7 +607,11 @@ export default function ViewReport() {
       sectionId,
       sectionsType: typeof currentReport.sections,
       isArray: Array.isArray(currentReport.sections),
-      hasSection: typeof currentReport.sections === 'object' && !Array.isArray(currentReport.sections) ? sectionId in currentReport.sections : false
+      hasSection: typeof currentReport.sections === 'object' && !Array.isArray(currentReport.sections) ? sectionId in currentReport.sections : false,
+      // Log sections keys if object
+      sectionKeys: typeof currentReport.sections === 'object' && !Array.isArray(currentReport.sections) ? Object.keys(currentReport.sections) : [],
+      // Check if sections is empty object
+      isEmptyObject: typeof currentReport.sections === 'object' && !Array.isArray(currentReport.sections) && Object.keys(currentReport.sections).length === 0
     })
     
     // Check if sections is an array (new format) or object (legacy format)
@@ -689,15 +697,50 @@ export default function ViewReport() {
             {/* Main content - professional formatting */}
             <div className="xl:col-span-3">
               <div className="bg-white rounded-xl border shadow-sm p-8">
-                <div className="prose prose-gray dark:prose-invert max-w-none prose-lg">
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    rehypePlugins={[rehypeRaw]}
-                    components={markdownComponents}
-                  >
-                    {currentSection.content}
-                  </ReactMarkdown>
-                </div>
+                {/* Handle findings format (Ring4 style) */}
+                {currentSection.summary && (
+                  <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <p className="text-lg text-gray-800 leading-relaxed">{currentSection.summary}</p>
+                  </div>
+                )}
+                
+                {currentSection.findings && currentSection.findings.length > 0 ? (
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-4">Key Findings</h3>
+                    {currentSection.findings.map((finding: any, index: number) => (
+                      <Card key={index} className="p-4">
+                        <div className="flex items-start gap-3">
+                          <div className="p-1 bg-blue-100 rounded">
+                            <Info className="h-4 w-4 text-blue-600" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-gray-800">{finding.text}</p>
+                            {finding.category && (
+                              <Badge variant="outline" className="mt-2">
+                                {finding.category.replace(/_/g, ' ')}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                ) : currentSection.content ? (
+                  <div className="prose prose-gray dark:prose-invert max-w-none prose-lg">
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      rehypePlugins={[rehypeRaw]}
+                      components={markdownComponents}
+                    >
+                      {currentSection.content}
+                    </ReactMarkdown>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <AlertCircle className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                    <p>No content available for this section</p>
+                  </div>
+                )}
                 
                 {/* Enhanced subsections with professional accordion design */}
                 {currentSection.subsections && currentSection.subsections.length > 0 && (
@@ -801,15 +844,50 @@ export default function ViewReport() {
             {/* Main content - professional formatting */}
             <div className="xl:col-span-3">
               <div className="bg-white rounded-xl border shadow-sm p-8">
-                <div className="prose prose-gray dark:prose-invert max-w-none prose-lg">
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    rehypePlugins={[rehypeRaw]}
-                    components={markdownComponents}
-                  >
-                    {currentSection.content}
-                  </ReactMarkdown>
-                </div>
+                {/* Handle findings format (Ring4 style) */}
+                {currentSection.summary && (
+                  <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <p className="text-lg text-gray-800 leading-relaxed">{currentSection.summary}</p>
+                  </div>
+                )}
+                
+                {currentSection.findings && currentSection.findings.length > 0 ? (
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-4">Key Findings</h3>
+                    {currentSection.findings.map((finding: any, index: number) => (
+                      <Card key={index} className="p-4">
+                        <div className="flex items-start gap-3">
+                          <div className="p-1 bg-blue-100 rounded">
+                            <Info className="h-4 w-4 text-blue-600" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-gray-800">{finding.text}</p>
+                            {finding.category && (
+                              <Badge variant="outline" className="mt-2">
+                                {finding.category.replace(/_/g, ' ')}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                ) : currentSection.content ? (
+                  <div className="prose prose-gray dark:prose-invert max-w-none prose-lg">
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      rehypePlugins={[rehypeRaw]}
+                      components={markdownComponents}
+                    >
+                      {currentSection.content}
+                    </ReactMarkdown>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <AlertCircle className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                    <p>No content available for this section</p>
+                  </div>
+                )}
                 
                 {/* Enhanced subsections with professional accordion design */}
                 {currentSection.subsections && currentSection.subsections.length > 0 && (
