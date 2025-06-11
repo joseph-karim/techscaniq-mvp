@@ -789,12 +789,31 @@ function generateCitations(evidence: any[], _reportData: any): any[] {
   evidence.forEach(item => {
     const section = determineSectionForEvidence(item)
     if (section && item.content_data) {
+      const claimText = item.content_data.summary || item.content_data.processed || ''
+      const claimId = `cite-${claimText.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 20)}`
+      
       citations.push({
         citation_number: citationNumber++,
+        claim_id: claimId,
         evidence_item_id: item.id,
         section: section,
-        claim_text: item.content_data.summary || item.content_data.processed || '',
-        confidence: item.confidence_score || 0.8
+        citation_text: claimText,
+        citation_context: item.content_data.processed || item.content_data.raw || '',
+        confidence_score: item.metadata?.confidence || item.confidence_score || 0.8,
+        // Additional fields for frontend compatibility
+        claim: claimText,
+        confidence: Math.round((item.metadata?.confidence || item.confidence_score || 0.8) * 100),
+        analyst: 'AI System',
+        review_date: new Date().toISOString(),
+        reasoning: `Based on ${item.type} evidence from ${item.source_data?.url || 'collected data'}`,
+        methodology: 'AI-driven analysis with multi-source evidence verification',
+        evidence_summary: [{
+          type: item.type,
+          title: `Evidence from ${item.source_data?.url || 'collected source'}`,
+          source: item.source_data?.url || item.source_data?.api || 'Internal analysis',
+          excerpt: item.content_data.summary || item.content_data.processed || '',
+          url: item.source_data?.url
+        }]
       })
     }
   })
@@ -812,6 +831,114 @@ function determineSectionForEvidence(item: any): string {
   if (type.includes('security') || type.includes('compliance')) return 'security-compliance'
   
   return 'executive-summary'
+}
+
+// Function to inject citations into report content
+function injectCitationsIntoReportData(reportData: any, citations: any[]): any {
+  if (!reportData || !citations || citations.length === 0) {
+    return reportData
+  }
+
+  console.log(`Injecting ${citations.length} citations into report content`)
+  const modifiedReport = { ...reportData }
+  
+  // Sort citations by citation number for consistent ordering
+  const sortedCitations = [...citations].sort((a, b) => 
+    (a.citation_number || 0) - (b.citation_number || 0)
+  )
+
+  // Process sections - handle both array and object formats
+  if (Array.isArray(modifiedReport.sections)) {
+    modifiedReport.sections = modifiedReport.sections.map((section: any) => ({
+      ...section,
+      content: section.content ? injectCitationsIntoContent(section.content, sortedCitations) : section.content,
+      summary: section.summary ? injectCitationsIntoContent(section.summary, sortedCitations) : section.summary
+    }))
+  } else if (typeof modifiedReport.sections === 'object' && modifiedReport.sections) {
+    Object.keys(modifiedReport.sections).forEach(key => {
+      const section = modifiedReport.sections[key]
+      if (section.content) {
+        modifiedReport.sections[key] = {
+          ...section,
+          content: injectCitationsIntoContent(section.content, sortedCitations)
+        }
+      }
+      // Process subsections if they exist
+      if (section.subsections) {
+        modifiedReport.sections[key].subsections = section.subsections.map((sub: any) => ({
+          ...sub,
+          content: sub.content ? injectCitationsIntoContent(sub.content, sortedCitations) : sub.content
+        }))
+      }
+    })
+  }
+
+  // Process executive summary
+  if (modifiedReport.executiveSummary?.content) {
+    modifiedReport.executiveSummary.content = injectCitationsIntoContent(
+      modifiedReport.executiveSummary.content, 
+      sortedCitations
+    )
+  }
+
+  return modifiedReport
+}
+
+// Function to inject citations into content string
+function injectCitationsIntoContent(content: string, citations: any[]): string {
+  if (!content || !citations || citations.length === 0) {
+    return content
+  }
+
+  let modifiedContent = content
+  
+  // For each citation, find relevant text and add citation marker
+  citations.forEach((citation) => {
+    const citationNumber = citation.citation_number
+    const claimText = citation.claim || citation.citation_text
+    
+    if (!claimText || !citationNumber) return
+
+    // Extract key terms from the claim
+    const keyTerms = claimText
+      .toLowerCase()
+      .replace(/[^\w\s]/g, ' ')
+      .split(/\s+/)
+      .filter((word: string) => word.length > 4)
+      .slice(0, 5) // Take up to 5 key terms
+
+    if (keyTerms.length < 2) return
+
+    // Try to find a sentence containing these key terms
+    const sentences = content.match(/[^.!?]+[.!?]+/g) || []
+    let bestMatch = { index: -1, score: 0, sentence: '' }
+    
+    sentences.forEach((sentence) => {
+      const sentenceLower = sentence.toLowerCase()
+      const matchedTerms = keyTerms.filter((term: string) => sentenceLower.includes(term))
+      const score = matchedTerms.length / keyTerms.length
+      
+      if (score > bestMatch.score && score >= 0.4) {
+        const startIndex = content.indexOf(sentence)
+        bestMatch = { index: startIndex, score, sentence }
+      }
+    })
+
+    // If we found a good match, add the citation
+    if (bestMatch.index >= 0 && !bestMatch.sentence.includes(`[${citationNumber}]`)) {
+      const insertPosition = bestMatch.index + bestMatch.sentence.length - 1 // Before the period
+      const citationMarker = ` [${citationNumber}](#cite-${citationNumber})`
+      
+      modifiedContent = 
+        modifiedContent.substring(0, insertPosition) +
+        citationMarker +
+        modifiedContent.substring(insertPosition)
+      
+      console.log(`Injected citation ${citationNumber} into content`)
+    }
+  })
+
+  return modifiedContent
 }
 
 // Main worker
@@ -866,6 +993,9 @@ export const reportGenerationWorker = new Worker<ReportGenerationJob>(
       
       await job.updateProgress(80)
       
+      // Inject citations into report content before saving
+      const reportDataWithCitations = injectCitationsIntoReportData(reportData, citations)
+      
       // Create report record
       const { data: report, error: reportError } = await supabase
         .from('reports')
@@ -876,7 +1006,7 @@ export const reportGenerationWorker = new Worker<ReportGenerationJob>(
           investment_rationale: reportData.investment_rationale,
           tech_health_score: Math.round(reportData.tech_health_score),
           tech_health_grade: grade,
-          report_data: reportData,
+          report_data: reportDataWithCitations,
           evidence_count: evidence.length,
           citation_count: citations.length,
           executive_summary: reportData.executiveSummary.content,
@@ -897,15 +1027,24 @@ export const reportGenerationWorker = new Worker<ReportGenerationJob>(
       
       // Store citations
       if (citations.length > 0 && report) {
+        console.log(`Storing ${citations.length} citations for report ${report.id}`)
+        
         const citationRecords = citations.map(c => ({
           ...c,
           report_id: report.id,
           created_at: new Date().toISOString()
         }))
         
-        await supabase
+        const { error: citationError } = await supabase
           .from('report_citations')
           .insert(citationRecords)
+          
+        if (citationError) {
+          console.error('Error storing citations:', citationError)
+          console.error('Sample citation record:', JSON.stringify(citationRecords[0], null, 2))
+        } else {
+          console.log(`Successfully stored ${citations.length} citations`)
+        }
       }
       
       // Update scan request
