@@ -5,7 +5,6 @@ import { Queue, Worker, Job } from 'bullmq';
 import { createClient } from '@supabase/supabase-js';
 import Anthropic from '@anthropic-ai/sdk';
 import { 
-  generateReportSection,
   TECHNOLOGY_SECTION_PROMPT,
   MARKET_SECTION_PROMPT,
   TEAM_SECTION_PROMPT,
@@ -16,7 +15,7 @@ import {
   MASTER_EDITOR_PROMPT,
   SectionPrompt
 } from '../lib/prompts/section-based-prompts';
-import { redisConnection } from './queue-config';
+import { connection as redisConnection } from './queue-config';
 
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL!,
@@ -146,7 +145,8 @@ class StagedReportGenerator {
         ]
       });
       
-      const content = this.parseResponse(message.content[0].text);
+      const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
+      const content = this.parseResponse(responseText);
       
       const result: SectionResult = {
         sectionId: prompt.id,
@@ -248,12 +248,7 @@ IMPORTANT: Output ONLY valid JSON. Base all findings on provided evidence.`;
 
   private async generateRiskAssessment(): Promise<void> {
     // Risk assessment depends on other sections
-    const sectionalAnalyses = this.sections.map(s => ({
-      section: s.sectionName,
-      risks: s.content.concerns || s.content.risks || [],
-      dataGaps: s.content.dataGaps || []
-    }));
-    
+    // Note: In full implementation, would pass sectional analyses to risk prompt
     const riskPrompt = {
       ...RISK_SECTION_PROMPT,
       requiredEvidence: ['sectional_analyses']
@@ -295,7 +290,8 @@ ${MASTER_EDITOR_PROMPT.outputFormat}`;
         messages: [{ role: 'user', content: editorPrompt }]
       });
       
-      const editorFeedback = this.parseResponse(message.content[0].text);
+      const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
+      const editorFeedback = this.parseResponse(responseText);
       
       // Apply editor feedback to sections
       const editedSections = this.applyEditorFeedback(this.sections, editorFeedback);
