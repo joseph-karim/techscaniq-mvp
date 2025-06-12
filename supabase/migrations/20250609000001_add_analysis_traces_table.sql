@@ -36,7 +36,7 @@ CREATE POLICY "Users can view their own analysis traces" ON analysis_traces
     EXISTS (
       SELECT 1 FROM scan_requests
       WHERE scan_requests.id = analysis_traces.scan_request_id
-      AND scan_requests.user_id = auth.uid()
+      AND scan_requests.requested_by = auth.uid()
     )
   );
 
