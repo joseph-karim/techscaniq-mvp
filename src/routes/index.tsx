@@ -24,6 +24,7 @@ const SettingsPage = lazy(() => import('@/pages/settings'))
 const AnalyticsPage = lazy(() => import('@/pages/analytics'))
 const ReportsListPage = lazy(() => import('@/pages/reports/reports-list'))
 const GenerateExecutiveReport = lazy(() => import('@/pages/reports/GenerateExecutiveReport'))
+const ThesisAlignedReport = lazy(() => import('@/pages/reports/thesis-aligned-report'))
 const AIWorkflowResults = lazy(() => import('@/pages/demo/ai-workflow-results'))
 
 
@@ -107,6 +108,12 @@ export const routeConfig: RouteConfig[] = [
         path: 'reports/:id',
         element: <ViewReportPage />,
         label: 'Report Details',
+        showInNav: false
+      },
+      {
+        path: 'reports/thesis-aligned/:id',
+        element: <ThesisAlignedReport />,
+        label: 'Thesis-Aligned Report',
         showInNav: false
       },
       {

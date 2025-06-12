@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
@@ -316,6 +316,7 @@ const ExecutiveInsightsSidebar = ({
 
 export default function ViewReport() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const [selectedCitation, setSelectedCitation] = useState<Citation | null>(null)
   const [activeTab, setActiveTab] = useState('executive-summary')
   const [loading, setLoading] = useState(true)
@@ -338,9 +339,17 @@ export default function ViewReport() {
             topLevelKeys: Object.keys(data),
             reportDataKeys: data.report_data ? Object.keys(data.report_data) : [],
             citationCount: data.citations?.length || 0,
+            reportType: data.report_type,
             // Log actual sections data
             sectionsData: JSON.stringify(data.report_data?.sections, null, 2)
           })
+          
+          // Check if this is a thesis-aligned report and redirect
+          if (data.report_type === 'thesis-aligned' || data.report_data?.thesis_type || data.report_data?.weighted_scores) {
+            console.log('Detected thesis-aligned report, redirecting...')
+            navigate(`/reports/thesis-aligned/${id}`, { replace: true })
+            return
+          }
           
           // Inject citations into report content
           if (data.citations && data.citations.length > 0 && data.report_data) {
@@ -373,7 +382,7 @@ export default function ViewReport() {
     }
 
     loadReport()
-  }, [id])
+  }, [id, navigate])
 
   // Transform report data to match expected format
   const currentReport = reportData ? {

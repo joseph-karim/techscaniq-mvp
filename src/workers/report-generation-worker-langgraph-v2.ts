@@ -345,6 +345,7 @@ async function generateCitations(state: typeof ResearchState.State) {
           citation_number: citationNumber,
           evidence_item_id: evidence.id,
           confidence: Math.round((evidence.confidence_score || 0.8) * 100),
+          confidence_score: evidence.confidence_score || 0.8,
           reasoning: `Based on ${evidence.evidence_type || evidence.type} evidence`,
           analyst: 'langgraph-claude',
           review_date: new Date().toISOString(),

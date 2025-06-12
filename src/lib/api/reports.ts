@@ -5,6 +5,7 @@ export interface ReportWithEvidence {
   scan_request_id?: string
   company_name?: string
   report_data: any
+  report_type?: string
   executive_summary?: string
   investment_score?: number
   investment_rationale?: string
