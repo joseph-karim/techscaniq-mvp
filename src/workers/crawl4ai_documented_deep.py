@@ -25,7 +25,7 @@ from crawl4ai.deep_crawling.filters import (
 from crawl4ai.deep_crawling.scorers import KeywordRelevanceScorer
 from crawl4ai.extraction_strategy import LLMExtractionStrategy
 from crawl4ai.types import LLMConfig
-from crawl4ai.dispatcher import MemoryAdaptiveDispatcher
+from crawl4ai.async_dispatcher import MemoryAdaptiveDispatcher
 
 
 class DocumentedDeepEvidenceCollector:
