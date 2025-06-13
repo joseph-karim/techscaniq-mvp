@@ -11,6 +11,7 @@
     "workers": "tsx src/workers.ts",
     "build": "tsc",
     "test": "vitest",
+    "test:queues": "tsx test-queues.ts",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit"
   },

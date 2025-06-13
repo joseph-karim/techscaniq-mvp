@@ -1,7 +1,7 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import { PlaywrightCrawler } from 'crawlee';
-const pdfParse = require('pdf-parse');
+import pdfParse from '../utils/pdf-parse';
 import { ChatOpenAI } from '@langchain/openai';
 import { config, models } from '../config';
 

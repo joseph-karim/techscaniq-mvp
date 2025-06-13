@@ -235,7 +235,7 @@ async function handleTechnicalAnalysis(
     techJobs.push(
       queues.technical.add('technical-profile', {
         url,
-        type: 'technical',
+        type: 'technical-profile',
       }, {
         priority: JobPriority.LOW,
       })
