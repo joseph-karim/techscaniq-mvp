@@ -1,9 +1,9 @@
-import { Worker, Job, Queue } from 'bullmq'
+import { Worker, Job, Queue, QueueEvents } from 'bullmq'
 import { createClient } from '@supabase/supabase-js'
 import Redis from 'ioredis'
 import { config } from 'dotenv'
 import { Anthropic } from '@anthropic-ai/sdk'
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import { GoogleGenerativeAI, DynamicRetrievalMode } from '@google/generative-ai'
 import fetch from 'node-fetch'
 
 config()
@@ -38,7 +38,13 @@ const skyvernQueue = new Queue('skyvern-discovery', { connection })
 const playwrightQueue = new Queue('playwright-crawler', { connection })
 const webtechQueue = new Queue('webtech-analyzer', { connection })
 const securityQueue = new Queue('security-scanner', { connection })
-const searchQueue = new Queue('search-analysis', { connection })
+
+// Create QueueEvents for waiting on jobs
+const crawl4aiQueueEvents = new QueueEvents('crawl4ai-extraction', { connection })
+const skyvernQueueEvents = new QueueEvents('skyvern-discovery', { connection })
+const playwrightQueueEvents = new QueueEvents('playwright-crawler', { connection })
+const webtechQueueEvents = new QueueEvents('webtech-analyzer', { connection })
+const securityQueueEvents = new QueueEvents('security-scanner', { connection })
 
 export const fullOrchestrator = new Worker(
   'evidence-orchestrator',
@@ -74,8 +80,7 @@ export const fullOrchestrator = new Worker(
         scanRequestId, 
         company, 
         domain, 
-        investmentThesis,
-        collection.id
+        investmentThesis
       )
       
       // Store all evidence flexibly
@@ -108,8 +113,7 @@ async function runComprehensiveCollection(
   scanRequestId: string,
   company: string,
   domain: string,
-  investmentThesis: string,
-  collectionId: string
+  investmentThesis: string
 ): Promise<any[]> {
   const allEvidence = []
   
@@ -141,7 +145,7 @@ async function runComprehensiveCollection(
         tools: [{
           googleSearchRetrieval: {
             dynamicRetrievalConfig: {
-              mode: "MODE_DYNAMIC",
+              mode: DynamicRetrievalMode.MODE_DYNAMIC,
               dynamicThreshold: 0.3
             }
           }
@@ -160,7 +164,7 @@ async function runComprehensiveCollection(
         }
       })
     } catch (error) {
-      console.error(`  Gemini error for "${query}":`, error.message)
+      console.error(`  Gemini error for "${query}":`, error instanceof Error ? error.message : String(error))
     }
   }
   
@@ -193,7 +197,7 @@ async function runComprehensiveCollection(
   // Wait for Crawl4AI results with timeout
   const crawl4aiResults = await Promise.allSettled(
     crawlJobs.map(job => 
-      job.waitUntilFinished(crawl4aiQueue.events, 60000).catch(e => {
+      job.waitUntilFinished(crawl4aiQueueEvents, 60000).catch(e => {
         console.error(`  Crawl4AI job ${job.id} failed:`, e.message)
         return null
       })
@@ -203,7 +207,7 @@ async function runComprehensiveCollection(
   crawl4aiResults.forEach((result, idx) => {
     if (result.status === 'fulfilled' && result.value?.evidence_items) {
       console.log(`  Crawl4AI extracted ${result.value.evidence_items.length} items from ${crawl4aiJobs[idx].url}`)
-      allEvidence.push(...result.value.evidence_items.map(item => ({
+      allEvidence.push(...result.value.evidence_items.map((item: any) => ({
         ...item,
         source: 'crawl4ai',
         url: crawl4aiJobs[idx].url,
@@ -230,7 +234,7 @@ async function runComprehensiveCollection(
   
   // Wait for Skyvern result
   try {
-    const skyvernResult = await skyvernJob.waitUntilFinished(skyvernQueue.events, 120000)
+    const skyvernResult = await skyvernJob.waitUntilFinished(skyvernQueueEvents, 120000)
     if (skyvernResult?.discovered_urls) {
       console.log(`  Skyvern discovered ${skyvernResult.discovered_urls.length} URLs`)
       allEvidence.push({
@@ -241,7 +245,7 @@ async function runComprehensiveCollection(
       })
     }
   } catch (error) {
-    console.error('  Skyvern job failed:', error.message)
+    console.error('  Skyvern job failed:', error instanceof Error ? error.message : String(error))
   }
   
   console.log('[Collection] Phase 4: Technical Analysis Suite')
@@ -275,8 +279,8 @@ async function runComprehensiveCollection(
   // Wait for technical analysis results
   const techResults = await Promise.allSettled(
     techJobs.map((job, idx) => {
-      const queue = [playwrightQueue, webtechQueue, securityQueue][idx]
-      return job.waitUntilFinished(queue.events, 60000).catch(e => {
+      const queueEvents = [playwrightQueueEvents, webtechQueueEvents, securityQueueEvents][idx]
+      return job.waitUntilFinished(queueEvents, 60000).catch(e => {
         console.error(`  Tech analysis job ${job.id} failed:`, e.message)
         return null
       })
@@ -376,7 +380,8 @@ async function runComprehensiveCollection(
   })
   
   try {
-    const content = reflectionResponse.content[0].text
+    const textContent = reflectionResponse.content.find(c => c.type === 'text')
+    const content = textContent?.text || ''
     const reflection = JSON.parse(content.match(/\{[\s\S]*\}/)?.[0] || '{}')
     
     allEvidence.push({

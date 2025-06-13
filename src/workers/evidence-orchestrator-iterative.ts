@@ -116,7 +116,7 @@ Return as JSON: { questions: [{question: string, category: string, priority: 1-5
   
   return {
     ...state,
-    researchQuestions: questions.map(q => q.question),
+    researchQuestions: questions.map((q: any) => q.question),
     currentPhase: 'gathering_initial',
     trace: [...state.trace, { phase: 'initialization', questions: questions.length }]
   }
@@ -128,7 +128,7 @@ async function orchestrateTools(state: typeof IterativeOrchestrationState.State)
   console.log(`[Iterative] Orchestrating tools for iteration ${state.iterationCount + 1}...`)
   
   const newJobs = new Map(state.pendingJobs)
-  const newEvidence = []
+  const newEvidence: any[] = []
   
   // 1. Gemini grounded search for each question
   for (const question of currentQuestions) {
@@ -148,7 +148,7 @@ async function orchestrateTools(state: typeof IterativeOrchestrationState.State)
         timestamp: new Date().toISOString()
       })
     } catch (error) {
-      console.error(`Gemini error: ${error.message}`)
+      console.error(`Gemini error: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
   
@@ -238,7 +238,7 @@ async function orchestrateTools(state: typeof IterativeOrchestrationState.State)
 async function collectResults(state: typeof IterativeOrchestrationState.State) {
   console.log('[Iterative] Collecting results from tools...')
   
-  const newEvidence = []
+  const newEvidence: any[] = []
   const completedTools = new Set(state.completedTools)
   const toolResults = { ...state.toolResults }
   
@@ -254,7 +254,7 @@ async function collectResults(state: typeof IterativeOrchestrationState.State) {
         
         // Extract evidence based on tool type
         if (key.startsWith('crawl4ai') && result.evidence_items) {
-          newEvidence.push(...result.evidence_items.map(item => ({
+          newEvidence.push(...result.evidence_items.map((item: any) => ({
             ...item,
             source: 'crawl4ai',
             tool: key
@@ -267,7 +267,7 @@ async function collectResults(state: typeof IterativeOrchestrationState.State) {
             discoveredCount: result.discovered_urls.length
           })
         } else if (key === 'deep_searcher' && result.results) {
-          newEvidence.push(...result.results.map(r => ({
+          newEvidence.push(...result.results.map((r: any) => ({
             source: 'deep_searcher',
             ...r
           })))
@@ -280,7 +280,7 @@ async function collectResults(state: typeof IterativeOrchestrationState.State) {
         }
       }
     } catch (error) {
-      console.error(`Job ${key} failed:`, error.message)
+      console.error(`Job ${key} failed:`, error instanceof Error ? error.message : String(error))
     }
   })
   
@@ -400,17 +400,6 @@ async function storeEvidence(state: typeof IterativeOrchestrationState.State) {
   }
 }
 
-
-// Helper function to get queue for job key
-function getQueueForJob(key: string): Queue {
-  if (key.startsWith('crawl4ai')) return crawl4aiQueue
-  if (key === 'skyvern') return skyvernQueue
-  if (key === 'deep_searcher') return deepSearchQueue
-  if (key === 'tech_0') return playwrightQueue
-  if (key === 'tech_1') return webtechQueue
-  if (key === 'tech_2') return securityQueue
-  return new Queue('unknown', { connection })
-}
 
 // Create queue events lazily
 let queueEventsCache: Record<string, QueueEvents> | null = null

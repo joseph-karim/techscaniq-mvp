@@ -39,7 +39,7 @@ interface SkyvernDiscoveryJob {
 }
 
 const queue = new Queue<SkyvernDiscoveryJob>('skyvern-discovery', {
-  redis: {
+  connection: {
     host: process.env.REDIS_HOST || 'localhost',
     port: parseInt(process.env.REDIS_PORT || '6379'),
   },
@@ -339,7 +339,7 @@ async function runEnhancedSkyvernDiscovery(job: SkyvernDiscoveryJob): Promise<an
       output += data.toString();
       // Log progress in real-time
       const lines = data.toString().split('\n');
-      lines.forEach(line => {
+      lines.forEach((line: string) => {
         if (line.includes('INFO') || line.includes('Executing prompt')) {
           logger.info(`[Skyvern Progress] ${line}`);
         }
@@ -588,7 +588,7 @@ export const skyvernWorker = new Worker(
     
   } catch (error) {
     logger.error('Skyvern discovery failed', {
-      error: error.message,
+      error: error instanceof Error ? error.message : String(error),
       jobId: job.id,
       scanRequestId: job.data.scanRequestId
     });
@@ -600,7 +600,7 @@ export const skyvernWorker = new Worker(
       source: 'skyvern-discovery',
       evidence_type: 'webpage_content',
       title: 'Skyvern Discovery Error',
-      content: JSON.stringify({ error: error.message, url: job.data.targetUrl }),
+      content: JSON.stringify({ error: error instanceof Error ? error.message : String(error), url: job.data.targetUrl }),
       url: job.data.targetUrl,
       relevance_score: 0.1,
       metadata: {
@@ -625,14 +625,14 @@ async function queueFollowUpDiscoveries(jobData: SkyvernDiscoveryJob, results: a
   ];
   
   const promisingUrls = (results.discovered_urls || [])
-    .filter(url => highValuePaths.some(path => url.includes(path)))
+    .filter((url: string) => highValuePaths.some(path => url.includes(path)))
     .slice(0, 3); // Limit follow-ups
   
   for (const url of promisingUrls) {
     const followUpMode = determineFollowUpMode(url);
     
     followUpJobs.push(
-      queue.add({
+      queue.add('discover', {
         scanRequestId: jobData.scanRequestId,
         targetUrl: url,
         discoveryMode: followUpMode,

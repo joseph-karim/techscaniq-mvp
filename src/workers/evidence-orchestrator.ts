@@ -2,8 +2,6 @@ import { Worker, Job, Queue } from 'bullmq'
 import { createClient } from '@supabase/supabase-js'
 import Redis from 'ioredis'
 import { config } from 'dotenv'
-import { StateGraph, Annotation } from '@langchain/langgraph'
-import { MemorySaver } from '@langchain/langgraph-checkpoint'
 import { Anthropic } from '@anthropic-ai/sdk'
 
 config()
@@ -26,7 +24,6 @@ const anthropic = new Anthropic({
 
 // Technical analysis queues
 const skyvernQueue = new Queue('skyvern-discovery', { connection })
-const playwrightQueue = new Queue('playwright-crawler', { connection })
 const webtechQueue = new Queue('webtech-analyzer', { connection })
 const securityQueue = new Queue('security-scanner', { connection })
 
@@ -102,7 +99,8 @@ async function runIntelligentOrchestration(job: Job, collectionId: string) {
   let researchPlan
   try {
     // Extract JSON from response
-    const content = planningResponse.content[0].text
+    const textContent = planningResponse.content.find(c => c.type === 'text')
+    const content = textContent?.text || ''
     const jsonMatch = content.match(/\[[\s\S]*\]/)
     researchPlan = jsonMatch ? JSON.parse(jsonMatch[0]) : []
   } catch (e) {
@@ -178,7 +176,8 @@ async function runIntelligentOrchestration(job: Job, collectionId: string) {
   
   let reflection
   try {
-    const content = reflectionResponse.content[0].text
+    const textContent = reflectionResponse.content.find(c => c.type === 'text')
+    const content = textContent?.text || ''
     const jsonMatch = content.match(/\{[\s\S]*\}/)
     reflection = jsonMatch ? JSON.parse(jsonMatch[0]) : {}
   } catch (e) {
@@ -240,7 +239,7 @@ async function runSimpleCollection(job: Job, collectionId: string) {
     evidence.push({
       type: 'homepage',
       url: `https://${domain}`,
-      error: error.message,
+      error: error instanceof Error ? error.message : String(error),
       collected_at: new Date().toISOString()
     })
   }

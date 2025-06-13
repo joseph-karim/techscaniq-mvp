@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { config } from '../config';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, DynamicRetrievalMode } from '@google/generative-ai';
 
 interface SearchResult {
   title: string;
@@ -193,7 +193,7 @@ export class WebSearchTool {
         tools: [{
           googleSearchRetrieval: {
             dynamicRetrievalConfig: {
-              mode: 'MODE_DYNAMIC' as any,
+              mode: DynamicRetrievalMode.MODE_DYNAMIC,
               dynamicThreshold: 0.3,
             }
           }
