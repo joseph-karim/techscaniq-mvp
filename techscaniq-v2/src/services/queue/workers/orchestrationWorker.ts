@@ -3,7 +3,7 @@ import { connection, queues, JobPriority } from '../index';
 import { ResearchState, ResearchQuestion, Evidence } from '../../../types';
 
 interface OrchestrationJobData {
-  type: 'gather_evidence' | 'evaluate_quality' | 'technical_analysis';
+  type: 'start_research' | 'gather_evidence' | 'evaluate_quality' | 'technical_analysis';
   stateId: string;
   data: any;
 }
@@ -29,6 +29,9 @@ export const orchestrationWorker = new Worker<OrchestrationJobData, Orchestratio
       await job.updateProgress(10);
       
       switch (type) {
+        case 'start_research':
+          return await handleStartResearch(job, stateId, data);
+        
         case 'gather_evidence':
           return await handleGatherEvidence(job, stateId, data);
           
@@ -59,6 +62,41 @@ export const orchestrationWorker = new Worker<OrchestrationJobData, Orchestratio
     concurrency: 5,
   }
 );
+
+async function handleStartResearch(
+  job: Job<OrchestrationJobData>,
+  stateId: string,
+  data: { company: string, website: string, thesisType: string, customThesis?: string }
+): Promise<OrchestrationJobResult> {
+  const { company, website, thesisType, customThesis } = data;
+  
+  await job.updateProgress(20);
+  
+  try {
+    // Import and run the research graph
+    const { runDeepResearch } = await import('../../../orchestrator/graph');
+    
+    await job.log(`Starting research for ${company} (${website})`);
+    
+    // Run the research
+    const reportId = await runDeepResearch(company, website, thesisType, customThesis);
+    
+    await job.updateProgress(100);
+    
+    return {
+      success: true,
+      stateId,
+      results: {
+        reportId,
+        company,
+        website,
+      },
+    };
+  } catch (error) {
+    await job.log(`Research failed: ${error instanceof Error ? error.message : String(error)}`);
+    throw error;
+  }
+}
 
 async function handleGatherEvidence(
   job: Job<OrchestrationJobData>,

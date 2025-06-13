@@ -1,6 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { config } from '../config';
 import { InvestmentThesis, Evidence, Report, ResearchState } from '../types';
+import * as fs from 'fs-extra';
+import * as path from 'path';
 
 const supabase = createClient(
   config.SUPABASE_URL,
@@ -8,6 +10,19 @@ const supabase = createClient(
 );
 
 export class StorageService {
+  /**
+   * Save research state to local storage (for development)
+   */
+  async saveResearchState(researchId: string, state: ResearchState): Promise<void> {
+    const key = `research_state_${researchId}`;
+    const serialized = JSON.stringify(state, null, 2);
+    
+    // In production, save to database or S3
+    // For now, save to local file
+    const filePath = path.join(process.cwd(), 'data', 'states', `${key}.json`);
+    await fs.ensureDir(path.dirname(filePath));
+    await fs.writeFile(filePath, serialized);
+  }
   /**
    * Store investment thesis
    */
@@ -73,13 +88,13 @@ export class StorageService {
         id: reportId,
         thesis_id: state.thesisId,
         company: state.thesis.company,
-        executive_summary: state.reportSections['executive_summary']?.content || '',
+        executive_summary: state.reportSections?.['executive_summary']?.content || '',
         investment_score: this.calculateInvestmentScore(state),
         status: 'final',
         metadata: {
           evidence_count: state.evidence.length,
-          citation_count: state.citations.length,
-          average_quality_score: this.calculateAverageQuality(state.qualityScores),
+          citation_count: state.citations?.length || 0,
+          average_quality_score: this.calculateAverageQuality(state.qualityScores || {}),
           research_duration: Date.now() - state.thesis.createdAt.getTime(),
           iteration_count: state.iterationCount,
           model_versions: {
@@ -98,15 +113,17 @@ export class StorageService {
     if (reportError) throw reportError;
 
     // Store report sections
-    const sections = Object.entries(state.reportSections).map(([key, section]) => ({
-      id: `${reportId}_${section.id}`,
-      report_id: reportId,
-      section_id: section.id,
-      title: section.title,
-      content: section.content,
-      order_index: section.order,
-      metadata: section.metadata,
-    }));
+    const sections = state.reportSections 
+      ? Object.entries(state.reportSections).map(([_, section]) => ({
+          id: `${reportId}_${section.id}`,
+          report_id: reportId,
+          section_id: section.id,
+          title: section.title,
+          content: section.content,
+          order_index: section.order,
+          metadata: section.metadata,
+        }))
+      : [];
 
     const { error: sectionsError } = await supabase
       .from('report_sections')
@@ -115,7 +132,7 @@ export class StorageService {
     if (sectionsError) throw sectionsError;
 
     // Store citations
-    if (state.citations.length > 0) {
+    if (state.citations && state.citations.length > 0) {
       const citations = state.citations.map(c => ({
         id: c.id,
         report_id: reportId,
@@ -166,6 +183,7 @@ export class StorageService {
         thesis: {
           id: thesis.id,
           company: thesis.company,
+          website: thesis.company_website,
           companyWebsite: thesis.company_website,
           statement: thesis.statement,
           type: thesis.type,
@@ -216,9 +234,9 @@ export class StorageService {
 
   private calculateInvestmentScore(state: ResearchState): number {
     // Simple scoring based on evidence quality and thesis validation
-    const avgQuality = this.calculateAverageQuality(state.qualityScores);
-    const thesisScore = state.reportSections['thesis_analysis']?.metadata?.validationScore || 0.5;
-    const riskScore = 1 - (state.reportSections['risk_analysis']?.metadata?.criticalRiskCount || 0) * 0.1;
+    const avgQuality = this.calculateAverageQuality(state.qualityScores || {});
+    const thesisScore = state.reportSections?.['thesis_analysis']?.metadata?.validationScore || 0.5;
+    const riskScore = 1 - (state.reportSections?.['risk_analysis']?.metadata?.criticalRiskCount || 0) * 0.1;
     
     return Math.round((avgQuality * 0.3 + thesisScore * 0.5 + riskScore * 0.2) * 100);
   }

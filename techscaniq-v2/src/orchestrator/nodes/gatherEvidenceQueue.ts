@@ -35,7 +35,7 @@ export async function gatherEvidenceQueueNode(state: ResearchState): Promise<Par
     for (const [pillarId, pillarQueries] of Object.entries(queries)) {
       for (const queryObj of pillarQueries as any[]) {
         // Find matching research question
-        const question = researchQuestions.find(q => 
+        const question = (researchQuestions || []).find(q => 
           q.pillarId === pillarId && q.question.includes(queryObj.query)
         );
         
@@ -105,7 +105,7 @@ export async function gatherEvidenceQueueNode(state: ResearchState): Promise<Par
   } catch (error) {
     console.error('❌ Evidence gathering with queues failed:', error);
     return {
-      errors: [...state.errors, {
+      errors: [...(state.errors || []), {
         timestamp: new Date(),
         phase: 'gather_evidence_queue',
         error: error instanceof Error ? error.message : String(error),

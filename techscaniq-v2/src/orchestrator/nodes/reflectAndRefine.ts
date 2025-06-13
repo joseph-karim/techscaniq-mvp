@@ -20,7 +20,7 @@ export async function reflectAndRefineNode(state: ResearchState): Promise<Partia
     const { thesis, evidence, qualityScores, researchQuestions, iterationCount } = state;
     
     // Analyze evidence coverage and quality by pillar
-    const pillarAnalysis = analyzePillarCoverage(thesis, evidence, qualityScores);
+    const pillarAnalysis = analyzePillarCoverage(thesis, evidence, qualityScores || {});
     
     // Use structured prompt for gap analysis
     const { system, prompt } = PROMPTS.gapAnalysis;
@@ -66,7 +66,7 @@ export async function reflectAndRefineNode(state: ResearchState): Promise<Partia
   } catch (error) {
     console.error('❌ Reflection failed:', error);
     return {
-      errors: [...state.errors, {
+      errors: [...(state.errors || []), {
         timestamp: new Date(),
         phase: 'reflect_and_refine',
         error: error instanceof Error ? error.message : String(error),

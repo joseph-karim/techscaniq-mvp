@@ -13,10 +13,10 @@ import { StorageService } from '../services/storage';
 
 // Condition functions
 function shouldReflect(state: ResearchState): string {
-  const avgQualityScore = calculateAverageQualityScore(state.qualityScores);
+  const avgQualityScore = calculateAverageQualityScore(state.qualityScores || {});
   const hasEnoughEvidence = state.evidence.length >= config.MIN_EVIDENCE_COUNT;
   const belowQualityThreshold = avgQualityScore < config.QUALITY_THRESHOLD;
-  const canIterate = state.iterationCount < state.maxIterations;
+  const canIterate = state.iterationCount < (state.maxIterations || config.MAX_RESEARCH_ITERATIONS);
 
   if (!hasEnoughEvidence || (belowQualityThreshold && canIterate)) {
     return 'reflect';
@@ -134,6 +134,7 @@ export async function runDeepResearch(
     thesis: {
       id: generateThesisId(),
       company,
+      website: website,
       companyWebsite: website,
       statement: customThesis || getDefaultThesisStatement(thesisType),
       type: thesisType as any,

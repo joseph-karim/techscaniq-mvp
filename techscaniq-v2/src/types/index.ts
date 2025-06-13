@@ -1,13 +1,16 @@
+export type ThesisType = 'growth' | 'efficiency' | 'innovation' | 'custom';
+
 export interface InvestmentThesis {
   id: string;
   company: string;
-  companyWebsite: string;
-  website?: string; // Alias for compatibility
+  companyWebsite?: string;
+  website: string; // Primary field
   statement: string;
-  type: 'accelerate-growth' | 'margin-expansion' | 'market-expansion' | 'turnaround';
+  type: ThesisType;
+  customThesis?: string;
   pillars: ThesisPillar[];
-  successCriteria: string[];
-  riskFactors: string[];
+  successCriteria?: string[];
+  riskFactors?: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -124,17 +127,26 @@ export interface ReportMetadata {
 
 // LangGraph State Types
 export interface ResearchState {
-  thesisId: string;
+  thesisId?: string;
   thesis: InvestmentThesis;
-  researchQuestions: ResearchQuestion[];
+  questions?: ResearchQuestion[]; // Support both naming conventions
+  researchQuestions?: ResearchQuestion[];
   evidence: Evidence[];
-  qualityScores: Record<string, number>;
-  reportSections: Record<string, ReportSection>;
-  citations: Citation[];
+  qualityScores?: Record<string, number>;
+  reportSections?: Record<string, ReportSection>;
+  citations?: Citation[];
+  report?: {
+    content: string;
+    sections: ReportSection[];
+    citations: Citation[];
+  };
   iterationCount: number;
-  maxIterations: number;
-  status: 'initializing' | 'researching' | 'evaluating' | 'refining' | 'generating' | 'complete';
-  errors: ResearchError[];
+  evidenceCount?: number;
+  maxIterations?: number;
+  status: 'interpreting_thesis' | 'gathering_evidence' | 'evaluating_quality' | 'reflecting' | 'generating_report' | 'completed' | 'initializing' | 'researching' | 'evaluating' | 'refining' | 'generating' | 'complete';
+  errors?: ResearchError[];
+  queuedJobs?: string[];
+  nextSteps?: any;
   metadata?: {
     currentQueries?: Record<string, any[]>;
     lastEvidenceGathering?: Date;
