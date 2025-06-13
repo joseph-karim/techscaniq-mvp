@@ -81,13 +81,16 @@ Create queries that will uncover both public information and harder-to-find insi
 - **Source Diversity:** Target review sites (G2, Capterra), forums (Reddit, HackerNews), industry publications
 
 # Output Format
-Return ONLY a valid JSON object mapping pillar IDs to query arrays:
+Return ONLY a valid JSON object mapping pillar IDs to query arrays. 
+IMPORTANT: Ensure proper JSON formatting - no trailing commas, all strings in double quotes.
+
+Example structure:
 {
-  "pillarId1": [
+  "technology": [
     {
       "query": "exact search query string",
-      "type": "web" | "news" | "academic" | "social" | "technical",
-      "priority": "high" | "medium" | "low",
+      "type": "web",
+      "priority": "high",
       "rationale": "why this query matters",
       "expectedResults": ["result type 1", "result type 2"],
       "filters": {
@@ -96,7 +99,8 @@ Return ONLY a valid JSON object mapping pillar IDs to query arrays:
         "excludeDomains": ["competitor.com"]
       }
     }
-  ]
+  ],
+  "market": [...]
 }`,
   },
 

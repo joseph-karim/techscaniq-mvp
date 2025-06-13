@@ -79,7 +79,7 @@ export const config = {
 };
 
 // Model configurations and assignments
-export const ORCHESTRATOR_MODEL = 'claude-opus-4';
+export const ORCHESTRATOR_MODEL = 'claude-opus-4-20250514';
 export const CONTENT_PARSER_MODEL = 'gemini-2.0-flash-exp';
 export const QUALITY_EVALUATOR_MODEL = 'o3';
 export const DEEP_ANALYZER_MODEL = 'o3-pro-2025-06-10';
@@ -92,7 +92,7 @@ export const models = {
     o3Pro: 'o3-pro-2025-06-10', // Deep analysis with extended thinking
   },
   anthropic: {
-    claudeOpus4: 'claude-opus-4', // World's best coding model, 72.5% SWE-bench
+    claudeOpus4: 'claude-opus-4-20250514', // World's best coding model, 72.5% SWE-bench
     claudeSonnet4: 'claude-sonnet-4', // Hybrid model with instant + deep reasoning
     claude37Sonnet: 'claude-3.7-sonnet', // Still supported
   },
@@ -103,7 +103,7 @@ export const models = {
   },
   // Model assignments for different tasks
   orchestrator: {
-    model: 'claude-opus-4',
+    model: 'claude-opus-4-20250514',
     temperature: 0.3,
   },
   contentParser: {

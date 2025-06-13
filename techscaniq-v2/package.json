@@ -19,7 +19,7 @@
   "dependencies": {
     "@fastify/cors": "^9.0.0",
     "@fastify/swagger": "^8.15.0",
-    "@fastify/swagger-ui": "^5.2.3",
+    "@fastify/swagger-ui": "^4.2.0",
     "@langchain/anthropic": "^0.3.0",
     "@langchain/community": "^0.3.0",
     "@langchain/core": "^0.3.0",
@@ -32,7 +32,7 @@
     "crawlee": "^3.8.0",
     "date-fns": "^3.6.0",
     "dotenv": "^16.4.0",
-    "fastify": "^4.26.0",
+    "fastify": "^4.29.1",
     "fs-extra": "^11.3.0",
     "ioredis": "^5.3.2",
     "lodash": "^4.17.21",
@@ -40,6 +40,7 @@
     "pdf-parse": "^1.1.1",
     "playwright": "^1.45.0",
     "redis": "^4.6.0",
+    "semver": "^7.7.2",
     "uuid": "^10.0.0",
     "zod": "^3.22.0"
   },

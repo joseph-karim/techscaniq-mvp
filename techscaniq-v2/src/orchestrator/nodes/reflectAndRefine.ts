@@ -11,6 +11,7 @@ const model = new ChatAnthropic({
   apiKey: config.ANTHROPIC_API_KEY,
   modelName: models.anthropic.claudeOpus4,
   temperature: 0.3,
+  maxTokens: 8192, // Ensure we get complete responses
 });
 
 export async function reflectAndRefineNode(state: ResearchState): Promise<Partial<ResearchState>> {
@@ -22,19 +23,67 @@ export async function reflectAndRefineNode(state: ResearchState): Promise<Partia
     // Analyze evidence coverage and quality by pillar
     const pillarAnalysis = analyzePillarCoverage(thesis, evidence, qualityScores || {});
     
-    // Use structured prompt for gap analysis
-    const { system, prompt } = PROMPTS.gapAnalysis;
-    
+    // Create a simpler reflection prompt focused on key gaps
+    const reflectionPrompt = `
+Analyze the research progress for ${thesis.company}.
+
+Current Evidence: ${evidence.length} pieces collected
+Quality: ${Object.values(qualityScores || {}).length} pieces scored
+Pillars: ${thesis.pillars.map(p => p.name).join(', ')}
+
+Identify the TOP 3 critical gaps that must be filled.
+
+Return ONLY a JSON object:
+{
+  "gaps": [
+    {
+      "pillarId": "pillar-id",
+      "type": "missing_data",
+      "description": "Brief gap description (max 20 words)",
+      "importance": "critical",
+      "suggestedQueries": ["query1", "query2"]
+    }
+  ],
+  "refinements": {
+    "focusAreas": ["area1", "area2"],
+    "adjustments": ["adjustment1"]
+  },
+  "recommendNextIteration": ${iterationCount < 2}
+}`;
+
     const response = await model.invoke([
-      new SystemMessage(system),
-      new HumanMessage(prompt(state)),
+      new SystemMessage("You are a research analyst. Return only valid JSON."),
+      new HumanMessage(reflectionPrompt),
     ]);
 
-    // Parse structured output
-    const reflectionAnalysis = parseStructuredOutput(
-      ReflectionAnalysisSchema,
-      response.content.toString()
-    );
+    // Parse response more robustly
+    let reflectionAnalysis;
+    try {
+      const content = response.content.toString();
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        reflectionAnalysis = JSON.parse(jsonMatch[0]);
+      } else {
+        throw new Error("No JSON found");
+      }
+    } catch (parseError) {
+      console.error("Parse error:", parseError);
+      // Provide default reflection
+      reflectionAnalysis = {
+        gaps: thesis.pillars.slice(0, 3).map(p => ({
+          pillarId: p.id,
+          type: 'missing_data',
+          description: `Need more data for ${p.name}`,
+          importance: 'high',
+          suggestedQueries: [`${thesis.company} ${p.name.toLowerCase()}`]
+        })),
+        refinements: {
+          focusAreas: ['financial metrics', 'competitive analysis'],
+          adjustments: ['expand search scope']
+        },
+        recommendNextIteration: iterationCount < 2
+      };
+    }
     
     // Generate refined queries based on gaps
     const refinedQueries = await generateRefinedQueriesFromGaps(

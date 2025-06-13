@@ -1,6 +1,8 @@
 #!/usr/bin/env node
-import dotenv from 'dotenv';
-dotenv.config();
+
+// Load environment variables
+process.env.NODE_ENV = process.env.NODE_ENV || 'development';
+
 import { startAllWorkers } from './services/queue/workers/index';
 import { getAllQueueStatuses, cleanQueues } from './services/queue/index';
 import { config } from './config';

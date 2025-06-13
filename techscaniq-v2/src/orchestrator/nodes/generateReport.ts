@@ -12,6 +12,7 @@ const claudeModel = new ChatAnthropic({
   apiKey: config.ANTHROPIC_API_KEY,
   modelName: models.anthropic.claudeOpus4,
   temperature: 0.2,
+  maxTokens: 8192, // Ensure we get complete responses
 });
 
 // Use o3-pro for final investment recommendation

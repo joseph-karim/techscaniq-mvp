@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { config } from '../config';
 import { InvestmentThesis, Evidence, Report, ResearchState } from '../types';
-import * as fs from 'fs-extra';
-import * as path from 'path';
+import fs from 'fs-extra';
+import path from 'path';
 
 const supabase = createClient(
   config.SUPABASE_URL,
@@ -21,7 +21,33 @@ export class StorageService {
     // For now, save to local file
     const filePath = path.join(process.cwd(), 'data', 'states', `${key}.json`);
     await fs.ensureDir(path.dirname(filePath));
-    await fs.writeFile(filePath, serialized);
+    await fs.writeJson(filePath, state, { spaces: 2 });
+  }
+
+  /**
+   * Load research state from local storage (for development)
+   */
+  async loadResearchState(researchId: string): Promise<ResearchState | null> {
+    const key = `research_state_${researchId}`;
+    const filePath = path.join(process.cwd(), 'data', 'states', `${key}.json`);
+    
+    try {
+      const exists = await fs.pathExists(filePath);
+      if (!exists) {
+        return null;
+      }
+      
+      const data = await fs.readJson(filePath);
+      // Convert date strings back to Date objects
+      if (data.thesis) {
+        data.thesis.createdAt = new Date(data.thesis.createdAt);
+        data.thesis.updatedAt = new Date(data.thesis.updatedAt);
+      }
+      return data as ResearchState;
+    } catch (error) {
+      console.error(`Error loading research state ${researchId}:`, error);
+      return null;
+    }
   }
   /**
    * Store investment thesis
@@ -156,9 +182,9 @@ export class StorageService {
   }
 
   /**
-   * Load research state for resume
+   * Load research state from Supabase for resume
    */
-  async loadResearchState(thesisId: string): Promise<ResearchState | null> {
+  async loadResearchStateFromSupabase(thesisId: string): Promise<ResearchState | null> {
     try {
       // Load thesis
       const { data: thesis, error: thesisError } = await supabase
