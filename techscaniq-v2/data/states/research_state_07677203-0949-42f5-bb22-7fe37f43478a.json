@@ -1,0 +1,22 @@
+{
+  "thesis": {
+    "id": "07677203-0949-42f5-bb22-7fe37f43478a",
+    "company": "Pendo",
+    "website": "https://pendo.io",
+    "type": "growth",
+    "statement": "",
+    "pillars": [],
+    "createdAt": "2025-06-13T17:00:28.082Z",
+    "updatedAt": "2025-06-13T17:00:28.082Z"
+  },
+  "evidence": [],
+  "questions": [],
+  "status": "interpreting_thesis",
+  "iterationCount": 0,
+  "evidenceCount": 0,
+  "queuedJobs": [],
+  "metadata": {
+    "testRun": true,
+    "timestamp": "2025-06-13T17:00:28.077Z"
+  }
+}

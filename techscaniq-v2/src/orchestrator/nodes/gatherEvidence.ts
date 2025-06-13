@@ -20,7 +20,7 @@ export async function gatherEvidenceNode(state: ResearchState): Promise<Partial<
 
     const allEvidence: Evidence[] = [];
     const searchTool = new WebSearchTool();
-    const docAnalyzer = new DocumentAnalyzer();
+    // const docAnalyzer = new DocumentAnalyzer(); // Temporarily disabled due to Crawlee fs-extra issue
 
     // Process queries in parallel batches
     for (const [pillarId, pillarQueries] of Object.entries(queries)) {
@@ -66,10 +66,10 @@ export async function gatherEvidenceNode(state: ResearchState): Promise<Partial<
               // Process each search result
               for (const result of searchResults) {
                 try {
-                  // Extract content from the URL
-                  const extractedContent = await docAnalyzer.extractWebContent(result.url);
+                  // For now, use snippet as content until DocumentAnalyzer is fixed
+                  const content = result.snippet || `Content from ${result.title}`;
                   
-                  if (extractedContent && extractedContent.text.length > 100) {
+                  if (content && content.length > 50) {
                     // Create evidence entry
                     const evidence: Evidence = {
                       id: uuidv4(),
@@ -81,15 +81,15 @@ export async function gatherEvidenceNode(state: ResearchState): Promise<Partial<
                         url: result.url,
                         credibilityScore: calculateCredibilityScore(result.url),
                         publishDate: result.publishedDate,
-                        author: extractedContent.author,
+                        author: undefined,
                       },
-                      content: extractedContent.text,
+                      content: content,
                       metadata: {
                         extractedAt: new Date(),
-                        extractionMethod: 'web_scraper',
-                        wordCount: extractedContent.text.split(/\s+/).length,
+                        extractionMethod: 'search_snippet',
+                        wordCount: content.split(/\s+/).length,
                         language: 'en',
-                        keywords: extractedContent.keywords || [],
+                        keywords: [],
                         sentiment: undefined, // Will be analyzed later
                         confidence: result.relevanceScore || 0.7,
                       },
@@ -156,7 +156,7 @@ export async function gatherEvidenceNode(state: ResearchState): Promise<Partial<
   } catch (error) {
     console.error('❌ Evidence gathering failed:', error);
     return {
-      errors: [...state.errors, {
+      errors: [...(state.errors || []), {
         timestamp: new Date(),
         phase: 'gather_evidence',
         error: error instanceof Error ? error.message : String(error),

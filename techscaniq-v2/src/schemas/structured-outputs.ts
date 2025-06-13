@@ -134,15 +134,62 @@ export function parseStructuredOutput<T>(
 ): T {
   try {
     // Try to extract JSON from the output
-    const jsonMatch = output.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error('No JSON found in output');
+    let jsonStr = output;
+    
+    // If the output contains markdown code blocks, extract the JSON
+    const codeBlockMatch = output.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (codeBlockMatch) {
+      jsonStr = codeBlockMatch[1];
+    } else {
+      // Try to find JSON object or array in the output
+      const jsonObjectMatch = output.match(/\{[\s\S]*\}/);
+      const jsonArrayMatch = output.match(/\[[\s\S]*\]/);
+      
+      if (jsonObjectMatch && (!jsonArrayMatch || jsonObjectMatch.index! < jsonArrayMatch.index!)) {
+        jsonStr = jsonObjectMatch[0];
+      } else if (jsonArrayMatch) {
+        jsonStr = jsonArrayMatch[0];
+      }
     }
     
-    const parsed = JSON.parse(jsonMatch[0]);
+    // Clean up common JSON issues
+    jsonStr = jsonStr
+      .replace(/,\s*}/g, '}') // Remove trailing commas in objects
+      .replace(/,\s*]/g, ']') // Remove trailing commas in arrays
+      .replace(/'/g, '"') // Replace single quotes with double quotes
+      .replace(/\n\s*"/g, '\n"') // Fix line breaks in strings
+      .replace(/"\s*\n/g, '"\n') // Fix line breaks in strings
+      .replace(/\.\.\./g, ''); // Remove ellipsis from truncated output
+    
+    // Handle truncated JSON by attempting to close open structures
+    if (!jsonStr.match(/[\}\]]\s*$/)) {
+      console.warn('JSON appears to be truncated, attempting to repair...');
+      
+      // Count open/close brackets and braces
+      const openBraces = (jsonStr.match(/\{/g) || []).length;
+      const closeBraces = (jsonStr.match(/\}/g) || []).length;
+      const openBrackets = (jsonStr.match(/\[/g) || []).length;
+      const closeBrackets = (jsonStr.match(/\]/g) || []).length;
+      
+      // Close any open strings
+      if ((jsonStr.match(/"/g) || []).length % 2 !== 0) {
+        jsonStr += '"';
+      }
+      
+      // Add missing brackets/braces
+      for (let i = 0; i < openBrackets - closeBrackets; i++) {
+        jsonStr += ']';
+      }
+      for (let i = 0; i < openBraces - closeBraces; i++) {
+        jsonStr += '}';
+      }
+    }
+    
+    const parsed = JSON.parse(jsonStr);
     return schema.parse(parsed);
   } catch (error) {
     console.error('Failed to parse structured output:', error);
+    console.error('Raw output:', output.substring(0, 500) + '...');
     if (fallback) {
       return fallback;
     }

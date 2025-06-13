@@ -10,6 +10,7 @@ const model = new ChatAnthropic({
   apiKey: config.ANTHROPIC_API_KEY,
   modelName: models.anthropic.claudeOpus4,
   temperature: 0.3,
+  maxTokens: 8192, // Ensure we get complete responses
 });
 
 export async function interpretThesisNode(state: ResearchState): Promise<Partial<ResearchState>> {
