@@ -146,6 +146,16 @@ export default function AdminDashboardPage() {
             </Link>
           </Button>
           <Button variant="outline" asChild>
+            <Link to="/admin/sales-intelligence/bmo">
+              <FileText className="mr-2 h-4 w-4" /> Sales Intelligence Demo
+            </Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link to="/admin/pe-diligence/snowplow">
+              <FileText className="mr-2 h-4 w-4" /> PE Diligence Demo
+            </Link>
+          </Button>
+          <Button variant="outline" asChild>
             <Link to="/advisor/queue">
               <Eye className="mr-2 h-4 w-4" /> Review Queue ({scanStats.awaitingReview})
             </Link>
