@@ -6,6 +6,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 import * as cheerio from 'cheerio'
 import fetch from 'node-fetch'
 import Anthropic from '@anthropic-ai/sdk'
+import { mapToValidEvidenceType, getEvidenceTypeFromContext } from './fix-evidence-types.js'
 // @ts-ignore
 const fetchTyped = fetch as any
 
@@ -586,7 +587,7 @@ class DeepResearchCollector {
       // Add reflection as evidence
       this.collectedEvidence.push({
         id: crypto.randomUUID(),
-        type: 'market_analysis', // Changed from investment_analysis
+        type: mapToValidEvidenceType('market_analysis'),
         source: {
           tool: 'gemini-reflection',
           timestamp: new Date().toISOString()
@@ -655,7 +656,7 @@ class DeepResearchCollector {
       // Add synthesis as final evidence
       this.collectedEvidence.push({
         id: crypto.randomUUID(),
-        type: 'market_analysis', // Changed from investment_analysis
+        type: mapToValidEvidenceType('market_analysis'),
         source: {
           tool: 'gemini-synthesis',
           timestamp: new Date().toISOString()
@@ -678,28 +679,44 @@ class DeepResearchCollector {
   
   private determineEvidenceType(url: string, _title: string, content: string): string {
     const urlLower = url.toLowerCase()
-    // const _titleLower = title.toLowerCase() // Not currently used in evidence type detection
     const contentLower = content.toLowerCase()
     
     // URL-based detection (using only VALID types from database)
-    if (urlLower.includes('/about')) return 'business_overview'
-    if (urlLower.includes('/team')) return 'team_info'
-    if (urlLower.includes('/careers')) return 'team_info' // Changed from team_culture
-    if (urlLower.includes('/pricing')) return 'business_overview' // Changed from pricing_model
-    if (urlLower.includes('/customers')) return 'business_overview' // Changed from customer_evidence
-    if (urlLower.includes('/blog')) return 'webpage_content' // Changed from business_intelligence
-    if (urlLower.includes('/technology') || urlLower.includes('/tech')) return 'technology_stack'
-    if (urlLower.includes('/platform')) return 'technology_stack' // Changed from product_information
-    if (urlLower.includes('/security')) return 'security_analysis' // Changed from security_compliance
-    if (urlLower.includes('/api') || urlLower.includes('/docs')) return 'api_response' // Changed from api_documentation
-    if (urlLower.includes('/integrations')) return 'technology_stack' // Changed from technical_architecture
+    if (urlLower.includes('/about') || urlLower.includes('/team') || urlLower.includes('/careers')) {
+      return 'business_search';
+    }
+    if (urlLower.includes('/pricing') || urlLower.includes('/customers')) {
+      return 'business_search';
+    }
+    if (urlLower.includes('/technology') || urlLower.includes('/tech') || urlLower.includes('/platform')) {
+      return 'technology_stack';
+    }
+    if (urlLower.includes('/security')) {
+      return 'security_analysis';
+    }
+    if (urlLower.includes('/api') || urlLower.includes('/docs') || urlLower.includes('/developer')) {
+      return 'api_response';
+    }
+    if (urlLower.includes('/blog') || urlLower.includes('/news')) {
+      return 'webpage_content';
+    }
+    if (urlLower.includes('/integrations')) {
+      return 'technology_stack';
+    }
     
     // Content-based detection
-    if (contentLower.includes('revenue') || contentLower.includes('funding')) return 'financial_info'
-    if (contentLower.includes('customers love') || contentLower.includes('testimonial')) return 'business_overview'
-    if (contentLower.includes('market leader') || contentLower.includes('competitive')) return 'market_analysis'
+    if (contentLower.includes('revenue') || contentLower.includes('funding')) {
+      return 'business_search';
+    }
+    if (contentLower.includes('customers love') || contentLower.includes('testimonial')) {
+      return 'business_search';
+    }
+    if (contentLower.includes('market leader') || contentLower.includes('competitive')) {
+      return 'business_search';
+    }
     
-    return 'webpage_content' // Changed from general_information
+    // Default to webpage_content
+    return 'webpage_content';
   }
   
   private extractStructuredData($: cheerio.CheerioAPI, url: string): string {
@@ -773,12 +790,7 @@ class DeepResearchCollector {
   }
   
   private getEvidenceTypeFromQuery(query: string): string {
-    if (query.includes('revenue') || query.includes('funding')) return 'financial_info'
-    if (query.includes('customer') || query.includes('review')) return 'business_overview' // Changed
-    if (query.includes('technology') || query.includes('stack')) return 'technology_stack'
-    if (query.includes('team') || query.includes('hiring')) return 'team_info'
-    if (query.includes('market') || query.includes('competitor')) return 'market_analysis'
-    return 'search_result' // Changed from business_intelligence
+    return getEvidenceTypeFromContext(query, 'gemini-search');
   }
   
   // Claude-orchestrated technical analysis phase
@@ -793,7 +805,7 @@ class DeepResearchCollector {
     try {
       // Have Claude analyze what technical evidence we need
       const message = await this.anthropic.messages.create({
-        model: 'claude-3-sonnet-20240229',
+        model: 'claude-opus-4-20250514',
         max_tokens: 2000,
         temperature: 0.3,
         system: `You are a technical due diligence analyst. Your job is to orchestrate technical analysis tools to gather deep technical intelligence about companies.
@@ -931,6 +943,12 @@ Respond with JSON format:
 export const evidenceCollectionWorker = new Worker<EvidenceCollectionJob>(
   'evidence-collection',
   async (job: Job<EvidenceCollectionJob>) => {
+    // Check if this is a deep-research job
+    if (job.name !== 'deep-research') {
+      console.log(`[DeepResearch] Skipping job ${job.name}, not for this worker`)
+      return null
+    }
+    
     const { scanRequestId, company, domain, depth, investmentThesis, primaryCriteria } = job.data
     
     console.log(`Starting deep research evidence collection for ${company} (${scanRequestId})`)
@@ -991,27 +1009,30 @@ export const evidenceCollectionWorker = new Worker<EvidenceCollectionJob>(
         const batch = evidence.slice(i, i + batchSize)
         
         const evidenceRecords = batch.map(item => ({
+          scan_request_id: scanRequestId,
           evidence_id: item.id,
           collection_id: collection.id,
           company_name: company,
-          type: item.type,
+          type: mapToValidEvidenceType(item.type),
           content_data: item.content,
           source_data: item.source,
           metadata: {
             ...item.metadata,
-            confidence_score: item.confidence,
-            processing_stage: 'raw'
-          },
-          breadcrumbs: [
-            {
-              step: 'collection',
-              timestamp: new Date().toISOString(),
-              tool: item.source.tool,
-              url: item.source.url,
-              query: item.source.query
-            }
-          ],
-          created_at: new Date().toISOString()
+            confidence_score: item.confidence || 0.5,
+            processing_stage: 'raw',
+            source_tool: item.source.tool,
+            title: item.content.summary?.substring(0, 200) || 'Evidence Item',
+            url: item.source.url || '',
+            breadcrumbs: [
+              {
+                step: 'collection',
+                timestamp: new Date().toISOString(),
+                tool: item.source.tool,
+                url: item.source.url,
+                query: item.source.query
+              }
+            ]
+          }
         }))
         
         const { error: insertError } = await supabase
