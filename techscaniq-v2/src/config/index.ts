@@ -111,7 +111,7 @@ export const models = {
     temperature: 0.1,
   },
   qualityEvaluator: {
-    model: 'o3',
+    model: 'gpt-4o-mini', // Use gpt-4o-mini instead of o3 for now
     temperature: 0.2,
   },
   deepAnalyzer: {
