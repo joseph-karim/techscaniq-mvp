@@ -62,7 +62,7 @@ export async function interpretThesisNode(state: ResearchState): Promise<Partial
   } catch (error) {
     console.error('❌ Thesis interpretation failed:', error);
     return {
-      errors: [...state.errors, {
+      errors: [...(state.errors || []), {
         timestamp: new Date(),
         phase: 'interpret_thesis',
         error: error instanceof Error ? error.message : String(error),

@@ -29,8 +29,8 @@ export async function generateReportNode(state: ResearchState): Promise<Partial<
     
     // Filter high-quality evidence
     const highQualityEvidence = evidence.filter(e => 
-      qualityScores[e.id] >= 0.7
-    ).sort((a, b) => qualityScores[b.id] - qualityScores[a.id]);
+      qualityScores && qualityScores[e.id] >= 0.7
+    ).sort((a, b) => (qualityScores?.[b.id] || 0) - (qualityScores?.[a.id] || 0));
     
     console.log(`Using ${highQualityEvidence.length} high-quality evidence pieces`);
     
@@ -108,7 +108,7 @@ export async function generateReportNode(state: ResearchState): Promise<Partial<
   } catch (error) {
     console.error('❌ Report generation failed:', error);
     return {
-      errors: [...state.errors, {
+      errors: [...(state.errors || []), {
         timestamp: new Date(),
         phase: 'generate_report',
         error: error instanceof Error ? error.message : String(error),

@@ -49,16 +49,16 @@
 - [x] Set up RLS policies for security (basic table created, RLS can be added as needed)
 - [x] Test vector similarity search (function created and verified)
 
-### 3. API Endpoints (Priority: Medium)
-- [ ] Complete Fastify API implementation
-- [ ] Add authentication middleware
-- [ ] Implement endpoints:
+### 3. API Endpoints (Priority: Medium) ✅ COMPLETED
+- [x] Complete Fastify API implementation
+- [x] Add authentication middleware
+- [x] Implement endpoints:
   - POST /api/research/start
   - GET /api/research/:id/status
   - GET /api/research/:id/report
   - POST /api/evidence/search
-- [ ] Add OpenAPI documentation
-- [ ] Implement rate limiting
+- [x] Add OpenAPI documentation
+- [x] Implement rate limiting
 
 ### 4. Frontend Dashboard (Priority: Medium)
 - [ ] Create Next.js frontend application

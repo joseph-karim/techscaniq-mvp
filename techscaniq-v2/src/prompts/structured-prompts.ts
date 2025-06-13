@@ -267,7 +267,7 @@ Create compelling, evidence-backed content that will inform our investment commi
 1. Company: "${state.thesis.company}"
 2. Investment Type: "${state.thesis.type}"
 3. Evidence Collected: ${state.evidence.length} pieces
-4. Overall Quality Score: ${Object.values(state.qualityScores).reduce((a, b) => a + b, 0) / Object.keys(state.qualityScores).length}
+4. Overall Quality Score: ${Object.values(state.qualityScores || {}).reduce((a, b) => a + b, 0) / Math.max(Object.keys(state.qualityScores || {}).length, 1)}
 5. Key Findings: ${JSON.stringify(state.metadata?.insights || [])}
 
 # Methodology & Constraints

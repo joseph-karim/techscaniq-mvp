@@ -80,7 +80,7 @@ export async function evaluateQualityNode(state: ResearchState): Promise<Partial
   } catch (error) {
     console.error('❌ Quality evaluation failed:', error);
     return {
-      errors: [...state.errors, {
+      errors: [...(state.errors || []), {
         timestamp: new Date(),
         phase: 'evaluate_quality',
         error: error instanceof Error ? error.message : String(error),

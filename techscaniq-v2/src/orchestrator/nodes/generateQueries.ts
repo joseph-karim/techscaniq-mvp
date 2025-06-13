@@ -50,7 +50,7 @@ export async function generateQueriesNode(state: ResearchState): Promise<Partial
     });
 
     // Update research questions status
-    const updatedQuestions = researchQuestions.map(q => {
+    const updatedQuestions = (researchQuestions || []).map(q => {
       if (q.status === 'pending' && queryResult.queries[q.pillarId]) {
         return { ...q, status: 'in_progress' as const };
       }
@@ -80,7 +80,7 @@ export async function generateQueriesNode(state: ResearchState): Promise<Partial
   } catch (error) {
     console.error('❌ Query generation failed:', error);
     return {
-      errors: [...state.errors, {
+      errors: [...(state.errors || []), {
         timestamp: new Date(),
         phase: 'generate_queries',
         error: error instanceof Error ? error.message : String(error),
