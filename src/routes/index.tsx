@@ -17,6 +17,8 @@ const AdminDashboardPage = lazy(() => import('@/pages/admin/dashboard'))
 const AdminScanConfigPage = lazy(() => import('@/pages/admin/scan-config'))
 const AdminPipelineConfigPage = lazy(() => import('@/pages/admin/pipeline-config'))
 const AdminPipelineMonitorPage = lazy(() => import('@/pages/admin/pipeline-monitor'))
+const AdminSalesIntelligenceReportPage = lazy(() => import('@/pages/admin/sales-intelligence-report'))
+const AdminPETechDiligenceReportPage = lazy(() => import('@/pages/admin/pe-tech-diligence-report'))
 const PortfolioPage = lazy(() => import('@/pages/pe/portfolio'))
 const ThesisTrackingPage = lazy(() => import('@/pages/pe/thesis-tracking'))
 const DeepDivePEReportPaginated = lazy(() => import('@/pages/pe/deep-dive-report-paginated'))
@@ -194,6 +196,34 @@ export const routeConfig: RouteConfig[] = [
         label: 'Pipeline Monitor',
         requireAdmin: true,
         showInNav: true
+      },
+      {
+        path: 'admin/sales-intelligence',
+        element: <Navigate to="/admin/sales-intelligence/bmo" replace />,
+        label: 'Sales Intelligence',
+        requireAdmin: true,
+        showInNav: true
+      },
+      {
+        path: 'admin/sales-intelligence/:accountId',
+        element: <AdminSalesIntelligenceReportPage />,
+        label: 'Sales Intelligence Report',
+        requireAdmin: true,
+        showInNav: false
+      },
+      {
+        path: 'admin/pe-diligence',
+        element: <Navigate to="/admin/pe-diligence/snowplow" replace />,
+        label: 'PE Diligence',
+        requireAdmin: true,
+        showInNav: true
+      },
+      {
+        path: 'admin/pe-diligence/:companyId',
+        element: <AdminPETechDiligenceReportPage />,
+        label: 'PE Tech Diligence Report',
+        requireAdmin: true,
+        showInNav: false
       },
       {
         path: 'advisor/queue',
