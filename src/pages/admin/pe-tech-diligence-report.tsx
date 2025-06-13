@@ -48,14 +48,6 @@ interface ScoringCategory {
   comment: string
 }
 
-interface Evidence {
-  id: string
-  content: string
-  source: string
-  impact: 'positive' | 'negative' | 'neutral'
-  score?: number
-}
-
 interface Risk {
   id: string
   description: string
