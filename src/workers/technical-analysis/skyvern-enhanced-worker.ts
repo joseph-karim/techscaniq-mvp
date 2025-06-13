@@ -15,12 +15,12 @@ const supabase = createClient(
   process.env.VITE_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
-import { logger } from '../../utils/logger.js';
+import { logger } from '../../utils/logger';
 import { spawn } from 'child_process';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { mapToValidEvidenceType } from '../fix-evidence-types.js';
+import { mapToValidEvidenceType } from '../fix-evidence-types';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

@@ -1,7 +1,7 @@
 import { Queue, Worker } from 'bullmq';
 import Redis from 'ioredis';
 import { supabase } from '../../lib/supabase.js';
-import { logger } from '../../utils/logger.js';
+import { logger } from '../../utils/logger';
 import { spawn } from 'child_process';
 import { promises as fs } from 'fs';
 import path from 'path';
