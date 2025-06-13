@@ -43,7 +43,7 @@ export interface Evidence {
 }
 
 export interface EvidenceSource {
-  type: 'web' | 'document' | 'api' | 'database';
+  type: 'web' | 'document' | 'api' | 'database' | 'academic' | 'news';
   name: string;
   url?: string;
   credibilityScore: number; // 0-1
@@ -161,6 +161,7 @@ export interface ResearchState {
     researchPriorities?: string[];
     successCriteria?: string[];
     nextSteps?: any;
+    queuedJobs?: Record<string, string[]>;
   };
 }
 

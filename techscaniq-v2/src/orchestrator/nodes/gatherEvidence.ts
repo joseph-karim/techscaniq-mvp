@@ -1,21 +1,10 @@
 import { ResearchState, Evidence, EvidenceSource } from '../../types';
-import { Queue } from 'bullmq';
-import { Redis } from 'ioredis';
+import { queues, JobPriority } from '../../services/queue/index';
 import { config } from '../../config';
 import { WebSearchTool } from '../../tools/webSearch';
 import { DocumentAnalyzer } from '../../tools/documentAnalyzer';
 import { EvidenceCollectorIntegration } from '../../tools/evidenceCollectorIntegration';
 import { v4 as uuidv4 } from 'uuid';
-
-// Initialize Redis connection for BullMQ
-const connection = new Redis({
-  host: config.REDIS_HOST,
-  port: config.REDIS_PORT,
-});
-
-// Create job queues
-const searchQueue = new Queue('evidence-search', { connection });
-const analysisQueue = new Queue('evidence-analysis', { connection });
 
 export async function gatherEvidenceNode(state: ResearchState): Promise<Partial<ResearchState>> {
   console.log('📊 Gathering evidence...');

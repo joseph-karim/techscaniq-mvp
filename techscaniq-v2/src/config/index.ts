@@ -34,6 +34,7 @@ const configSchema = z.object({
   MAX_RESEARCH_ITERATIONS: z.coerce.number().default(5),
   RESEARCH_TIMEOUT_MINUTES: z.coerce.number().default(30),
   MIN_EVIDENCE_COUNT: z.coerce.number().default(10),
+  USE_QUEUES: z.coerce.boolean().default(true),
 });
 
 // Parse and validate environment variables
@@ -59,6 +60,7 @@ const parseConfig = () => {
       MAX_RESEARCH_ITERATIONS: process.env.MAX_RESEARCH_ITERATIONS,
       RESEARCH_TIMEOUT_MINUTES: process.env.RESEARCH_TIMEOUT_MINUTES,
       MIN_EVIDENCE_COUNT: process.env.MIN_EVIDENCE_COUNT,
+      USE_QUEUES: process.env.USE_QUEUES,
     });
   } catch (error) {
     console.error('Configuration validation failed:', error);
@@ -76,7 +78,12 @@ export const config = {
   MIN_EVIDENCE_COUNT: parseConfig().MIN_EVIDENCE_COUNT,
 };
 
-// Model configurations
+// Model configurations and assignments
+export const ORCHESTRATOR_MODEL = 'claude-opus-4';
+export const CONTENT_PARSER_MODEL = 'gemini-2.0-flash-exp';
+export const QUALITY_EVALUATOR_MODEL = 'o3';
+export const DEEP_ANALYZER_MODEL = 'o3-pro-2025-06-10';
+
 export const models = {
   openai: {
     gpt4o: 'gpt-4o',
@@ -93,6 +100,27 @@ export const models = {
     gemini25Pro: 'gemini-2.5-pro', // Latest flagship
     gemini15Flash: 'gemini-1.5-flash', // Efficient processing
     geminiFlash2: 'gemini-2.0-flash-exp', // Fast fetching and parsing
+  },
+  // Model assignments for different tasks
+  orchestrator: {
+    model: 'claude-opus-4',
+    temperature: 0.3,
+  },
+  contentParser: {
+    model: 'gemini-2.0-flash-exp',
+    temperature: 0.1,
+  },
+  qualityEvaluator: {
+    model: 'o3',
+    temperature: 0.2,
+  },
+  deepAnalyzer: {
+    model: 'o3-pro-2025-06-10',
+    temperature: 0.5,
+  },
+  citationReviewer: {
+    model: 'o3',
+    temperature: 0.1,
   },
 };
 
