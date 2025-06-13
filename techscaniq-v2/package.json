@@ -13,7 +13,8 @@
     "test": "vitest",
     "test:queues": "tsx test-queues.ts",
     "lint": "eslint src",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "migrate": "tsx scripts/migrate.ts"
   },
   "dependencies": {
     "@langchain/community": "^0.3.0",
