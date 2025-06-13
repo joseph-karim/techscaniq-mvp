@@ -1,4 +1,4 @@
-import { Worker, Job } from 'bullmq'
+import { Worker, Job, Queue } from 'bullmq'
 import { createClient } from '@supabase/supabase-js'
 import Redis from 'ioredis'
 import { config } from 'dotenv'
@@ -6,6 +6,7 @@ import { StateGraph, Annotation } from '@langchain/langgraph'
 import { MemorySaver } from '@langchain/langgraph-checkpoint'
 import { Anthropic } from '@anthropic-ai/sdk'
 import fetch from 'node-fetch'
+import { mapToValidEvidenceType } from './fix-evidence-types.js'
 
 // Load environment variables
 config()
@@ -25,6 +26,12 @@ const supabase = createClient(
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
 })
+
+// Initialize technical analysis queues
+const skyvernQueue = new Queue('skyvern-discovery', { connection })
+const playwrightQueue = new Queue('playwright-crawler', { connection })
+const webtechQueue = new Queue('webtech-analyzer', { connection })
+const securityQueue = new Queue('security-scanner', { connection })
 
 // Types for iterative research
 interface ResearchQuestion {
@@ -135,7 +142,7 @@ Generate specific questions that can be answered with evidence.`
     const prompt = thesisPrompts[state.investmentThesis as keyof typeof thesisPrompts] || thesisPrompts['data_infrastructure']
     
     const response = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-opus-4-20250514',
       max_tokens: 2000,
       messages: [{ role: 'user', content: prompt }]
     })
@@ -185,6 +192,22 @@ async function researchQuestions(state: typeof IterativeResearchState.State) {
   try {
     const newFindings: Finding[] = []
     const evidenceItems: any[] = []
+    
+    // Queue technical analysis on first iteration
+    if (state.iterationCount === 0) {
+      // Extract key questions for technical discovery
+      const keyQuestions = state.researchQuestions
+        .filter(q => q.priority === 'critical' || q.category === 'technical')
+        .map(q => q.question)
+        .slice(0, 5);
+        
+      await queueTechnicalAnalysis(
+        state.scanRequestId, 
+        state.domain, 
+        state.company,
+        keyQuestions
+      )
+    }
     
     // Create or get collection
     let collectionId = state.collectionId
@@ -239,21 +262,25 @@ async function researchQuestions(state: typeof IterativeResearchState.State) {
               
               // Create evidence item for database
               evidenceItems.push({
-                id: finding.id,
+                scan_request_id: state.scanRequestId,
+                evidence_id: finding.id,
                 collection_id: collectionId,
-                source_url: evidence.url,
-                type: 'research_finding',
+                company_name: state.company,
+                evidence_type: mapToValidEvidenceType('research_finding'),
                 title: `Finding for: ${question.question.substring(0, 100)}`,
-                content_data: {
+                content: JSON.stringify({
                   question_id: question.id,
                   question: question.question,
                   answer: extraction.answer,
                   raw_content: evidence.content.substring(0, 2000)
-                },
-                confidence_score: extraction.confidence,
+                }),
+                url: evidence.url,
+                source: 'iterative-research',
+                relevance_score: extraction.confidence,
                 metadata: {
                   iteration: state.iterationCount + 1,
-                  category: question.category
+                  category: question.category,
+                  confidence_score: extraction.confidence
                 },
                 created_at: new Date().toISOString()
               })
@@ -302,6 +329,19 @@ async function researchQuestions(state: typeof IterativeResearchState.State) {
   }
 }
 
+// Check for technical analysis results
+async function checkTechnicalAnalysisResults(scanRequestId: string): Promise<any[]> {
+  const { data: technicalEvidence } = await supabase
+    .from('evidence_items')
+    .select('*')
+    .eq('scan_request_id', scanRequestId)
+    .in('source', ['skyvern-discovery', 'playwright-crawler', 'webtech-analyzer', 'security-scanner'])
+    .order('created_at', { ascending: false })
+    .limit(50);
+    
+  return technicalEvidence || [];
+}
+
 // Node: Reflect on research and identify gaps
 async function reflectOnResearch(state: typeof IterativeResearchState.State) {
   console.log('[ReflectOnResearch] Analyzing findings and identifying gaps...')
@@ -323,6 +363,10 @@ async function reflectOnResearch(state: typeof IterativeResearchState.State) {
       (partialQuestions.length / state.researchQuestions.length) * 0.2
     )
     
+    // Check for technical analysis results
+    const technicalEvidence = await checkTechnicalAnalysisResults(state.scanRequestId);
+    console.log(`  Found ${technicalEvidence.length} technical evidence items`);
+    
     // Use LLM to identify knowledge gaps
     const reflectionPrompt = `Analyze the research progress for ${state.company}:
 
@@ -334,6 +378,9 @@ ${partialQuestions.map(q => `- ${q.question}: ${q.findings[0]?.content || 'Limit
 
 Unanswered Questions (${unansweredQuestions.length}):
 ${unansweredQuestions.map(q => `- ${q.question}`).join('\n')}
+
+Technical Analysis Results: ${technicalEvidence.length} items
+${technicalEvidence.slice(0, 5).map(e => `- [${e.source}] ${e.title}`).join('\n')}
 
 Overall Confidence: ${(overallConfidence * 100).toFixed(0)}%
 
@@ -348,7 +395,7 @@ Output as JSON with:
 - reasoning: explanation of decision`
 
     const response = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-opus-4-20250514',
       max_tokens: 1500,
       messages: [{ role: 'user', content: reflectionPrompt }]
     })
@@ -689,6 +736,69 @@ function getCategoryTitle(category: string): string {
   return titles[category] || category
 }
 
+// Queue technical analysis jobs
+async function queueTechnicalAnalysis(
+  scanRequestId: string, 
+  domain: string, 
+  company: string,
+  researchQuestions?: string[]
+) {
+  console.log('[TechnicalAnalysis] Queueing technical analysis jobs...')
+  
+  const jobs = []
+  
+  // Queue Skyvern for deep product discovery with research context
+  jobs.push(
+    skyvernQueue.add('discover', {
+      scanRequestId,
+      targetUrl: `https://${domain}`,
+      discoveryMode: 'deep_exploration',
+      iterationContext: {
+        previousFindings: [],
+        depthLevel: 0,
+        authenticationAttempted: false,
+        discoveredPaths: [],
+        researchQuestions: researchQuestions || []
+      }
+    })
+  )
+  
+  // Queue Playwright for UI analysis
+  jobs.push(
+    playwrightQueue.add('crawl', {
+      scanRequestId,
+      url: `https://${domain}`,
+      domain,
+      company,
+      depth: 2,
+      extractionTargets: ['forms', 'navigation', 'interactive_elements']
+    })
+  )
+  
+  // Queue Webtech for technology stack
+  jobs.push(
+    webtechQueue.add('analyze', {
+      scanRequestId,
+      url: `https://${domain}`,
+      domain,
+      company
+    })
+  )
+  
+  // Queue Security scanner
+  jobs.push(
+    securityQueue.add('scan', {
+      scanRequestId,
+      url: `https://${domain}`,
+      domain,
+      company
+    })
+  )
+  
+  await Promise.all(jobs)
+  console.log('[TechnicalAnalysis] Queued 4 technical analysis jobs')
+}
+
 // Build the iterative research graph
 function buildIterativeResearchGraph() {
   const workflow = new StateGraph(IterativeResearchState)
@@ -721,8 +831,13 @@ function buildIterativeResearchGraph() {
 
 // Main worker
 export const iterativeResearchWorker = new Worker(
-  'iterative-research',
+  'evidence-collection',
   async (job: Job) => {
+    // Check if this is an iterative-research job
+    if (job.name !== 'iterative-research') {
+      console.log(`[IterativeResearch] Skipping job ${job.name}, not for this worker`)
+      return null
+    }
     const { scanRequestId, company, domain, investmentThesis } = job.data
     
     console.log(`[IterativeResearch] Starting Chain of RAG research for ${company}`)
