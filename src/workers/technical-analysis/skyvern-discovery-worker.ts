@@ -1,4 +1,5 @@
-import { Queue } from 'bullmq';
+import { Queue, Worker } from 'bullmq';
+import Redis from 'ioredis';
 import { supabase } from '../../lib/supabase.js';
 import { logger } from '../../utils/logger.js';
 import { spawn } from 'child_process';
@@ -22,7 +23,7 @@ interface SkyvernDiscoveryJob {
 }
 
 const queue = new Queue<SkyvernDiscoveryJob>('skyvern-discovery', {
-  redis: {
+  connection: {
     host: process.env.REDIS_HOST || 'localhost',
     port: parseInt(process.env.REDIS_PORT || '6379'),
   },
@@ -204,7 +205,13 @@ async function runSkyvernDiscovery(job: SkyvernDiscoveryJob): Promise<any> {
   });
 }
 
-queue.process(async (job) => {
+const connection = new Redis({
+  host: process.env.REDIS_HOST || 'localhost',
+  port: parseInt(process.env.REDIS_PORT || '6379'),
+  maxRetriesPerRequest: null,
+});
+
+const worker = new Worker('skyvern-discovery', async (job) => {
   logger.info('Starting Skyvern discovery job', {
     jobId: job.id,
     scanRequestId: job.data.scanRequestId,
@@ -308,7 +315,7 @@ queue.process(async (job) => {
     // Queue follow-up discovery jobs based on findings
     if (job.data.iterationContext?.depthLevel < 3) {
       // Queue deeper discovery for promising URLs
-      const promisingUrls = discoveryResults.discovered_urls?.filter(url => 
+      const promisingUrls = discoveryResults.discovered_urls?.filter((url: string) => 
         url.includes('demo') || 
         url.includes('api') || 
         url.includes('docs') ||
@@ -317,7 +324,7 @@ queue.process(async (job) => {
       ) || [];
       
       for (const url of promisingUrls.slice(0, 3)) { // Limit to 3 follow-ups
-        await queue.add({
+        await queue.add('discover', {
           scanRequestId: job.data.scanRequestId,
           targetUrl: url,
           discoveryMode: 'technical_docs',
@@ -340,14 +347,22 @@ queue.process(async (job) => {
     
   } catch (error) {
     logger.error('Skyvern discovery failed', {
-      error: error.message,
+      error: error instanceof Error ? error.message : String(error),
       jobId: job.id,
       scanRequestId: job.data.scanRequestId
     });
     throw error;
   }
-});
+}, { connection });
 
 logger.info('Skyvern discovery worker started');
+
+// Ensure proper cleanup
+process.on('SIGTERM', async () => {
+  console.log('Shutting down Skyvern worker...');
+  await worker.close();
+  await connection.quit();
+  process.exit(0);
+});
 
 export { queue as skyvernDiscoveryQueue };

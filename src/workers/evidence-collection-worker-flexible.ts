@@ -93,7 +93,7 @@ async function collectEvidence(domain: string): Promise<any[]> {
     evidence.push({
       type: 'homepage',
       url: `https://${domain}`,
-      error: error.message,
+      error: error instanceof Error ? error.message : String(error),
       timestamp: new Date().toISOString()
     })
   }

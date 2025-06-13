@@ -1,5 +1,4 @@
-import { Worker, Job, Queue } from 'bullmq'
-import { createClient } from '@supabase/supabase-js'
+import { Worker, Job } from 'bullmq'
 import Redis from 'ioredis'
 import { config } from 'dotenv'
 import { Anthropic } from '@anthropic-ai/sdk'
@@ -12,11 +11,6 @@ const connection = new Redis({
   port: parseInt(process.env.REDIS_PORT || '6379'),
   maxRetriesPerRequest: null,
 })
-
-const supabase = createClient(
-  process.env.VITE_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,

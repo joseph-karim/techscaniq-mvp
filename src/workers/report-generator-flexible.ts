@@ -72,9 +72,8 @@ export const reportGenerator = new Worker(
       
       let reportData
       try {
-        const content = typeof reportResponse.content[0] === 'string' ? 
-          reportResponse.content[0] : 
-          reportResponse.content[0].text
+        const textContent = reportResponse.content.find(c => typeof c === 'object' && c.type === 'text')
+        const content = textContent?.text || ''
         const jsonMatch = content.match(/\{[\s\S]*\}/)
         reportData = jsonMatch ? JSON.parse(jsonMatch[0]) : {}
       } catch (e) {
@@ -88,7 +87,7 @@ export const reportGenerator = new Worker(
       }
       
       // Extract citations
-      const citations = []
+      const citations: any[] = []
       const citationPattern = /\[(\d+)\]/g
       
       Object.values(reportData.sections || {}).forEach((section: any) => {
@@ -145,7 +144,7 @@ export const reportGenerator = new Worker(
       
       // Store citations separately if needed
       if (citations.length > 0 && report) {
-        const citationRecords = citations.map((c, i) => ({
+        const citationRecords = citations.map((c, _i) => ({
           report_id: report.id,
           evidence_id: `${collectionId}-${c.evidence_index}`,
           quote: c.quote,
