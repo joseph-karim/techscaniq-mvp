@@ -54,9 +54,7 @@ export function Header({ user }: HeaderProps) {
           </Button>
           <Link to="/dashboard" className="hidden items-center gap-3 md:flex">
             <div className="flex flex-col">
-              <span className="font-heading text-h4 font-medium text-brand-gunmetal-gray dark:text-white flex items-center">
-                TechScan I<img src="/Techscan Q.png" alt="Q" className="h-[1em] w-auto inline-block align-middle ml-0.5" style={{ verticalAlign: 'middle' }} />
-              </span>
+              <img src="/techscan_iq_logo.png" alt="TechScan IQ" className="h-10 w-auto" />
               <span className="text-caption text-brand-digital-teal font-medium -mt-1">
                 Diligence, Decoded.
               </span>
