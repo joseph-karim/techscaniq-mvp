@@ -50,7 +50,7 @@ export function Sidebar({ collapsed, setCollapsed, isAdmin }: SidebarProps) {
       <div className="flex h-16 items-center justify-between border-b border-slate-800 px-4">
         <Link to="/dashboard" className={cn('flex items-center gap-2', collapsed && 'justify-center')}>
           {!collapsed ? (
-            <img src="/techscan_iq_logo.png" alt="TechScan IQ" className="h-10 w-auto" />
+            <img src="/Tesch_Scan_IQ_Logo_Transparent.png" alt="TechScan IQ" className="h-8 w-auto" />
           ) : (
             <img src="/Techscan Q.png" alt="TechScan IQ" className="h-8 w-8" />
           )}

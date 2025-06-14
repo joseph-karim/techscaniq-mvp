@@ -90,7 +90,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4 py-12">
       <div className="w-full max-w-md space-y-6">
         <div className="flex flex-col items-center space-y-2 text-center">
-          <img src="/techscan_iq_logo.png" alt="TechScan IQ" className="h-16 w-auto mb-4" />
+          <img src="/Tesch_Scan_IQ_Logo_Transparent.png" alt="TechScan IQ" className="h-12 w-auto mb-4" />
           <p className="text-muted-foreground">
             AI-Powered Technical Due Diligence for Early-Stage Investors
           </p>
