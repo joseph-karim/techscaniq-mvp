@@ -55,7 +55,8 @@ export function Header({ user }: HeaderProps) {
           <Link to="/dashboard" className="hidden items-center gap-3 md:flex">
             <div className="flex flex-col">
               <div>
-                <img src="/Tesch_Scan_IQ_Logo_Transparent.png" alt="TechScan IQ" className="h-10 w-auto" />
+                <img src="/Tesch_Scan_IQ_Logo_Transparent.png" alt="TechScan IQ" className="h-10 w-auto dark:hidden" />
+                <img src="/tech_scan_iq_logo_transparent_white_text.png" alt="TechScan IQ" className="h-10 w-auto hidden dark:block" />
                 <span className="text-caption text-brand-digital-teal font-medium block -mt-1">
                   Diligence, Decoded.
                 </span>
