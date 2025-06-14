@@ -22,6 +22,8 @@ import {
   XCircle,
   Gauge
 } from 'lucide-react'
+import { EvidenceModal } from '@/components/reports/EvidenceModal'
+import { type Evidence, type Citation } from '@/components/reports/EvidenceCitation'
 import { 
   ResponsiveContainer, 
   RadarChart, 
@@ -37,6 +39,297 @@ import {
   Tooltip,
   Legend
 } from 'recharts'
+
+// Mock evidence data
+const evidenceData: Evidence[] = [
+  {
+    id: 'T4',
+    title: 'Event Streaming Architecture Analysis',
+    source: 'GitHub Repository Review',
+    excerpt: 'Modern microservices architecture with Apache Kafka for event streaming. 99.95% uptime over past 12 months. Processing capacity of 5B+ events per day.',
+    type: 'code',
+    url: 'https://github.com/snowplow/snowplow-stream-architecture',
+    metadata: {
+      lastModified: new Date().toISOString(),
+      confidence: 95
+    }
+  },
+  {
+    id: 'T6',
+    title: 'Infrastructure Scalability Assessment',
+    source: 'AWS Architecture Review',
+    excerpt: 'Kubernetes-based deployment with automatic horizontal pod autoscaling. Multi-region support with sub-100ms latency globally.',
+    type: 'document',
+    metadata: {
+      lastModified: new Date().toISOString(),
+      confidence: 90
+    }
+  },
+  {
+    id: 'M2',
+    title: 'Multi-Region Deployment Strategy',
+    source: 'Infrastructure Documentation',
+    excerpt: 'Deployed across US, EU, and APAC regions with full data residency compliance. GDPR and CCPA compliant by design.',
+    type: 'document',
+    metadata: {
+      lastModified: new Date().toISOString(),
+      confidence: 95
+    }
+  },
+  {
+    id: 'M8',
+    title: 'Compliance Certifications',
+    source: 'Compliance Audit Reports',
+    excerpt: 'SOC2 Type I certified, Type II in progress. GDPR/CCPA compliant with automated data privacy controls.',
+    type: 'document',
+    metadata: {
+      lastModified: new Date().toISOString(),
+      confidence: 100
+    }
+  },
+  {
+    id: 'D5',
+    title: 'CI/CD Pipeline Metrics',
+    source: 'Jenkins/GitHub Actions Analytics',
+    excerpt: 'Average deployment frequency: 3.2 per day. Automated testing with 72% code coverage. Zero-downtime deployments.',
+    type: 'analysis',
+    metadata: {
+      lastModified: new Date().toISOString(),
+      confidence: 85
+    }
+  },
+  {
+    id: 'T8',
+    title: 'Test Coverage Report',
+    source: 'SonarQube Analysis',
+    excerpt: '72% line coverage, 68% branch coverage. Comprehensive unit and integration test suites. Performance regression tests.',
+    type: 'document',
+    metadata: {
+      lastModified: new Date().toISOString(),
+      confidence: 90
+    }
+  },
+  {
+    id: 'R-01',
+    title: 'Single Point of Failure Analysis',
+    source: 'Architecture Risk Assessment',
+    excerpt: 'Event validation service runs in single availability zone, creating potential downtime risk. Estimated impact: 2-4 hours downtime if AZ fails.',
+    type: 'document',
+    metadata: {
+      lastModified: new Date().toISOString(),
+      confidence: 85
+    }
+  },
+  {
+    id: 'C5',
+    title: 'Code Complexity Analysis',
+    source: 'Static Code Analysis',
+    excerpt: '23% of methods have cyclomatic complexity >15. Legacy Scala collectors contribute to 60% of high complexity code.',
+    type: 'code',
+    metadata: {
+      lastModified: new Date().toISOString(),
+      confidence: 80
+    }
+  },
+  {
+    id: 'R-02',
+    title: 'Technical Debt Assessment',
+    source: 'Code Review Analysis',
+    excerpt: 'Legacy Scala collectors require significant refactoring. Estimated 400 engineering hours for migration to Go.',
+    type: 'document',
+    metadata: {
+      lastModified: new Date().toISOString(),
+      confidence: 85
+    }
+  },
+  {
+    id: 'R-04',
+    title: 'Security Pipeline Gaps',
+    source: 'Security Audit',
+    excerpt: 'Limited SAST/DAST integration in CI/CD pipeline. No automated security scanning for dependencies.',
+    type: 'document',
+    metadata: {
+      lastModified: new Date().toISOString(),
+      confidence: 90
+    }
+  },
+  {
+    id: 'I3',
+    title: 'Kubernetes Infrastructure Analysis',
+    source: 'Infrastructure Review',
+    excerpt: 'Kubernetes cluster with HPA enabled. Average 50% CPU headroom maintained. Auto-scaling tested up to 10x load.',
+    type: 'document',
+    metadata: {
+      lastModified: new Date().toISOString(),
+      confidence: 90
+    }
+  },
+  {
+    id: 'I7',
+    title: 'Redis Architecture Review',
+    source: 'Architecture Assessment',
+    excerpt: 'Single-AZ Redis deployment for session data. No replication configured. Potential single point of failure.',
+    type: 'document',
+    metadata: {
+      lastModified: new Date().toISOString(),
+      confidence: 85
+    }
+  },
+  {
+    id: 'I9',
+    title: 'Global Latency Analysis',
+    source: 'Performance Testing',
+    excerpt: 'Multi-region deployment achieving <100ms latency globally. CDN integration reduces static asset latency by 60%.',
+    type: 'analysis',
+    metadata: {
+      lastModified: new Date().toISOString(),
+      confidence: 95
+    }
+  },
+  {
+    id: 'D9',
+    title: 'Deployment Metrics',
+    source: 'CI/CD Analytics',
+    excerpt: 'Lead time for changes: 2.3 days. MTTR: 42 minutes. Change failure rate: 8%.',
+    type: 'analysis',
+    metadata: {
+      lastModified: new Date().toISOString(),
+      confidence: 90
+    }
+  },
+  {
+    id: 'D14',
+    title: 'Developer Productivity Analysis',
+    source: 'Engineering Metrics',
+    excerpt: 'Average PR review time: 4 hours. 2.1 reviewers per PR. Strong code review culture.',
+    type: 'analysis',
+    metadata: {
+      lastModified: new Date().toISOString(),
+      confidence: 85
+    }
+  },
+  {
+    id: 'C7',
+    title: 'Code Duplication Report',
+    source: 'SonarQube Analysis',
+    excerpt: '4.2% code duplication detected. Below industry average of 5-8%. Most duplication in test fixtures.',
+    type: 'code',
+    metadata: {
+      lastModified: new Date().toISOString(),
+      confidence: 90
+    }
+  },
+  {
+    id: 'C11',
+    title: 'Security Vulnerability Scan',
+    source: 'SAST Report',
+    excerpt: '3 high severity issues, 12 medium. No critical vulnerabilities. All high issues have remediation plans.',
+    type: 'document',
+    metadata: {
+      lastModified: new Date().toISOString(),
+      confidence: 85
+    }
+  },
+  {
+    id: 'M15',
+    title: 'Growth Metrics Analysis',
+    source: 'Financial Reports',
+    excerpt: '40% YoY revenue growth. 118% net retention rate. CAC payback period: 14 months.',
+    type: 'analysis',
+    metadata: {
+      lastModified: new Date().toISOString(),
+      confidence: 95
+    }
+  },
+  {
+    id: 'R-03',
+    title: 'Cloud Portability Assessment',
+    source: 'Architecture Review',
+    excerpt: 'Heavy dependency on AWS Kinesis limits multi-cloud options. Migration would require significant refactoring.',
+    type: 'document',
+    metadata: {
+      lastModified: new Date().toISOString(),
+      confidence: 80
+    }
+  },
+  {
+    id: 'T12',
+    title: 'Performance Benchmarks',
+    source: 'Load Testing Results',
+    excerpt: 'System handles 5B+ events/day with 99.95% uptime. P99 latency under 50ms for event ingestion.',
+    type: 'analysis',
+    metadata: {
+      lastModified: new Date().toISOString(),
+      confidence: 95
+    }
+  },
+  {
+    id: 'T18',
+    title: 'Technology Stack Assessment',
+    source: 'Code Repository Analysis',
+    excerpt: 'Modern stack: Go microservices, React frontend, PostgreSQL, Kafka. Some legacy Scala components.',
+    type: 'code',
+    metadata: {
+      lastModified: new Date().toISOString(),
+      confidence: 90
+    }
+  },
+  {
+    id: 'A1',
+    title: 'API Documentation Review',
+    source: 'API Documentation',
+    excerpt: 'Comprehensive OpenAPI 3.0 specifications. Versioned APIs with deprecation policy. GraphQL endpoint available.',
+    type: 'document',
+    metadata: {
+      lastModified: new Date().toISOString(),
+      confidence: 95
+    }
+  },
+  {
+    id: 'A4',
+    title: 'API Usage Analytics',
+    source: 'API Gateway Metrics',
+    excerpt: 'RESTful and GraphQL APIs. 2B+ API calls/month. Average response time: 120ms.',
+    type: 'analysis',
+    metadata: {
+      lastModified: new Date().toISOString(),
+      confidence: 90
+    }
+  },
+  {
+    id: 'P2',
+    title: 'Privacy Compliance Audit',
+    source: 'Compliance Documentation',
+    excerpt: 'GDPR compliant with automated data deletion. CCPA compliant. Privacy by design architecture.',
+    type: 'document',
+    metadata: {
+      lastModified: new Date().toISOString(),
+      confidence: 95
+    }
+  },
+  {
+    id: 'P5',
+    title: 'Security Certifications',
+    source: 'Audit Reports',
+    excerpt: 'SOC2 Type I certified. Type II audit in progress. ISO 27001 planned for Q2 2024.',
+    type: 'document',
+    metadata: {
+      lastModified: new Date().toISOString(),
+      confidence: 100
+    }
+  },
+  {
+    id: 'D11',
+    title: 'Observability Stack Review',
+    source: 'Infrastructure Documentation',
+    excerpt: 'Partial observability implementation. Metrics and logs collected. Distributed tracing not fully implemented.',
+    type: 'document',
+    metadata: {
+      lastModified: new Date().toISOString(),
+      confidence: 75
+    }
+  }
+]
 
 // Types
 interface ScoringCategory {
@@ -250,9 +543,25 @@ const financialMetrics = {
   grossChurn: 8
 }
 
+// Create citations from evidence
+const createCitation = (claim: string, evidenceIds: string[]): Citation => {
+  const relevantEvidence = evidenceData.filter(e => evidenceIds.includes(e.id))
+  return {
+    id: `citation-${evidenceIds.join('-')}`,
+    claim,
+    evidence: relevantEvidence,
+    reasoning: 'Based on comprehensive technical analysis and review of multiple data sources.',
+    confidence: 85,
+    analyst: 'Technical Due Diligence Team',
+    reviewDate: new Date().toISOString(),
+    methodology: 'Multi-source verification with code analysis and documentation review'
+  }
+}
+
 export default function PETechDiligenceReportPage() {
   const [activeTab, setActiveTab] = useState('summary')
   const [expandedSections, setExpandedSections] = useState<string[]>([])
+  const [selectedCitation, setSelectedCitation] = useState<Citation | null>(null)
 
   const toggleSection = (sectionId: string) => {
     setExpandedSections(prev => 
@@ -295,13 +604,14 @@ export default function PETechDiligenceReportPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6">
+        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-7">
           <TabsTrigger value="summary">Executive Summary</TabsTrigger>
           <TabsTrigger value="scoring">Scoring Analysis</TabsTrigger>
           <TabsTrigger value="deepdive">Deep Dive</TabsTrigger>
           <TabsTrigger value="technical">Technical Focus</TabsTrigger>
           <TabsTrigger value="risks">Risk Register</TabsTrigger>
           <TabsTrigger value="roadmap">Value Creation</TabsTrigger>
+          <TabsTrigger value="appendix">Evidence</TabsTrigger>
         </TabsList>
 
         {/* Executive Summary */}
@@ -386,22 +696,49 @@ export default function PETechDiligenceReportPage() {
                     <li className="flex gap-2">
                       <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
                       <span className="text-sm">
-                        Best-in-class event streaming architecture with 99.95% uptime 
-                        <Badge variant="outline" className="ml-1 text-xs">⟦T4,T6⟧</Badge>
+                        Best-in-class event streaming architecture with 99.95% uptime
+                        <Badge 
+                          variant="outline" 
+                          className="ml-1 text-xs cursor-pointer hover:bg-primary/10"
+                          onClick={() => setSelectedCitation(createCitation(
+                            'Best-in-class event streaming architecture with 99.95% uptime',
+                            ['T4', 'T6']
+                          ))}
+                        >
+                          ⟦T4,T6⟧
+                        </Badge>
                       </span>
                     </li>
                     <li className="flex gap-2">
                       <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
                       <span className="text-sm">
-                        Multi-region ready with GDPR/CCPA compliance built-in 
-                        <Badge variant="outline" className="ml-1 text-xs">⟦M2,M8⟧</Badge>
+                        Multi-region ready with GDPR/CCPA compliance built-in
+                        <Badge 
+                          variant="outline" 
+                          className="ml-1 text-xs cursor-pointer hover:bg-primary/10"
+                          onClick={() => setSelectedCitation(createCitation(
+                            'Multi-region ready with GDPR/CCPA compliance built-in',
+                            ['M2', 'M8']
+                          ))}
+                        >
+                          ⟦M2,M8⟧
+                        </Badge>
                       </span>
                     </li>
                     <li className="flex gap-2">
                       <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
                       <span className="text-sm">
-                        Strong engineering culture: 72% test coverage, 3.2 deploys/day 
-                        <Badge variant="outline" className="ml-1 text-xs">⟦D5,T8⟧</Badge>
+                        Strong engineering culture: 72% test coverage, 3.2 deploys/day
+                        <Badge 
+                          variant="outline" 
+                          className="ml-1 text-xs cursor-pointer hover:bg-primary/10"
+                          onClick={() => setSelectedCitation(createCitation(
+                            'Strong engineering culture: 72% test coverage, 3.2 deploys/day',
+                            ['D5', 'T8']
+                          ))}
+                        >
+                          ⟦D5,T8⟧
+                        </Badge>
                       </span>
                     </li>
                   </ul>
@@ -416,22 +753,49 @@ export default function PETechDiligenceReportPage() {
                     <li className="flex gap-2">
                       <XCircle className="h-4 w-4 text-red-600 flex-shrink-0 mt-0.5" />
                       <span className="text-sm">
-                        Single-AZ dependencies create potential downtime risk 
-                        <Badge variant="outline" className="ml-1 text-xs">⟦R-01⟧</Badge>
+                        Single-AZ dependencies create potential downtime risk
+                        <Badge 
+                          variant="outline" 
+                          className="ml-1 text-xs cursor-pointer hover:bg-primary/10"
+                          onClick={() => setSelectedCitation(createCitation(
+                            'Single-AZ dependencies create potential downtime risk',
+                            ['R-01']
+                          ))}
+                        >
+                          ⟦R-01⟧
+                        </Badge>
                       </span>
                     </li>
                     <li className="flex gap-2">
                       <XCircle className="h-4 w-4 text-red-600 flex-shrink-0 mt-0.5" />
                       <span className="text-sm">
-                        Legacy Scala collectors need refactoring (23% high complexity) 
-                        <Badge variant="outline" className="ml-1 text-xs">⟦C5,R-02⟧</Badge>
+                        Legacy Scala collectors need refactoring (23% high complexity)
+                        <Badge 
+                          variant="outline" 
+                          className="ml-1 text-xs cursor-pointer hover:bg-primary/10"
+                          onClick={() => setSelectedCitation(createCitation(
+                            'Legacy Scala collectors need refactoring (23% high complexity)',
+                            ['C5', 'R-02']
+                          ))}
+                        >
+                          ⟦C5,R-02⟧
+                        </Badge>
                       </span>
                     </li>
                     <li className="flex gap-2">
                       <XCircle className="h-4 w-4 text-red-600 flex-shrink-0 mt-0.5" />
                       <span className="text-sm">
-                        Limited security automation in deployment pipeline 
-                        <Badge variant="outline" className="ml-1 text-xs">⟦R-04⟧</Badge>
+                        Limited security automation in deployment pipeline
+                        <Badge 
+                          variant="outline" 
+                          className="ml-1 text-xs cursor-pointer hover:bg-primary/10"
+                          onClick={() => setSelectedCitation(createCitation(
+                            'Limited security automation in deployment pipeline',
+                            ['R-04']
+                          ))}
+                        >
+                          ⟦R-04⟧
+                        </Badge>
                       </span>
                     </li>
                   </ul>
@@ -537,7 +901,17 @@ export default function PETechDiligenceReportPage() {
                       <TableCell>
                         <div className="flex gap-1 flex-wrap">
                           {category.evidenceRefs.map(ref => (
-                            <Badge key={ref} variant="outline" className="text-xs">
+                            <Badge 
+                              key={ref} 
+                              variant="outline" 
+                              className="text-xs cursor-pointer hover:bg-primary/10"
+                              onClick={() => {
+                                const evidence = evidenceData.find(e => e.id === ref)
+                                if (evidence) {
+                                  setSelectedCitation(createCitation(category.comment, [ref]))
+                                }
+                              }}
+                            >
                               ⟦{ref}⟧
                             </Badge>
                           ))}
@@ -623,7 +997,16 @@ export default function PETechDiligenceReportPage() {
                     <TableBody>
                       <TableRow>
                         <TableCell>
-                          <Badge variant="outline">⟦I3⟧</Badge>
+                          <Badge 
+                            variant="outline" 
+                            className="cursor-pointer hover:bg-primary/10"
+                            onClick={() => setSelectedCitation(createCitation(
+                              'Kubernetes cluster with HPA; 50% CPU headroom',
+                              ['I3']
+                            ))}
+                          >
+                            ⟦I3⟧
+                          </Badge>
                         </TableCell>
                         <TableCell>Kubernetes cluster with HPA; 50% CPU headroom</TableCell>
                         <TableCell>
@@ -633,7 +1016,16 @@ export default function PETechDiligenceReportPage() {
                       </TableRow>
                       <TableRow>
                         <TableCell>
-                          <Badge variant="outline">⟦I7⟧</Badge>
+                          <Badge 
+                            variant="outline" 
+                            className="cursor-pointer hover:bg-primary/10"
+                            onClick={() => setSelectedCitation(createCitation(
+                              'Single-AZ Redis cache for session data',
+                              ['I7']
+                            ))}
+                          >
+                            ⟦I7⟧
+                          </Badge>
                         </TableCell>
                         <TableCell>Single-AZ Redis cache for session data</TableCell>
                         <TableCell>
@@ -643,7 +1035,16 @@ export default function PETechDiligenceReportPage() {
                       </TableRow>
                       <TableRow>
                         <TableCell>
-                          <Badge variant="outline">⟦I9⟧</Badge>
+                          <Badge 
+                            variant="outline" 
+                            className="cursor-pointer hover:bg-primary/10"
+                            onClick={() => setSelectedCitation(createCitation(
+                              'Multi-region deployment with <100ms latency',
+                              ['I9']
+                            ))}
+                          >
+                            ⟦I9⟧
+                          </Badge>
                         </TableCell>
                         <TableCell>Multi-region deployment with &lt;100ms latency</TableCell>
                         <TableCell>
@@ -1067,7 +1468,17 @@ export default function PETechDiligenceReportPage() {
                         <TableCell>
                           <div className="flex gap-1 flex-wrap">
                             {area.evidence.map(ref => (
-                              <Badge key={ref} variant="outline" className="text-xs">
+                              <Badge 
+                                key={ref} 
+                                variant="outline" 
+                                className="text-xs cursor-pointer hover:bg-primary/10"
+                                onClick={() => {
+                                  const evidence = evidenceData.find(e => e.id === ref)
+                                  if (evidence) {
+                                    setSelectedCitation(createCitation(area.notes, [ref]))
+                                  }
+                                }}
+                              >
                                 ⟦{ref}⟧
                               </Badge>
                             ))}
@@ -1519,7 +1930,79 @@ export default function PETechDiligenceReportPage() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* Evidence Appendix */}
+        <TabsContent value="appendix" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Evidence Appendix</CardTitle>
+              <CardDescription>
+                Supporting documentation and evidence for the technical due diligence assessment
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {/* Group evidence by category */}
+                {Object.entries(
+                  evidenceData.reduce((acc, evidence) => {
+                    const category = evidence.type === 'code' ? 'Technical' : 
+                                   evidence.type === 'document' ? 'Documentation' : 
+                                   evidence.type === 'analysis' ? 'Analysis' : 
+                                   evidence.type === 'interview' ? 'Interview' : 'Other'
+                    if (!acc[category]) acc[category] = []
+                    acc[category].push(evidence)
+                    return acc
+                  }, {} as Record<string, Evidence[]>)
+                ).map(([category, items]) => (
+                  <div key={category}>
+                    <h3 className="font-semibold mb-2">{category}</h3>
+                    <div className="space-y-2">
+                      {items.map(evidence => (
+                        <Card 
+                          key={evidence.id} 
+                          className="cursor-pointer hover:shadow-md transition-shadow"
+                          onClick={() => setSelectedCitation(createCitation(evidence.title, [evidence.id]))}
+                        >
+                          <CardHeader className="pb-3">
+                            <div className="flex items-center justify-between">
+                              <CardTitle className="text-sm flex items-center gap-2">
+                                <Badge variant="outline" className="text-xs">
+                                  {evidence.id}
+                                </Badge>
+                                {evidence.title}
+                              </CardTitle>
+                              <Badge variant="secondary" className="text-xs">
+                                {evidence.type}
+                              </Badge>
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            <p className="text-sm text-muted-foreground mb-2">{evidence.excerpt || evidence.title}</p>
+                            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                              <span>Source: {evidence.source}</span>
+                              <span>Date: {evidence.metadata?.lastModified ? new Date(evidence.metadata.lastModified).toLocaleDateString() : 'N/A'}</span>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
+
+      {/* Evidence Modal */}
+      {selectedCitation && (
+        <EvidenceModal
+          isOpen={!!selectedCitation}
+          onClose={() => setSelectedCitation(null)}
+          citation={selectedCitation}
+          userRole="admin"
+        />
+      )}
     </div>
   )
 }
