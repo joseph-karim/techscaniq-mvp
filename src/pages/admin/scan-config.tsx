@@ -291,7 +291,7 @@ export default function ScanConfigPage() {
           </Button>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold">{scanRequest.company_name}</h1>
+              <h1 className="text-2xl font-heading font-medium">{scanRequest.company_name}</h1>
               {scanRequest.is_demo && (
                 <Badge variant="secondary" className="bg-blue-100 text-blue-800">
                   Demo Data
@@ -407,7 +407,7 @@ export default function ScanConfigPage() {
                 <Button 
                   onClick={triggerEvidenceCollection}
                   disabled={isCollecting}
-                  className="bg-electric-teal hover:bg-electric-teal/90"
+                  className="bg-brand-digital-teal hover:bg-brand-digital-teal/90 font-medium"
                 >
                   {isCollecting ? (
                     <>
@@ -459,7 +459,7 @@ export default function ScanConfigPage() {
                   {currentCollection && (
                     <div className="grid gap-4 md:grid-cols-3">
                       <div className="text-center p-4 border rounded-lg">
-                        <div className="text-2xl font-bold text-electric-teal">{currentCollection.evidence_count}</div>
+                        <div className="text-2xl font-bold text-brand-digital-teal">{currentCollection.evidence_count}</div>
                         <div className="text-sm text-muted-foreground">Evidence Items</div>
                       </div>
                       <div className="text-center p-4 border rounded-lg">

@@ -54,7 +54,7 @@ export function NotificationToast({
           </div>
           
           <div className="ml-3 flex-1">
-            <h3 className="font-medium">{title}</h3>
+            <h3 className="font-heading font-medium">{title}</h3>
             <p className="mt-1 text-sm text-muted-foreground">{message}</p>
             <div className="mt-2 flex gap-2">
               <Button size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={onClose}>
@@ -63,7 +63,7 @@ export function NotificationToast({
               {type === 'info' && (
                 <Button 
                   size="sm" 
-                  className="h-7 bg-electric-teal px-2 text-xs hover:bg-electric-teal/90"
+                  className="h-7 bg-brand-digital-teal px-2 text-xs hover:bg-brand-digital-teal/90 font-medium"
                   onClick={onClose}
                 >
                   View Details

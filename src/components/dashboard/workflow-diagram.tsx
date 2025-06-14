@@ -59,12 +59,12 @@ export function WorkflowDiagram({ className, steps: propSteps }: WorkflowDiagram
               <div className="absolute left-1/2 top-7 hidden w-full -translate-y-1/2 transform md:block">
                 <div className={cn(
                   "h-[2px] w-full", 
-                  step.status === 'completed' ? "bg-electric-teal" : "bg-slate-200 dark:bg-slate-700"
+                  step.status === 'completed' ? "bg-brand-digital-teal" : "bg-gray-200 dark:bg-gray-700"
                 )}></div>
                 <ArrowRight 
                   className={cn(
                     "absolute right-0 top-1/2 h-4 w-4 -translate-y-1/2",
-                    step.status === 'completed' ? "text-electric-teal" : "text-slate-200 dark:text-slate-700"
+                    step.status === 'completed' ? "text-brand-digital-teal" : "text-gray-200 dark:text-gray-700"
                   )} 
                 />
               </div>
@@ -74,9 +74,9 @@ export function WorkflowDiagram({ className, steps: propSteps }: WorkflowDiagram
             <div 
               className={cn(
                 "z-10 flex h-14 w-14 items-center justify-center rounded-full border-2",
-                step.status === 'completed' ? "border-electric-teal bg-electric-teal text-white" :
-                step.status === 'current' ? "border-electric-teal bg-white text-electric-teal dark:bg-deep-navy" :
-                "border-slate-200 bg-white text-slate-400 dark:border-slate-700 dark:bg-deep-navy"
+                step.status === 'completed' ? "border-brand-digital-teal bg-brand-digital-teal text-white" :
+                step.status === 'current' ? "border-brand-digital-teal bg-white text-brand-digital-teal dark:bg-brand-gunmetal-gray" :
+                "border-gray-200 bg-white text-gray-400 dark:border-gray-700 dark:bg-brand-gunmetal-gray"
               )}
             >
               <step.icon className="h-6 w-6" />
@@ -85,7 +85,7 @@ export function WorkflowDiagram({ className, steps: propSteps }: WorkflowDiagram
             {/* Step details */}
             <div className="mt-3 text-center">
               <h3 className={cn(
-                "font-medium",
+                "font-heading font-medium",
                 step.status === 'completed' || step.status === 'current' ? "text-foreground" : "text-muted-foreground"
               )}>
                 {step.title}

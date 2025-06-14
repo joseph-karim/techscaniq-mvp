@@ -100,8 +100,11 @@ export default function RegisterPage() {
     <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4 py-12">
       <div className="w-full max-w-md space-y-6">
         <div className="flex flex-col items-center space-y-2 text-center">
-          <img src="/favicon.svg" alt="TechScan IQ" className="h-12 w-12" />
-          <h1 className="text-3xl font-bold">Create an Account</h1>
+          <div className="flex items-center justify-center mb-2">
+            <h1 className="text-3xl font-heading font-medium flex items-center">
+              Create a TechScan I<img src="/Techscan Q.png" alt="Q" className="h-10 w-10 inline-block" /> Account
+            </h1>
+          </div>
           <p className="text-muted-foreground">
             Get started with TechScan IQ's AI-powered technical due diligence
           </p>

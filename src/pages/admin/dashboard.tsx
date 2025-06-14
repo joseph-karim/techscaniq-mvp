@@ -133,13 +133,13 @@ export default function AdminDashboardPage() {
     <div className="space-y-6">
       <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
+          <h1 className="text-3xl font-heading font-medium tracking-tight">Admin Dashboard</h1>
           <p className="text-muted-foreground">
             Manage scan workflow from request to publication
           </p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
-          <Button className="bg-electric-teal hover:bg-electric-teal/90" asChild>
+          <Button className="bg-brand-digital-teal hover:bg-brand-digital-teal/90 font-medium" asChild>
             <Link to="/admin/scan-config">
               <Cog className="mr-2 h-4 w-4" /> Configure New Scan
             </Link>
@@ -154,7 +154,7 @@ export default function AdminDashboardPage() {
       
       <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-8">
             <div className="flex items-center space-x-2">
               <Clock className="h-10 w-10 rounded-lg bg-blue-100 p-2 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" />
               <div>
@@ -173,12 +173,12 @@ export default function AdminDashboardPage() {
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center space-x-2">
-              <Zap className="h-10 w-10 rounded-lg bg-electric-teal/10 p-2 text-electric-teal" />
+              <Zap className="h-10 w-10 rounded-lg bg-brand-digital-teal/10 p-2 text-brand-digital-teal" />
               <div>
                 <p className="text-sm text-muted-foreground">Active Scans</p>
                 <div className="flex items-baseline space-x-2">
                   <h2 className="text-3xl font-bold">{scanStats.inProgress}</h2>
-                  <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-electric-teal/10 text-electric-teal">
+                  <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-brand-digital-teal/10 text-brand-digital-teal">
                     Running
                   </span>
                 </div>
@@ -267,7 +267,7 @@ export default function AdminDashboardPage() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
-          <Card className="border-electric-teal/20 bg-electric-teal/5">
+          <Card className="border-brand-digital-teal/20 bg-brand-digital-teal/5">
             <CardHeader className="pb-3">
               <CardTitle>Scan Workflow Status</CardTitle>
               <CardDescription>
@@ -309,7 +309,7 @@ export default function AdminDashboardPage() {
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>Recent Scan Requests</CardTitle>
+                <CardTitle className="font-heading">Recent Scan Requests</CardTitle>
                 <CardDescription>
                   Latest requests awaiting configuration
                 </CardDescription>
@@ -320,7 +320,7 @@ export default function AdminDashboardPage() {
                     <div key={request.id} className="flex items-center justify-between rounded-lg border p-3">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <h4 className="font-medium">{request.company_name}</h4>
+                          <h4 className="font-heading font-medium">{request.company_name}</h4>
                           <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${getPriorityColor((request as DemoScanRequest).priority || 'medium')}`}>
                             {(request as DemoScanRequest).priority || 'medium'}
                           </span>
@@ -344,7 +344,7 @@ export default function AdminDashboardPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>System Health</CardTitle>
+                <CardTitle className="font-heading">System Health</CardTitle>
                 <CardDescription>
                   AI models and infrastructure status
                 </CardDescription>
@@ -354,7 +354,7 @@ export default function AdminDashboardPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="h-2 w-2 rounded-full bg-green-500"></div>
-                      <span className="text-sm font-medium">Claude 4 Opus</span>
+                      <span className="text-sm font-medium font-sans">Claude 4 Opus</span>
                     </div>
                     <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-green-50 text-green-600">
                       Active
@@ -364,7 +364,7 @@ export default function AdminDashboardPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="h-2 w-2 rounded-full bg-green-500"></div>
-                      <span className="text-sm font-medium">GPT-4 Turbo</span>
+                      <span className="text-sm font-medium font-sans">GPT-4 Turbo</span>
                     </div>
                     <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-green-50 text-green-600">
                       Active
@@ -374,7 +374,7 @@ export default function AdminDashboardPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="h-2 w-2 rounded-full bg-green-500"></div>
-                      <span className="text-sm font-medium">Gemini-Pro</span>
+                      <span className="text-sm font-medium font-sans">Gemini-Pro</span>
                     </div>
                     <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-green-50 text-green-600">
                       Active
@@ -384,7 +384,7 @@ export default function AdminDashboardPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="h-2 w-2 rounded-full bg-yellow-500"></div>
-                      <span className="text-sm font-medium">Data Collection API</span>
+                      <span className="text-sm font-medium font-sans">Data Collection API</span>
                     </div>
                     <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-yellow-50 text-yellow-600">
                       Degraded
@@ -475,7 +475,7 @@ export default function AdminDashboardPage() {
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        <Button size="sm" className="bg-electric-teal hover:bg-electric-teal/90" asChild>
+                        <Button size="sm" className="bg-brand-digital-teal hover:bg-brand-digital-teal/90 font-medium" asChild>
                           <Link to={`/admin/scan-config/${request.id}`}>
                             <Play className="mr-1 h-3 w-3" />
                             Configure Scan

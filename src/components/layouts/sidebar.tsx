@@ -49,8 +49,14 @@ export function Sidebar({ collapsed, setCollapsed, isAdmin }: SidebarProps) {
     >
       <div className="flex h-16 items-center justify-between border-b border-slate-800 px-4">
         <Link to="/dashboard" className={cn('flex items-center gap-2', collapsed && 'justify-center')}>
-          <img src="/favicon.svg" alt="TechScan IQ" className="h-8 w-8" />
-          {!collapsed && <span className="text-lg font-bold text-white">TechScan IQ</span>}
+          {!collapsed ? (
+            <div className="flex items-center">
+              <span className="text-lg font-heading font-medium text-white">TechScan I</span>
+              <img src="/Techscan Q.png" alt="Q" className="h-6 w-6 inline-block" />
+            </div>
+          ) : (
+            <img src="/Techscan Q.png" alt="TechScan IQ" className="h-8 w-8" />
+          )}
         </Link>
         <Button 
           variant="ghost" 
@@ -88,7 +94,7 @@ export function Sidebar({ collapsed, setCollapsed, isAdmin }: SidebarProps) {
           {/* PE Section */}
           {isPE && navigationRoutes.some(route => route.requirePE) && (
             <>
-              <div className={cn('my-4 border-t border-slate-800', collapsed ? 'mx-2' : 'mx-4')} />
+              <div className={cn('my-6 border-t border-gray-800', collapsed ? 'mx-2' : 'mx-4')} />
               <div className="px-3 py-2">
                 <p className={collapsed ? 'sr-only' : 'mb-2 text-xs uppercase tracking-wider text-slate-500'}>
                   Private Equity
@@ -195,8 +201,8 @@ function NavItem({ to, icon, label, badge, collapsed, active }: NavItemProps) {
         cn(
           'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
           active
-            ? 'bg-electric-teal text-white'
-            : 'text-slate-400 hover:bg-deep-navy/50 hover:text-white',
+            ? 'bg-brand-digital-teal text-white'
+            : 'text-gray-400 hover:bg-gray-800/50 hover:text-white',
           collapsed && 'justify-center px-2'
         )
       }
@@ -206,14 +212,14 @@ function NavItem({ to, icon, label, badge, collapsed, active }: NavItemProps) {
         <>
           <span className="flex-1">{label}</span>
           {badge && (
-            <Badge className="h-5 w-5 justify-center rounded-full bg-electric-teal p-0 text-xs">
+            <Badge className="h-5 w-5 justify-center rounded-full bg-brand-digital-teal text-white p-0 text-xs">
               {badge}
             </Badge>
           )}
         </>
       )}
       {collapsed && badge && (
-        <Badge className="absolute right-1 top-1 h-4 w-4 justify-center rounded-full bg-electric-teal p-0 text-[10px]">
+        <Badge className="absolute right-1 top-1 h-4 w-4 justify-center rounded-full bg-brand-digital-teal text-white p-0 text-[10px]">
           {badge}
         </Badge>
       )}
