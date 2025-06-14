@@ -66,7 +66,7 @@ export function TechHealthScoreGauge({ score }: TechHealthScoreGaugeProps) {
             <linearGradient id="gauge-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#DC2626" /> {/* Red */}
               <stop offset="50%" stopColor="#F59E0B" /> {/* Yellow/Amber */}
-              <stop offset="100%" stopColor="#10B981" /> {/* Green */}
+              <stop offset="100%" stopColor="#00C2B2" /> {/* Brand Digital Teal */}
             </linearGradient>
           </defs>
           
@@ -96,7 +96,7 @@ export function TechHealthScoreGauge({ score }: TechHealthScoreGaugeProps) {
         
         {/* Score display below the gauge */}
         <div className="mt-4 text-center">
-          <span className="text-3xl font-bold">{score.toFixed(1)}</span>
+          <span className="text-3xl font-heading font-medium">{score.toFixed(1)}</span>
         </div>
         
         <div className="mt-4 flex w-full justify-between text-xs text-muted-foreground">
@@ -108,7 +108,7 @@ export function TechHealthScoreGauge({ score }: TechHealthScoreGaugeProps) {
         <Tooltip open={tooltip !== null}>
           <TooltipTrigger asChild>
             <button 
-              className="mt-4 flex items-center text-sm text-electric-teal hover:underline"
+              className="mt-4 flex items-center text-sm text-brand-digital-teal hover:underline"
               onMouseEnter={() => setTooltip('methodology')}
               onMouseLeave={() => setTooltip(null)}
             >

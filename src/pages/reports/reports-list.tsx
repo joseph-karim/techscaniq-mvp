@@ -103,10 +103,10 @@ export default function ReportsListPage() {
   })
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Reports</h1>
+          <h1 className="text-3xl font-heading font-medium tracking-tight">Reports</h1>
           <p className="text-muted-foreground">
             {isPE 
               ? 'Technical due diligence reports for your portfolio companies'
@@ -125,7 +125,7 @@ export default function ReportsListPage() {
       {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Filter Reports</CardTitle>
+          <CardTitle className="text-lg font-heading">Filter Reports</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-4 md:flex-row md:items-center">
@@ -167,7 +167,7 @@ export default function ReportsListPage() {
           <CardHeader>
             <div className="flex items-start justify-between">
               <div className="space-y-1">
-                <CardTitle className="text-xl">BMO Financial Group - Sales Intelligence Report</CardTitle>
+                <CardTitle className="text-xl font-heading">BMO Financial Group - Sales Intelligence Report</CardTitle>
                 <CardDescription className="flex items-center gap-2">
                   <Building2 className="h-4 w-4" />
                   TechScanIQ Demo
@@ -228,7 +228,7 @@ export default function ReportsListPage() {
           <CardHeader>
             <div className="flex items-start justify-between">
               <div className="space-y-1">
-                <CardTitle className="text-xl">Snowplow Analytics - PE Tech Diligence Report</CardTitle>
+                <CardTitle className="text-xl font-heading">Snowplow Analytics - PE Tech Diligence Report</CardTitle>
                 <CardDescription className="flex items-center gap-2">
                   <Building2 className="h-4 w-4" />
                   TechScanIQ Demo
@@ -309,7 +309,7 @@ export default function ReportsListPage() {
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="space-y-1">
-                    <CardTitle className="text-xl">{scan.company_name} - Technical Due Diligence</CardTitle>
+                    <CardTitle className="text-xl font-heading">{scan.company_name} - Technical Due Diligence</CardTitle>
                     <CardDescription className="flex items-center gap-2">
                       <Building2 className="h-4 w-4" />
                       {scan.organization_name}
