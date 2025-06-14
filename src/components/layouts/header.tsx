@@ -53,10 +53,9 @@ export function Header({ user }: HeaderProps) {
             <span className="sr-only">Toggle menu</span>
           </Button>
           <Link to="/dashboard" className="hidden items-center gap-3 md:flex">
-            <img src="/Techscan Q.png" alt="TechScan IQ" className="h-10 w-10" />
             <div className="flex flex-col">
               <span className="font-heading text-h4 font-medium text-brand-gunmetal-gray dark:text-white flex items-center">
-                TechScan I<img src="/Techscan Q.png" alt="Q" className="h-6 w-6 inline-block ml-0.5" />
+                TechScan I<img src="/Techscan Q.png" alt="Q" className="h-[1em] w-auto inline-block align-middle ml-0.5" style={{ verticalAlign: 'middle' }} />
               </span>
               <span className="text-caption text-brand-digital-teal font-medium -mt-1">
                 Diligence, Decoded.

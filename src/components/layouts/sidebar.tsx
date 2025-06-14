@@ -50,10 +50,9 @@ export function Sidebar({ collapsed, setCollapsed, isAdmin }: SidebarProps) {
       <div className="flex h-16 items-center justify-between border-b border-slate-800 px-4">
         <Link to="/dashboard" className={cn('flex items-center gap-2', collapsed && 'justify-center')}>
           {!collapsed ? (
-            <div className="flex items-center">
-              <span className="text-lg font-heading font-medium text-white">TechScan I</span>
-              <img src="/Techscan Q.png" alt="Q" className="h-6 w-6 inline-block" />
-            </div>
+            <span className="text-lg font-heading font-medium text-white flex items-center">
+              TechScan I<img src="/Techscan Q.png" alt="Q" className="h-[1em] w-auto inline-block align-middle ml-0.5" style={{ verticalAlign: 'middle' }} />
+            </span>
           ) : (
             <img src="/Techscan Q.png" alt="TechScan IQ" className="h-8 w-8" />
           )}
