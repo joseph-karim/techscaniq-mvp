@@ -12,7 +12,6 @@ import {
   Zap,
   Database,
   Brain,
-  ExternalLink,
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -146,16 +145,6 @@ export default function AdminDashboardPage() {
             </Link>
           </Button>
           <Button variant="outline" asChild>
-            <Link to="/admin/sales-intelligence/bmo">
-              <FileText className="mr-2 h-4 w-4" /> Sales Intelligence Demo
-            </Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link to="/admin/pe-diligence/snowplow">
-              <FileText className="mr-2 h-4 w-4" /> PE Diligence Demo
-            </Link>
-          </Button>
-          <Button variant="outline" asChild>
             <Link to="/advisor/queue">
               <Eye className="mr-2 h-4 w-4" /> Review Queue ({scanStats.awaitingReview})
             </Link>
@@ -268,13 +257,12 @@ export default function AdminDashboardPage() {
       </div>
 
       <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="requests">Scan Requests</TabsTrigger>
           <TabsTrigger value="active">Active Scans</TabsTrigger>
           <TabsTrigger value="review">Review Queue</TabsTrigger>
           <TabsTrigger value="reports">All Reports</TabsTrigger>
-          <TabsTrigger value="workflows">AI Workflows</TabsTrigger>
           <TabsTrigger value="config">Configuration</TabsTrigger>
         </TabsList>
 
@@ -487,11 +475,6 @@ export default function AdminDashboardPage() {
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm" asChild>
-                          <Link to={`/scans/${request.id}`}>
-                            View Details
-                          </Link>
-                        </Button>
                         <Button size="sm" className="bg-electric-teal hover:bg-electric-teal/90" asChild>
                           <Link to={`/admin/scan-config/${request.id}`}>
                             <Play className="mr-1 h-3 w-3" />
@@ -661,6 +644,70 @@ export default function AdminDashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
+                {/* Demo Reports */}
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3">
+                        <h3 className="font-semibold">BMO Financial Group</h3>
+                        <Badge variant="outline">Score: 95/100</Badge>
+                        <Badge variant="secondary" className="bg-purple-100 text-purple-800">Demo Report</Badge>
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        <p>Report Type: <span className="font-medium">Sales Intelligence</span></p>
+                        <p>Industry: <span className="font-medium">Financial Services</span></p>
+                        <p>Opportunity Score: <span className="font-medium">9.5/10</span></p>
+                        <p>Created: <span className="font-medium">Demo Report</span></p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" asChild>
+                        <Link to="/admin/sales-intelligence/bmo">
+                          <FileText className="mr-1 h-3 w-3" />
+                          View Report
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="mt-3 pt-3 border-t">
+                    <p className="text-sm text-gray-700 line-clamp-2">
+                      Comprehensive sales intelligence report for BMO Financial Group, identifying $60M+ digital transformation opportunity across retail banking, wealth management, and capital markets...
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3">
+                        <h3 className="font-semibold">Snowplow Analytics</h3>
+                        <Badge variant="outline">Score: 92/100</Badge>
+                        <Badge variant="secondary" className="bg-purple-100 text-purple-800">Demo Report</Badge>
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        <p>Report Type: <span className="font-medium">PE Tech Diligence</span></p>
+                        <p>Industry: <span className="font-medium">Data Analytics</span></p>
+                        <p>Tech Health Score: <span className="font-medium">92%</span></p>
+                        <p>Created: <span className="font-medium">Demo Report</span></p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" asChild>
+                        <Link to="/admin/pe-diligence/snowplow">
+                          <FileText className="mr-1 h-3 w-3" />
+                          View Report
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="mt-3 pt-3 border-t">
+                    <p className="text-sm text-gray-700 line-clamp-2">
+                      Technical due diligence assessment of Snowplow Analytics, evaluating architecture scalability, security posture, and engineering capabilities for private equity investment...
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Real Reports */}
                 {realReports.map((report) => (
                   <div key={report.id} className="border rounded-lg p-4">
                     <div className="flex items-start justify-between">
@@ -689,14 +736,6 @@ export default function AdminDashboardPage() {
                             View Report
                           </Link>
                         </Button>
-                        {report.scan_request_id && (
-                          <Button variant="outline" size="sm" asChild>
-                            <Link to={`/scans/${report.scan_request_id}`}>
-                              <ExternalLink className="mr-1 h-3 w-3" />
-                              View Scan
-                            </Link>
-                          </Button>
-                        )}
                       </div>
                     </div>
                     {report.executive_summary && (
@@ -720,75 +759,6 @@ export default function AdminDashboardPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="workflows" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Brain className="h-5 w-5" />
-                AI Workflows ({aiWorkflows.length})
-              </CardTitle>
-              <CardDescription>
-                Monitor AI-driven analysis workflows and performance
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {aiWorkflows.map((workflow) => (
-                  <div key={workflow.id} className="border rounded-lg p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-3">
-                          <h3 className="font-semibold">Workflow #{workflow.id.substring(0, 8)}</h3>
-                          <Badge variant={workflow.status === 'completed' ? 'default' : 
-                                        workflow.status === 'failed' ? 'destructive' : 'secondary'}>
-                            {workflow.status}
-                          </Badge>
-                          <Badge variant="outline" className="capitalize">
-                            {workflow.workflow_type.replace('_', ' ')}
-                          </Badge>
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          <p>Processing Time: <span className="font-medium">
-                            {workflow.total_processing_time_ms ? 
-                              `${(workflow.total_processing_time_ms / 1000).toFixed(1)}s` : 'N/A'}
-                          </span></p>
-                          <p>Evidence Collected: <span className="font-medium">
-                            {workflow.performance_metrics?.total_evidence_collected || 0}
-                          </span></p>
-                          <p>Citations Generated: <span className="font-medium">
-                            {workflow.performance_metrics?.total_citations_generated || 0}
-                          </span></p>
-                          <p>Confidence Score: <span className="font-medium">
-                            {((workflow.performance_metrics?.average_confidence_score || 0) * 100).toFixed(1)}%
-                          </span></p>
-                          <p>Started: <span className="font-medium">{formatDate(workflow.started_at)}</span></p>
-                          {workflow.completed_at && (
-                            <p>Completed: <span className="font-medium">{formatDate(workflow.completed_at)}</span></p>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" asChild>
-                          <Link to={`/demo/ai-workflow-results`}>
-                            <Brain className="mr-1 h-3 w-3" />
-                            View Details
-                          </Link>
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                {aiWorkflows.length === 0 && (
-                  <div className="text-center py-8">
-                    <Brain className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500">No AI workflows found</p>
-                    <p className="text-sm text-gray-400">Run the AI workflow test to see results here</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
       </Tabs>
     </div>
