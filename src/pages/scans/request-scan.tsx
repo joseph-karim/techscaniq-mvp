@@ -3,13 +3,14 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from 'react-router-dom'
-import { AlertCircle, CheckCircle2, Globe, Info, Target, TrendingUp } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Globe, Info, Target, TrendingUp, Briefcase, ShoppingCart } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
 import { useAuth } from '@/lib/auth/auth-provider'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Form,
   FormControl,
@@ -28,9 +29,19 @@ const requestScanSchema = z.object({
   companyName: z.string().min(2, { message: 'Company name must be at least 2 characters' }),
   websiteUrl: z.string().url({ message: 'Please enter a valid URL' }),
   description: z.string().optional(),
+  reportType: z.enum(['pe-due-diligence', 'sales-intelligence']).default('pe-due-diligence'),
   thesisTags: z.array(z.string()).optional(), // Made optional since we now use investment thesis
   primaryCriteria: z.string().max(200, { message: 'Primary criteria must be 200 characters or less' }).optional(),
   secondaryCriteria: z.string().max(200, { message: 'Secondary criteria must be 200 characters or less' }).optional(),
+  // Sales Intelligence specific fields
+  vendorOffering: z.string().optional(),
+  targetIndustry: z.string().optional(),
+  targetCompanySize: z.string().optional(),
+  targetGeography: z.string().optional(),
+  salesUseCases: z.array(z.string()).optional(),
+  budgetMin: z.number().optional(),
+  budgetMax: z.number().optional(),
+  evaluationTimeline: z.string().optional(),
 })
 
 type RequestScanForm = z.infer<typeof requestScanSchema>
@@ -88,9 +99,18 @@ export default function RequestScanPage() {
       companyName: '',
       websiteUrl: '',
       description: '',
+      reportType: 'pe-due-diligence',
       thesisTags: [],
       primaryCriteria: '',
       secondaryCriteria: '',
+      vendorOffering: '',
+      targetIndustry: '',
+      targetCompanySize: '',
+      targetGeography: '',
+      salesUseCases: [],
+      budgetMin: undefined,
+      budgetMax: undefined,
+      evaluationTimeline: '',
     },
   })
 
@@ -103,6 +123,30 @@ export default function RequestScanPage() {
     // No validation needed since it can't be null
     
     try {
+      // Prepare metadata based on report type
+      let metadata: any = {
+        report_type: data.reportType,
+      }
+      
+      if (data.reportType === 'sales-intelligence') {
+        metadata.sales_context = {
+          company: data.companyName,
+          offering: data.vendorOffering || '',
+          idealCustomerProfile: {
+            industry: data.targetIndustry,
+            companySize: data.targetCompanySize,
+            geography: data.targetGeography,
+          },
+          useCases: data.salesUseCases || [],
+          budgetRange: (data.budgetMin || data.budgetMax) ? {
+            min: data.budgetMin,
+            max: data.budgetMax,
+            currency: 'USD',
+          } : undefined,
+          evaluationTimeline: data.evaluationTimeline,
+        }
+      }
+
       // Create the scan request in the database
       const { data: scanRequest, error: dbError } = await supabase
         .from('scan_requests')
@@ -117,24 +161,53 @@ export default function RequestScanPage() {
           requestor_name: user?.user_metadata?.name || user?.email || 'Unknown',
           organization_name: user?.user_metadata?.workspace_name || 'Unknown Organization',
           status: 'pending',
+          report_type: data.reportType,
           sections: [],
           risks: [],
-          investment_thesis_data: {
+          metadata: metadata,
+          investment_thesis_data: data.reportType === 'pe-due-diligence' ? {
             ...investmentThesis,
             thesis_tags: data.thesisTags || investmentThesis.focusAreas || [],
             primary_criteria: data.primaryCriteria || investmentThesis.criteria?.[0]?.description || '',
             secondary_criteria: data.secondaryCriteria || investmentThesis.criteria?.[1]?.description || '',
             submitted_at: new Date().toISOString()
-          }
+          } : null
         })
         .select()
         .single()
 
       if (dbError) throw dbError
 
-      // FIXED: Now automatically trigger report generation
+      // Also trigger via API for background processing
       console.log('✅ Scan request created:', scanRequest.id)
-      console.log('🚀 Triggering report generation...')
+      console.log('🚀 Triggering background processing...')
+      
+      // Call the API to start background processing
+      const response = await fetch('/api/scans', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          company_name: data.companyName,
+          website_url: data.websiteUrl,
+          company_description: data.description,
+          report_type: data.reportType,
+          metadata: metadata,
+          thesis_tags: data.thesisTags || investmentThesis.focusAreas || [],
+          primary_criteria: data.primaryCriteria || investmentThesis.criteria?.[0]?.description || '',
+          requestor_name: user?.user_metadata?.name || user?.email || 'Unknown',
+          organization_name: user?.user_metadata?.workspace_name || 'Unknown Organization',
+          investment_thesis_data: data.reportType === 'pe-due-diligence' ? investmentThesis : null,
+        }),
+      })
+      
+      if (!response.ok) {
+        console.error('⚠️ Background processing initiation failed')
+        // Don't throw error - scan is created, just background processing failed
+      } else {
+        console.log('✅ Background processing initiated successfully')
+      }
       
       // Call the report orchestrator to start analysis
       const { data: reportResult, error: reportError } = await supabase.functions.invoke('report-orchestrator-v3', {
@@ -185,7 +258,7 @@ export default function RequestScanPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Request a Scan</h1>
         <p className="text-muted-foreground">
-          Submit a request for technical due diligence on a target company with customized investment thesis analysis
+          Submit a request for PE due diligence or sales intelligence analysis on a target company
         </p>
       </div>
       
@@ -215,9 +288,18 @@ export default function RequestScanPage() {
             <Target className="h-4 w-4" />
             Company Details
           </TabsTrigger>
-          <TabsTrigger value="thesis" className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4" />
-            Investment Thesis
+          <TabsTrigger value="context" className="flex items-center gap-2">
+            {form.watch('reportType') === 'pe-due-diligence' ? (
+              <>
+                <TrendingUp className="h-4 w-4" />
+                Investment Thesis
+              </>
+            ) : (
+              <>
+                <ShoppingCart className="h-4 w-4" />
+                Sales Context
+              </>
+            )}
           </TabsTrigger>
           <TabsTrigger value="criteria" className="flex items-center gap-2">
             <Info className="h-4 w-4" />
@@ -300,15 +382,223 @@ export default function RequestScanPage() {
                       </FormItem>
                     )}
                   />
+                  
+                  <FormField
+                    control={form.control}
+                    name="reportType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Report Type</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a report type" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="pe-due-diligence">
+                              <div className="flex items-center gap-2">
+                                <Briefcase className="h-4 w-4" />
+                                PE Due Diligence
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="sales-intelligence">
+                              <div className="flex items-center gap-2">
+                                <ShoppingCart className="h-4 w-4" />
+                                Sales Intelligence
+                              </div>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormDescription>
+                          Choose the type of analysis report you need
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </CardContent>
               </Card>
             </TabsContent>
             
-            <TabsContent value="thesis" className="space-y-6">
-              <InvestmentThesisSelector 
-                value={investmentThesis}
-                onChange={handleInvestmentThesisChange}
-              />
+            <TabsContent value="context" className="space-y-6">
+              {form.watch('reportType') === 'pe-due-diligence' ? (
+                <InvestmentThesisSelector 
+                  value={investmentThesis}
+                  onChange={handleInvestmentThesisChange}
+                />
+              ) : (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Sales Intelligence Context</CardTitle>
+                    <CardDescription>
+                      Configure your solution and target customer profile for sales intelligence analysis
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="vendorOffering"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Your Product/Service Offering</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="e.g., Cloud Infrastructure Platform, Data Analytics Solution"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            The solution you're selling to this prospect
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium">Ideal Customer Profile</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="targetIndustry"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Target Industry</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  placeholder="e.g., Financial Services, Healthcare"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="targetCompanySize"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Company Size</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  placeholder="e.g., 1000-5000 employees"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="targetGeography"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Geography</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  placeholder="e.g., North America, EMEA"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="evaluationTimeline"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Evaluation Timeline</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  placeholder="e.g., Q1 2024, 3-6 months"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+                    
+                    <FormField
+                      control={form.control}
+                      name="salesUseCases"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Key Use Cases</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Enter use cases (one per line)&#10;e.g.:&#10;- Real-time data processing&#10;- Customer analytics&#10;- Predictive maintenance"
+                              className="min-h-[100px]"
+                              onChange={(e) => {
+                                const useCases = e.target.value.split('\n').filter(Boolean).map(uc => uc.replace(/^[-•]\s*/, ''))
+                                field.onChange(useCases)
+                              }}
+                              value={field.value?.join('\n') || ''}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Specific use cases your solution addresses
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium">Budget Range (Optional)</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="budgetMin"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Minimum ($K)</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="number"
+                                  placeholder="100"
+                                  {...field}
+                                  onChange={e => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="budgetMax"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Maximum ($K)</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="number"
+                                  placeholder="500"
+                                  {...field}
+                                  onChange={e => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
             
             <TabsContent value="criteria" className="space-y-6">
@@ -392,19 +682,29 @@ export default function RequestScanPage() {
               
               <div className="flex justify-between">
                 <div className="text-sm text-muted-foreground">
-                  {investmentThesis ? (
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
-                      Investment thesis configured: {investmentThesis.thesisType === 'custom' ? investmentThesis.customThesisName || 'Custom Thesis' : investmentThesis.thesisType}
-                    </div>
+                  {form.watch('reportType') === 'pe-due-diligence' ? (
+                    investmentThesis ? (
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        Investment thesis configured: {investmentThesis.thesisType === 'custom' ? investmentThesis.customThesisName || 'Custom Thesis' : investmentThesis.thesisType}
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <AlertCircle className="h-4 w-4 text-amber-500" />
+                        Please configure your investment thesis in the previous tab
+                      </div>
+                    )
                   ) : (
                     <div className="flex items-center gap-2">
-                      <AlertCircle className="h-4 w-4 text-amber-500" />
-                      Please configure your investment thesis in the previous tab
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      Sales intelligence context configured
                     </div>
                   )}
                 </div>
-                <Button type="submit" disabled={isSubmitting || !investmentThesis}>
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting || (form.watch('reportType') === 'pe-due-diligence' && !investmentThesis)}
+                >
                   {isSubmitting ? 'Submitting...' : 'Submit Scan Request'}
                 </Button>
               </div>

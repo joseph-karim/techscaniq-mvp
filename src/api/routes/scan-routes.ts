@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { createClient } from '@supabase/supabase-js'
 import { createScanJob, getJobStatus, getQueueMetrics } from '../../lib/queues/scan-queue.js'
+import { requireAdminAuth } from '../middleware/admin-auth.js'
 
 const router = Router()
 
@@ -24,28 +25,39 @@ function getSupabase() {
 // Create a new scan with background processing
 router.post('/api/scans', async (req: any, res: any) => {
   try {
-    const {
-      company_name,
-      website_url,
-      primary_criteria,
-      thesis_tags,
-      requestor_name,
-      organization_name,
-      company_description,
-      investment_thesis_data,
-    } = req.body
+    // Check if it's an admin-initiated scan
+    const authHeader = req.headers.authorization
+    const isAdminScan = authHeader && authHeader.startsWith('Bearer ') && req.body.scanId
     
-    // Validate required fields
-    if (!company_name || !website_url) {
-      return res.status(400).json({
-        error: 'Company name and website URL are required',
-      })
-    }
+    let scanRequest: any
     
-    // Create scan request in database
-    const { data: scanRequest, error: dbError } = await getSupabase()
-      .from('scan_requests')
-      .insert({
+    if (isAdminScan) {
+      // Admin scan - just need to process existing scan
+      const { scanId, priority } = req.body
+      
+      // Get existing scan request
+      const { data: existingScan, error } = await getSupabase()
+        .from('scan_requests')
+        .select('*')
+        .eq('id', scanId)
+        .single()
+      
+      if (error || !existingScan) {
+        return res.status(404).json({ error: 'Scan request not found' })
+      }
+      
+      scanRequest = existingScan
+      
+      // Update priority if provided
+      if (priority) {
+        await getSupabase()
+          .from('scan_requests')
+          .update({ priority, status: 'processing' })
+          .eq('id', scanId)
+      }
+    } else {
+      // Regular client scan
+      const {
         company_name,
         website_url,
         primary_criteria,
@@ -54,19 +66,47 @@ router.post('/api/scans', async (req: any, res: any) => {
         organization_name,
         company_description,
         investment_thesis_data,
-        status: 'pending',
-        ai_workflow_status: 'pending',
-        created_at: new Date().toISOString(),
-      })
-      .select()
-      .single()
+        report_type,
+        metadata,
+      } = req.body
     
-    if (dbError) {
-      console.error('Database error:', dbError)
-      return res.status(500).json({
-        error: 'Failed to create scan request',
-        details: dbError.message,
-      })
+      // Validate required fields
+      if (!company_name || !website_url) {
+        return res.status(400).json({
+          error: 'Company name and website URL are required',
+        })
+      }
+      
+      // Create scan request in database
+      const { data: newScanRequest, error: dbError } = await getSupabase()
+        .from('scan_requests')
+        .insert({
+          company_name,
+          website_url,
+          primary_criteria,
+          thesis_tags,
+          requestor_name,
+          organization_name,
+          company_description,
+          investment_thesis_data,
+          report_type: report_type || 'pe-due-diligence',
+          metadata: metadata || {},
+          status: 'pending',
+          ai_workflow_status: 'pending',
+          created_at: new Date().toISOString(),
+        })
+        .select()
+        .single()
+      
+      if (dbError) {
+        console.error('Database error:', dbError)
+        return res.status(500).json({
+          error: 'Failed to create scan request',
+          details: dbError.message,
+        })
+      }
+      
+      scanRequest = newScanRequest
     }
     
     // Create background jobs
@@ -77,6 +117,7 @@ router.post('/api/scans', async (req: any, res: any) => {
       .from('scan_requests')
       .update({
         metadata: {
+          ...((scanRequest.metadata as any) || {}),
           evidenceJobId,
           reportJobId,
         } as any,
@@ -188,7 +229,7 @@ router.get('/api/scans/:id/status', async (req: any, res: any) => {
 })
 
 // Get queue metrics for admin dashboard
-router.get('/api/admin/queue-metrics', async (_req: any, res: any) => {
+router.get('/api/admin/queue-metrics', requireAdminAuth as any, async (_req: any, res: any) => {
   try {
     const metrics = await getQueueMetrics()
     

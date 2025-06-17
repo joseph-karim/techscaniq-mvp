@@ -28,6 +28,9 @@ const ReportsListPage = lazy(() => import('@/pages/reports/reports-list'))
 const GenerateExecutiveReport = lazy(() => import('@/pages/reports/GenerateExecutiveReport'))
 const ThesisAlignedReport = lazy(() => import('@/pages/reports/thesis-aligned-report'))
 const AIWorkflowResults = lazy(() => import('@/pages/demo/ai-workflow-results'))
+const AdminScansPage = lazy(() => import('@/pages/admin/admin-scans'))
+const AdminScanRequestPage = lazy(() => import('@/pages/admin/admin-scan-request'))
+const AdminScanDetailsPage = lazy(() => import('@/pages/admin/admin-scan-details'))
 
 
 // Route configuration interface
@@ -196,6 +199,27 @@ export const routeConfig: RouteConfig[] = [
         label: 'Pipeline Monitor',
         requireAdmin: true,
         showInNav: true
+      },
+      {
+        path: 'admin/scans',
+        element: <AdminScansPage />,
+        label: 'Admin Scans',
+        requireAdmin: true,
+        showInNav: true
+      },
+      {
+        path: 'admin/scans/new',
+        element: <AdminScanRequestPage />,
+        label: 'New Admin Scan',
+        requireAdmin: true,
+        showInNav: false
+      },
+      {
+        path: 'admin/scans/:id',
+        element: <AdminScanDetailsPage />,
+        label: 'Admin Scan Details',
+        requireAdmin: true,
+        showInNav: false
       },
       {
         path: 'admin/sales-intelligence',
