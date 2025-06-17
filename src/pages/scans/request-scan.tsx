@@ -24,6 +24,8 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { ThesisTagSelector } from '@/components/scans/thesis-tag-selector'
 import { InvestmentThesisSelector, type InvestmentThesisData } from '@/components/scans/investment-thesis-selector'
+import { SavedConfigurationSelector } from '@/components/scans/saved-configuration-selector'
+import type { SavedInvestmentThesis, SavedVendorProfile } from '@/types/saved-configurations'
 
 const requestScanSchema = z.object({
   companyName: z.string().min(2, { message: 'Company name must be at least 2 characters' }),
@@ -74,6 +76,60 @@ export default function RequestScanPage() {
     }
     
     setInvestmentThesis(newThesis)
+  }
+
+  const handleLoadSavedInvestmentThesis = (saved: SavedInvestmentThesis | null) => {
+    if (!saved) {
+      // Reset to default when creating new
+      setInvestmentThesis({
+        thesisType: 'accelerate-organic-growth',
+        criteria: [
+          { id: 'criterion-0', name: 'Cloud Architecture Scalability', weight: 30, description: 'Auto-scaling capabilities, microservices architecture, infrastructure headroom for 10x growth' },
+          { id: 'criterion-1', name: 'Development Velocity & Pipeline', weight: 25, description: 'CI/CD maturity, test coverage, deployment frequency, feature delivery speed' },
+          { id: 'criterion-2', name: 'Market Expansion Readiness', weight: 25, description: 'Geographic reach, customer acquisition systems, product-market fit indicators' },
+          { id: 'criterion-3', name: 'Code Quality & Technical Debt', weight: 20, description: 'Modular architecture, maintainability, technical debt burden affecting velocity' }
+        ],
+        focusAreas: ['cloud-native', 'scalable-architecture', 'devops-maturity', 'test-coverage', 'microservices'],
+        timeHorizon: '3-5 years',
+        targetMultiple: '5-10x',
+        notes: ''
+      })
+    } else {
+      // Load saved configuration
+      setInvestmentThesis({
+        thesisType: saved.thesis_type as InvestmentThesisData['thesisType'],
+        customThesisName: saved.custom_thesis_name,
+        criteria: saved.criteria,
+        focusAreas: saved.focus_areas,
+        timeHorizon: saved.time_horizon || '',
+        targetMultiple: saved.target_multiple || '',
+        notes: saved.notes || ''
+      })
+    }
+  }
+
+  const handleLoadSavedVendorProfile = (saved: SavedVendorProfile | null) => {
+    if (!saved) {
+      // Reset vendor fields
+      form.setValue('vendorOffering', '')
+      form.setValue('targetIndustry', '')
+      form.setValue('targetCompanySize', '')
+      form.setValue('targetGeography', '')
+      form.setValue('salesUseCases', [])
+      form.setValue('budgetMin', undefined)
+      form.setValue('budgetMax', undefined)
+      form.setValue('evaluationTimeline', '')
+    } else {
+      // Load saved vendor profile
+      form.setValue('vendorOffering', saved.offering)
+      form.setValue('targetIndustry', saved.ideal_customer_profile.industry || '')
+      form.setValue('targetCompanySize', saved.ideal_customer_profile.companySize || '')
+      form.setValue('targetGeography', saved.ideal_customer_profile.geography || '')
+      form.setValue('salesUseCases', saved.use_cases)
+      form.setValue('budgetMin', saved.budget_range?.min)
+      form.setValue('budgetMax', saved.budget_range?.max)
+      form.setValue('evaluationTimeline', saved.evaluation_timeline || '')
+    }
   }
 
   // Handle navigation after successful submission
@@ -423,12 +479,47 @@ export default function RequestScanPage() {
             
             <TabsContent value="context" className="space-y-6">
               {form.watch('reportType') === 'pe-due-diligence' ? (
-                <InvestmentThesisSelector 
-                  value={investmentThesis}
-                  onChange={handleInvestmentThesisChange}
-                />
+                <>
+                  <SavedConfigurationSelector
+                    type="investment-thesis"
+                    onSelect={handleLoadSavedInvestmentThesis}
+                    currentConfig={{
+                      thesis_type: investmentThesis.thesisType,
+                      custom_thesis_name: investmentThesis.customThesisName,
+                      criteria: investmentThesis.criteria,
+                      focus_areas: investmentThesis.focusAreas,
+                      time_horizon: investmentThesis.timeHorizon,
+                      target_multiple: investmentThesis.targetMultiple,
+                      notes: investmentThesis.notes,
+                    }}
+                  />
+                  <InvestmentThesisSelector 
+                    value={investmentThesis}
+                    onChange={handleInvestmentThesisChange}
+                  />
+                </>
               ) : (
-                <Card>
+                <>
+                  <SavedConfigurationSelector
+                    type="vendor-profile"
+                    onSelect={handleLoadSavedVendorProfile}
+                    currentConfig={{
+                      offering: form.watch('vendorOffering'),
+                      ideal_customer_profile: {
+                        industry: form.watch('targetIndustry'),
+                        companySize: form.watch('targetCompanySize'),
+                        geography: form.watch('targetGeography'),
+                      },
+                      use_cases: form.watch('salesUseCases') || [],
+                      budget_range: (form.watch('budgetMin') || form.watch('budgetMax')) ? {
+                        min: form.watch('budgetMin'),
+                        max: form.watch('budgetMax'),
+                        currency: 'USD',
+                      } : undefined,
+                      evaluation_timeline: form.watch('evaluationTimeline'),
+                    }}
+                  />
+                  <Card>
                   <CardHeader>
                     <CardTitle>Sales Intelligence Context</CardTitle>
                     <CardDescription>
@@ -598,6 +689,7 @@ export default function RequestScanPage() {
                     </div>
                   </CardContent>
                 </Card>
+                </>
               )}
             </TabsContent>
             

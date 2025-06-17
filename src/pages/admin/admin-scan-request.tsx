@@ -13,6 +13,8 @@ import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/lib/auth/auth-provider'
 import { toast } from 'sonner'
 import { Loader2, Search, Building2, FileText, Briefcase, ShoppingCart } from 'lucide-react'
+import { SavedConfigurationSelector } from '@/components/scans/saved-configuration-selector'
+import type { SavedInvestmentThesis, SavedVendorProfile } from '@/types/saved-configurations'
 
 // Define schemas for different report types
 const peContextSchema = z.object({
@@ -86,6 +88,44 @@ export default function AdminScanRequest() {
   })
 
   const watchReportType = watch('reportType')
+
+  const handleLoadSavedInvestmentThesis = (saved: SavedInvestmentThesis | null) => {
+    if (!saved) {
+      // Reset PE context
+      setValue('peContext.description', '')
+      setValue('peContext.pePartner', '')
+      setValue('peContext.investmentAmount', undefined)
+      setValue('peContext.targetHoldPeriod', undefined)
+    } else {
+      // Load saved investment thesis
+      setValue('peContext.description', saved.notes || '')
+      // Could extend to map more fields if needed
+    }
+  }
+
+  const handleLoadSavedVendorProfile = (saved: SavedVendorProfile | null) => {
+    if (!saved) {
+      // Reset sales context
+      setValue('salesContext.offering', '')
+      setValue('salesContext.idealCustomerProfile.industry', '')
+      setValue('salesContext.idealCustomerProfile.companySize', '')
+      setValue('salesContext.idealCustomerProfile.geography', '')
+      setValue('salesContext.useCases', [])
+      setValue('salesContext.budgetRange.min', undefined)
+      setValue('salesContext.budgetRange.max', undefined)
+      setValue('salesContext.evaluationTimeline', '')
+    } else {
+      // Load saved vendor profile
+      setValue('salesContext.offering', saved.offering)
+      setValue('salesContext.idealCustomerProfile.industry', saved.ideal_customer_profile.industry || '')
+      setValue('salesContext.idealCustomerProfile.companySize', saved.ideal_customer_profile.companySize || '')
+      setValue('salesContext.idealCustomerProfile.geography', saved.ideal_customer_profile.geography || '')
+      setValue('salesContext.useCases', saved.use_cases)
+      setValue('salesContext.budgetRange.min', saved.budget_range?.min)
+      setValue('salesContext.budgetRange.max', saved.budget_range?.max)
+      setValue('salesContext.evaluationTimeline', saved.evaluation_timeline || '')
+    }
+  }
 
   const onSubmit = async (data: AdminScanFormData) => {
     if (!user) return
@@ -289,6 +329,14 @@ export default function AdminScanRequest() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Investment Context</h3>
                   
+                  <SavedConfigurationSelector
+                    type="investment-thesis"
+                    onSelect={handleLoadSavedInvestmentThesis}
+                    currentConfig={{
+                      notes: watch('peContext.description'),
+                    }}
+                  />
+                  
                   <div>
                     <Label htmlFor="peContext.description">Investment Thesis *</Label>
                     <Textarea
@@ -337,6 +385,26 @@ export default function AdminScanRequest() {
               {watchReportType === 'sales-intelligence' && (
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Sales Intelligence Context</h3>
+                  
+                  <SavedConfigurationSelector
+                    type="vendor-profile"
+                    onSelect={handleLoadSavedVendorProfile}
+                    currentConfig={{
+                      offering: watch('salesContext.offering'),
+                      ideal_customer_profile: {
+                        industry: watch('salesContext.idealCustomerProfile.industry'),
+                        companySize: watch('salesContext.idealCustomerProfile.companySize'),
+                        geography: watch('salesContext.idealCustomerProfile.geography'),
+                      },
+                      use_cases: watch('salesContext.useCases') || [],
+                      budget_range: (watch('salesContext.budgetRange.min') || watch('salesContext.budgetRange.max')) ? {
+                        min: watch('salesContext.budgetRange.min'),
+                        max: watch('salesContext.budgetRange.max'),
+                        currency: 'USD',
+                      } : undefined,
+                      evaluation_timeline: watch('salesContext.evaluationTimeline'),
+                    }}
+                  />
                   
                   <div>
                     <Label htmlFor="salesContext.offering">Product/Service Offering *</Label>
