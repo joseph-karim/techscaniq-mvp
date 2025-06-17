@@ -252,6 +252,15 @@ export interface ResearchState {
     sonarJobId?: string;
     sonarStatus?: string;
     sonarLastChecked?: Date;
+    sonarSubmittedAt?: Date;
+    sonarCompletedAt?: Date;
+    sonarCost?: number;
+    sonarStats?: {
+      searchQueries: number;
+      reasoningTokens: number;
+      citations: number;
+    };
+    queryStrategy?: any;
   };
 }
 

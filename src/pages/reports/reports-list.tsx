@@ -284,6 +284,68 @@ export default function ReportsListPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* OneZero PE Tech Diligence Report */}
+        <Card className="hover:shadow-md transition-shadow border-l-4 border-l-purple-500">
+          <CardHeader>
+            <div className="flex items-start justify-between">
+              <div className="space-y-1">
+                <CardTitle className="text-xl font-heading">OneZero Financial Systems - PE Tech Diligence Report</CardTitle>
+                <CardDescription className="flex items-center gap-2">
+                  <Building2 className="h-4 w-4" />
+                  TechScanIQ Demo
+                  <span className="text-muted-foreground">•</span>
+                  <Calendar className="h-4 w-4" />
+                  Demo Report
+                </CardDescription>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge className="bg-purple-500">Demo</Badge>
+                <Badge className="bg-green-500">Completed</Badge>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Private equity due diligence assessment for mature financial services platform
+              </p>
+              
+              <div className="grid grid-cols-3 gap-4 rounded-lg border p-3">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-yellow-600">72</div>
+                  <p className="text-xs text-muted-foreground">Health Score</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold">B+</div>
+                  <p className="text-xs text-muted-foreground">Grade</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-yellow-600">65%</div>
+                  <p className="text-xs text-muted-foreground">Investment Score</p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-2">
+                <div className="text-sm text-muted-foreground">
+                  Industry: Financial Services
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" asChild>
+                    <Link to="/admin/pe-diligence/onezero">
+                      <Eye className="mr-2 h-4 w-4" />
+                      View Report
+                    </Link>
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    <Download className="mr-2 h-4 w-4" />
+                    Download
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
         
         {/* User Reports */}
         {loading ? (

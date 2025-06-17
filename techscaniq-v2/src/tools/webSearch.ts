@@ -51,19 +51,10 @@ export class WebSearchTool {
       console.log('Using Gemini with Google Search grounding');
       return await this.searchWithGemini(query, options);
     } catch (error) {
-      console.error('Primary search failed, trying alternatives:', error);
+      console.error('Primary search failed:', error);
       
-      // Fallback to other providers
-      if (this.tavilyApiKey) {
-        console.log('Using Tavily API');
-        return await this.searchWithTavily(query, options);
-      } else if (this.serperApiKey) {
-        console.log('Using Serper API');
-        return await this.searchWithSerper(query, options);
-      } else {
-        console.log('No alternative API keys found, using mock results');
-        return this.getMockResults(query, options);
-      }
+      // Don't fall back to mock results - propagate the error
+      throw error;
     }
   }
 
@@ -340,8 +331,13 @@ export class WebSearchTool {
 
   private async searchWithPerplexity(query: string, options: SearchOptions): Promise<SearchResult[]> {
     try {
+      console.log(`🔍 Perplexity API Request:
+        Query: ${query}
+        Model: sonar-deep-research
+        API Key: ${this.perplexityApiKey?.substring(0, 10)}...`);
+      
       const response = await axios.post('https://api.perplexity.ai/chat/completions', {
-        model: 'sonar-pro',
+        model: 'sonar-deep-research',
         messages: [
           {
             role: 'system',
@@ -356,7 +352,7 @@ export class WebSearchTool {
         return_citations: true,
         search_domain_filter: [],
         return_images: false,
-        search_recency_filter: 'all',
+        // search_recency_filter is optional, remove it
       }, {
         headers: {
           'Authorization': `Bearer ${this.perplexityApiKey}`,
@@ -393,7 +389,28 @@ export class WebSearchTool {
       return results;
     } catch (error) {
       console.error('Perplexity search error:', error);
-      throw error;
+      if (axios.isAxiosError(error) && error.response) {
+        console.error('Response status:', error.response.status);
+        console.error('Response data:', JSON.stringify(error.response.data, null, 2));
+        console.error('Failed query:', query);
+        
+        // For 400 errors, try a simplified query
+        if (error.response.status === 400) {
+          console.log('🔄 Retrying with simplified query...');
+          // Remove problematic operators like site:, filetype:, etc
+          const simplifiedQuery = query
+            .replace(/site:\S+\s*/g, '')
+            .replace(/filetype:\S+\s*/g, '')
+            .replace(/intitle:\S+\s*/g, '')
+            .trim();
+          
+          if (simplifiedQuery !== query && simplifiedQuery.length > 0) {
+            return this.searchWithPerplexity(simplifiedQuery, options);
+          }
+        }
+      }
+      // Propagate the error instead of falling back to mock results
+      throw new Error(`Perplexity API failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 

@@ -3,7 +3,7 @@ import { Evidence } from '../types';
 import { config } from '../config';
 
 interface SonarDeepResearchRequest {
-  model: 'sonar-deep-research';
+  model: 'sonar-deep-research' | 'sonar-pro' | 'sonar';
   messages: Array<{
     role: 'user' | 'assistant';
     content: string;
@@ -81,7 +81,7 @@ export class SonarDeepResearch {
     const prompt = this.buildResearchPrompt(company, website, thesisType, focusAreas);
     
     const request: SonarDeepResearchRequest = {
-      model: 'sonar-deep-research',
+      model: 'sonar-deep-research', // Use sonar-deep-research for highest quality
       messages: [{
         role: 'user',
         content: prompt
@@ -89,13 +89,14 @@ export class SonarDeepResearch {
       reasoning_effort: this.getReasoningEffort(thesisType),
     };
     
-    const response = await fetch(`${this.baseUrl}/async/chat/completions`, {
+    // For now, use synchronous endpoint as the async one requires different format
+    const response = await fetch(`${this.baseUrl}/chat/completions`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${this.apiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ request }),
+      body: JSON.stringify(request),
     });
     
     if (!response.ok) {
@@ -103,15 +104,37 @@ export class SonarDeepResearch {
     }
     
     const result = await response.json();
-    console.log(`📚 Sonar Deep Research job submitted: ${result.id}`);
+    console.log(`📚 Sonar Deep Research completed synchronously`);
     
-    return result.id;
+    // For sync response, return a fake job ID with the result embedded
+    return JSON.stringify({ type: 'sync', result });
   }
   
   /**
    * Poll for async research results
    */
   async getResults(jobId: string): Promise<SonarAsyncResponse> {
+    // Check if this is a sync response
+    try {
+      const parsed = JSON.parse(jobId);
+      if (parsed.type === 'sync' && parsed.result) {
+        // Convert sync response to async format
+        return {
+          id: jobId,
+          model: parsed.result.model,
+          created_at: Date.now(),
+          status: 'COMPLETED',
+          response: {
+            choices: parsed.result.choices,
+            usage: parsed.result.usage,
+            citations: parsed.result.citations || [],
+          },
+        };
+      }
+    } catch (e) {
+      // Not a sync response, continue with async
+    }
+    
     const response = await fetch(
       `${this.baseUrl}/async/chat/completions/${jobId}`,
       {

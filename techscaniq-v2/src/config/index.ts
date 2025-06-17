@@ -1,7 +1,17 @@
 import dotenv from 'dotenv';
 import { z } from 'zod';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+import fs from 'fs';
 
-dotenv.config();
+// For local development, load from .env.local if it exists
+const envLocalPath = '/Users/josephkarim/techscaniq-mvp/.env.local';
+
+if (fs.existsSync(envLocalPath)) {
+  dotenv.config({ path: envLocalPath });
+} else {
+  dotenv.config();
+}
 
 const configSchema = z.object({
   // API Keys
@@ -33,7 +43,7 @@ const configSchema = z.object({
   MAX_CONCURRENT_SEARCHES: z.coerce.number().default(5),
   EVIDENCE_QUALITY_THRESHOLD: z.coerce.number().default(0.7),
   MAX_RESEARCH_ITERATIONS: z.coerce.number().default(5),
-  RESEARCH_TIMEOUT_MINUTES: z.coerce.number().default(30),
+  RESEARCH_TIMEOUT_MINUTES: z.coerce.number().default(120), // 2 hours default for comprehensive research
   MIN_EVIDENCE_COUNT: z.coerce.number().default(10),
   USE_QUEUES: z.coerce.boolean().default(true),
 });
@@ -113,7 +123,7 @@ export const models = {
     temperature: 0.1,
   },
   qualityEvaluator: {
-    model: 'gpt-4o-mini', // Use gpt-4o-mini instead of o3 for now
+    model: 'gpt-4o-mini', // Using gpt-4o-mini for quality evaluation
     temperature: 0.2,
   },
   deepAnalyzer: {

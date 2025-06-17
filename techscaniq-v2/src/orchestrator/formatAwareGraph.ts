@@ -13,8 +13,8 @@ import { generateReportFormatAwareNode } from './nodes/generateReportFormatAware
 import { evaluateQualityMarketAwareNode } from './nodes/evaluateQualityMarketAware';
 import { reflectAndRefineMarketAwareNode } from './nodes/reflectAndRefineMarketAware';
 
-// Import Sonar integration if needed
-import { sonarMarketResearchNode, sonarResultCollectorNode } from './nodes/sonarMarketResearch';
+// Import Sonar integration
+import { sonarResearchNode, sonarResultsNode } from './nodes/sonarResearch';
 
 import { config, thresholds } from '../config';
 
@@ -98,8 +98,8 @@ const workflow = new StateGraph<ResearchState>({
 
 // Add nodes
 workflow.addNode('interpret_thesis', interpretThesisNode);
-workflow.addNode('sonar_market_research', (state: ResearchState) => sonarMarketResearchNode(state));
-workflow.addNode('process_sonar_results', (state: ResearchState) => sonarResultCollectorNode(state));
+workflow.addNode('sonar_research', sonarResearchNode);
+workflow.addNode('sonar_results', sonarResultsNode);
 workflow.addNode('generate_queries', generateQueriesNode);
 workflow.addNode('gather_evidence', gatherEvidenceNode);
 
@@ -128,29 +128,24 @@ workflow.addNode('generate_report', generateReportFormatAwareNode);
 workflow.addEdge('__start__', 'interpret_thesis' as any);
 
 // Add edges with conditional routing
-workflow.addEdge('interpret_thesis' as any, 'sonar_market_research' as any);
-
-// Sonar processing flow
 workflow.addConditionalEdges(
-  'sonar_market_research' as any,
+  'interpret_thesis' as any,
   (state: ResearchState) => {
     // Skip Sonar if disabled
     if (state.metadata?.useSonar === false) {
       return 'generate_queries';
     }
-    
-    if (state.sonarJobId && state.status === 'sonar_submitted') {
-      return 'wait_for_sonar';
-    }
-    return 'generate_queries';
+    return 'sonar_research';
   },
   {
-    'wait_for_sonar': 'process_sonar_results' as any,
+    'sonar_research': 'sonar_research' as any,
     'generate_queries': 'generate_queries' as any,
   } as any
 );
 
-workflow.addEdge('process_sonar_results' as any, 'generate_queries' as any);
+// Sonar processing flow
+workflow.addEdge('sonar_research' as any, 'sonar_results' as any);
+workflow.addEdge('sonar_results' as any, 'generate_queries' as any);
 workflow.addEdge('generate_queries' as any, 'gather_evidence' as any);
 workflow.addEdge('gather_evidence' as any, 'evaluate_quality' as any);
 
@@ -292,9 +287,45 @@ export async function runFormatAwareResearch(thesis: any, options?: {
     console.log(`   Market Context: ${options?.useMarketContext !== false ? 'Enabled' : 'Disabled'}`);
     console.log(`   Sonar Integration: ${options?.useSonar !== false ? 'Enabled' : 'Disabled'}`);
     
-    const result = await formatAwareGraph.invoke(initialState);
+    // Add progress monitoring
+    const startTime = Date.now();
+    let lastLog = Date.now();
+    
+    // Use stream to monitor progress
+    const stream = await formatAwareGraph.stream(initialState, { 
+      streamMode: 'values',
+    });
+    
+    let finalState: any;
+    let stepCount = 0;
+    
+    for await (const state of stream) {
+      stepCount++;
+      finalState = state;
+      
+      const now = Date.now();
+      const elapsed = Math.floor((now - startTime) / 1000);
+      
+      // Log progress every 15 seconds
+      if (now - lastLog > 15000) {
+        console.log(`\n⏱️  Progress Update [${elapsed}s elapsed]:`);
+        console.log(`   Steps completed: ${stepCount}`);
+        console.log(`   Evidence collected: ${state.evidence?.length || 0}`);
+        console.log(`   Iterations: ${state.iterationCount || 0}/${state.maxIterations || 3}`);
+        if (state.currentQueries?.length) {
+          console.log(`   Active queries: ${state.currentQueries.length}`);
+        }
+        if (state.errors?.length) {
+          console.log(`   ⚠️  Errors encountered: ${state.errors.length}`);
+        }
+        lastLog = now;
+      }
+    }
+    
+    const result = finalState;
     
     console.log(`\n✅ Research complete!`);
+    console.log(`   Total time: ${Math.floor((Date.now() - startTime) / 1000)}s`);
     console.log(`   Report Type: ${result.metadata?.reportType}`);
     console.log(`   Sections Generated: ${Object.keys(result.reportSections || {}).length}`);
     

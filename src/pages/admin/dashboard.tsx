@@ -706,6 +706,37 @@ export default function AdminDashboardPage() {
                     </p>
                   </div>
                 </div>
+
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3">
+                        <h3 className="font-semibold">OneZero Financial Systems</h3>
+                        <Badge variant="outline">Score: 72/100</Badge>
+                        <Badge variant="secondary" className="bg-purple-100 text-purple-800">Demo Report</Badge>
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        <p>Report Type: <span className="font-medium">PE Tech Diligence</span></p>
+                        <p>Industry: <span className="font-medium">Financial Services</span></p>
+                        <p>Tech Health Score: <span className="font-medium">72%</span></p>
+                        <p>Created: <span className="font-medium">Demo Report</span></p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" asChild>
+                        <Link to="/admin/pe-diligence/onezero">
+                          <FileText className="mr-1 h-3 w-3" />
+                          View Report
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="mt-3 pt-3 border-t">
+                    <p className="text-sm text-gray-700 line-clamp-2">
+                      Mature financial services platform with solid fundamentals but technical debt. Processing $450M+ daily with 99.95% reliability. Modernization required for growth...
+                    </p>
+                  </div>
+                </div>
                 
                 {/* Real Reports */}
                 {realReports.map((report) => (
