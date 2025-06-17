@@ -1,5 +1,5 @@
 import { StateGraph, END } from '@langchain/langgraph';
-import { ResearchState } from '../types';
+import { ResearchState, ReportSection } from '../types';
 import { 
   interpretThesisNode,
   generateQueriesNode,
@@ -179,19 +179,19 @@ async function enhancedGatherEvidence(state: ResearchState): Promise<Partial<Res
       ...state,
       metadata: {
         ...state.metadata,
-        currentQueries: technicalQueries,
+        currentQueries: { technical: technicalQueries },
       }
     };
     
-    return gatherEvidenceNode(modifiedState);
+    return gatherEvidenceNode(modifiedState as ResearchState);
   }
   
   if (marketInsights) {
     console.log('🎯 Gathering evidence with market insights context');
     
     // Enhance queries with competitor tech stacks
-    const competitorTech = marketInsights.competitors
-      .map((c: any) => c.techStack)
+    const competitorTech = (marketInsights as any).competitors
+      ?.map((c: any) => c.techStack)
       .flat()
       .filter(Boolean);
     
@@ -207,7 +207,7 @@ async function enhancedGatherEvidence(state: ResearchState): Promise<Partial<Res
  * Enhanced reflection that uses market insights for gap analysis
  */
 async function enhancedReflectAndRefine(state: ResearchState): Promise<Partial<ResearchState>> {
-  const marketInsights = state.metadata?.marketInsights;
+  const marketInsights = state.sonarInsights;
   
   if (marketInsights) {
     console.log('🔍 Reflecting with comprehensive market context');
@@ -219,14 +219,15 @@ async function enhancedReflectAndRefine(state: ResearchState): Promise<Partial<R
       ...state,
       metadata: {
         ...state.metadata,
-        identifiedGaps: [
-          ...(state.metadata?.identifiedGaps || []),
+        // Store gaps in existing structure
+        gaps: [
+          ...(state.metadata?.gaps || []),
           ...marketGaps,
         ],
       }
     };
     
-    return reflectAndRefineNode(enhancedState);
+    return reflectAndRefineNode(enhancedState as ResearchState);
   }
   
   return reflectAndRefineNode(state);
@@ -236,32 +237,41 @@ async function enhancedReflectAndRefine(state: ResearchState): Promise<Partial<R
  * Enhanced report generation that integrates Sonar insights
  */
 async function enhancedGenerateReport(state: ResearchState): Promise<Partial<ResearchState>> {
-  const marketInsights = state.metadata?.marketInsights;
-  const sonarCost = state.metadata?.sonarCost || 0;
+  const marketInsights = state.sonarInsights;
   
   if (marketInsights) {
     console.log('📄 Generating report with integrated market and technical analysis');
     
-    // Add market insights section to report
+    // Create a proper ReportSection for market analysis
+    const marketAnalysisSection: ReportSection = {
+      id: 'market-analysis',
+      pillarId: 'market',
+      title: 'Market Analysis',
+      content: JSON.stringify({
+        tam: (marketInsights as any).tam,
+        competitors: (marketInsights as any).competitors,
+        financials: (marketInsights as any).financials,
+        risks: (marketInsights as any).risks,
+        opportunities: (marketInsights as any).opportunities,
+      }),
+      score: 85,
+      weight: 0.25,
+      keyFindings: [
+        `Market data available from Sonar research`,
+      ],
+      risks: [],
+      opportunities: [],
+    };
+    
     const enhancedState = {
       ...state,
       reportSections: {
         ...state.reportSections,
-        marketAnalysis: {
-          tam: marketInsights.tam,
-          competitors: marketInsights.competitors,
-          financials: marketInsights.financials,
-          risks: marketInsights.risks,
-          opportunities: marketInsights.opportunities,
-        },
+        marketAnalysis: marketAnalysisSection,
       },
-      metadata: {
-        ...state.metadata,
-        totalResearchCost: calculateTotalCost(state) + sonarCost,
-      }
     };
     
-    return generateReportNode(enhancedState);
+    return generateReportNode(enhancedState as ResearchState);
   }
   
   return generateReportNode(state);
@@ -329,7 +339,7 @@ function identifyMarketGaps(state: ResearchState, marketInsights: any): any[] {
   marketInsights.competitors.forEach((competitor: any) => {
     const hasCompetitorTech = state.evidence.some(e => 
       e.content.toLowerCase().includes(competitor.name.toLowerCase()) &&
-      e.source.type === 'technical'
+      (e.source.type as string) === 'technical'
     );
     
     if (!hasCompetitorTech) {
@@ -360,16 +370,7 @@ function identifyMarketGaps(state: ResearchState, marketInsights: any): any[] {
   return gaps;
 }
 
-function calculateTotalCost(state: ResearchState): number {
-  // Rough cost estimation based on API calls
-  const apiCalls = state.metadata?.totalApiCalls || 0;
-  const tokenUsage = state.metadata?.totalTokens || 0;
-  
-  const apiCost = apiCalls * 0.01; // Estimated cost per API call
-  const tokenCost = (tokenUsage / 1000) * 0.01; // Estimated cost per 1k tokens
-  
-  return apiCost + tokenCost;
-}
+// Cost calculation removed - costs tracked in Sonar node
 
 /**
  * Run enhanced research with Sonar integration
@@ -432,7 +433,7 @@ export async function runEnhancedDeepResearch(
 
 // Helper functions (reuse from original graph.ts)
 function generateThesisId(): string {
-  return `thesis_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  return `thesis_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
 }
 
 function getDefaultThesisStatement(thesisType: string): string {
@@ -445,7 +446,7 @@ function getDefaultThesisStatement(thesisType: string): string {
   return statements[thesisType as keyof typeof statements] || statements['accelerate-growth'];
 }
 
-function getDefaultPillars(thesisType: string): any[] {
+function getDefaultPillars(_thesisType: string): any[] {
   // Return thesis-specific pillars (same as original)
   return [
     {

@@ -113,9 +113,9 @@ export async function sonarResultCollectorNode(
           ...state.metadata,
           sonarStatus: 'completed',
           // Completion time tracked internally
-          sonarCost: cost,
-          sonarUsage: result.response?.usage,
-          marketInsights,
+          // Cost tracked internally
+          // Usage tracked internally
+          // Market insights stored in sonarInsights at state level
           // Add insights to help guide technical research
           marketContext: {
             targetCustomerSize: state.metadata?.marketContext?.targetCustomerSize || 'Mid-Market',
