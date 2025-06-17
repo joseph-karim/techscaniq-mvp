@@ -25,7 +25,7 @@ export async function gatherEvidenceQueueNode(state: ResearchState): Promise<Par
     console.log('🕷️ Starting comprehensive evidence collection...');
     
     const comprehensiveEvidence = await evidenceCollector.collectComprehensiveEvidence(
-      thesis.companyWebsite || thesis.website || thesis.company,
+      (thesis as any).companyWebsite || (thesis as any).website || thesis.company,
       thesis.statement
     );
     

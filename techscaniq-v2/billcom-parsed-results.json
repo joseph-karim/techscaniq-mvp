@@ -1,0 +1,38 @@
+{
+  "jobId": "f730caaf-13c2-435f-af57-d337e251dd3e",
+  "company": "Bill.com",
+  "completedAt": "2025-06-17T01:07:40.470Z",
+  "duration": "0 seconds",
+  "cost": "0.91",
+  "usage": {
+    "prompt_tokens": 429,
+    "completion_tokens": 3111,
+    "total_tokens": 3540,
+    "search_context_size": null,
+    "citation_tokens": 12638,
+    "num_search_queries": 43,
+    "reasoning_tokens": 214523
+  },
+  "insights": {
+    "tam": {
+      "size": "Unknown",
+      "growth": "Market Analysis. The user provided several search results. Result [1] mentions the accounts receivable automation market size was $2.8 billion in 2024, projected to reach $6.4 billion by 2033 with a 9.7% CAGR. Result [2] talks about the AP/AR Automation Market size at $1.11 billion in 2024, expected to hit $3.69 billion by 2032 with an 11.2% CAGR. Result [3] cites a 2022 market size of $1.9 billion, projected to $3.52 billion by 2030. Result [14] states the financial automation market was $6.6 billion in 2023, growing at 14.2%",
+      "sources": []
+    },
+    "competitors": [],
+    "financials": {
+      "revenue": "revenue from companies with $50M",
+      "profitability": "Margin**: 81.3%"
+    },
+    "risks": [],
+    "opportunities": []
+  },
+  "evidenceCount": 0,
+  "keyMetrics": {
+    "revenue": "Revenue streams in [11] show $358.2 million",
+    "growth": "growing at 14.2%",
+    "customers": "475,000 customers",
+    "paymentVolume": "payment volume annually[13]. This report analyzes Bill.com’s growth potential through market dynamics, competitive positioning, financial performance, and strategic initiatives, supported by a 94% customer retention rate[9] and 125% net revenue retention[9]. Key opportunities include expansion into mid-market/enterprise segments (TAM: $30 billion"
+  },
+  "sampleEvidence": []
+}

@@ -1,9 +1,13 @@
-import { ResearchState, ThesisPillar } from '../../types';
+import { ResearchState, ThesisPillar, InvestmentThesis } from '../../types';
 import { ChatAnthropic } from '@langchain/anthropic';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { config, models } from '../../config';
 import { PROMPTS } from '../../prompts/structured-prompts';
 import { ThesisInterpretationSchema, parseStructuredOutput } from '../../schemas/structured-outputs';
+
+function generateThesisId(): string {
+  return `thesis_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+}
 
 // Use Claude Opus 4 for orchestration as specified
 const model = new ChatAnthropic({
@@ -24,7 +28,14 @@ export async function interpretThesisNode(state: ResearchState): Promise<Partial
     
     const response = await model.invoke([
       new SystemMessage(system),
-      new HumanMessage(prompt(thesis)),
+      new HumanMessage(prompt({
+        ...thesis,
+        id: thesis.id || generateThesisId(),
+        website: thesis.website || thesis.company,
+        type: thesis.type || 'growth',
+        createdAt: thesis.createdAt || new Date(),
+        updatedAt: thesis.updatedAt || new Date(),
+      } as InvestmentThesis)),
     ]);
 
     // Parse and validate structured output
@@ -89,7 +100,7 @@ function generateInitialQuestions(thesis: any, interpretation: any): any[] {
     // Create questions based on expected evidence
     priority.expectedEvidence.forEach((evidence: string) => {
       questions.push({
-        id: `q_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: `q_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
         question: `For ${thesis.company}: ${evidence}`,
         pillarId: pillarId,
         priority: 'high',

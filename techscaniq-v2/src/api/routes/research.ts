@@ -206,7 +206,7 @@ export async function researchRoutes(fastify: FastifyInstance) {
           currentPhase: state.status,
           evidenceCount: state.evidence.length,
           iterationCount: state.iterationCount,
-          lastUpdated: state.thesis.updatedAt.toISOString(),
+          lastUpdated: state.thesis.updatedAt?.toISOString() || new Date().toISOString(),
           estimatedTimeRemaining,
         });
       } catch (error) {
@@ -279,7 +279,7 @@ export async function researchRoutes(fastify: FastifyInstance) {
           thesis: state.thesis,
           report: state.report,
           evidence: state.evidence.slice(0, 50), // Limit evidence in response
-          generatedAt: state.thesis.updatedAt.toISOString(),
+          generatedAt: state.thesis.updatedAt?.toISOString() || new Date().toISOString(),
         });
       } catch (error) {
         fastify.log.error({ error }, 'Failed to get report');
@@ -321,7 +321,7 @@ function calculateProgress(state: ResearchState): number {
 }
 
 function estimateTimeRemaining(state: ResearchState): string {
-  const elapsedMinutes = (Date.now() - state.thesis.createdAt.getTime()) / 60000;
+  const elapsedMinutes = (Date.now() - (state.thesis.createdAt?.getTime() || Date.now())) / 60000;
   const progress = calculateProgress(state);
   
   if (progress === 0) return '15-30 minutes';

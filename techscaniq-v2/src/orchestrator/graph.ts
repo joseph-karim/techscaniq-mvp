@@ -1,5 +1,5 @@
 import { StateGraph, END } from '@langchain/langgraph';
-import { ResearchState } from '../types';
+import { ResearchState, InvestmentThesis, Thesis } from '../types';
 import { 
   interpretThesisNode,
   generateQueriesNode,
@@ -10,6 +10,33 @@ import {
 } from './nodes';
 import { config } from '../config';
 import { StorageService } from '../services/storage';
+
+// Create and export the compiled graph
+export const researchGraph = createResearchGraph();
+
+// Export function to run research
+export async function runResearch(thesis: InvestmentThesis | Thesis, options?: {
+  maxIterations?: number;
+}) {
+  const initialState: Partial<ResearchState> = {
+    thesis,
+    status: 'initializing',
+    iterationCount: 0,
+    maxIterations: options?.maxIterations || config.MAX_RESEARCH_ITERATIONS || 3,
+    metadata: {
+      startTime: new Date(),
+      logs: [],
+    },
+  };
+  
+  try {
+    const result = await researchGraph.invoke(initialState);
+    return result;
+  } catch (error) {
+    console.error('Research failed:', error);
+    throw error;
+  }
+}
 
 // Condition functions
 function shouldReflect(state: ResearchState): string {
@@ -260,8 +287,8 @@ async function storeReport(state: ResearchState): Promise<string> {
   const storage = new StorageService();
   
   // Store thesis if not already stored
-  if (!state.thesis.id.startsWith('thesis_')) {
-    await storage.storeThesis(state.thesis);
+  if (state.thesis.id && !state.thesis.id.startsWith('thesis_')) {
+    await storage.storeThesis(state.thesis as InvestmentThesis);
   }
   
   // Store evidence

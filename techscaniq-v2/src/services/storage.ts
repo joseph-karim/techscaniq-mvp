@@ -121,7 +121,7 @@ export class StorageService {
           evidence_count: state.evidence.length,
           citation_count: state.citations?.length || 0,
           average_quality_score: this.calculateAverageQuality(state.qualityScores || {}),
-          research_duration: Date.now() - state.thesis.createdAt.getTime(),
+          research_duration: Date.now() - (state.thesis.createdAt?.getTime() || Date.now()),
           iteration_count: state.iterationCount,
           model_versions: {
             orchestration: 'claude-opus-4',

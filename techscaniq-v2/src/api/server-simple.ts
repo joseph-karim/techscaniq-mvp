@@ -137,7 +137,7 @@ fastify.get('/api/research/:id/status', async (request, reply) => {
       currentPhase: state.status,
       evidenceCount: state.evidence.length,
       iterationCount: state.iterationCount,
-      lastUpdated: state.thesis.updatedAt.toISOString(),
+      lastUpdated: state.thesis.updatedAt?.toISOString() || new Date().toISOString(),
       estimatedTimeRemaining: '10-15 minutes',
     });
   } catch (error) {
@@ -176,7 +176,7 @@ fastify.get('/api/research/:id/report', async (request, reply) => {
       thesis: state.thesis,
       report: state.report || { content: 'Report generation pending', sections: [], citations: [] },
       evidence: state.evidence.slice(0, 50), // Limit evidence in response
-      generatedAt: state.thesis.updatedAt.toISOString(),
+      generatedAt: state.thesis.updatedAt?.toISOString() || new Date().toISOString(),
     });
   } catch (error) {
     fastify.log.error({ error }, 'Failed to get report');

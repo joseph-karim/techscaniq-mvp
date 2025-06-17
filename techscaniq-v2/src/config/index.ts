@@ -8,6 +8,7 @@ const configSchema = z.object({
   OPENAI_API_KEY: z.string(),
   ANTHROPIC_API_KEY: z.string(),
   GOOGLE_AI_API_KEY: z.string(),
+  PERPLEXITY_API_KEY: z.string().optional(),
   
   // Database
   SUPABASE_URL: z.string().url(),
@@ -44,6 +45,7 @@ const parseConfig = () => {
       OPENAI_API_KEY: process.env.OPENAI_API_KEY,
       ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
       GOOGLE_AI_API_KEY: process.env.GOOGLE_AI_API_KEY,
+      PERPLEXITY_API_KEY: process.env.PERPLEXITY_API_KEY,
       SUPABASE_URL: process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL,
       SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
       REDIS_HOST: process.env.REDIS_HOST,

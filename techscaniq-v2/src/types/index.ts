@@ -63,6 +63,7 @@ export interface EvidenceMetadata {
   sentiment?: 'positive' | 'negative' | 'neutral';
   confidence?: number;
   llmAnalysis?: any; // For storing LLM analysis results
+  section?: string; // For sonar deep research
 }
 
 export interface QualityScore {
@@ -73,6 +74,7 @@ export interface QualityScore {
     recency: number;
     specificity: number;
     bias: number;
+    depth?: number; // Optional depth score for comprehensive analysis
   };
   reasoning: string;
   missingInformation?: string[];
@@ -116,6 +118,35 @@ export interface ReportSection {
   metadata?: Record<string, any>; // Additional metadata
 }
 
+// Market Context Types
+export interface MarketContext {
+  targetCustomerSize: 'SMB' | 'Mid-Market' | 'Enterprise' | 'Developer' | 'Consumer';
+  primaryBuyers: string[];
+  technicalSophistication: 'Low' | 'Medium' | 'High';
+  industryNorms: {
+    typicalTechStack: string[];
+    commonIntegrations: string[];
+    regulatoryRequirements: string[];
+  };
+  competitiveContext: {
+    marketLeader: string;
+    marketLeaderShare: number;
+    typicalFeatures: string[];
+  };
+  competitors?: string[]; // For sonar market research
+}
+
+export interface CompanyMarketSignals {
+  customerRevenue?: number;
+  avgContractValue?: number;
+  customerCount?: number;
+  targetIndustries?: string[];
+  pricingModel?: string;
+  salesCycle?: string;
+  retentionRate?: number;
+  growthStrategy?: string;
+}
+
 export interface ReportMetadata {
   evidenceCount: number;
   citationCount: number;
@@ -126,9 +157,34 @@ export interface ReportMetadata {
 }
 
 // LangGraph State Types
+// Simplified Thesis type for examples
+export interface Thesis {
+  id?: string;
+  statement: string;
+  company: string;
+  website?: string;
+  type?: ThesisType;
+  pillars: {
+    id: string;
+    name: string;
+    weight: number;
+    questions: string[];
+    description?: string;
+  }[];
+  successCriteria?: string[];
+  metadata?: {
+    sector?: string;
+    subSector?: string;
+    investmentStage?: string;
+    reportType?: 'sales-intelligence' | 'pe-due-diligence';
+  };
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
 export interface ResearchState {
   thesisId?: string;
-  thesis: InvestmentThesis;
+  thesis: InvestmentThesis | Thesis;
   questions?: ResearchQuestion[]; // Support both naming conventions
   researchQuestions?: ResearchQuestion[];
   evidence: Evidence[];
@@ -143,10 +199,16 @@ export interface ResearchState {
   iterationCount: number;
   evidenceCount?: number;
   maxIterations?: number;
-  status: 'interpreting_thesis' | 'gathering_evidence' | 'evaluating_quality' | 'reflecting' | 'generating_report' | 'completed' | 'initializing' | 'researching' | 'evaluating' | 'refining' | 'generating' | 'complete';
+  status: 'interpreting_thesis' | 'gathering_evidence' | 'evaluating_quality' | 'reflecting' | 'generating_report' | 'completed' | 'initializing' | 'researching' | 'evaluating' | 'refining' | 'generating' | 'complete' | 'sonar_submitted' | 'sonar_processing' | 'failed';
   errors?: ResearchError[];
   queuedJobs?: string[];
   nextSteps?: any;
+  sonarJobId?: string;
+  sonarInsights?: {
+    evidence: any[];
+    summary: string;
+    marketData: any;
+  };
   metadata?: {
     currentQueries?: Record<string, any[]>;
     lastEvidenceGathering?: Date;
@@ -158,6 +220,7 @@ export interface ResearchState {
       averageQuality: number;
       highQualityCount: number;
       totalEvaluated: number;
+      technicalEvidenceCount?: number;
     };
     gaps?: any[];
     pillarAnalysis?: Record<string, any>;
@@ -167,6 +230,9 @@ export interface ResearchState {
       sections: number;
       totalCitations: number;
       evidenceUsed: number;
+      marketContext?: string;
+      completeness?: number;
+      missingRequiredSections?: string[];
     };
     interpretation?: any;
     insights?: any;
@@ -174,6 +240,18 @@ export interface ResearchState {
     successCriteria?: string[];
     nextSteps?: any;
     queuedJobs?: Record<string, string[]>;
+    marketContext?: MarketContext;
+    marketSignals?: CompanyMarketSignals;
+    marketSpecificInsights?: string[];
+    startTime?: Date;
+    logs?: any[];
+    useSonar?: boolean;
+    useMarketContext?: boolean;
+    reportType?: 'sales-intelligence' | 'pe-due-diligence';
+    reportFormat?: string;
+    sonarJobId?: string;
+    sonarStatus?: string;
+    sonarLastChecked?: Date;
   };
 }
 
