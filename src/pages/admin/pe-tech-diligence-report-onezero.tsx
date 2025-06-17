@@ -35,74 +35,78 @@ import {
   Legend
 } from 'recharts'
 
-// Evidence data for OneZero
+// Evidence data for OneZero - Based on actual Perplexity Deep Research
 const evidenceData: Evidence[] = [
   {
     id: 'T1',
-    title: 'Hybrid Infrastructure Architecture Analysis',
-    source: 'Infrastructure Deep Dive',
-    excerpt: 'OneZero maintains a hybrid cloud-on-premise architecture optimized for financial workloads. 60% cloud-based with AWS primary, 40% on-premise for compliance. Multi-region deployment across NA, EU, and APAC.',
+    title: 'OneZero Company Overview and Infrastructure',
+    source: 'OneZero Official Website',
+    excerpt: 'OneZero Financial Systems provides enterprise trading technology for banks and brokers, processing $250B+ ADV with multi-asset capabilities across FX, equities, and crypto markets.',
     type: 'document',
-    url: 'https://onezero.internal/docs/infrastructure-architecture',
+    url: 'https://www.onezero.com/company/',
     metadata: {
       lastModified: new Date().toISOString(),
-      confidence: 85
+      confidence: 95
     }
   },
   {
     id: 'T2',
-    title: 'AWS Architecture Review',
-    source: 'Cloud Infrastructure Assessment',
-    excerpt: 'AWS deployment uses EC2, RDS, ElastiCache, and Lambda. Auto-scaling groups handle traffic spikes. Reserved instances reduce costs by 45%. Multi-AZ deployment ensures high availability.',
-    type: 'analysis',
+    title: 'Golden Gate Capital Investment Announcement',
+    source: 'OneZero Press Release',
+    excerpt: 'OneZero announces strategic investment from Golden Gate Capital to accelerate global expansion and product innovation in multi-asset trading technology.',
+    type: 'document',
+    url: 'https://www.onezero.com/press-releases/onezero-announces-investment-from-golden-gate-capital/',
     metadata: {
       lastModified: new Date().toISOString(),
-      confidence: 90
+      confidence: 95
     }
   },
   {
     id: 'T3',
-    title: 'Technology Stack Assessment',
-    source: 'Code Repository Analysis',
-    excerpt: 'Java Spring Boot microservices (70%), Python data services (20%), React/TypeScript frontend (10%). Modern but conservative tech choices appropriate for financial services.',
-    type: 'code',
-    url: 'https://github.com/onezero/platform',
+    title: 'Inc. 5000 Fastest Growing Companies Recognition',
+    source: 'OneZero Press Release',
+    excerpt: 'OneZero recognized on Inc. 5000 list with 400% revenue growth from 2018-2021, demonstrating strong market adoption of their trading platform.',
+    type: 'document',
+    url: 'https://www.onezero.com/homepage/onezero-makes-inc-5000-list-of-americas-fastest-growing-private-companies/',
+    metadata: {
+      lastModified: new Date().toISOString(),
+      confidence: 95
+    }
+  },
+  {
+    id: 'T4',
+    title: 'Strategic Partnership with Options Technology',
+    source: 'OneZero Press Release',
+    excerpt: 'Options and oneZero announce partnership to deliver comprehensive multi-asset enterprise trading technology solutions, enhancing market data and connectivity capabilities.',
+    type: 'document',
+    url: 'https://www.onezero.com/press-releases/options-and-onezero-announce-strategic-partnership-to-boost-multi-asset-enterprise-trading-technology-solutions/',
     metadata: {
       lastModified: new Date().toISOString(),
       confidence: 90
     }
   },
   {
-    id: 'T4',
-    title: 'Monolithic Core Analysis',
-    source: 'Architecture Review',
-    excerpt: 'Core payment processing system remains monolithic (2.5M LOC Java). Tightly coupled modules make extraction difficult. Estimated 18-24 months for full microservices migration.',
-    type: 'code',
-    metadata: {
-      lastModified: new Date().toISOString(),
-      confidence: 85
-    }
-  },
-  {
     id: 'M1',
-    title: 'Real-time Transaction Processing',
-    source: 'Performance Metrics Dashboard',
-    excerpt: 'Processing 2M+ transactions daily with 99.95% uptime. Average latency 47ms for core transactions. Kafka-based event streaming handles peak loads of 50K TPS.',
-    type: 'analysis',
+    title: 'OneZero Ecosystem Expansion - Cboe FX and State Street',
+    source: 'PR Newswire',
+    excerpt: 'OneZero expands its EcoSystem with major additions including Cboe FX and State Street, strengthening liquidity access for 200+ institutional clients.',
+    type: 'document',
+    url: 'https://www.prnewswire.com/in/news-releases/onezero-expands-its-ecosystem-adds-cboe-fx-and-state-street-301701109.html',
     metadata: {
       lastModified: new Date().toISOString(),
-      confidence: 92
+      confidence: 95
     }
   },
   {
     id: 'M2',
-    title: 'Database Performance Analysis',
-    source: 'Database Monitoring',
-    excerpt: 'PostgreSQL primary database with 2TB data. Read replicas handle analytics workload. Query optimization needed - 15% of queries exceed 500ms threshold.',
+    title: 'Online Trading Platform Market Analysis',
+    source: 'Fortune Business Insights',
+    excerpt: 'Online trading platform market valued at $10.83B in 2025, expected to reach $16.94B by 2032 with 6.6% CAGR. OneZero positioned in institutional segment.',
     type: 'analysis',
+    url: 'https://www.fortunebusinessinsights.com/online-trading-platform-market-104934',
     metadata: {
       lastModified: new Date().toISOString(),
-      confidence: 88
+      confidence: 90
     }
   },
   {
@@ -118,11 +122,11 @@ const evidenceData: Evidence[] = [
   },
   {
     id: 'M5',
-    title: 'Security & Compliance Status',
-    source: 'Compliance Audit Report 2023',
-    excerpt: 'SOC2 Type II, PCI-DSS Level 1, ISO 27001 certified. Passed 2023 regulatory audits with zero critical findings. Advanced threat detection with 0 breaches in 3 years.',
+    title: 'Lovell Minnick Partners Strategic Investment',
+    source: 'OneZero Press Release',
+    excerpt: 'Lovell Minnick Partners makes significant investment in OneZero Financial Systems to support growth strategy and technology development initiatives.',
     type: 'document',
-    url: 'https://onezero.internal/compliance/audit-2023',
+    url: 'https://www.onezero.com/company/news/lovell-minnick-partners-makes-significant-investment-in-onezero-financial-systems/',
     metadata: {
       lastModified: new Date().toISOString(),
       confidence: 95
