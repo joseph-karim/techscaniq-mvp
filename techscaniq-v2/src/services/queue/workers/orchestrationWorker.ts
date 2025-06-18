@@ -66,9 +66,9 @@ export const orchestrationWorker = new Worker<OrchestrationJobData, Orchestratio
 async function handleStartResearch(
   job: Job<OrchestrationJobData>,
   stateId: string,
-  data: { company: string, website: string, thesisType: string, customThesis?: string }
+  data: { company: string, website: string, thesisType: string, customThesis?: string, metadata?: any }
 ): Promise<OrchestrationJobResult> {
-  const { company, website, thesisType, customThesis } = data;
+  const { company, website, thesisType, customThesis, metadata } = data;
   
   await job.updateProgress(20);
   
@@ -79,7 +79,7 @@ async function handleStartResearch(
     await job.log(`Starting research for ${company} (${website})`);
     
     // Run the research
-    const reportId = await runDeepResearch(company, website, thesisType, customThesis);
+    const reportId = await runDeepResearch(company, website, thesisType, customThesis, metadata);
     
     await job.updateProgress(100);
     

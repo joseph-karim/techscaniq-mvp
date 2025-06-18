@@ -19,24 +19,93 @@ const model = new ChatAnthropic({
 
 export async function interpretThesisNode(state: ResearchState): Promise<Partial<ResearchState>> {
   console.log('🎯 Interpreting investment thesis...');
+  console.log(`   Company: ${state.thesis.company}`);
+  console.log(`   Type: ${state.thesis.type}`);
+  console.log(`   Custom Thesis: ${(state.thesis as any).customThesis?.substring(0, 100)}...`);
   
   try {
-    const { thesis } = state;
+    const { thesis, metadata } = state;
     
-    // Use structured prompt system
+    // For sales intelligence, use a simpler interpretation
+    if (metadata?.reportType === 'sales-intelligence') {
+      console.log('💼 Using sales intelligence quick interpretation...');
+      
+      const interpretation = {
+        successFactors: [
+          'Digital transformation initiatives requiring external expertise',
+          'Technology stack alignment with vendor capabilities',
+          'Budget availability for digital services'
+        ],
+        successCriteria: [
+          'Active digital transformation projects',
+          'Technology modernization needs',
+          'Alignment with vendor service offerings'
+        ],
+        riskFactors: [
+          'Existing vendor relationships',
+          'Internal IT capabilities',
+          'Budget constraints'
+        ],
+        keyMetrics: [
+          { name: 'Digital Maturity Score', target: 'Medium to High', importance: 'high' },
+          { name: 'Technology Stack Complexity', target: 'Enterprise-grade', importance: 'critical' }
+        ],
+        researchPriorities: [
+          {
+            area: 'Technology Infrastructure',
+            rationale: 'Understand current tech stack and modernization needs',
+            expectedEvidence: ['Current technology platforms', 'Digital initiatives', 'Tech challenges']
+          },
+          {
+            area: 'Vendor Landscape',
+            rationale: 'Identify existing partnerships and opportunities',
+            expectedEvidence: ['Current technology vendors', 'Partnership gaps', 'Procurement process']
+          }
+        ]
+      };
+      
+      // Skip the LLM call and return quickly
+      const updatedThesis = {
+        ...thesis,
+        successCriteria: interpretation.successCriteria || [],
+        riskFactors: interpretation.riskFactors || [],
+        updatedAt: new Date(),
+      };
+      
+      console.log('✅ Returning quick interpretation result');
+      console.log(`   Questions generated: ${generateInitialQuestions(updatedThesis, interpretation).length}`);
+      
+      return {
+        thesis: updatedThesis,
+        researchQuestions: generateInitialQuestions(updatedThesis, interpretation),
+        metadata: {
+          ...state.metadata,
+          interpretation,
+        },
+        status: 'researching' as const,
+      };
+    }
+    
+    // Use structured prompt system for other types
     const { system, prompt } = PROMPTS.thesisInterpretation;
+    
+    console.log('📤 Sending to Claude Opus 4...');
+    const startTime = Date.now();
     
     const response = await model.invoke([
       new SystemMessage(system),
       new HumanMessage(prompt({
         ...thesis,
         id: thesis.id || generateThesisId(),
-        website: thesis.website || thesis.company,
+        website: (thesis as any).website || thesis.company,
         type: thesis.type || 'growth',
         createdAt: thesis.createdAt || new Date(),
         updatedAt: thesis.updatedAt || new Date(),
       } as InvestmentThesis)),
     ]);
+    
+    const duration = Date.now() - startTime;
+    console.log(`📥 Response received in ${duration}ms`);
 
     // Parse and validate structured output
     const interpretation = parseStructuredOutput(

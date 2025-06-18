@@ -8,6 +8,8 @@ import {
   reflectAndRefineNode,
   generateReportNode
 } from './nodes';
+// import { gatherEvidenceEnhancedNode } from './nodes/gatherEvidenceEnhanced';
+import { gatherEvidenceSimpleNode } from './nodes/gatherEvidenceSimple';
 import { config } from '../config';
 import { StorageService } from '../services/storage';
 
@@ -118,7 +120,7 @@ export function createResearchGraph() {
   // Add nodes
   workflow.addNode('interpret_thesis' as any, interpretThesisNode);
   workflow.addNode('generate_queries' as any, generateQueriesNode);
-  workflow.addNode('gather_evidence' as any, gatherEvidenceNode);
+  workflow.addNode('gather_evidence' as any, gatherEvidenceSimpleNode);
   workflow.addNode('evaluate_quality' as any, evaluateQualityNode);
   workflow.addNode('reflect_and_refine' as any, reflectAndRefineNode);
   workflow.addNode('generate_report' as any, generateReportNode);
@@ -151,7 +153,8 @@ export async function runDeepResearch(
   company: string,
   website: string,
   thesisType: string,
-  customThesis?: string
+  customThesis?: string,
+  metadata?: any
 ): Promise<string> {
   const graph = createResearchGraph();
   
@@ -179,12 +182,19 @@ export async function runDeepResearch(
     iterationCount: 0,
     maxIterations: config.MAX_RESEARCH_ITERATIONS,
     status: 'initializing',
-    errors: []
+    errors: [],
+    metadata: metadata || {}
   };
 
   try {
+    // Save initial state
+    const storage = new StorageService();
+    const thesisId = initialState.thesis.id || generateThesisId();
+    await storage.saveResearchState(thesisId, initialState);
+    
     // Execute the graph with progress tracking
     const finalState = await graph.invoke(initialState, {
+      recursionLimit: 50,
       callbacks: [
         {
           handleLLMStart: async (llm, prompts) => {
@@ -198,6 +208,13 @@ export async function runDeepResearch(
           },
           handleToolEnd: async (output) => {
             console.log('Tool End');
+          },
+          handleChainEnd: async (outputs) => {
+            // Save state after each node execution
+            console.log('Node completed, saving state...');
+            if (outputs?.status) {
+              await storage.saveResearchState(thesisId, outputs as any);
+            }
           }
         }
       ]
@@ -223,7 +240,11 @@ function getDefaultThesisStatement(thesisType: string): string {
     'accelerate-growth': 'Target company has strong product-market fit and can achieve 20-40%+ ARR growth with investment in go-to-market and product development.',
     'margin-expansion': 'Target company can improve EBITDA by 10-15 points through operational excellence and cost optimization.',
     'market-expansion': 'Target company can expand into new geographic markets or customer segments to drive growth.',
-    'turnaround': 'Target company can be restructured and repositioned for profitability and growth.'
+    'turnaround': 'Target company can be restructured and repositioned for profitability and growth.',
+    'custom': 'Custom thesis analysis based on specific requirements.',
+    'growth': 'Target company has strong product-market fit and can achieve 20-40%+ ARR growth with investment in go-to-market and product development.',
+    'efficiency': 'Target company can improve EBITDA by 10-15 points through operational excellence and cost optimization.',
+    'innovation': 'Target company has innovative technology or business model that can disrupt the market.'
   };
   return statements[thesisType as keyof typeof statements] || statements['accelerate-growth'];
 }

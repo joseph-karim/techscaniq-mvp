@@ -164,9 +164,67 @@ function generateSonarQueries(
   reportType: string,
   strategy: any
 ): any[] {
-  // For Sonar, return empty array as queries will be handled by Sonar node
-  // The generateQueries node should only generate follow-up queries after Sonar
-  return [];
+  const queries: any[] = [];
+  
+  if (reportType === 'sales-intelligence') {
+    // Sales intelligence queries
+    queries.push(
+      {
+        query: `"${thesis.company}" "digital transformation" OR "technology initiatives" OR "IT spending"`,
+        type: 'web',
+        priority: 'high',
+        rationale: 'Identify technology initiatives and digital transformation efforts',
+      },
+      {
+        query: `"${thesis.company}" "website redesign" OR "digital marketing" OR "customer experience"`,
+        type: 'news',
+        priority: 'high',
+        rationale: 'Find recent digital projects and initiatives',
+      },
+      {
+        query: `"${thesis.company}" CTO OR CIO OR "chief technology" OR "chief information"`,
+        type: 'web',
+        priority: 'high',
+        rationale: 'Identify key technology decision makers',
+      },
+      {
+        query: `"${thesis.company}" "request for proposal" OR RFP OR "vendor selection"`,
+        type: 'web',
+        priority: 'medium',
+        rationale: 'Find procurement activities and vendor selection processes',
+      },
+      {
+        query: `"${thesis.company}" "annual report" OR "investor presentation" budget technology`,
+        type: 'financial',
+        priority: 'medium',
+        rationale: 'Understand technology budget and spending priorities',
+      }
+    );
+  } else {
+    // PE due diligence queries
+    queries.push(
+      {
+        query: `"${thesis.company}" revenue OR "financial performance" OR EBITDA`,
+        type: 'financial',
+        priority: 'high',
+        rationale: 'Financial performance metrics',
+      },
+      {
+        query: `"${thesis.company}" "market share" OR competition OR competitors`,
+        type: 'web',
+        priority: 'high',
+        rationale: 'Market position analysis',
+      },
+      {
+        query: `"${thesis.company}" acquisition OR merger OR investment`,
+        type: 'news',
+        priority: 'medium',
+        rationale: 'M&A activity and investment history',
+      }
+    );
+  }
+  
+  return queries;
 }
 
 /**

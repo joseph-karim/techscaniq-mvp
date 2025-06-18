@@ -66,10 +66,14 @@ export class WebSearchTool {
       dateRange: options.dateRange || 'past_year',
     });
     
-    // Filter for news sources
-    return results.filter(r => 
-      r.url.match(/news|press|announcement|reuters|bloomberg|techcrunch|venturebeat/i)
-    );
+    // Filter for news sources - handle cases where url might be missing
+    return results.filter(r => {
+      if (!r || !r.url || typeof r.url !== 'string') {
+        console.warn('Invalid search result:', r);
+        return false;
+      }
+      return r.url.match(/news|press|announcement|reuters|bloomberg|techcrunch|venturebeat/i) !== null;
+    });
   }
 
   async searchAcademic(query: string, options: SearchOptions = {}): Promise<SearchResult[]> {
@@ -349,43 +353,86 @@ export class WebSearchTool {
           }
         ],
         temperature: 0,
-        return_citations: true,
         search_domain_filter: [],
         return_images: false,
-        // search_recency_filter is optional, remove it
+        search_recency_filter: 'month',
       }, {
         headers: {
           'Authorization': `Bearer ${this.perplexityApiKey}`,
           'Content-Type': 'application/json',
         },
+        timeout: 900000, // 15 minute timeout for deep research
       });
 
       const content = response.data.choices[0].message.content;
       const citations = response.data.citations || [];
+      const searchResults = response.data.search_results || [];
       
-      // Extract search results from citations
-      const results: SearchResult[] = citations.slice(0, options.maxResults || 10).map((citation: any, index: number) => ({
-        title: citation.title || `Result ${index + 1}`,
-        url: citation.url || citation.link || '',
-        snippet: citation.snippet || citation.text || '',
-        publishedDate: citation.publishedDate ? new Date(citation.publishedDate) : undefined,
-        relevanceScore: 1.0 - (index * 0.05), // Decreasing relevance by position
-      }));
-
-      // If no citations, try to parse from content
+      console.log(`📖 Perplexity Response:
+        Has citations: ${citations.length > 0}
+        Citations count: ${citations.length}
+        Has search_results: ${searchResults.length > 0}
+        Search results count: ${searchResults.length}
+        Response keys: ${Object.keys(response.data).join(', ')}
+        Content length: ${content?.length || 0}`);
+      
+      // Debug: Log first search result structure
+      if (searchResults.length > 0) {
+        console.log('First search result structure:', JSON.stringify(searchResults[0], null, 2));
+      }
+      
+      // Extract search results from the search_results field
+      let results: SearchResult[] = [];
+      
+      if (searchResults && searchResults.length > 0) {
+        results = searchResults.slice(0, options.maxResults || 10).map((result: any, index: number) => {
+          // Handle different possible field names for the snippet/description
+          const snippet = result.snippet || result.description || result.content || '';
+          
+          return {
+            title: result.title || `Result ${index + 1}`,
+            url: result.url || '',
+            snippet: snippet,
+            publishedDate: result.date ? new Date(result.date) : undefined,
+            relevanceScore: 1.0 - (index * 0.05),
+          };
+        });
+      }
+      
+      // If no search_results but we have citations, try to use those
+      if (results.length === 0 && citations && citations.length > 0) {
+        results = citations.slice(0, options.maxResults || 10).map((citation: any, index: number) => {
+          // Citations might be just URLs or objects with url property
+          const url = typeof citation === 'string' ? citation : citation.url || citation;
+          const hostname = url ? new URL(url).hostname : '';
+          
+          return {
+            title: `Source from ${hostname}`,
+            url: url,
+            snippet: '', // Citations typically don't include snippets
+            relevanceScore: 0.9 - (index * 0.05),
+          };
+        });
+      }
+      
+      // As a last resort, try to parse URLs from content
       if (results.length === 0 && content) {
-        // Extract URLs and context from the response
-        const urlRegex = /https?:\/\/[^\s]+/g;
+        const urlRegex = /https?:\/\/[^\s\]]+/g;
         const urls = content.match(urlRegex) || [];
+        const uniqueUrls = [...new Set(urls)]; // Remove duplicates
         
-        return urls.slice(0, options.maxResults || 10).map((url: string, index: number) => ({
-          title: `Search Result ${index + 1}`,
-          url: url.replace(/[\]\)\.,;]$/, ''), // Clean up trailing punctuation
-          snippet: this.extractSnippetAroundUrl(content, url),
+        results = uniqueUrls.slice(0, options.maxResults || 10).map((url, index) => ({
+          title: `Source from ${new URL(url).hostname}`,
+          url: url,
+          snippet: '',
           relevanceScore: 0.8 - (index * 0.05),
         }));
       }
-
+      
+      // Ensure all results have valid URLs
+      results = results.filter(r => r && r.url && typeof r.url === 'string' && r.url.startsWith('http'));
+      
+      console.log(`✅ Extracted ${results.length} search results from Perplexity`);
       return results;
     } catch (error) {
       console.error('Perplexity search error:', error);
@@ -414,23 +461,4 @@ export class WebSearchTool {
     }
   }
 
-  private extractSnippetAroundUrl(content: string, url: string): string {
-    const urlIndex = content.indexOf(url);
-    if (urlIndex === -1) return '';
-    
-    // Extract text around the URL
-    const start = Math.max(0, urlIndex - 100);
-    const end = Math.min(content.length, urlIndex + url.length + 100);
-    let snippet = content.substring(start, end);
-    
-    // Clean up the snippet
-    snippet = snippet.replace(/\[\d+\]/g, ''); // Remove citation marks
-    snippet = snippet.trim();
-    
-    // Add ellipsis if truncated
-    if (start > 0) snippet = '...' + snippet;
-    if (end < content.length) snippet = snippet + '...';
-    
-    return snippet;
-  }
 }

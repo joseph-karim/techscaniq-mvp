@@ -1,0 +1,77 @@
+{
+  "thesis": {
+    "id": "da07f59c-e488-4460-9bb0-93721f758c25",
+    "company": "Fidelity Canada",
+    "website": "https://www.fidelity.ca",
+    "type": "custom",
+    "customThesis": "Sales Intelligence Analysis: Evaluate Fidelity Canada as a potential customer for Interad's digital agency services, focusing on their technology needs, digital transformation initiatives, and alignment with our offerings.",
+    "statement": "",
+    "pillars": [],
+    "createdAt": "2025-06-18T04:07:40.417Z",
+    "updatedAt": "2025-06-18T04:07:40.417Z"
+  },
+  "evidence": [],
+  "questions": [],
+  "report": {
+    "content": "",
+    "sections": [],
+    "citations": []
+  },
+  "status": "interpreting_thesis",
+  "iterationCount": 0,
+  "evidenceCount": 0,
+  "queuedJobs": [],
+  "metadata": {
+    "scanId": "532c3609-788e-45c7-9879-29ab59289ed5",
+    "reportType": "sales-intelligence",
+    "salesContext": {
+      "company": "Fidelity Canada",
+      "offering": "Full-service digital agency providing end-to-end web and mobile solutions including custom development, CMS/e-commerce (Shopify Partner, WordPress expert), UX/UI design, QA, accessibility compliance (WCAG/AODA certified), and ongoing support",
+      "useCases": [
+        "Develop secure online financial tools and calculators (mortgage, investment, retirement planning)",
+        "Build compliant online account application forms with identity verification",
+        "Create mobile apps for customer engagement (iOS/Android)",
+        "Implement accessibility compliance for AODA requirements",
+        "Modernize legacy web interfaces with responsive UX/UI design",
+        "Integrate web platforms with backend financial systems",
+        "Provide ongoing maintenance and security updates"
+      ],
+      "budgetRange": {
+        "max": 2000,
+        "min": 250,
+        "currency": "USD"
+      },
+      "differentiators": [
+        "Decades of experience with Canadian financial institutions including Big Five banks",
+        "Developed hundreds of financial calculators and tools",
+        "AODA-certified team ensuring full accessibility compliance",
+        "95% local Toronto team enabling close collaboration",
+        "Experience navigating complex corporate approval processes",
+        "Emerging capabilities in AEO/GEO for AI-driven search optimization"
+      ],
+      "decisionCriteria": [
+        "Deep expertise in financial services sector",
+        "Strong security and compliance track record",
+        "WCAG/AODA accessibility certification",
+        "Local Toronto presence for close collaboration",
+        "Experience with enterprise stakeholder management",
+        "Proven ability to integrate with legacy systems"
+      ],
+      "valueProposition": "Interad brings 30 years of financial services expertise with proven success at major Canadian banks (including Big Five), specialized financial tool development (hundreds delivered), strong security/compliance understanding, and local Toronto presence for hands-on partnership.",
+      "evaluationTimeline": "Q1-Q2 2025",
+      "idealCustomerProfile": {
+        "industry": "Financial Services",
+        "geography": "Canada (Toronto/Ontario region)",
+        "companySize": "Large Enterprise (1000+ employees)"
+      },
+      "competitiveAlternatives": [
+        "Accenture Interactive",
+        "Deloitte Digital",
+        "IBM iX",
+        "Publicis Sapient"
+      ]
+    },
+    "vendor": "Interad",
+    "target": "Fidelity Canada"
+  }
+}

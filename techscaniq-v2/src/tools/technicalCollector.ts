@@ -150,7 +150,7 @@ export class TechnicalCollector {
 
       // Navigate and wait for network idle
       const startTime = Date.now();
-      await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
+      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
       const loadTime = Date.now() - startTime;
 
       // Collect various technical data in parallel

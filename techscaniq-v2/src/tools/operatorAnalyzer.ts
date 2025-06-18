@@ -60,7 +60,7 @@ export class OperatorAnalyzer {
       this.page.on('pageerror', err => errors.push(`[Page Error] ${err.message}`));
 
       // Navigate to the URL
-      await this.page.goto(url, { waitUntil: 'networkidle' });
+      await this.page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
       
       // Analyze the flow based on description
       const tasks = this.parseFlowDescription(flowDescription);
@@ -112,7 +112,7 @@ export class OperatorAnalyzer {
     this.page = await context.newPage();
 
     try {
-      await this.page.goto(url, { waitUntil: 'networkidle' });
+      await this.page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
 
       // Look for authentication indicators
       const authIndicators = await this.page.evaluate(() => {
@@ -213,7 +213,7 @@ export class OperatorAnalyzer {
         ws.on('framereceived', frame => websocketMessages.push({ type: 'received', data: frame }));
       });
 
-      await this.page.goto(url, { waitUntil: 'networkidle' });
+      await this.page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
 
       // Wait for dynamic content
       for (const selector of waitForSelectors) {
@@ -305,7 +305,7 @@ export class OperatorAnalyzer {
     const results: any[] = [];
 
     try {
-      await this.page.goto(url, { waitUntil: 'networkidle' });
+      await this.page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
 
       for (const action of actions) {
         try {
@@ -445,7 +445,7 @@ export class OperatorAnalyzer {
       flow.push('Submitted login form');
 
       // Wait for navigation or error
-      await this.page!.waitForLoadState('networkidle');
+      await this.page!.waitForLoadState('domcontentloaded', { timeout: 15000 });
       
       // Check for MFA
       const mfaIndicators = await this.page!.evaluate(() => {

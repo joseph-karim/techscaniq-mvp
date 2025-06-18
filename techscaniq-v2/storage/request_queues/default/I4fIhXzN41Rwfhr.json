@@ -1,9 +1,0 @@
-{
-	"id": "I4fIhXzN41Rwfhr",
-	"json": "{\"id\":\"I4fIhXzN41Rwfhr\",\"url\":\"https://openai.com\",\"uniqueKey\":\"https://openai.com\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{}}",
-	"method": "GET",
-	"orderNo": 1749828644199,
-	"retryCount": 0,
-	"uniqueKey": "https://openai.com",
-	"url": "https://openai.com"
-}

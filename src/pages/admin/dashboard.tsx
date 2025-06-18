@@ -737,6 +737,37 @@ export default function AdminDashboardPage() {
                     </p>
                   </div>
                 </div>
+
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3">
+                        <h3 className="font-semibold">Fidelity Investments Canada</h3>
+                        <Badge variant="outline">Score: 88/100</Badge>
+                        <Badge variant="secondary" className="bg-purple-100 text-purple-800">Demo Report</Badge>
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        <p>Report Type: <span className="font-medium">Sales Intelligence</span></p>
+                        <p>Industry: <span className="font-medium">Financial Services</span></p>
+                        <p>Opportunity Score: <span className="font-medium">8.8/10</span></p>
+                        <p>Created: <span className="font-medium">Demo Report</span></p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" asChild>
+                        <Link to="/admin/sales-intelligence/fidelity">
+                          <FileText className="mr-1 h-3 w-3" />
+                          View Report
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="mt-3 pt-3 border-t">
+                    <p className="text-sm text-gray-700 line-clamp-2">
+                      Comprehensive digital ecosystem audit identifying $1.2M+ opportunity for performance optimization, AODA compliance, and personalization across Fidelity Canada's multi-property digital presence...
+                    </p>
+                  </div>
+                </div>
                 
                 {/* Real Reports */}
                 {realReports.map((report) => (

@@ -43,7 +43,20 @@ export async function researchRoutes(fastify: FastifyInstance) {
     '/start',
     {
       schema: {
-        body: StartResearchBody,
+        body: {
+          type: 'object',
+          properties: {
+            company: { type: 'string', minLength: 1 },
+            website: { type: 'string', format: 'uri' },
+            thesisType: { 
+              type: 'string', 
+              enum: ['growth', 'efficiency', 'innovation', 'custom'] 
+            },
+            customThesis: { type: 'string' },
+            metadata: { type: 'object' }
+          },
+          required: ['company', 'website', 'thesisType']
+        },
         response: {
           200: {
             type: 'object',
@@ -112,6 +125,7 @@ export async function researchRoutes(fastify: FastifyInstance) {
                 website,
                 thesisType,
                 customThesis,
+                metadata,
               },
             },
             {
@@ -125,7 +139,7 @@ export async function researchRoutes(fastify: FastifyInstance) {
         } else {
           // Direct execution without queues (for development)
           const { runDeepResearch } = await import('../../orchestrator/graph');
-          runDeepResearch(company, website, thesisType, customThesis).catch(error => {
+          runDeepResearch(company, website, thesisType, customThesis, metadata).catch(error => {
             fastify.log.error({ error, researchId }, 'Research failed');
           });
         }
@@ -158,7 +172,13 @@ export async function researchRoutes(fastify: FastifyInstance) {
     '/:id/status',
     {
       schema: {
-        params: ResearchStatusParams,
+        params: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', format: 'uuid' }
+          },
+          required: ['id']
+        },
         response: {
           200: {
             type: 'object',
@@ -223,7 +243,13 @@ export async function researchRoutes(fastify: FastifyInstance) {
     '/:id/report',
     {
       schema: {
-        params: GetReportParams,
+        params: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', format: 'uuid' }
+          },
+          required: ['id']
+        },
         response: {
           200: {
             type: 'object',

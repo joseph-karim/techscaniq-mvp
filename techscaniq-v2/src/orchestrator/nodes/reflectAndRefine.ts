@@ -81,6 +81,8 @@ Return ONLY a JSON object:
           focusAreas: ['financial metrics', 'competitive analysis'],
           adjustments: ['expand search scope']
         },
+        insights: [],
+        nextSteps: ['gather more evidence', 'expand search criteria'],
         recommendNextIteration: iterationCount < 2
       };
     }
@@ -95,9 +97,9 @@ Return ONLY a JSON object:
     console.log(`📋 Reflection complete:`);
     console.log(`   Iteration: ${iterationCount + 1}/${state.maxIterations}`);
     console.log(`   Evidence collected: ${evidence.length}`);
-    console.log(`   Gaps identified: ${reflectionAnalysis.gaps.length}`);
-    console.log(`   Key insights: ${reflectionAnalysis.insights.length}`);
-    console.log(`   Next steps: ${reflectionAnalysis.nextSteps.length}`);
+    console.log(`   Gaps identified: ${reflectionAnalysis.gaps?.length || 0}`);
+    console.log(`   Key insights: ${reflectionAnalysis.insights?.length || 0}`);
+    console.log(`   Next steps: ${reflectionAnalysis.nextSteps?.length || 0}`);
     
     return {
       iterationCount: iterationCount + 1,

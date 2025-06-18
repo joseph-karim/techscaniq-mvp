@@ -100,7 +100,14 @@ export class EvidenceCollectorIntegration {
         errorData += data.toString();
       });
 
+      // Add timeout to prevent hanging
+      const timeout = setTimeout(() => {
+        pythonProcess.kill('SIGTERM');
+        reject(new Error('Crawl4AI timeout after 5 minutes'));
+      }, 300000); // 5 minute timeout
+
       pythonProcess.on('close', (code) => {
+        clearTimeout(timeout);
         if (code !== 0) {
           console.error('Crawl4AI error:', errorData);
           reject(new Error(`Crawl4AI process exited with code ${code}`));

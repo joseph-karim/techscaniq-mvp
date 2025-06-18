@@ -6,10 +6,11 @@ import { PROMPTS } from '../../prompts/structured-prompts';
 import { QualityEvaluationSchema, parseStructuredOutput } from '../../schemas/structured-outputs';
 
 // Use o3 for quality evaluation as user suggested
+// Note: o3 model only supports default temperature (1.0)
 const model = new ChatOpenAI({
   apiKey: config.OPENAI_API_KEY,
   modelName: models.openai.o3,
-  temperature: 0.1,
+  // temperature: 1.0 is the default and only supported value for o3
 });
 
 export async function evaluateQualityNode(state: ResearchState): Promise<Partial<ResearchState>> {

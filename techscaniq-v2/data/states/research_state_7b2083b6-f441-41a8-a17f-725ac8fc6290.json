@@ -1,0 +1,44 @@
+{
+  "thesis": {
+    "id": "7b2083b6-f441-41a8-a17f-725ac8fc6290",
+    "company": "Fidelity Investments Canada",
+    "website": "https://www.fidelity.ca",
+    "type": "custom",
+    "customThesis": "Sales Intelligence: Evaluate Fidelity Canada as a prospect for Interad's digital agency services including web development, UX/UI design, and digital transformation",
+    "statement": "",
+    "pillars": [],
+    "createdAt": "2025-06-18T00:15:55.591Z",
+    "updatedAt": "2025-06-18T00:15:55.591Z"
+  },
+  "evidence": [],
+  "questions": [],
+  "report": {
+    "content": "",
+    "sections": [],
+    "citations": []
+  },
+  "status": "interpreting_thesis",
+  "iterationCount": 0,
+  "evidenceCount": 0,
+  "queuedJobs": [],
+  "metadata": {
+    "scanId": "532c3609-788e-45c7-9879-29ab59289ed5",
+    "reportType": "sales-intelligence",
+    "salesContext": {
+      "vendorCompany": "Interad",
+      "offering": "Full-service digital agency: web development, UX/UI design, digital marketing, digital transformation",
+      "useCases": [
+        "Website redesign and modernization",
+        "Digital customer experience optimization",
+        "Marketing automation implementation",
+        "Mobile app development",
+        "Analytics and data visualization"
+      ],
+      "budgetRange": {
+        "min": 250000,
+        "max": 2000000,
+        "currency": "USD"
+      }
+    }
+  }
+}

@@ -112,11 +112,13 @@ export class WebTechDetector {
       // Use Playwright to get full page context
       const crawler = new PlaywrightCrawler({
         maxRequestsPerCrawl: 1,
+        requestHandlerTimeoutSecs: 20, // 20 second timeout
+        navigationTimeoutSecs: 15, // 15 second navigation timeout
         async requestHandler({ page, request }) {
           const startTime = Date.now();
 
-          // Wait for page to load
-          await page.waitForLoadState('networkidle');
+          // Wait for page to load - use domcontentloaded instead of networkidle to prevent hanging
+          await page.waitForLoadState('domcontentloaded');
           result.performance.loadTime = Date.now() - startTime;
 
           // Get page metadata

@@ -141,7 +141,7 @@ export class DocumentAnalyzer {
       this.crawler.router.addDefaultHandler(async ({ page, request }) => {
         try {
           // Wait for content to load
-          await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+          await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
 
           // Extract content from page
           const content = await page.evaluate(() => {

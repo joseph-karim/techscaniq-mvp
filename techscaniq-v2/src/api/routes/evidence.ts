@@ -31,7 +31,23 @@ export async function evidenceRoutes(fastify: FastifyInstance) {
     '/search',
     {
       schema: {
-        body: SearchEvidenceBody,
+        body: {
+          type: 'object',
+          properties: {
+            query: { type: 'string', minLength: 1 },
+            filters: {
+              type: 'object',
+              properties: {
+                thesisId: { type: 'string', format: 'uuid' },
+                pillarId: { type: 'string' },
+                minQuality: { type: 'number', minimum: 0, maximum: 1 },
+                sourceType: { type: 'string' }
+              }
+            },
+            limit: { type: 'integer', minimum: 1, maximum: 100, default: 10 }
+          },
+          required: ['query']
+        },
         response: {
           200: {
             type: 'object',
@@ -134,9 +150,13 @@ export async function evidenceRoutes(fastify: FastifyInstance) {
     '/:id',
     {
       schema: {
-        params: z.object({
-          id: z.string().uuid(),
-        }),
+        params: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', format: 'uuid' }
+          },
+          required: ['id']
+        },
         response: {
           200: {
             type: 'object',
@@ -155,7 +175,7 @@ export async function evidenceRoutes(fastify: FastifyInstance) {
     },
     async (request, reply) => {
       try {
-        const { id } = request.params;
+        // const { id } = request.params;
 
         // For now, return a not found error
         // In a full implementation, this would fetch from a evidence table
