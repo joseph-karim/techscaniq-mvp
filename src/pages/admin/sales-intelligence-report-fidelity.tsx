@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useParams, Navigate } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
@@ -375,14 +374,8 @@ const valueMetrics = [
 ]
 
 export default function FidelitySalesIntelligenceReport() {
-  const { clientId } = useParams()
   const [selectedCitation, setSelectedCitation] = useState<Citation | null>(null)
   const [activeTab, setActiveTab] = useState('overview')
-
-  // Route protection
-  if (clientId !== '2') {
-    return <Navigate to="/admin/sales-intelligence" replace />
-  }
 
   const handleViewEvidence = (evidenceIds: string[], claim: string) => {
     const citation = createCitation(claim, evidenceIds)

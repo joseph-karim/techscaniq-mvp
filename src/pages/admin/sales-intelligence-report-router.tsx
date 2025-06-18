@@ -5,6 +5,8 @@ import SalesIntelligenceReportFidelity from './sales-intelligence-report-fidelit
 export default function AdminSalesIntelligenceReportPage() {
   const { accountId } = useParams<{ accountId: string }>()
   
+  console.log('Sales Intelligence Router - accountId:', accountId)
+  
   // Route to specific company reports based on accountId
   switch (accountId?.toLowerCase()) {
     case 'bmo':
