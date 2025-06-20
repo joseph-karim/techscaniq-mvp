@@ -49,6 +49,12 @@ services:
         fromDatabase:
           name: ai-keys
           property: google_key
+      - key: DISABLE_RATE_LIMITING
+        value: "true"
+      - key: REDIS_URL
+        fromDatabase:
+          name: redis-queue
+          property: connectionString
     autoDeploy: true
     buildFilter:
       paths:
