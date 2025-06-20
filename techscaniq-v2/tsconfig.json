@@ -13,12 +13,12 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true,
+    "noEmit": false,
     "incremental": true,
     "tsBuildInfoFile": "./tsconfig.tsbuildinfo",
     "allowJs": true,
     "types": ["node"]
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "start-api.ts"],
   "exclude": ["node_modules", "dist"]
 }
