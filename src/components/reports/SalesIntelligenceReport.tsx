@@ -73,7 +73,7 @@ export function SalesIntelligenceReport({ report }: SalesIntelligenceReportProps
 
   // Extract strategic imperatives from report sections
   const strategicImperatives = report.report.sections
-    ?.filter(s => s.title && (s.title.toLowerCase().includes('strategic') || s.title.toLowerCase().includes('initiative')))
+    ?.filter(s => s.title && typeof s.title === 'string' && (s.title.toLowerCase().includes('strategic') || s.title.toLowerCase().includes('initiative')))
     ?.map((s, i) => ({
       title: s.title,
       description: s.content?.substring(0, 200) + '...' || '',
@@ -84,7 +84,7 @@ export function SalesIntelligenceReport({ report }: SalesIntelligenceReportProps
 
   // Extract technology stack information
   const techStackData = report.evidence
-    ?.filter(e => e.content && (e.content.toLowerCase().includes('technology') || e.content.toLowerCase().includes('platform')))
+    ?.filter(e => e.content && typeof e.content === 'string' && (e.content.toLowerCase().includes('technology') || e.content.toLowerCase().includes('platform')))
     ?.slice(0, 8)
     ?.map(e => {
       const categories = ['Analytics', 'CRM', 'Marketing', 'Infrastructure', 'Security', 'Data Platform']
@@ -100,7 +100,7 @@ export function SalesIntelligenceReport({ report }: SalesIntelligenceReportProps
 
   // Create gap analysis from report sections
   const gapData = report.report.sections
-    ?.filter(s => s.title && (s.title.toLowerCase().includes('gap') || s.title.toLowerCase().includes('opportunity')))
+    ?.filter(s => s.title && typeof s.title === 'string' && (s.title.toLowerCase().includes('gap') || s.title.toLowerCase().includes('opportunity')))
     ?.map(s => ({
       area: s.title,
       gap: 'Current state limitations identified',

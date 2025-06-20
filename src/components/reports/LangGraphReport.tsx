@@ -142,7 +142,7 @@ export function LangGraphReport({ report }: LangGraphReportProps) {
   const getDecisionIcon = (decision: string) => {
     if (!decision) return <Info className="h-5 w-5 text-blue-600" />
     
-    switch (decision && decision.toLowerCase()) {
+    switch (decision && typeof decision === 'string' ? decision.toLowerCase() : '') {
       case 'strong buy':
       case 'buy':
         return <TrendingUp className="h-5 w-5 text-green-600" />
