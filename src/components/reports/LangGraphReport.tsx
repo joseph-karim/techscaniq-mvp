@@ -102,14 +102,14 @@ export function LangGraphReport({ report }: LangGraphReportProps) {
       .filter(e => evidenceIds.includes(e.id))
       .map(e => ({
         id: e.id,
-        title: e.source.name,
-        source: e.source.name,
-        excerpt: e.content.substring(0, 300) + '...',
+        title: e.source?.name || 'Unknown Source',
+        source: e.source?.name || 'Unknown Source',
+        excerpt: e.content ? e.content.substring(0, 300) + '...' : '',
         type: 'document' as const,
-        url: e.source.url,
+        url: e.source?.url,
         metadata: {
           lastModified: new Date().toISOString(),
-          confidence: e.metadata?.confidence || e.qualityScore.overall * 100
+          confidence: e.metadata?.confidence || e.qualityScore?.overall * 100 || 0
         }
       }))
 
@@ -140,7 +140,9 @@ export function LangGraphReport({ report }: LangGraphReportProps) {
   }
 
   const getDecisionIcon = (decision: string) => {
-    switch (decision.toLowerCase()) {
+    if (!decision) return <Info className="h-5 w-5 text-blue-600" />
+    
+    switch (decision && decision.toLowerCase()) {
       case 'strong buy':
       case 'buy':
         return <TrendingUp className="h-5 w-5 text-green-600" />
@@ -320,8 +322,10 @@ export function LangGraphReport({ report }: LangGraphReportProps) {
                   report.report.metadata.confidenceLevel === 'medium' ? 'secondary' :
                   'destructive'
                 }>
-                  {report.report.metadata.confidenceLevel.charAt(0).toUpperCase() + 
-                   report.report.metadata.confidenceLevel.slice(1)}
+                  {report.report.metadata.confidenceLevel
+                    ? report.report.metadata.confidenceLevel.charAt(0).toUpperCase() + 
+                      report.report.metadata.confidenceLevel.slice(1)
+                    : 'Unknown'}
                 </Badge>
               </div>
             )}
@@ -451,25 +455,25 @@ export function LangGraphReport({ report }: LangGraphReportProps) {
         </CardHeader>
         <CardContent>
           <div className="space-y-2 max-h-96 overflow-y-auto">
-            {report.evidence.slice(0, 20).map((evidence) => (
+            {(report.evidence || []).slice(0, 20).map((evidence) => (
               <div
                 key={evidence.id}
                 className="p-3 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors"
                 onClick={() => setSelectedCitation(createCitation(
-                  evidence.source.name,
+                  evidence.source?.name || 'Unknown Source',
                   [evidence.id]
                 ))}
               >
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium flex items-center gap-2">
-                    [{evidence.id}] {evidence.source.name}
-                    {evidence.source.url && (
+                    [{evidence.id}] {evidence.source?.name || 'Unknown Source'}
+                    {evidence.source?.url && (
                       <ExternalLink className="h-3 w-3" />
                     )}
                   </p>
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="text-xs">
-                      Quality: {(evidence.qualityScore.overall * 100).toFixed(0)}%
+                      Quality: {((evidence.qualityScore?.overall || 0) * 100).toFixed(0)}%
                     </Badge>
                     {evidence.metadata?.confidence && (
                       <Badge variant="outline" className="text-xs">
@@ -479,7 +483,7 @@ export function LangGraphReport({ report }: LangGraphReportProps) {
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                  {evidence.content}
+                  {evidence.content || 'No content available'}
                 </p>
               </div>
             ))}

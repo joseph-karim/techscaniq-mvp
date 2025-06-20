@@ -250,8 +250,9 @@ export interface InvestmentThesisData {
 }
 
 interface InvestmentThesisSelectorProps {
-  value: InvestmentThesisData
-  onChange: (value: InvestmentThesisData) => void
+  value: string
+  onChange: (value: string, thesis?: InvestmentThesisData) => void
+  showSavedTheses?: boolean
 }
 
 const FOCUS_AREAS = [
@@ -272,12 +273,43 @@ const FOCUS_AREAS = [
   { value: 'documentation', label: 'Well-Documented' }
 ]
 
-export function InvestmentThesisSelector({ value, onChange }: InvestmentThesisSelectorProps) {
+export function InvestmentThesisSelector({ value, onChange, showSavedTheses = true }: InvestmentThesisSelectorProps) {
   const [showCustomization, setShowCustomization] = useState(false)
+  const [currentData, setCurrentData] = useState<InvestmentThesisData>(() => {
+    // Initialize with default data based on value prop
+    if (value && PE_THESIS_TYPES[value as ThesisType]) {
+      const thesis = PE_THESIS_TYPES[value as ThesisType]
+      return {
+        thesisType: value as ThesisType,
+        criteria: thesis.criteria.map((c, i) => ({
+          id: `criterion-${i}`,
+          name: c.name,
+          weight: c.weight,
+          description: c.description
+        })),
+        focusAreas: [...thesis.focusAreas],
+        timeHorizon: thesis.timeHorizon,
+        targetMultiple: thesis.targetMultiple
+      }
+    }
+    // Default to organic growth thesis
+    const defaultThesis = PE_THESIS_TYPES['accelerate-organic-growth']
+    return {
+      thesisType: 'accelerate-organic-growth',
+      criteria: defaultThesis.criteria.map((c, i) => ({
+        id: `criterion-${i}`,
+        name: c.name,
+        weight: c.weight,
+        description: c.description
+      })),
+      focusAreas: [...defaultThesis.focusAreas],
+      timeHorizon: defaultThesis.timeHorizon,
+      targetMultiple: defaultThesis.targetMultiple
+    }
+  })
   const lastProcessedValue = useRef<string>('')
   
-  // Since parent now initializes with proper default, value should never be null
-  const currentValue = value!
+  const currentValue = currentData
   
   const handleThesisTypeChange = (thesisType: ThesisType | 'custom') => {
     // Debounce: ignore if we just processed this exact same value
@@ -292,8 +324,10 @@ export function InvestmentThesisSelector({ value, onChange }: InvestmentThesisSe
     
     lastProcessedValue.current = thesisType
     
+    let newData: InvestmentThesisData
+    
     if (thesisType === 'custom') {
-      onChange({
+      newData = {
         thesisType: 'custom',
         customThesisName: '',
         customThesisDescription: '',
@@ -305,10 +339,10 @@ export function InvestmentThesisSelector({ value, onChange }: InvestmentThesisSe
         focusAreas: ['scalable-architecture', 'modern-tech-stack'],
         timeHorizon: '3-5 years',
         targetMultiple: '5-10x'
-      })
+      }
     } else {
       const thesis = PE_THESIS_TYPES[thesisType]
-      onChange({
+      newData = {
         thesisType,
         criteria: thesis.criteria.map((c, i) => ({
           id: `criterion-${i}`,
@@ -319,8 +353,11 @@ export function InvestmentThesisSelector({ value, onChange }: InvestmentThesisSe
         focusAreas: [...thesis.focusAreas],
         timeHorizon: thesis.timeHorizon,
         targetMultiple: thesis.targetMultiple
-      })
+      }
     }
+    
+    setCurrentData(newData)
+    onChange(thesisType, newData)
   }
   
   const updateCriterion = (id: string, updates: Partial<CustomCriterion>) => {
@@ -340,7 +377,9 @@ export function InvestmentThesisSelector({ value, onChange }: InvestmentThesisSe
       })
     }
     
-    onChange({ ...currentValue, criteria: newCriteria })
+    const updatedData = { ...currentValue, criteria: newCriteria }
+    setCurrentData(updatedData)
+    onChange(currentValue.thesisType, updatedData)
   }
   
   const addCriterion = () => {
@@ -350,24 +389,30 @@ export function InvestmentThesisSelector({ value, onChange }: InvestmentThesisSe
       weight: 10,
       description: 'Description of evaluation criterion'
     }
-    onChange({
+    const updatedData = {
       ...currentValue,
       criteria: [...currentValue.criteria, newCriterion]
-    })
+    }
+    setCurrentData(updatedData)
+    onChange(currentValue.thesisType, updatedData)
   }
   
   const removeCriterion = (id: string) => {
-    onChange({
+    const updatedData = {
       ...currentValue,
       criteria: currentValue.criteria.filter(c => c.id !== id)
-    })
+    }
+    setCurrentData(updatedData)
+    onChange(currentValue.thesisType, updatedData)
   }
   
   const toggleFocusArea = (area: string) => {
     const newFocusAreas = currentValue.focusAreas.includes(area as any)
       ? currentValue.focusAreas.filter(a => a !== area)
       : [...currentValue.focusAreas, area as any]
-    onChange({ ...currentValue, focusAreas: newFocusAreas })
+    const updatedData = { ...currentValue, focusAreas: newFocusAreas }
+    setCurrentData(updatedData)
+    onChange(currentValue.thesisType, updatedData)
   }
   
   const selectedThesis = currentValue.thesisType !== 'custom' 
@@ -376,6 +421,19 @@ export function InvestmentThesisSelector({ value, onChange }: InvestmentThesisSe
   
   return (
     <div className="space-y-6">
+      {/* Saved Configurations */}
+      {showSavedTheses && (
+        <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/30">
+          <div>
+            <p className="text-sm font-medium">Load Saved Investment Thesis</p>
+            <p className="text-xs text-muted-foreground">Use a previously saved configuration</p>
+          </div>
+          <Button variant="outline" size="sm" onClick={() => console.log('Load saved thesis')}>
+            Load Thesis
+          </Button>
+        </div>
+      )}
+      
       {/* Thesis Type Selection */}
       <Card>
         <CardHeader>
@@ -484,7 +542,11 @@ export function InvestmentThesisSelector({ value, onChange }: InvestmentThesisSe
                 <Input
                   id="custom-name"
                   value={currentValue.customThesisName || ''}
-                  onChange={(e) => onChange({ ...currentValue, customThesisName: e.target.value })}
+                  onChange={(e) => {
+                    const updatedData = { ...currentValue, customThesisName: e.target.value }
+                    setCurrentData(updatedData)
+                    onChange('custom', updatedData)
+                  }}
                   placeholder="e.g., AI-First Growth Strategy"
                 />
               </div>
@@ -493,7 +555,11 @@ export function InvestmentThesisSelector({ value, onChange }: InvestmentThesisSe
                 <Textarea
                   id="custom-description"
                   value={currentValue.customThesisDescription || ''}
-                  onChange={(e) => onChange({ ...currentValue, customThesisDescription: e.target.value })}
+                  onChange={(e) => {
+                    const updatedData = { ...currentValue, customThesisDescription: e.target.value }
+                    setCurrentData(updatedData)
+                    onChange('custom', updatedData)
+                  }}
                   placeholder="Describe your investment thesis and key value creation levers..."
                 />
               </div>
@@ -660,7 +726,11 @@ export function InvestmentThesisSelector({ value, onChange }: InvestmentThesisSe
             <Label htmlFor="time-horizon">Investment Timeline</Label>
             <Select
               value={currentValue.timeHorizon}
-              onValueChange={(value) => onChange({ ...currentValue, timeHorizon: value })}
+              onValueChange={(value) => {
+                const updatedData = { ...currentValue, timeHorizon: value }
+                setCurrentData(updatedData)
+                onChange(currentValue.thesisType, updatedData)
+              }}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -679,7 +749,11 @@ export function InvestmentThesisSelector({ value, onChange }: InvestmentThesisSe
             <Label htmlFor="target-multiple">Target Multiple</Label>
             <Select
               value={currentValue.targetMultiple}
-              onValueChange={(value) => onChange({ ...currentValue, targetMultiple: value })}
+              onValueChange={(value) => {
+                const updatedData = { ...currentValue, targetMultiple: value }
+                setCurrentData(updatedData)
+                onChange(currentValue.thesisType, updatedData)
+              }}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -707,7 +781,11 @@ export function InvestmentThesisSelector({ value, onChange }: InvestmentThesisSe
         <CardContent>
           <Textarea
             value={currentValue.notes || ''}
-            onChange={(e) => onChange({ ...currentValue, notes: e.target.value })}
+            onChange={(e) => {
+              const updatedData = { ...currentValue, notes: e.target.value }
+              setCurrentData(updatedData)
+              onChange(currentValue.thesisType, updatedData)
+            }}
             placeholder="e.g., Must have SOC 2 compliance, avoid companies with PHP legacy systems, focus on API-first architecture..."
             rows={4}
           />

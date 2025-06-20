@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Clock, Filter, Search, MoreHorizontal, FileText, Zap } from 'lucide-react'
+import { Clock, Filter, Search, MoreHorizontal, FileText, Zap, Plus } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -9,7 +9,11 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { formatDate } from '@/lib/utils'
+import { UnifiedScanConfigForm, type ScanConfiguration } from '@/components/scans/UnifiedScanConfigForm'
+import { useAuth } from '@/lib/auth/auth-provider'
+import { toast } from 'sonner'
 
 interface ScanRequest {
   id: string
@@ -25,10 +29,12 @@ interface ScanRequest {
 }
 
 export default function AdvisorQueuePage() {
+  const { user } = useAuth()
   const [activeTab, setActiveTab] = useState('pending')
   const [searchQuery, setSearchQuery] = useState('')
   const [scanRequests, setScanRequests] = useState<ScanRequest[]>([])
   const [loading, setLoading] = useState(true)
+  const [showNewScanDialog, setShowNewScanDialog] = useState(false)
   
   // Update scan status
   const updateScanStatus = async (scanId: string, newStatus: string) => {
@@ -96,6 +102,59 @@ export default function AdvisorQueuePage() {
     return matchesTab && matchesSearch
   })
   
+  // Handle new scan configuration submission
+  const handleNewScan = async (config: ScanConfiguration) => {
+    if (!user) return
+
+    try {
+      // Create scan request with advisor/queue metadata
+      const scanRequest = {
+        company_name: config.companyName,
+        website_url: config.websiteUrl,
+        company_description: config.companyDescription,
+        report_type: config.reportType.replace('_', '-'),
+        industry: config.targetIndustry,
+        priority: config.priority || 'medium',
+        requestor_id: user.id,
+        requestor_email: user.email,
+        requestor_type: 'advisor',
+        status: 'pending',
+        metadata: {
+          advisor_initiated: true,
+          initiated_by: user.email,
+          initiated_at: new Date().toISOString(),
+          queue_priority: config.queuePriority,
+        },
+      }
+
+      // Add investment thesis for PE reports
+      if (config.reportType === 'pe_due_diligence' && config.investmentThesis) {
+        (scanRequest.metadata as any).investment_thesis = {
+          thesis_type: config.investmentThesis,
+          thesis_tags: config.thesisTags,
+          primary_criteria: config.primaryCriteria,
+          secondary_criteria: config.secondaryCriteria,
+        }
+      }
+
+      // Insert scan request
+      const { error } = await supabase
+        .from('scan_requests')
+        .insert(scanRequest)
+        .select()
+        .single()
+
+      if (error) throw error
+
+      toast.success('Scan request added to queue successfully')
+      setShowNewScanDialog(false)
+    } catch (error) {
+      console.error('Error creating scan:', error)
+      toast.error('Failed to create scan request')
+      throw error
+    }
+  }
+  
   return (
     <div className="space-y-6">
       <div className="flex flex-col space-y-2 md:flex-row md:items-center md:justify-between md:space-y-0">
@@ -105,6 +164,10 @@ export default function AdvisorQueuePage() {
             Manage and review technical due diligence scans
           </p>
         </div>
+        <Button onClick={() => setShowNewScanDialog(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          New Scan
+        </Button>
       </div>
       
       <div className="flex flex-col space-y-4 md:flex-row md:items-center md:space-x-4 md:space-y-0">
@@ -327,6 +390,27 @@ export default function AdvisorQueuePage() {
           </Card>
         </TabsContent>
       </Tabs>
+      
+      {/* New Scan Configuration Dialog */}
+      <Dialog open={showNewScanDialog} onOpenChange={setShowNewScanDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Configure New Scan</DialogTitle>
+            <DialogDescription>
+              Add a new scan request to the advisor queue
+            </DialogDescription>
+          </DialogHeader>
+          <UnifiedScanConfigForm
+            mode="advisor-queue"
+            userRole="advisor"
+            onSubmit={handleNewScan}
+            onCancel={() => setShowNewScanDialog(false)}
+            submitButtonText="Add to Queue"
+            layout="tabs"
+            showSavedConfigurations={true}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

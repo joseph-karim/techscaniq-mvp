@@ -1,26 +1,24 @@
 'use client'
 
-import React, { useState } from 'react'
+import React from 'react'
 import { useRouter } from 'next/navigation'
+import { UnifiedScanConfigForm, type ScanConfiguration } from '@/components/scans/UnifiedScanConfigForm'
 import { useReportOrchestrator } from '../hooks/useReportOrchestrator'
+import { toast } from 'sonner'
 
 export function QuickScanForm() {
   const router = useRouter()
   const { generateReport, loading, error, progress } = useReportOrchestrator()
-  
-  const [companyName, setCompanyName] = useState('')
-  const [websiteUrl, setWebsiteUrl] = useState('')
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    if (!companyName || !websiteUrl) {
+  const handleSubmit = async (config: ScanConfiguration) => {
+    if (!config.companyName || !config.websiteUrl) {
+      toast.error('Company name and website URL are required')
       return
     }
 
     const report = await generateReport({
-      name: companyName,
-      website: websiteUrl
+      name: config.companyName,
+      website: config.websiteUrl
     })
 
     if (report) {
@@ -33,57 +31,27 @@ export function QuickScanForm() {
     <div className="bg-white rounded-lg shadow-sm border p-6">
       <h2 className="text-2xl font-bold mb-6">Quick Company Scan</h2>
       
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-1">
-            Company Name
-          </label>
-          <input
-            id="company"
-            type="text"
-            value={companyName}
-            onChange={(e) => setCompanyName(e.target.value)}
-            placeholder="e.g., Stripe"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
+      <UnifiedScanConfigForm
+        mode="quick-scan"
+        userRole="user"
+        onSubmit={handleSubmit}
+        submitButtonText="Generate Report"
+        layout="single-page"
+        showSavedConfigurations={false}
+        hideFields={['priority', 'scanDepth', 'collectionNotes']}
+      />
+
+      {error && (
+        <div className="bg-red-50 text-red-700 p-3 rounded-md text-sm mt-4">
+          {error}
         </div>
+      )}
 
-        <div>
-          <label htmlFor="website" className="block text-sm font-medium text-gray-700 mb-1">
-            Website URL
-          </label>
-          <input
-            id="website"
-            type="url"
-            value={websiteUrl}
-            onChange={(e) => setWebsiteUrl(e.target.value)}
-            placeholder="e.g., https://stripe.com"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
+      {loading && progress && (
+        <div className="bg-blue-50 text-blue-700 p-3 rounded-md text-sm mt-4">
+          {progress}
         </div>
-
-        {error && (
-          <div className="bg-red-50 text-red-700 p-3 rounded-md text-sm">
-            {error}
-          </div>
-        )}
-
-        {loading && progress && (
-          <div className="bg-blue-50 text-blue-700 p-3 rounded-md text-sm">
-            {progress}
-          </div>
-        )}
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-        >
-          {loading ? 'Generating Report...' : 'Generate Report'}
-        </button>
-      </form>
+      )}
 
       <div className="mt-6 p-4 bg-gray-50 rounded-md">
         <h3 className="text-sm font-semibold text-gray-700 mb-2">What happens next:</h3>
@@ -95,4 +63,4 @@ export function QuickScanForm() {
       </div>
     </div>
   )
-} 
+}

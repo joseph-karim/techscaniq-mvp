@@ -41,6 +41,7 @@ import {
   Radar 
 } from 'recharts'
 import { cn } from '@/lib/utils'
+import { checkReportHealth } from '@/utils/report-validators'
 
 interface SalesIntelligenceReportProps {
   report: {
@@ -60,13 +61,22 @@ interface SalesIntelligenceReportProps {
 
 export function SalesIntelligenceReport({ report }: SalesIntelligenceReportProps) {
   const [expandedSection, setExpandedSection] = useState<number | null>(null)
+  
+  // Validate report health
+  const healthCheck = checkReportHealth(report)
+  if (!healthCheck.isValid) {
+    console.error('Invalid report structure:', healthCheck.errors)
+  }
+  if (healthCheck.warnings.length > 0) {
+    console.warn('Report warnings:', healthCheck.warnings)
+  }
 
   // Extract strategic imperatives from report sections
   const strategicImperatives = report.report.sections
-    ?.filter(s => s.title.toLowerCase().includes('strategic') || s.title.toLowerCase().includes('initiative'))
+    ?.filter(s => s.title && (s.title.toLowerCase().includes('strategic') || s.title.toLowerCase().includes('initiative')))
     ?.map((s, i) => ({
       title: s.title,
-      description: s.content.substring(0, 200) + '...',
+      description: s.content?.substring(0, 200) + '...' || '',
       adobeAngle: 'Adobe solutions directly address this initiative through our integrated platform.',
       evidenceIds: s.citations || [],
       icon: [Target, TrendingUp, Users, Brain][i % 4]
@@ -74,14 +84,14 @@ export function SalesIntelligenceReport({ report }: SalesIntelligenceReportProps
 
   // Extract technology stack information
   const techStackData = report.evidence
-    ?.filter(e => e.content.toLowerCase().includes('technology') || e.content.toLowerCase().includes('platform'))
+    ?.filter(e => e.content && (e.content.toLowerCase().includes('technology') || e.content.toLowerCase().includes('platform')))
     ?.slice(0, 8)
     ?.map(e => {
       const categories = ['Analytics', 'CRM', 'Marketing', 'Infrastructure', 'Security', 'Data Platform']
       return {
         category: categories[Math.floor(Math.random() * categories.length)],
-        technology: e.source.name.split(' - ')[0],
-        evidence: e.content.substring(0, 100) + '...',
+        technology: e.source?.name?.split(' - ')[0] || 'Unknown',
+        evidence: e.content?.substring(0, 100) + '...' || '',
         evidenceIds: [e.id],
         confidence: e.qualityScore?.overall > 0.8 ? 'High' : 'Medium',
         implications: 'Opportunity for Adobe integration and enhancement.'
@@ -90,7 +100,7 @@ export function SalesIntelligenceReport({ report }: SalesIntelligenceReportProps
 
   // Create gap analysis from report sections
   const gapData = report.report.sections
-    ?.filter(s => s.title.toLowerCase().includes('gap') || s.title.toLowerCase().includes('opportunity'))
+    ?.filter(s => s.title && (s.title.toLowerCase().includes('gap') || s.title.toLowerCase().includes('opportunity')))
     ?.map(s => ({
       area: s.title,
       gap: 'Current state limitations identified',
