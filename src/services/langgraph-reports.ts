@@ -234,28 +234,39 @@ export async function listLangGraphReports(params?: {
 
 // Load with fallback to local file for demo reports
 export async function loadLangGraphReportWithFallback(reportId: string): Promise<LangGraphReport | null> {
-  try {
-    // Try API first
-    return await loadLangGraphReport(reportId)
-  } catch (error) {
-    console.log('API failed, trying local file fallback for report:', reportId)
-    
-    // For the CIBC report, try loading from local file
-    if (reportId === '9f8e7d6c-5b4a-3210-fedc-ba9876543210' || reportId === 'cibc-adobe-sales-2024') {
-      try {
-        // Import the local report data
-        const response = await fetch(`/data/langgraph-reports/9f8e7d6c-5b4a-3210-fedc-ba9876543210.json`)
-        if (response.ok) {
-          const data = await response.json()
-          console.log('Loaded report from local file')
-          return data
-        }
-      } catch (localError) {
-        console.error('Failed to load local file:', localError)
+  // Check if we're dealing with a demo report that should use local file
+  const demoReports: Record<string, string> = {
+    '9f8e7d6c-5b4a-3210-fedc-ba9876543210': '/data/langgraph-reports/9f8e7d6c-5b4a-3210-fedc-ba9876543210.json',
+    'cibc-adobe-sales-2024': '/data/langgraph-reports/9f8e7d6c-5b4a-3210-fedc-ba9876543210.json'
+  }
+
+  // For demo reports, always use local file
+  if (demoReports[reportId]) {
+    try {
+      console.log('Loading demo report from local file:', reportId)
+      const response = await fetch(demoReports[reportId])
+      if (response.ok) {
+        const data = await response.json()
+        console.log('Successfully loaded demo report from local file')
+        return data
       }
+    } catch (localError) {
+      console.error('Failed to load local demo file:', localError)
+    }
+  }
+
+  try {
+    // For non-demo reports, try API
+    return await loadLangGraphReport(reportId)
+  } catch (error: any) {
+    console.error('API failed for report:', reportId, error)
+    
+    // Check if it's a CSP error
+    if (error.message?.includes('Content Security Policy') || error.message?.includes('Failed to fetch')) {
+      console.warn('CSP blocking API access. For production, ensure VITE_API_URL is set and CSP headers allow the API domain.')
     }
     
-    // Re-throw the original error if no fallback available
+    // Re-throw the error
     throw error
   }
 }
