@@ -28,7 +28,7 @@ async function enhanceEvidenceWithRepoAnalysis(evidence: any[]) {
   // Analyze each repository
   const repoAnalyses = []
   for (const repoUrl of githubUrls) {
-    const repoName = repoUrl.split('/').slice(-2).join('/')
+    const repoName = repoUrl?.split('/').slice(-2).join('/') || 'unknown'
     
     // Read README
     const readFileTool = tools.find(t => t.name === 'read_file')

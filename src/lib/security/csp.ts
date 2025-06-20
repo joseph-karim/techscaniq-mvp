@@ -67,7 +67,7 @@ export const CSP_SOURCES = {
     'https://api.anthropic.com',
     isDevelopment && 'http://localhost:*',
     isDevelopment && 'ws://localhost:*'
-  ].filter(Boolean)
+  ].filter(Boolean) as string[]
 };
 
 // Generate CSP header string

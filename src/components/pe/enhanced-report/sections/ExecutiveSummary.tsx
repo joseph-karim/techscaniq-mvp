@@ -480,7 +480,7 @@ export function ExecutiveSummary({ data, citations = [], onCitationClick }: Exec
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           citation={selectedCitation}
-          onAddNote={(note) => {
+          onAddNote={(_note) => {
             // Handle note addition - could be passed up to parent component
             // TODO: Implement note persistence
           }}

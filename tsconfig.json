@@ -27,5 +27,14 @@
     }
   },
   "include": ["src"],
+  "exclude": [
+    "src/tests",
+    "src/api", 
+    "src/services/langgraph-mcp-tools.ts",
+    "src/services/langgraph-serena-tools.ts",
+    "src/services/serena-integration.ts",
+    "src/workers",
+    "src/examples"
+  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

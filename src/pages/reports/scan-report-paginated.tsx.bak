@@ -1694,7 +1694,7 @@ export default function ScanReportPaginated() {
           }}
           citation={selectedCitation}
           notes={[]}
-          onAddNote={(_note) => {
+          onAddNote={(note) => {
             // TODO: Implement note persistence
             // New note added
           }}

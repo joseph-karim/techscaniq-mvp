@@ -12,7 +12,7 @@ const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 const MAX_REQUESTS = 100; // per window
 
 export function rateLimit(req: NextRequest): boolean {
-  const ip = req.ip || req.headers.get('x-forwarded-for') || 'unknown';
+  const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
   const now = Date.now();
   
   // Clean expired entries

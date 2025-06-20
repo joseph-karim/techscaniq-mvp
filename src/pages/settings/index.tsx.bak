@@ -77,7 +77,7 @@ export default function SettingsPage() {
     },
   })
 
-  const onSubmitProfile = async (_data: ProfileFormValues) => {
+  const onSubmitProfile = async (data: ProfileFormValues) => {
     // TODO: Implement profile update functionality
     // Profile data submitted
     // In a real app, you would update the user's profile here
@@ -85,7 +85,7 @@ export default function SettingsPage() {
     setTimeout(() => setProfileSuccess(false), 3000)
   }
 
-  const onSubmitWorkspace = async (_data: WorkspaceFormValues) => {
+  const onSubmitWorkspace = async (data: WorkspaceFormValues) => {
     // TODO: Implement workspace update functionality
     // Workspace data submitted
     // In a real app, you would update the workspace here

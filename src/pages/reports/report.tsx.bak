@@ -750,7 +750,7 @@ export default function ReportPage() {
           }}
           citation={activeCitation}
           notes={[]}
-          onAddNote={(_note) => {
+          onAddNote={(note) => {
             // TODO: Implement note persistence
             // New note added
           }}

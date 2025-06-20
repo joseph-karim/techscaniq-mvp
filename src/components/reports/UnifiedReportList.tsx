@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Award, FileText, Building2, TrendingUp, Calendar, ChevronRight } from 'lucide-react'
 import { DemoReportList } from './DemoReportList'
 import { useAuth } from '@/hooks/useAuth'
-import { reportService } from '@/services/optimized-report-service'
+// import { reportService } from '@/services/optimized-report-service'
 
 interface Report {
   id: string
@@ -144,7 +144,7 @@ export function UnifiedReportList() {
   const [reports, setReports] = useState<Report[]>([])
   const [showDemoReports, setShowDemoReports] = useState(false)
   const [loading, setLoading] = useState(true)
-  const { user, role } = useAuth()
+  const { role } = useAuth()
 
   const isAdmin = role === 'admin'
 

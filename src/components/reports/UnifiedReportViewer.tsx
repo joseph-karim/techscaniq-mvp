@@ -1,8 +1,8 @@
-import { useState, useCallback } from 'react'
+import { useCallback } from 'react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Info, Download, Share2, AlertTriangle } from 'lucide-react'
+import { Info, Download, Share2 } from 'lucide-react'
 import { 
   LazyLangGraphReport,
   LazyLangGraphPEReport,
@@ -26,7 +26,7 @@ interface ReportHeaderProps {
   onShare: () => void
 }
 
-function ReportHeader({ reportType, reportId, isDemo, onDownload, onShare }: ReportHeaderProps) {
+function ReportHeader({ reportType, reportId, onDownload, onShare }: ReportHeaderProps) {
   const reportTypeLabels = {
     'pe-due-diligence': 'Private Equity Due Diligence',
     'sales-intelligence': 'Sales Intelligence',
@@ -73,20 +73,20 @@ export function UnifiedReportViewer({
   reportId,
   isDemo = false
 }: UnifiedReportViewerProps) {
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  // const [loading, setLoading] = useState(false)
+  // const [error, setError] = useState<string | null>(null)
 
   // Common report actions
   const handleDownload = useCallback(() => {
     // Unified download logic
     // TODO: Implement actual download functionality
-    setError('Download functionality not yet implemented')
+    console.log('Download functionality not yet implemented')
   }, [reportId])
 
   const handleShare = useCallback(() => {
     // Unified sharing logic
     // TODO: Implement actual sharing functionality
-    setError('Sharing functionality not yet implemented')
+    console.log('Sharing functionality not yet implemented')
   }, [reportId])
 
   // Render appropriate report component based on type

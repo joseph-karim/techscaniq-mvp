@@ -25,15 +25,18 @@ export interface MCPTool {
 }
 
 export class MCPClient {
-  private anthropic: Anthropic
+  private _anthropic: Anthropic
   private servers: Map<string, MCPServerConfig> = new Map()
   private tools: Map<string, MCPTool> = new Map()
   private initialized = false
 
   constructor() {
-    this.anthropic = new Anthropic({
+    this._anthropic = new Anthropic({
       apiKey: process.env.ANTHROPIC_API_KEY!,
     })
+    
+    // Suppress unused variable warning
+    void this._anthropic
   }
 
   /**

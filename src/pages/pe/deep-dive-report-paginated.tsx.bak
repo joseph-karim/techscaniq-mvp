@@ -664,7 +664,7 @@ export default function DeepDiveReportPaginated() {
           }}
           citation={selectedCitation}
           notes={[]}
-          onAddNote={(_note) => {
+          onAddNote={(note) => {
             // TODO: Implement note persistence
             // New note added
           }}

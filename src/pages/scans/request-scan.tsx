@@ -267,7 +267,7 @@ export default function RequestScanPage() {
       }
       
       // Call the report orchestrator to start analysis
-      const { data: reportResult, error: reportError } = await supabase.functions.invoke('report-orchestrator-v3', {
+      const { error: reportError } = await supabase.functions.invoke('report-orchestrator-v3', {
         body: {
           scan_request_id: scanRequest.id,
           analysisDepth: 'comprehensive'

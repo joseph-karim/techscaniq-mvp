@@ -5,6 +5,7 @@ import { supabase as mainSupabaseClient } from '@/lib/supabase'
 // Auth context type
 type AuthContextType = {
   user: User | null
+  role: string | null
   supabase: SupabaseClient | null
   signIn: (email: string, password: string) => Promise<any>
   signUp: (email: string, password: string, name?: string, workspaceName?: string, role?: string) => Promise<any>
@@ -15,8 +16,9 @@ type AuthContextType = {
 }
 
 // Create context with default values
-const AuthContext = createContext<AuthContextType>({
+export const AuthContext = createContext<AuthContextType>({
   user: null,
+  role: null,
   supabase: null,
   signIn: async () => ({}),
   signUp: async () => ({}),
@@ -166,6 +168,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const value = {
     user,
+    role: user?.user_metadata?.role || null,
     supabase,
     signIn,
     signUp,
