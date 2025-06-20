@@ -232,8 +232,30 @@ export async function listLangGraphReports(params?: {
   }
 }
 
-// No fallback - throw error if API fails
+// Load with fallback to local file for demo reports
 export async function loadLangGraphReportWithFallback(reportId: string): Promise<LangGraphReport | null> {
-  // Just use the API, no fallback
-  return await loadLangGraphReport(reportId)
+  try {
+    // Try API first
+    return await loadLangGraphReport(reportId)
+  } catch (error) {
+    console.log('API failed, trying local file fallback for report:', reportId)
+    
+    // For the CIBC report, try loading from local file
+    if (reportId === '9f8e7d6c-5b4a-3210-fedc-ba9876543210' || reportId === 'cibc-adobe-sales-2024') {
+      try {
+        // Import the local report data
+        const response = await fetch(`/data/langgraph-reports/9f8e7d6c-5b4a-3210-fedc-ba9876543210.json`)
+        if (response.ok) {
+          const data = await response.json()
+          console.log('Loaded report from local file')
+          return data
+        }
+      } catch (localError) {
+        console.error('Failed to load local file:', localError)
+      }
+    }
+    
+    // Re-throw the original error if no fallback available
+    throw error
+  }
 }
