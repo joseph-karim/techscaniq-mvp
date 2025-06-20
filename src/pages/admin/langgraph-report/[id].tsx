@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { ArrowLeft, AlertTriangle } from 'lucide-react'
 import { LangGraphReport } from '@/components/reports/LangGraphReport'
 import { LangGraphPEReport } from '@/components/reports/LangGraphPEReport'
+import { SalesIntelligenceReport } from '@/components/reports/SalesIntelligenceReport'
 import { loadLangGraphReportWithFallback } from '@/services/langgraph-reports'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
@@ -96,6 +97,8 @@ export default function LangGraphReportView() {
         {/* Report Content */}
         {report.reportType === 'pe-due-diligence' ? (
           <LangGraphPEReport report={report} />
+        ) : report.reportType === 'sales-intelligence' ? (
+          <SalesIntelligenceReport report={report} />
         ) : (
           <LangGraphReport report={report} />
         )}
