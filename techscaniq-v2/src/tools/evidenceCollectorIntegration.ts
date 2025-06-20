@@ -2,12 +2,10 @@ import { spawn } from 'child_process';
 import { Queue, QueueEvents } from 'bullmq';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { Evidence, EvidenceSource } from '../types';
 import { config } from '../config';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// __dirname is available in CommonJS by default
 
 interface Crawl4AIResult {
   success: boolean;

@@ -2,7 +2,6 @@
   "name": "techscaniq-v2",
   "version": "2.0.0",
   "description": "Deep Research Agent Platform for PE Due Diligence",
-  "type": "module",
   "scripts": {
     "dev": "npm-run-all --parallel dev:*",
     "dev:api": "nodemon --exec tsx src/api/server.ts",
