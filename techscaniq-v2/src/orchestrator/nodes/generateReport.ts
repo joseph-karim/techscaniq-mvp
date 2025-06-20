@@ -189,7 +189,7 @@ export async function generateReportNode(state: ResearchState): Promise<Partial<
     }
     
     // Add recommendations to enhanced state
-    enhancedState.metadata.infoGatheringRecommendations = infoGatheringRecommendations;
+    (enhancedState.metadata as any).infoGatheringRecommendations = infoGatheringRecommendations;
     
     // 2. Technology Assessment
     const techAssessment = await generateSectionWithStructuredPrompt(
@@ -232,7 +232,6 @@ export async function generateReportNode(state: ResearchState): Promise<Partial<
       const infoGatheringSection: ReportSection = {
         title: 'Recommended Information Gathering Activities',
         content: `Given the ${confidenceLevel} confidence level of our analysis (average evidence quality: ${avgQualityScore.toFixed(2)}), we recommend the following information gathering activities to strengthen the investment thesis:\n\n${infoGatheringRecommendations.join('\n\n')}\n\n**Note**: ${inferenceApproach}. Direct engagement with CIBC stakeholders will significantly improve the accuracy and confidence of our recommendations.`,
-        subsections: [],
         keyFindings: infoGatheringRecommendations.map(rec => rec.split(':')[1]?.trim() || rec),
         evidence: [],
         confidence: confidenceLevel as any,
@@ -301,15 +300,15 @@ async function generateSectionWithStructuredPrompt(
     const modelWithTool = claudeModel.bindTools([reportSectionTool]);
     
     // Create focused prompt based on confidence level
-    const confidenceContext = state.metadata?.confidenceLevel || 'unknown';
-    const inferenceApproach = state.metadata?.inferenceApproach || '';
+    const confidenceContext = (state.metadata as any)?.confidenceLevel || 'unknown';
+    const inferenceApproach = (state.metadata as any)?.inferenceApproach || '';
     
     const systemPrompt = `You are generating the "${sectionName}" section of a sales intelligence report for ${state.thesis.company}.
     
 Confidence Level: ${confidenceContext}
 Inference Approach: ${inferenceApproach}
-Evidence Quality: ${state.metadata?.evidenceQualityDistribution ? 
-  `High: ${state.metadata.evidenceQualityDistribution.high}, Medium: ${state.metadata.evidenceQualityDistribution.medium}, Low: ${state.metadata.evidenceQualityDistribution.low}` : 
+Evidence Quality: ${(state.metadata as any)?.evidenceQualityDistribution ? 
+  `High: ${(state.metadata as any).evidenceQualityDistribution.high}, Medium: ${(state.metadata as any).evidenceQualityDistribution.medium}, Low: ${(state.metadata as any).evidenceQualityDistribution.low}` : 
   'Unknown'}
 
 Important Instructions:
@@ -421,9 +420,9 @@ async function generateInvestmentRecommendation(
       score: section.score,
     }));
     
-    const confidenceLevel = state.metadata?.confidenceLevel || 'unknown';
-    const evidenceQuality = state.metadata?.evidenceQualityDistribution;
-    const infoGatheringRecs = state.metadata?.infoGatheringRecommendations || [];
+    const confidenceLevel = (state.metadata as any)?.confidenceLevel || 'unknown';
+    const evidenceQuality = (state.metadata as any)?.evidenceQualityDistribution;
+    const infoGatheringRecs = (state.metadata as any)?.infoGatheringRecommendations || [];
     
     const systemPrompt = `You are making an investment recommendation for Adobe selling to ${state.thesis.company}.
     
@@ -483,7 +482,7 @@ Use the generate_investment_recommendation tool to structure your response.`;
         id: 'recommendation',
         pillarId: 'summary',
         title: 'Investment Recommendation',
-        content: `**${recommendationData.recommendation}** (Confidence: ${(recommendationData.confidence * 100).toFixed(0)}%)\n\n${recommendationData.rationale}\n\n**Key Drivers:**\n${recommendationData.keyDrivers.map(d => `- ${d}`).join('\n')}\n\n**Risks:**\n${recommendationData.risks.map(r => `- ${r}`).join('\n')}\n\n**Next Steps:**\n${recommendationData.nextSteps.map(s => `- ${s}`).join('\n')}${recommendationData.timeline ? `\n\n**Timeline:** ${recommendationData.timeline}` : ''}`,
+        content: `**${recommendationData.recommendation}** (Confidence: ${(recommendationData.confidence * 100).toFixed(0)}%)\n\n${recommendationData.rationale}\n\n**Key Drivers:**\n${recommendationData.keyDrivers.map((d: any) => `- ${d}`).join('\n')}\n\n**Risks:**\n${recommendationData.risks.map((r: any) => `- ${r}`).join('\n')}\n\n**Next Steps:**\n${recommendationData.nextSteps.map((s: any) => `- ${s}`).join('\n')}${recommendationData.timeline ? `\n\n**Timeline:** ${recommendationData.timeline}` : ''}`,
         score: investmentScore,
         weight: getPillarWeight(state, 'summary'),
         keyFindings: recommendationData.keyDrivers,

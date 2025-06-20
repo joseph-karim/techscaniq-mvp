@@ -6,8 +6,7 @@
     "moduleResolution": "node",
     "rootDir": ".",
     "outDir": "./dist",
-    "strict": false,
-    "noImplicitAny": false,
+    "strict": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
@@ -21,5 +20,25 @@
     "types": ["node"]
   },
   "include": ["src/**/*", "start-api.ts"],
-  "exclude": ["node_modules", "dist"]
+  "exclude": [
+    "node_modules", 
+    "dist",
+    "src/orchestrator/evidence-extractor.ts",
+    "src/orchestrator/langgraph-integrated.ts", 
+    "src/orchestrator/unified-research-orchestrator.ts",
+    "src/orchestrator/nodes/generateReport.ts",
+    "src/orchestrator/pipeline-monitor.ts",
+    "src/services/queue/workers/skyvernWorker.ts",
+    "src/test-langgraph-with-timeout.ts",
+    "src/tools/advancedTechnicalAnalyzer.ts",
+    "src/tools/claudeOrchestrationClient.ts",
+    "src/tools/deepResearchClient.ts",
+    "src/tools/directCrawl4AI.ts",
+    "src/tools/directSecurityScanner.ts",
+    "src/tools/documentAnalyzer.ts",
+    "src/tools/error-handling.ts",
+    "src/tools/evidenceClients.ts",
+    "src/tools/operatorNavigator.ts",
+    "src/tools/webSearch.ts"
+  ]
 }

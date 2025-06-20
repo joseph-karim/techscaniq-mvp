@@ -1,9 +1,9 @@
 import { InvestmentThesis, ResearchParams, ResearchResult, ThesisPillar, ResearchQuestion, PrioritizedPlan, Evidence, ResearchGap, EvidenceSource, EvidenceType, SalesIntelligenceContext, SalesValidation, MarketContext, ThesisAlignmentScore, ThesisValidation, EvidenceMetadata } from '../types/research';
-import { PerplexitySonarClient } from '../tools/perplexityClient';
+import { PerplexityClient } from '../tools/perplexityClient';
 import { Crawl4AIClient } from '../tools/crawl4aiClient';
 import { SkyvernClient } from '../tools/skyvernClient';
 import { ClaudeAnalysisClient } from '../tools/claudeAnalysisClient';
-import { PublicDataAPIClient } from '../tools/publicDataClient';
+import { PublicDataClient } from '../tools/publicDataClient';
 import { ClaudeOrchestrationClient } from '../tools/claudeOrchestrationClient';
 import { DeepResearchClient } from '../tools/deepResearchClient';
 import { TechnicalAnalysisClient } from '../tools/technicalAnalysisClient';
@@ -34,7 +34,7 @@ export interface MultiSourceEvidenceCollector {
     crawl4ai: Crawl4AIClient;
     skyvern: SkyvernClient;
     claude: ClaudeAnalysisClient;
-    publicData: PublicDataAPIClient;
+    publicData: PublicDataClient;
     deepResearch: DeepResearchClient;
     technicalAnalysis: TechnicalAnalysisClient;
     marketIntelligence: MarketIntelligenceClient;
@@ -113,7 +113,7 @@ export class UnifiedResearchOrchestratorImpl implements UnifiedResearchOrchestra
   ): Promise<ResearchResult> {
     // 1. Analyze investment thesis with market context
     console.log('📊 Analyzing investment thesis through market lens...');
-    const researchPlan = await this.thesisAnalyzer.createResearchPlan(
+    const researchPlan = await (this.thesisAnalyzer as any).createResearchPlan(
       thesis,
       marketContext
     );
@@ -789,7 +789,7 @@ export class MultiSourceEvidenceCollectorImpl implements MultiSourceEvidenceColl
       crawl4ai: Crawl4AIClient;
       skyvern: SkyvernClient;
       claude: ClaudeAnalysisClient;
-      publicData: PublicDataAPIClient;
+      publicData: PublicDataClient;
       deepResearch: DeepResearchClient;
       technicalAnalysis: TechnicalAnalysisClient;
       marketIntelligence: MarketIntelligenceClient;

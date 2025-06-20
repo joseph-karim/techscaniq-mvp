@@ -25,7 +25,7 @@ export class PipelineMonitor extends EventEmitter {
   private status: PipelineStatus;
   private logFile: string;
   private statusFile: string;
-  private updateInterval: NodeJS.Timer | null = null;
+  private updateInterval: NodeJS.Timeout | null = null;
   private rl: readline.Interface | null = null;
   
   constructor(runId: string, logDir: string = './logs') {
@@ -63,7 +63,7 @@ export class PipelineMonitor extends EventEmitter {
   
   async stop(): Promise<void> {
     if (this.updateInterval) {
-      clearInterval(this.updateInterval);
+      clearInterval(this.updateInterval as NodeJS.Timeout);
     }
     if (this.rl) {
       this.rl.close();

@@ -240,7 +240,7 @@ export function createDeepResearchNode(model: ChatOpenAI) {
     
     // Get thesis statement and custom thesis for context
     const thesisStatement = thesis.statement || '';
-    const customThesis = metadata?.customThesis || '';
+    const customThesis = (metadata as any)?.customThesis || '';
     const reportType = thesis.type || metadata?.reportType || 'sales-intelligence';
     
     // Construct comprehensive search queries based on context
@@ -252,7 +252,7 @@ export function createDeepResearchNode(model: ChatOpenAI) {
       const vendorMatch = (customThesis || thesisStatement).match(/^(\w+)\s+can\s+help\s+.+\s+with\s+(.+)$/i);
       const vendor = vendorMatch?.[1] || '';
       const productsString = vendorMatch?.[2] || '';
-      const products = productsString ? productsString.split(/,\s*/).map(p => p.trim()) : [];
+      const products = productsString ? productsString.split(/,\s*/).map((p: any) => p.trim()) : [];
       
       if (vendor && products.length > 0) {
         // Generate vendor-specific queries
@@ -342,7 +342,7 @@ export function createDeepResearchNode(model: ChatOpenAI) {
         
         // Extract evidence from results
         const extractedEvidence = EvidenceExtractor.extractFromPerplexityResponse(
-          results,
+          results as any,
           query,
           researchQuestions?.[0]?.id || 'general'
         );
@@ -375,7 +375,7 @@ export function createAnalyzeFindingsNode(model: ChatOpenAI) {
     const { thesis, evidence, metadata } = state;
     const company = thesis.company;
     const thesisStatement = thesis.statement || '';
-    const customThesis = metadata?.customThesis || '';
+    const customThesis = (metadata as any)?.customThesis || '';
     const reportType = thesis.type || metadata?.reportType || 'sales-intelligence';
     
     // Group evidence by topic/theme for analysis
@@ -392,7 +392,7 @@ export function createAnalyzeFindingsNode(model: ChatOpenAI) {
       const vendorMatch = (customThesis || thesisStatement).match(/^(\w+)\s+can\s+help\s+.+\s+with\s+(.+)$/i);
       const vendor = vendorMatch?.[1] || '';
       const productsString = vendorMatch?.[2] || '';
-      const products = productsString ? productsString.split(/,\s*/).map(p => p.trim()) : [];
+      const products = productsString ? productsString.split(/,\s*/).map((p: any) => p.trim()) : [];
       
       if (vendor && products.length > 0) {
         analysisContext = `
@@ -597,7 +597,7 @@ export function createEvidenceGatheringAgent(model: ChatOpenAI) {
     
     // Parse context from thesis for tool selection
     const thesisStatement = thesis.statement || '';
-    const customThesis = metadata?.customThesis || '';
+    const customThesis = (metadata as any)?.customThesis || '';
     const reportType = thesis.type || metadata?.reportType || 'sales-intelligence';
     
     // Build context-aware system message based on thesis
@@ -607,7 +607,7 @@ export function createEvidenceGatheringAgent(model: ChatOpenAI) {
       const vendorMatch = (customThesis || thesisStatement).match(/^(\w+)\s+can\s+help\s+.+\s+with\s+(.+)$/i);
       const vendor = vendorMatch?.[1] || '';
       const productsString = vendorMatch?.[2] || '';
-      const products = productsString ? productsString.split(/,\s*/).map(p => p.trim()) : [];
+      const products = productsString ? productsString.split(/,\s*/).map((p: any) => p.trim()) : [];
       
       if (vendor && products.length > 0) {
         contextGuidance = `
@@ -1091,7 +1091,7 @@ Focus on:
           keywords: [],
           confidence: 0.85,
           chunkCount: synthesisResults.length,
-        },
+        } as any,
         qualityScore: {
           overall: 0.85,
           components: {
@@ -1177,15 +1177,15 @@ export function createIntegratedResearchGraph(enableCheckpointing: boolean = fal
   workflow.addNode('generate_report', generateReportNode);
   
   // Define edges
-  workflow.addEdge('__start__', 'interpret_thesis');
-  workflow.addEdge('interpret_thesis', 'generate_queries');
-  workflow.addEdge('generate_queries', 'deep_research');
-  workflow.addEdge('deep_research', 'analyze_findings');
-  workflow.addEdge('analyze_findings', 'gather_evidence');
-  workflow.addEdge('gather_evidence', 'evaluate_progress');
+  (workflow as any).addEdge('__start__', 'interpret_thesis');
+  (workflow as any).addEdge('interpret_thesis', 'generate_queries');
+  (workflow as any).addEdge('generate_queries', 'deep_research');
+  (workflow as any).addEdge('deep_research', 'analyze_findings');
+  (workflow as any).addEdge('analyze_findings', 'gather_evidence');
+  (workflow as any).addEdge('gather_evidence', 'evaluate_progress');
   
   // Conditional edge for the iterative loop
-  workflow.addConditionalEdges(
+  (workflow as any).addConditionalEdges(
     'evaluate_progress',
     (state: ResearchState) => {
       return state.metadata?.shouldContinueGathering ? 'gather_evidence' : 'generate_report';
@@ -1196,7 +1196,7 @@ export function createIntegratedResearchGraph(enableCheckpointing: boolean = fal
     }
   );
   
-  workflow.addEdge('generate_report', END);
+  (workflow as any).addEdge('generate_report', END);
   
   // Compile with checkpointer if provided
   return workflow.compile(checkpointer ? { checkpointer } : undefined);
@@ -1327,7 +1327,7 @@ export async function listCheckpoints(threadId: string) {
     for await (const checkpoint of checkpointIterator) {
       checkpoints.push({
         checkpoint_id: checkpoint.config?.configurable?.checkpoint_id,
-        created_at: checkpoint.created_at,
+        created_at: (checkpoint as any).created_at || checkpoint.createdAt,
         metadata: checkpoint.metadata
       });
     }
