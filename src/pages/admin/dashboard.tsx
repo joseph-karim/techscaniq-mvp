@@ -787,7 +787,7 @@ export default function AdminDashboardPage() {
                     </div>
                     <div className="flex gap-2">
                       <Button variant="outline" size="sm" asChild>
-                        <Link to="/admin/langgraph-report/cibc-adobe-sales-2024">
+                        <Link to="/admin/langgraph-report/9f8e7d6c-5b4a-3210-fedc-ba9876543210">
                           <FileText className="mr-1 h-3 w-3" />
                           View Report
                         </Link>

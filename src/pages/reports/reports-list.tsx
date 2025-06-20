@@ -341,7 +341,7 @@ export default function ReportsListPage() {
                 </div>
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" asChild>
-                    <Link to="/admin/langgraph-report/cibc-adobe-sales-2024">
+                    <Link to="/admin/langgraph-report/9f8e7d6c-5b4a-3210-fedc-ba9876543210">
                       <Eye className="mr-2 h-4 w-4" />
                       View Report
                     </Link>
@@ -479,67 +479,6 @@ export default function ReportsListPage() {
           </CardContent>
         </Card>
 
-        {/* CIBC Sales Intelligence Report - LangGraph Generated */}
-        <Card className="hover:shadow-md transition-shadow border-l-4 border-l-electric-teal">
-          <CardHeader>
-            <div className="flex items-start justify-between">
-              <div className="space-y-1">
-                <CardTitle className="text-xl font-heading">CIBC - Sales Intelligence Report (LangGraph)</CardTitle>
-                <CardDescription className="flex items-center gap-2">
-                  <Building2 className="h-4 w-4" />
-                  TechScanIQ LangGraph
-                  <span className="text-muted-foreground">•</span>
-                  <Calendar className="h-4 w-4" />
-                  {new Date().toLocaleDateString()}
-                </CardDescription>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge className="bg-electric-teal">LangGraph</Badge>
-                <Badge className="bg-green-500">Completed</Badge>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Deep research analysis identifying $60M+ digital transformation opportunity with 95% confidence
-              </p>
-              
-              <div className="grid grid-cols-3 gap-4 rounded-lg border p-3">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">Strong Buy</div>
-                  <p className="text-xs text-muted-foreground">Recommendation</p>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold">95%</div>
-                  <p className="text-xs text-muted-foreground">Confidence</p>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">204</div>
-                  <p className="text-xs text-muted-foreground">Evidence Pieces</p>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between pt-2">
-                <div className="text-sm text-muted-foreground">
-                  Industry: Financial Services
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" asChild>
-                    <Link to="/admin/sales-intelligence/cibc">
-                      <Eye className="mr-2 h-4 w-4" />
-                      View Report
-                    </Link>
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <Download className="mr-2 h-4 w-4" />
-                    Download
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
         
         {/* User Reports */}
         {loading ? (
