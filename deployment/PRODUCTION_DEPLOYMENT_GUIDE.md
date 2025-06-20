@@ -12,8 +12,8 @@ Required production environment variables:
 
 ```bash
 # AI Services
-ANTHROPIC_API_KEY=sk-ant-...
-GOOGLE_API_KEY=AIza...  # Future use
+ANTHROPIC_API_KEY=[REDACTED]...
+GOOGLE_API_KEY=[REDACTED]...  # Future use
 
 # Database  
 SUPABASE_SERVICE_ROLE_KEY=eyJhbGci...

@@ -24,7 +24,7 @@ Add these secret groups in Render Dashboard:
 - `google_key`: Your Google API key
 
 #### `langgraph-secrets`
-- `api_key`: Your LangGraph Cloud API key (`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`)
+- `api_key`: Your LangGraph Cloud API key (`[REDACTED]`)
 
 ## Render Configuration
 
@@ -57,7 +57,7 @@ Instead of using the YAML configuration, you can manually add these environment 
 ### For Both Services (API + Workers):
 ```
 NODE_ENV=production
-LANGGRAPH_API_KEY=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
+LANGGRAPH_API_KEY=[REDACTED]
 LANGCHAIN_TRACING_V2=true
 LANGCHAIN_ENDPOINT=https://api.smith.langchain.com
 LANGCHAIN_PROJECT=techscaniq-v2-production

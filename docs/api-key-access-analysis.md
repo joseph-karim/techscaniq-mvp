@@ -28,7 +28,7 @@ SUPABASE_ANON_KEY = "secret"
 ✅ **evidence-collector-v7**: Collects evidence successfully
 
 ### 4. Security Verification
-- ✅ No hardcoded API keys found (searched for patterns like "sk-", "AIza")
+- ✅ No hardcoded API keys found (searched for patterns like "sk-", "[REDACTED]")
 - ✅ All functions use environment variables
 - ✅ Proper error handling when keys are missing
 
