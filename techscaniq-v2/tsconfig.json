@@ -39,6 +39,14 @@
     "src/tools/error-handling.ts",
     "src/tools/evidenceClients.ts",
     "src/tools/operatorNavigator.ts",
-    "src/tools/webSearch.ts"
+    "src/tools/webSearch.ts",
+    "src/services/queue/index-original.ts",
+    "src/services/queue-original.ts",
+    "src/services/queue/workers/**/*",
+    "src/services/queue/monitor.ts",
+    "src/workers.ts",
+    "src/workers-simple.ts",
+    "src/orchestrator/nodes/gatherEvidenceQueue.ts",
+    "src/api/server-simple.ts"
   ]
 }

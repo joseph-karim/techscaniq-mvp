@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
-import { queues } from '../../services/queue/index';
+// import { queues } from '../../services/queue/index'; // Disabled - using LangGraph instead
 import { StorageService } from '../../services/storage';
 import { ResearchState, ThesisType } from '../../types';
 import { config } from '../../config';
@@ -115,7 +115,9 @@ export async function researchRoutes(fastify: FastifyInstance) {
 
         // Queue the orchestration job
         if (config.USE_QUEUES) {
-          const job = await queues.orchestration.add(
+          // Queue-based orchestration disabled - using LangGraph
+          throw new Error('Queue-based orchestration is disabled. Please use the LangGraph API endpoints.');
+          /*const job = await queues.orchestration.add(
             'start-research',
             {
               type: 'start_research',
@@ -135,7 +137,7 @@ export async function researchRoutes(fastify: FastifyInstance) {
             }
           );
 
-          fastify.log.info({ researchId, jobId: job.id }, 'Research queued');
+          fastify.log.info({ researchId, jobId: job.id }, 'Research queued');*/
         } else {
           // Direct execution without queues (for development)
           const { runDeepResearch } = await import('../../orchestrator/graph');

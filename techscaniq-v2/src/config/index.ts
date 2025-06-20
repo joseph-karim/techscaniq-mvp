@@ -47,7 +47,7 @@ const configSchema = z.object({
   MAX_RESEARCH_ITERATIONS: z.coerce.number().default(5),
   RESEARCH_TIMEOUT_MINUTES: z.coerce.number().default(120), // 2 hours default for comprehensive research
   MIN_EVIDENCE_COUNT: z.coerce.number().default(10),
-  USE_QUEUES: z.coerce.boolean().default(true),
+  USE_QUEUES: z.coerce.boolean().default(false), // Disabled - using LangGraph instead
 });
 
 // Parse and validate environment variables
