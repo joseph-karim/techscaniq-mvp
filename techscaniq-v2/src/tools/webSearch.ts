@@ -14,6 +14,7 @@ interface SearchOptions {
   maxResults?: number;
   dateRange?: string;
   language?: string;
+  returnFullResponse?: boolean;
 }
 
 export class WebSearchTool {
@@ -361,7 +362,7 @@ export class WebSearchTool {
           'Authorization': `Bearer ${this.perplexityApiKey}`,
           'Content-Type': 'application/json',
         },
-        timeout: 900000, // 15 minute timeout for deep research
+        timeout: 1800000, // 30 minute timeout for deep research
       });
 
       const content = response.data.choices[0].message.content;
@@ -433,6 +434,12 @@ export class WebSearchTool {
       results = results.filter(r => r && r.url && typeof r.url === 'string' && r.url.startsWith('http'));
       
       console.log(`✅ Extracted ${results.length} search results from Perplexity`);
+      
+      // If returnFullResponse is true, return the entire response for evidence extraction
+      if (options.returnFullResponse) {
+        return response.data as any;
+      }
+      
       return results;
     } catch (error) {
       console.error('Perplexity search error:', error);

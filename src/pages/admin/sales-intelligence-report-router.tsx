@@ -1,6 +1,7 @@
 import { useParams } from 'react-router-dom'
 import SalesIntelligenceReportBMO from './sales-intelligence-report-bmo'
 import SalesIntelligenceReportFidelity from './sales-intelligence-report-fidelity'
+import SalesIntelligenceReportCIBC from './sales-intelligence-report-cibc'
 
 export default function AdminSalesIntelligenceReportPage() {
   const { accountId } = useParams<{ accountId: string }>()
@@ -13,6 +14,8 @@ export default function AdminSalesIntelligenceReportPage() {
       return <SalesIntelligenceReportBMO />
     case 'fidelity':
       return <SalesIntelligenceReportFidelity />
+    case 'cibc':
+      return <SalesIntelligenceReportCIBC />
     default:
       return (
         <div className="flex items-center justify-center h-96">

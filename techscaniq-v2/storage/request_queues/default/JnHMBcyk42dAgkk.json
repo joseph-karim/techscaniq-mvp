@@ -1,9 +1,0 @@
-{
-	"id": "JnHMBcyk42dAgkk",
-	"json": "{\"id\":\"JnHMBcyk42dAgkk\",\"url\":\"https://www.fidelity.ca\",\"loadedUrl\":\"https://www.fidelity.ca/en/\",\"uniqueKey\":\"https://www.fidelity.ca\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"__crawlee\":{\"state\":4}},\"handledAt\":\"2025-06-18T03:34:40.142Z\"}",
-	"method": "GET",
-	"orderNo": null,
-	"retryCount": 0,
-	"uniqueKey": "https://www.fidelity.ca",
-	"url": "https://www.fidelity.ca"
-}

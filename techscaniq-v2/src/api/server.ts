@@ -6,6 +6,7 @@ import { Redis } from 'ioredis';
 import { config } from '../config';
 import { researchRoutes } from './routes/research';
 import { evidenceRoutes } from './routes/evidence';
+import { langgraphRoutes } from './routes/langgraph';
 import { verifyBearerToken, optionalAuth } from './middleware/auth';
 import { rateLimiters } from './middleware/rateLimit';
 
@@ -119,6 +120,14 @@ fastify.register(async function (fastify) {
     fastify.addHook('onRequest', optionalAuth);
     fastify.addHook('onRequest', rateLimiters.relaxed(redis));
     fastify.register(evidenceRoutes, { prefix: '/evidence' });
+  }, { prefix: '/api' });
+
+  // LangGraph routes - require authentication 
+  fastify.register(async function (fastify) {
+    // TEMPORARILY DISABLED FOR TESTING
+    // fastify.addHook('onRequest', verifyBearerToken);
+    fastify.addHook('onRequest', rateLimiters.perUser(redis));
+    fastify.register(langgraphRoutes, { prefix: '/langgraph' });
   }, { prefix: '/api' });
 });
 

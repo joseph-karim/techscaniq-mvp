@@ -4,6 +4,7 @@ import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { config, models, thresholds } from '../../config';
 import { PROMPTS } from '../../prompts/structured-prompts';
 import { QualityEvaluationSchema, parseStructuredOutput } from '../../schemas/structured-outputs';
+import { StructuredOutputParser, evidenceQualitySchema } from '../../utils/structuredOutputParser';
 
 // Use o3 for quality evaluation as user suggested
 // Note: o3 model only supports default temperature (1.0)
@@ -103,16 +104,32 @@ async function evaluateEvidenceQuality(evidence: Evidence, thesis: any): Promise
   const { system, prompt } = PROMPTS.qualityEvaluation;
 
   try {
+    // Create structured prompt with limited response length
+    const structuredPrompt = StructuredOutputParser.createStructuredPrompt(
+      evidenceQualitySchema,
+      prompt(evidence, pillar, successCriteria)
+    );
+    
     const response = await model.invoke([
       new SystemMessage(system),
-      new HumanMessage(prompt(evidence, pillar, successCriteria)),
+      new HumanMessage(structuredPrompt),
     ]);
 
-    // Parse and validate structured output
-    const evaluation = parseStructuredOutput(
-      QualityEvaluationSchema,
-      response.content.toString()
+    // Parse with enhanced parser
+    const evaluation = StructuredOutputParser.parseJson(
+      response.content.toString(),
+      evidenceQualitySchema
     );
+    
+    if (!evaluation) {
+      console.warn('Failed to parse quality evaluation, using fallback');
+      // Try original parser as fallback
+      const fallbackEvaluation = parseStructuredOutput(
+        QualityEvaluationSchema,
+        response.content.toString()
+      );
+      return convertToQualityScore(fallbackEvaluation);
+    }
     
     // Calculate overall score with weights
     const weights = {
@@ -137,10 +154,9 @@ async function evaluateEvidenceQuality(evidence: Evidence, thesis: any): Promise
         recency: evaluation.recency,
         specificity: evaluation.specificity,
         bias: evaluation.bias,
+        depth: 0.7, // Default depth score
       },
       reasoning: evaluation.reasoning || '',
-      missingInformation: evaluation.missingInformation,
-      suggestedFollowUp: evaluation.suggestedFollowUp,
     };
 
   } catch (error) {
@@ -154,8 +170,37 @@ async function evaluateEvidenceQuality(evidence: Evidence, thesis: any): Promise
         recency: 0.3,
         specificity: 0.3,
         bias: 0.5,
+        depth: 0.3,
       },
       reasoning: 'Quality evaluation failed',
     };
   }
+}
+
+function convertToQualityScore(evaluation: any): QualityScore {
+  const weights = {
+    relevance: 0.35,
+    credibility: 0.25,
+    recency: 0.15,
+    specificity: 0.20,
+    bias: 0.05,
+  };
+
+  const overall = Object.entries(weights).reduce((sum, [key, weight]) => {
+    const score = evaluation[key] || 0;
+    return sum + (score * weight);
+  }, 0);
+
+  return {
+    overall,
+    components: {
+      relevance: evaluation.relevance || 0,
+      credibility: evaluation.credibility || 0,
+      recency: evaluation.recency || 0,
+      specificity: evaluation.specificity || 0,
+      bias: evaluation.bias || 0,
+      depth: 0.7,
+    },
+    reasoning: evaluation.reasoning || '',
+  };
 }

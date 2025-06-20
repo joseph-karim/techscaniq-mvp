@@ -31,6 +31,8 @@ const AIWorkflowResults = lazy(() => import('@/pages/demo/ai-workflow-results'))
 const AdminScansPage = lazy(() => import('@/pages/admin/admin-scans'))
 const AdminScanRequestPage = lazy(() => import('@/pages/admin/admin-scan-request'))
 const AdminScanDetailsPage = lazy(() => import('@/pages/admin/admin-scan-details'))
+const AdminLangGraphReportPage = lazy(() => import('@/pages/admin/langgraph-report/[id]'))
+const GenerateLangGraphReport = lazy(() => import('@/pages/reports/GenerateLangGraphReport'))
 
 
 // Route configuration interface
@@ -261,6 +263,20 @@ export const routeConfig: RouteConfig[] = [
         element: <AdvisorReviewPage />,
         label: 'Review',
         requireAdmin: true,
+        showInNav: false
+      },
+      {
+        path: 'admin/langgraph-report/:id',
+        element: <AdminLangGraphReportPage />,
+        label: 'LangGraph Report',
+        requireAdmin: true,
+        showInNav: false
+      },
+      {
+        path: 'reports/generate-langgraph',
+        element: <GenerateLangGraphReport />,
+        label: 'Generate LangGraph Report',
+        requireAdmin: false,
         showInNav: false
       }
     ]

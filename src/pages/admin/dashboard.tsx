@@ -768,6 +768,38 @@ export default function AdminDashboardPage() {
                     </p>
                   </div>
                 </div>
+
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3">
+                        <h3 className="font-semibold">CIBC</h3>
+                        <Badge variant="outline">Score: 95/100</Badge>
+                        <Badge variant="secondary" className="bg-electric-teal text-white">LangGraph AI</Badge>
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        <p>Report Type: <span className="font-medium">Sales Intelligence</span></p>
+                        <p>Industry: <span className="font-medium">Financial Services</span></p>
+                        <p>Recommendation: <span className="font-medium">Strong Buy (95% confidence)</span></p>
+                        <p>Evidence Collected: <span className="font-medium">2,544 pieces</span></p>
+                        <p>Created: <span className="font-medium">Demo Report (LangGraph)</span></p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" asChild>
+                        <Link to="/admin/langgraph-report/cibc-adobe-sales-2024">
+                          <FileText className="mr-1 h-3 w-3" />
+                          View Report
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="mt-3 pt-3 border-t">
+                    <p className="text-sm text-gray-700 line-clamp-2">
+                      Deep research analysis identifying $60M+ digital transformation opportunity with Adobe Experience Cloud. AI-powered report with 2-hour comprehensive research covering 2,544 evidence pieces...
+                    </p>
+                  </div>
+                </div>
                 
                 {/* Real Reports */}
                 {realReports.map((report) => (

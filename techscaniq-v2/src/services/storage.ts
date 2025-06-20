@@ -10,6 +10,7 @@ const supabase = createClient(
 );
 
 export class StorageService {
+  private langGraphReports: Map<string, any> = new Map();
   /**
    * Save research state to local storage (for development)
    */
@@ -271,5 +272,78 @@ export class StorageService {
     const values = Object.values(scores);
     if (values.length === 0) return 0;
     return values.reduce((sum, score) => sum + score, 0) / values.length;
+  }
+
+  /**
+   * Save LangGraph report
+   */
+  async saveLangGraphReport(reportId: string, report: any): Promise<void> {
+    this.langGraphReports.set(reportId, report);
+    
+    // Also save to file for persistence
+    const filePath = path.join(process.cwd(), 'data', 'langgraph-reports', `${reportId}.json`);
+    await fs.ensureDir(path.dirname(filePath));
+    await fs.writeJson(filePath, report, { spaces: 2 });
+  }
+
+  /**
+   * Load LangGraph report
+   */
+  async loadLangGraphReport(reportId: string): Promise<any | null> {
+    // Check memory first
+    if (this.langGraphReports.has(reportId)) {
+      return this.langGraphReports.get(reportId);
+    }
+    
+    // Try to load from file
+    const filePath = path.join(process.cwd(), 'data', 'langgraph-reports', `${reportId}.json`);
+    try {
+      const exists = await fs.pathExists(filePath);
+      if (!exists) {
+        return null;
+      }
+      
+      const report = await fs.readJson(filePath);
+      this.langGraphReports.set(reportId, report);
+      return report;
+    } catch (error) {
+      console.error(`Error loading LangGraph report ${reportId}:`, error);
+      return null;
+    }
+  }
+
+  /**
+   * List LangGraph reports
+   */
+  async listLangGraphReports(): Promise<any[]> {
+    const dirPath = path.join(process.cwd(), 'data', 'langgraph-reports');
+    try {
+      await fs.ensureDir(dirPath);
+      const files = await fs.readdir(dirPath);
+      
+      const reports = [];
+      for (const file of files) {
+        if (file.endsWith('.json')) {
+          const reportId = file.replace('.json', '');
+          const report = await this.loadLangGraphReport(reportId);
+          if (report) {
+            reports.push({
+              id: reportId,
+              company: report.company,
+              createdAt: report.createdAt,
+              status: report.status,
+              reportType: report.reportType,
+            });
+          }
+        }
+      }
+      
+      return reports.sort((a, b) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+    } catch (error) {
+      console.error('Error listing LangGraph reports:', error);
+      return [];
+    }
   }
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { FileText, Search, Calendar, Building2, BarChart3, Eye, Download } from 'lucide-react'
+import { FileText, Search, Calendar, Building2, BarChart3, Eye, Download, Sparkles } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -114,12 +114,20 @@ export default function ReportsListPage() {
             }
           </p>
         </div>
-        <Button asChild>
-          <Link to="/scans/request">
-            <FileText className="mr-2 h-4 w-4" />
-            Request New Scan
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" asChild>
+            <Link to="/admin/generate-langgraph-report">
+              <Sparkles className="mr-2 h-4 w-4" />
+              Generate AI Report
+            </Link>
+          </Button>
+          <Button asChild>
+            <Link to="/scans/request">
+              <FileText className="mr-2 h-4 w-4" />
+              Request New Scan
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -285,6 +293,68 @@ export default function ReportsListPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* CIBC LangGraph Sales Intelligence Report */}
+        <Card className="hover:shadow-md transition-shadow border-l-4 border-l-electric-teal">
+          <CardHeader>
+            <div className="flex items-start justify-between">
+              <div className="space-y-1">
+                <CardTitle className="text-xl font-heading">CIBC - Sales Intelligence Report (LangGraph)</CardTitle>
+                <CardDescription className="flex items-center gap-2">
+                  <Building2 className="h-4 w-4" />
+                  Adobe Experience Cloud
+                  <span className="text-muted-foreground">•</span>
+                  <Calendar className="h-4 w-4" />
+                  Demo Report
+                </CardDescription>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge className="bg-electric-teal">LangGraph AI</Badge>
+                <Badge className="bg-green-500">Completed</Badge>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Deep research analysis identifying $60M+ digital transformation opportunity with Adobe Experience Cloud
+              </p>
+              
+              <div className="grid grid-cols-3 gap-4 rounded-lg border p-3">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600">9.5</div>
+                  <p className="text-xs text-muted-foreground">Opportunity Score</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold">A+</div>
+                  <p className="text-xs text-muted-foreground">Grade</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600">95%</div>
+                  <p className="text-xs text-muted-foreground">Confidence</p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-2">
+                <div className="text-sm text-muted-foreground">
+                  Industry: Financial Services • Evidence: 2,544 pieces
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" asChild>
+                    <Link to="/admin/langgraph-report/cibc-adobe-sales-2024">
+                      <Eye className="mr-2 h-4 w-4" />
+                      View Report
+                    </Link>
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    <Download className="mr-2 h-4 w-4" />
+                    Download
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
         
         <Card className="hover:shadow-md transition-shadow border-l-4 border-l-purple-500">
           <CardHeader>
@@ -395,6 +465,68 @@ export default function ReportsListPage() {
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" asChild>
                     <Link to="/admin/pe-diligence/onezero">
+                      <Eye className="mr-2 h-4 w-4" />
+                      View Report
+                    </Link>
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    <Download className="mr-2 h-4 w-4" />
+                    Download
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* CIBC Sales Intelligence Report - LangGraph Generated */}
+        <Card className="hover:shadow-md transition-shadow border-l-4 border-l-electric-teal">
+          <CardHeader>
+            <div className="flex items-start justify-between">
+              <div className="space-y-1">
+                <CardTitle className="text-xl font-heading">CIBC - Sales Intelligence Report (LangGraph)</CardTitle>
+                <CardDescription className="flex items-center gap-2">
+                  <Building2 className="h-4 w-4" />
+                  TechScanIQ LangGraph
+                  <span className="text-muted-foreground">•</span>
+                  <Calendar className="h-4 w-4" />
+                  {new Date().toLocaleDateString()}
+                </CardDescription>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge className="bg-electric-teal">LangGraph</Badge>
+                <Badge className="bg-green-500">Completed</Badge>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Deep research analysis identifying $60M+ digital transformation opportunity with 95% confidence
+              </p>
+              
+              <div className="grid grid-cols-3 gap-4 rounded-lg border p-3">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600">Strong Buy</div>
+                  <p className="text-xs text-muted-foreground">Recommendation</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold">95%</div>
+                  <p className="text-xs text-muted-foreground">Confidence</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600">204</div>
+                  <p className="text-xs text-muted-foreground">Evidence Pieces</p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-2">
+                <div className="text-sm text-muted-foreground">
+                  Industry: Financial Services
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" asChild>
+                    <Link to="/admin/sales-intelligence/cibc">
                       <Eye className="mr-2 h-4 w-4" />
                       View Report
                     </Link>

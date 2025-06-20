@@ -261,6 +261,24 @@ export interface ResearchState {
       citations: number;
     };
     queryStrategy?: any;
+    deepResearchComplete?: boolean;
+    deepResearchEvidenceCount?: number;
+    findingsAnalyzed?: boolean;
+    targetedResearchPlan?: {
+      techGaps: string[];
+      investigationAreas: string[];
+      recommendedTools: string[];
+      priorities: string[];
+    };
+    currentIteration?: number;
+    maxTargetedIterations?: number;
+    shouldContinueGathering?: boolean;
+    evidenceGatheringComplete?: boolean;
+    toolsUsed?: string[];
+    salesContext?: {
+      offering?: string;
+    };
+    integrated?: boolean;
   };
 }
 

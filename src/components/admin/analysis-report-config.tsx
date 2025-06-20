@@ -41,120 +41,110 @@ interface ModelConfig {
 
 const modelConfigs: ModelConfig[] = [
   {
-    id: 'claude-opus-4',
-    name: 'Claude Opus 4',
-    provider: 'anthropic',
-    version: '20250514',
+    id: 'perplexity-sonar-deep',
+    name: 'Perplexity Sonar Deep',
+    provider: 'perplexity' as any,
+    version: 'sonar-deep-research',
     contextWindow: 200000,
-    costPer1kTokens: { input: 0.015, output: 0.075 },
-    capabilities: ['Advanced reasoning', 'Investment analysis', 'Technical due diligence', 'Code analysis'],
+    costPer1kTokens: { input: 0.005, output: 0.005 },
+    capabilities: ['Deep research', 'Comprehensive search', 'Citation extraction', '70+ sources per query'],
     status: 'available'
   },
   {
-    id: 'gemini-2-flash',
-    name: 'Gemini 2.0 Flash',
-    provider: 'google',
-    version: '2.0',
-    contextWindow: 1000000,
-    costPer1kTokens: { input: 0.001, output: 0.002 },
-    capabilities: ['Real-time search', 'Fast retrieval', 'Multi-modal', 'Research'],
-    status: 'available'
-  },
-  {
-    id: 'gpt-4-turbo',
+    id: 'gpt-4-turbo-preview',
     name: 'GPT-4 Turbo',
     provider: 'openai',
-    version: '2024-04-09',
+    version: 'gpt-4-turbo-preview',
     contextWindow: 128000,
     costPer1kTokens: { input: 0.01, output: 0.03 },
-    capabilities: ['General analysis', 'Code review', 'Technical writing'],
-    status: 'unavailable'
+    capabilities: ['LangGraph orchestration', 'Evidence synthesis', 'Tool usage', 'Report generation'],
+    status: 'available'
   },
   {
-    id: 'gemini-2.0-flash',
+    id: 'o3-pro-2025-06-10',
+    name: 'O3 Pro',
+    provider: 'openai',
+    version: '2025-06-10',
+    contextWindow: 128000,
+    costPer1kTokens: { input: 0.015, output: 0.06 },
+    capabilities: ['Advanced reasoning', 'Investment recommendations', 'Confidence scoring', 'Final analysis'],
+    status: 'available'
+  },
+  {
+    id: 'gemini-2.0-flash-exp',
     name: 'Gemini 2.0 Flash',
     provider: 'google',
     version: 'experimental',
     contextWindow: 1000000,
     costPer1kTokens: { input: 0.0001, output: 0.0004 },
-    capabilities: ['Search grounding', 'Fast inference', 'Multimodal'],
+    capabilities: ['Evidence parsing', 'Fast processing', 'Large context handling', 'Chunking'],
     status: 'available'
   }
 ]
 
 const analysisStages: AnalysisStage[] = [
   {
-    id: 'evidence-chunking',
-    name: 'Evidence Chunking',
-    description: 'Splits evidence by category to manage context limits',
-    model: 'System Process',
-    prompt: 'Categories: technical, security, team, market, financial\nMax items per category: 10\nSorting: By confidence score',
-    tokens: { input: 0, output: 0 },
+    id: 'deep-research',
+    name: 'Deep Research Phase',
+    description: 'Comprehensive research using Perplexity Sonar Deep with 8 targeted queries',
+    model: 'perplexity-sonar-deep',
+    prompt: 'Executing deep research queries:\n- Technology stack infrastructure\n- Digital transformation initiatives\n- Customer experience gaps\n- Cybersecurity compliance\n- API integrations ecosystem\n- Mobile/web performance\n- Cloud migration efforts\n- Data analytics initiatives',
+    tokens: { input: 50000, output: 100000 },
     status: 'completed'
   },
   {
-    id: 'tech-analysis',
-    name: 'Technical Stack Analysis',
-    description: 'Analyzes technology stack, architecture, and infrastructure',
-    model: 'claude-opus-4',
-    prompt: `You are an expert technical due diligence analyst for a PE firm...
-
-Analyze the technology stack focusing on:
-1. Core technologies and frameworks
-2. Architecture patterns and scalability
-3. Infrastructure and deployment
-4. Development practices and CI/CD
-5. Technical debt and modernization needs
-
-Evidence: {TECHNICAL_EVIDENCE}
-
-Provide structured analysis with confidence scores...`,
-    tokens: { input: 15000, output: 3000 },
+    id: 'analyze-findings',
+    name: 'Findings Analysis',
+    description: 'Analyzes deep research to identify gaps and plan targeted follow-up',
+    model: 'gpt-4-turbo-preview',
+    prompt: 'Analyzing findings to identify:\n1. Key technology gaps\n2. Areas needing deeper investigation\n3. Most valuable tools for follow-up\n4. Priority areas for targeted evidence',
+    tokens: { input: 80000, output: 5000 },
     status: 'completed'
   },
   {
-    id: 'security-analysis',
-    name: 'Security Assessment',
-    description: 'Evaluates security posture and vulnerabilities',
-    model: 'claude-opus-4',
-    prompt: `Analyze security evidence for investment risk assessment...
+    id: 'targeted-evidence',
+    name: 'Targeted Evidence Loop',
+    description: 'Iterative evidence gathering using specific tools based on analysis',
+    model: 'gpt-4-turbo-preview',
+    prompt: `Targeted tool usage based on priorities:
+- website_analyzer: Multi-page analysis with sitemap
+- technical_analysis: Infrastructure and security deep dive
+- crawl4ai_extractor: Specific content extraction
+- security_scanner: Vulnerability assessment
+- sales_intelligence_analyzer: Market positioning
 
-Focus areas:
-- Security headers and configurations
-- Known vulnerabilities (CVEs)
-- SSL/TLS implementation
-- API security and exposed secrets
-- Compliance considerations
+Iterates up to 5 times based on gaps`,
+    tokens: { input: 40000, output: 20000 },
+    status: 'processing'
+  },
+  {
+    id: 'evidence-synthesis',
+    name: 'Evidence Synthesis',
+    description: 'Intelligent chunking and synthesis of all evidence',
+    model: 'gemini-2.0-flash-exp',
+    prompt: `Dynamic chunk sizing by evidence type:
+- Research evidence: 10 items per chunk
+- Web pages: 20 items per chunk  
+- Citations: 100 items per chunk
+- Technical data: 50 items per chunk
 
-Evidence: {SECURITY_EVIDENCE}
-
-Rate security maturity 1-10 with justification...`,
-    tokens: { input: 10000, output: 2500 },
-    status: 'completed'
+Processes ${'{evidence_count}'} total pieces`,
+    tokens: { input: 200000, output: 50000 },
+    status: 'pending'
   },
   {
     id: 'report-generation',
-    name: 'Investment Report Generation',
-    description: 'Generates comprehensive investment thesis and recommendations',
-    model: 'claude-3-opus',
-    prompt: `Generate PE investment report based on technical analysis...
+    name: 'Report Generation',
+    description: 'Final report with confidence-based recommendations',
+    model: 'o3-pro-2025-06-10',
+    prompt: `Generate investment recommendation with confidence levels:
+- High (80%+): Strong evidence, clear signals
+- Medium (60-79%): Good evidence, some gaps
+- Low (<60%): Limited evidence, recommend further research
 
-Company: {COMPANY_INFO}
-Investment Thesis: {INVESTMENT_THESIS}
-Technical Findings: {TECH_ANALYSIS}
-Security Assessment: {SECURITY_ANALYSIS}
-
-Structure:
-1. Executive Summary (3-5 key points)
-2. Investment Score (0-100) with rationale
-3. Technology Overview
-4. Risk Assessment
-5. Value Creation Opportunities
-6. Due Diligence Recommendations
-
-Tone: Professional, data-driven, action-oriented...`,
-    tokens: { input: 25000, output: 5000 },
-    status: 'completed'
+Include specific non-public information recommendations when confidence is low`,
+    tokens: { input: 30000, output: 15000 },
+    status: 'pending'
   }
 ]
 

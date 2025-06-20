@@ -7,9 +7,8 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { 
   Globe, Shield, Zap, Search, Database, 
-  CheckCircle2, Code, Lock, Package, 
-  FileSearch, Bug, Key, Layers,
-  RefreshCw, ChevronRight, Info
+  CheckCircle2, Code, Key, Layers,
+  RefreshCw, ChevronRight, Info, FileSearch
 } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
 import { cn } from '@/lib/utils'
@@ -41,97 +40,65 @@ interface EvidenceCollection {
 
 const collectionTools: CollectionTool[] = [
   {
-    id: 'html-collector',
-    name: 'HTML Collector',
-    description: 'Fetches raw HTML content from websites with configurable user agents',
-    category: 'content',
-    icon: <Globe className="h-5 w-5" />,
-    status: 'active',
-    technologies: ['Node.js', 'Fetch API'],
-    features: ['User agent spoofing', 'Timeout handling', 'Retry logic', 'Content extraction']
-  },
-  {
-    id: 'jina-collector',
-    name: 'Jina AI',
-    description: 'Converts web pages to clean markdown and performs intelligent searches',
-    category: 'content',
-    icon: <FileSearch className="h-5 w-5" />,
-    status: 'active',
-    technologies: ['Jina Reader API', 'Jina Search API'],
-    apiKeys: ['JINA_API_KEY'],
-    features: ['Markdown conversion', 'Content cleaning', 'Smart extraction', 'Web search']
-  },
-  {
-    id: 'google-search',
-    name: 'Google Search & Gemini',
-    description: 'AI-powered web search with Gemini 2.0 Flash and traditional search fallback',
+    id: 'web_search',
+    name: 'Perplexity Web Search',
+    description: 'Deep research using Perplexity Sonar Deep for comprehensive web analysis',
     category: 'search',
     icon: <Search className="h-5 w-5" />,
     status: 'active',
-    technologies: ['Gemini 2.0 Flash', 'Google Custom Search API'],
-    apiKeys: ['GOOGLE_API_KEY'],
-    features: ['AI grounding', 'Semantic search', 'Traditional search fallback', 'Result ranking']
+    technologies: ['Perplexity Sonar Deep', 'Perplexity Sonar Pro'],
+    apiKeys: ['PERPLEXITY_API_KEY'],
+    features: ['Deep research mode', 'Citation extraction', 'Search result analysis', '100+ results per query']
   },
   {
-    id: 'security-scanner',
-    name: 'Security Scanner',
-    description: 'Analyzes security headers, exposed secrets, and vulnerabilities',
-    category: 'security',
-    icon: <Shield className="h-5 w-5" />,
+    id: 'website_analyzer',
+    name: 'Website Analyzer',
+    description: 'Analyzes websites using Crawl4AI with sitemap support for multi-page analysis',
+    category: 'content',
+    icon: <Globe className="h-5 w-5" />,
     status: 'active',
-    technologies: ['Custom security checks', 'Pattern matching'],
-    features: ['Security headers', 'API key detection', 'Mixed content', 'Outdated libraries', 'XSS detection']
+    technologies: ['Crawl4AI', 'WebTechDetector'],
+    features: ['Sitemap crawling', 'Multi-page analysis', 'Technology detection', 'Content extraction']
   },
   {
-    id: 'nuclei-scanner',
-    name: 'Nuclei Scanner',
-    description: 'Template-based vulnerability scanning for common security issues',
-    category: 'security',
-    icon: <Bug className="h-5 w-5" />,
-    status: 'active',
-    technologies: ['Nuclei engine', 'YAML templates'],
-    features: ['CVE detection', 'Misconfigurations', 'Information disclosure', 'Path traversal', 'SQL injection']
-  },
-  {
-    id: 'testssl-scanner',
-    name: 'TestSSL Scanner',
-    description: 'Comprehensive SSL/TLS analysis and vulnerability detection',
-    category: 'security',
-    icon: <Lock className="h-5 w-5" />,
-    status: 'active',
-    technologies: ['TestSSL.sh', 'OpenSSL'],
-    features: ['Protocol analysis', 'Cipher suites', 'Certificate validation', 'Known vulnerabilities']
-  },
-  {
-    id: 'webtech-analyzer',
-    name: 'WebTech Analyzer',
-    description: 'Detects technology stack, frameworks, and third-party services',
+    id: 'technical_analysis',
+    name: 'Technical Analysis Suite',
+    description: 'Deep technical analysis including infrastructure, security, and API discovery',
     category: 'technology',
     icon: <Layers className="h-5 w-5" />,
     status: 'active',
-    technologies: ['Pattern recognition', 'Fingerprinting'],
-    features: ['Framework detection', 'CMS identification', 'Analytics tools', 'Payment processors', 'Cloud providers']
+    technologies: ['TechnicalCollector', 'APIDiscovery', 'SecurityScanner'],
+    features: ['Infrastructure analysis', 'API endpoint discovery', 'Security scanning', 'Performance metrics']
   },
   {
-    id: 'performance-analyzer',
-    name: 'Performance Analyzer',
-    description: 'Measures Core Web Vitals and performance metrics using PageSpeed Insights',
-    category: 'performance',
+    id: 'crawl4ai_extractor',
+    name: 'Crawl4AI Extractor',
+    description: 'Intelligent content extraction with structured data support',
+    category: 'content',
+    icon: <FileSearch className="h-5 w-5" />,
+    status: 'active',
+    technologies: ['Crawl4AI', 'LLM extraction'],
+    features: ['Pricing extraction', 'Customer logos', 'Company info', 'Documentation parsing']
+  },
+  {
+    id: 'security_scanner',
+    name: 'Direct Security Scanner',
+    description: 'Comprehensive security analysis including SSL, headers, and vulnerabilities',
+    category: 'security',
+    icon: <Shield className="h-5 w-5" />,
+    status: 'active',
+    technologies: ['Custom security checks', 'SSL analysis'],
+    features: ['SSL/TLS analysis', 'Security headers', 'DNS checks', 'Vulnerability detection']
+  },
+  {
+    id: 'sales_intelligence_analyzer',
+    name: 'Sales Intelligence',
+    description: 'Analyzes companies for sales opportunities relevant to vendor products/services',
+    category: 'search',
     icon: <Zap className="h-5 w-5" />,
     status: 'active',
-    technologies: ['Google PageSpeed Insights API'],
-    apiKeys: ['GOOGLE_API_KEY'],
-    features: ['Core Web Vitals', 'Performance score', 'Accessibility', 'SEO analysis', 'Best practices']
-  },
-  {
-    id: 'chrome-extension',
-    name: 'Chrome Extension',
-    description: 'Browser extension for manual evidence collection and network analysis',
-    category: 'content',
-    icon: <Package className="h-5 w-5" />,
-    status: 'inactive',
-    technologies: ['Chrome Extension API', 'JavaScript'],
-    features: ['Network capture', 'DOM analysis', 'Manual collection', 'HAR export']
+    technologies: ['Perplexity API', 'Custom analysis'],
+    features: ['Dynamic vendor-specific triggers', 'Technology gaps analysis', 'Competitive positioning', 'Market opportunity identification']
   }
 ]
 
@@ -229,25 +196,34 @@ export function EvidenceCollectionPipeline() {
               </Button>
             </div>
 
-            {/* Pipeline Steps */}
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-              {['Content Collection', 'Security Analysis', 'Tech Detection', 'Performance Metrics', 'AI Processing'].map((step, idx) => (
-                <div key={step} className="relative">
+            {/* Hybrid LangGraph Pipeline Steps */}
+            <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
+              {[
+                { name: 'Interpret Thesis', desc: 'Quick analysis' },
+                { name: 'Generate Queries', desc: 'Smart queries' },
+                { name: 'Deep Research', desc: 'Perplexity Sonar' },
+                { name: 'Analyze Findings', desc: 'Gap analysis' },
+                { name: 'Targeted Evidence', desc: 'Tool usage' },
+                { name: 'Generate Report', desc: 'AI synthesis' }
+              ].map((step, idx) => (
+                <div key={step.name} className="relative">
                   <div className={cn(
-                    "p-4 rounded-lg border-2 text-center",
-                    idx === 0 ? "border-blue-500 bg-blue-50" : "border-gray-200"
+                    "p-3 rounded-lg border-2 text-center",
+                    idx === 2 ? "border-electric-teal bg-electric-teal/10" : 
+                    idx === 4 ? "border-amber-500 bg-amber-50" : "border-gray-200"
                   )}>
-                    <div className="font-medium text-sm">{step}</div>
+                    <div className="font-medium text-sm">{step.name}</div>
                     <div className="text-xs text-muted-foreground mt-1">
-                      {idx === 0 && '3 tools active'}
-                      {idx === 1 && '3 tools active'}
-                      {idx === 2 && '1 tool active'}
-                      {idx === 3 && '1 tool active'}
-                      {idx === 4 && 'Processing'}
+                      {step.desc}
                     </div>
                   </div>
-                  {idx < 4 && (
+                  {idx < 5 && (
                     <ChevronRight className="absolute -right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  )}
+                  {idx === 4 && (
+                    <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-xs text-muted-foreground">
+                      ↻ Iterative
+                    </div>
                   )}
                 </div>
               ))}

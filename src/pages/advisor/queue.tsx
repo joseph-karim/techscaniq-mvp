@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Clock, Filter, Search, MoreHorizontal } from 'lucide-react'
+import { Clock, Filter, Search, MoreHorizontal, FileText, Zap } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -245,11 +245,27 @@ export default function AdvisorQueuePage() {
                           <td className="px-4 py-3">
                             <div className="flex gap-2">
                               {scan.status === 'pending' ? (
-                                <Button size="sm" className="bg-electric-teal hover:bg-electric-teal/90" asChild>
-                                  <Link to={`/reports/generate?scanId=${scan.id}&company=${encodeURIComponent(scan.company_name)}&website=${encodeURIComponent(scan.website_url)}&requestor=${encodeURIComponent(scan.requestor_name)}&organization=${encodeURIComponent(scan.organization_name)}`}>
-                                    Generate Report
-                                  </Link>
-                                </Button>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button size="sm" className="bg-electric-teal hover:bg-electric-teal/90">
+                                      Generate Report
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem asChild>
+                                      <Link to={`/reports/generate?scanId=${scan.id}&company=${encodeURIComponent(scan.company_name)}&website=${encodeURIComponent(scan.website_url)}&requestor=${encodeURIComponent(scan.requestor_name)}&organization=${encodeURIComponent(scan.organization_name)}`}>
+                                        <FileText className="mr-2 h-4 w-4" />
+                                        Standard Report
+                                      </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem asChild>
+                                      <Link to={`/reports/generate-langgraph?scanId=${scan.id}&company=${encodeURIComponent(scan.company_name)}&website=${encodeURIComponent(scan.website_url)}&requestor=${encodeURIComponent(scan.requestor_name)}&organization=${encodeURIComponent(scan.organization_name)}`}>
+                                        <Zap className="mr-2 h-4 w-4 text-electric-teal" />
+                                        LangGraph AI Report
+                                      </Link>
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
                               ) : scan.status === 'awaiting_review' ? (
                                 <Button size="sm" className="bg-electric-teal hover:bg-electric-teal/90" asChild>
                                   <Link to={`/advisor/review/${scan.id}`}>

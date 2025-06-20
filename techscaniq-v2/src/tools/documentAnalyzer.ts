@@ -4,7 +4,7 @@ import { PlaywrightCrawler } from 'crawlee';
 import pdfParse from '../utils/pdf-parse';
 import { ChatOpenAI } from '@langchain/openai';
 import { config, models } from '../config';
-import fs from 'fs-extra';
+import * as fs from 'fs-extra';
 
 export interface ExtractedContent {
   url: string;

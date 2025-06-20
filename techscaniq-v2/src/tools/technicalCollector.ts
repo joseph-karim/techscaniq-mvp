@@ -104,6 +104,31 @@ interface TechnologyStack {
 export class TechnicalCollector {
   private browser: Browser | null = null;
 
+  async collectTechnicalData(domain: string): Promise<any> {
+    // Convert domain to URL if needed
+    const url = domain.startsWith('http') ? domain : `https://${domain}`;
+    const profile = await this.collectTechnicalProfile(url);
+    
+    // Transform to expected format for LangGraph integration
+    return {
+      httpInfo: {
+        headers: profile.infrastructure.headers,
+        cookies: profile.infrastructure.cookies,
+        ssl: profile.infrastructure.ssl,
+      },
+      dnsRecords: profile.infrastructure.dns,
+      ports: {
+        open: [], // Would need actual port scanning
+        services: [],
+      },
+      subdomains: [], // Would need subdomain enumeration
+      technologies: profile.technologies,
+      performance: profile.performance,
+      security: profile.security,
+      apis: profile.apis,
+    };
+  }
+
   async collectTechnicalProfile(url: string): Promise<TechnicalProfile> {
     console.log(`🔧 Collecting technical profile for ${url}`);
     
