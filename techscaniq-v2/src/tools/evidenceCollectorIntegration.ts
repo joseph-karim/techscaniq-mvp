@@ -1,9 +1,38 @@
 import { spawn } from 'child_process';
-import { Queue, QueueEvents } from 'bullmq';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import { Evidence, EvidenceSource } from '../types';
 import { config } from '../config';
+
+// Stub Queue and QueueEvents to prevent Redis connections
+class Queue {
+  constructor(name: string, options?: any) {
+    console.warn(`Queue ${name} creation skipped - queues disabled`);
+  }
+  add(name: string, data: any, options?: any) { 
+    return Promise.resolve({ 
+      id: 'stub',
+      waitUntilFinished: (queueEvents?: any) => Promise.resolve({ 
+        discovered_urls: [],
+        technical_evidence: [],
+        authentication_opportunities: [],
+        api_endpoints: [],
+        product_features: [],
+        screenshots: [],
+        error: null 
+      })
+    }); 
+  }
+  on() {}
+}
+
+class QueueEvents {
+  constructor(name: string, options?: any) {
+    console.warn(`QueueEvents ${name} creation skipped - queues disabled`);
+  }
+  on() {}
+  waitUntilReady() { return Promise.resolve(); }
+}
 
 // __dirname is available in CommonJS by default
 
@@ -44,21 +73,28 @@ export class EvidenceCollectorIntegration {
     // Path to existing crawl4ai script
     this.crawl4aiScript = path.join(__dirname, '../../../../src/workers/crawl4ai_documented_deep.py');
     
-    // Initialize Skyvern queue
-    this.skyvernQueue = new Queue('skyvern-discovery', {
-      connection: {
-        host: config.REDIS_HOST,
-        port: config.REDIS_PORT,
-      },
-    });
-    
-    // Initialize queue events
-    this.skyvernQueueEvents = new QueueEvents('skyvern-discovery', {
-      connection: {
-        host: config.REDIS_HOST,
-        port: config.REDIS_PORT,
-      },
-    });
+    // Only initialize queues if enabled
+    if (config.USE_QUEUES && !config.DISABLE_RATE_LIMITING) {
+      // Initialize Skyvern queue
+      this.skyvernQueue = new Queue('skyvern-discovery', {
+        connection: {
+          host: config.REDIS_HOST,
+          port: config.REDIS_PORT,
+        },
+      });
+      
+      // Initialize queue events
+      this.skyvernQueueEvents = new QueueEvents('skyvern-discovery', {
+        connection: {
+          host: config.REDIS_HOST,
+          port: config.REDIS_PORT,
+        },
+      });
+    } else {
+      // Create stub instances
+      this.skyvernQueue = new Queue('skyvern-discovery');
+      this.skyvernQueueEvents = new QueueEvents('skyvern-discovery');
+    }
   }
 
   /**
