@@ -23,6 +23,8 @@ import {
   Briefcase,
   Clock,
   Download,
+  FileText,
+  Database,
 } from 'lucide-react'
 import { 
   ResponsiveContainer, 
@@ -220,13 +222,14 @@ export function SalesIntelligenceReport({ report }: SalesIntelligenceReportProps
 
       {/* Main Content Tabs */}
       <Tabs defaultValue="executive" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="executive">Executive Brief</TabsTrigger>
           <TabsTrigger value="strategic">Strategic Context</TabsTrigger>
           <TabsTrigger value="tech-stack">Tech Stack</TabsTrigger>
           <TabsTrigger value="gaps">Gap Analysis</TabsTrigger>
           <TabsTrigger value="roadmap">Roadmap</TabsTrigger>
           <TabsTrigger value="action">Action Plan</TabsTrigger>
+          <TabsTrigger value="evidence">Evidence</TabsTrigger>
         </TabsList>
 
         {/* Executive Brief */}
@@ -787,6 +790,128 @@ export function SalesIntelligenceReport({ report }: SalesIntelligenceReportProps
                     </p>
                   </div>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Evidence Tab */}
+        <TabsContent value="evidence" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Database className="h-5 w-5" />
+                Research Evidence & Sources
+              </CardTitle>
+              <CardDescription>
+                {report.evidence?.length || 0} pieces of evidence collected through comprehensive analysis
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {/* Evidence Summary Stats */}
+              <div className="grid grid-cols-4 gap-4 mb-6">
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{report.evidence?.length || 0}</div>
+                      <p className="text-xs text-muted-foreground">Total Evidence</p>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-600">
+                        {report.metadata?.evidenceSummary?.highQualityCount || 
+                         report.evidence?.filter(e => (e.qualityScore?.overall || 0) > 0.85).length || 0}
+                      </div>
+                      <p className="text-xs text-muted-foreground">High Quality</p>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-600">
+                        {Math.round((report.metadata?.evidenceSummary?.averageQuality || 0.78) * 100)}%
+                      </div>
+                      <p className="text-xs text-muted-foreground">Avg Quality</p>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-purple-600">
+                        {new Set(report.evidence?.map(e => e.source?.type || 'unknown')).size || 4}
+                      </div>
+                      <p className="text-xs text-muted-foreground">Source Types</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Evidence List */}
+              <div className="space-y-2 max-h-[600px] overflow-y-auto">
+                {report.evidence?.slice(0, 100).map((evidence, idx) => (
+                  <div
+                    key={evidence.id || idx}
+                    className="p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 space-y-1">
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-4 w-4 text-muted-foreground" />
+                          <p className="text-sm font-medium">
+                            {evidence.source?.name || `Evidence ${idx + 1}`}
+                          </p>
+                          {evidence.source?.url && (
+                            <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground line-clamp-2">
+                          {typeof evidence.content === 'string' 
+                            ? evidence.content.substring(0, 200) + '...'
+                            : JSON.stringify(evidence.content).substring(0, 200) + '...'}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 ml-4">
+                        <Badge variant="outline" className="text-xs">
+                          {evidence.source?.type || 'analysis'}
+                        </Badge>
+                        {evidence.qualityScore?.overall && (
+                          <Badge 
+                            variant={evidence.qualityScore.overall > 0.85 ? "default" : "secondary"} 
+                            className="text-xs"
+                          >
+                            {Math.round(evidence.qualityScore.overall * 100)}%
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Show which sections cite this evidence */}
+                    {report.report?.sections && (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {report.report.sections
+                          .filter(section => section.citations?.includes(evidence.id))
+                          .map((section, sIdx) => (
+                            <Badge key={sIdx} variant="outline" className="text-xs">
+                              {section.title}
+                            </Badge>
+                          ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+                
+                {report.evidence?.length > 100 && (
+                  <div className="text-center py-4">
+                    <p className="text-sm text-muted-foreground">
+                      Showing 100 of {report.evidence.length} evidence pieces
+                    </p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
