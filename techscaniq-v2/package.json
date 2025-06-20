@@ -21,6 +21,7 @@
     "research:checkpoint": "tsx scripts/run-with-checkpoint.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.24.0",
     "@fastify/cors": "^9.0.0",
     "@fastify/swagger": "^8.15.0",
     "@fastify/swagger-ui": "^4.2.0",

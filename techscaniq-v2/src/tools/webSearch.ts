@@ -423,8 +423,8 @@ export class WebSearchTool {
         const uniqueUrls = [...new Set(urls)]; // Remove duplicates
         
         results = uniqueUrls.slice(0, options.maxResults || 10).map((url, index) => ({
-          title: `Source from ${new URL(url).hostname}`,
-          url: url,
+          title: `Source from ${new URL(url as string).hostname}`,
+          url: url as string,
           snippet: '',
           relevanceScore: 0.8 - (index * 0.05),
         }));

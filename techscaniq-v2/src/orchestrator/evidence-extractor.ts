@@ -77,7 +77,7 @@ export class EvidenceExtractor {
     // Extract each citation as individual evidence
     if (data.citations && Array.isArray(data.citations)) {
       data.citations.forEach((citation, index) => {
-        const url = typeof citation === 'string' ? citation : citation.url || citation;
+        const url = typeof citation === 'string' ? citation : (citation as any)?.url || citation;
         if (!url || !url.startsWith('http')) return;
 
         try {
