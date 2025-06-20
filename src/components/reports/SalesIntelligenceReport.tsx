@@ -23,7 +23,6 @@ import {
   Briefcase,
   Clock,
   Download,
-  FileText,
   Database,
 } from 'lucide-react'
 import { 
@@ -843,75 +842,124 @@ export function SalesIntelligenceReport({ report }: SalesIntelligenceReportProps
                   <CardContent className="p-4">
                     <div className="text-center">
                       <div className="text-2xl font-bold text-purple-600">
-                        {new Set(report.evidence?.map(e => e.source?.type || 'unknown')).size || 4}
+                        {report.metadata?.evidenceSummary?.sources || 
+                         new Set(report.evidence?.map(e => e.source?.name || e.source || 'unknown')).size || 4}
                       </div>
-                      <p className="text-xs text-muted-foreground">Source Types</p>
+                      <p className="text-xs text-muted-foreground">Unique Sources</p>
                     </div>
                   </CardContent>
                 </Card>
               </div>
 
               {/* Evidence List */}
-              <div className="space-y-2 max-h-[600px] overflow-y-auto">
-                {report.evidence?.slice(0, 100).map((evidence, idx) => (
-                  <div
+              <div className="space-y-4 max-h-[800px] overflow-y-auto pr-2">
+                {report.evidence?.map((evidence, idx) => (
+                  <Card
                     key={evidence.id || idx}
-                    className="p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+                    className="overflow-hidden hover:shadow-md transition-shadow"
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1 space-y-1">
-                        <div className="flex items-center gap-2">
-                          <FileText className="h-4 w-4 text-muted-foreground" />
-                          <p className="text-sm font-medium">
-                            {evidence.source?.name || `Evidence ${idx + 1}`}
-                          </p>
-                          {evidence.source?.url && (
-                            <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 space-y-1">
+                          <CardTitle className="text-base font-semibold">
+                            {evidence.title || evidence.source?.name || `Evidence ${idx + 1}`}
+                          </CardTitle>
+                          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <Database className="h-3 w-3" />
+                              {evidence.type || evidence.source?.type || 'analysis'}
+                            </span>
+                            <span>{evidence.source?.name || evidence.source || 'Research Finding'}</span>
+                            {evidence.metadata?.lastModified && (
+                              <span>{new Date(evidence.metadata.lastModified).toLocaleDateString()}</span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 ml-4">
+                          {evidence.qualityScore?.overall && (
+                            <Badge 
+                              variant={evidence.qualityScore.overall > 0.90 ? "default" : 
+                                     evidence.qualityScore.overall > 0.85 ? "secondary" : "outline"} 
+                              className="text-xs"
+                            >
+                              {Math.round(evidence.qualityScore.overall * 100)}%
+                            </Badge>
+                          )}
+                          {evidence.metadata?.confidence && (
+                            <Badge variant="outline" className="text-xs">
+                              {evidence.metadata.confidence}% Conf
+                            </Badge>
                           )}
                         </div>
-                        <p className="text-xs text-muted-foreground line-clamp-2">
-                          {typeof evidence.content === 'string' 
-                            ? evidence.content.substring(0, 200) + '...'
-                            : JSON.stringify(evidence.content).substring(0, 200) + '...'}
-                        </p>
                       </div>
-                      <div className="flex items-center gap-2 ml-4">
-                        <Badge variant="outline" className="text-xs">
-                          {evidence.source?.type || 'analysis'}
-                        </Badge>
-                        {evidence.qualityScore?.overall && (
-                          <Badge 
-                            variant={evidence.qualityScore.overall > 0.85 ? "default" : "secondary"} 
-                            className="text-xs"
+                    </CardHeader>
+                    
+                    <CardContent className="pt-0 space-y-3">
+                      {/* Evidence Excerpt or Content */}
+                      {evidence.excerpt ? (
+                        <div className="bg-muted/50 rounded-lg p-3 border border-muted">
+                          <p className="text-sm leading-relaxed">
+                            {evidence.excerpt}
+                          </p>
+                        </div>
+                      ) : evidence.content && typeof evidence.content === 'string' ? (
+                        <p className="text-sm text-muted-foreground">
+                          {evidence.content.length > 300 
+                            ? evidence.content.substring(0, 300) + '...'
+                            : evidence.content}
+                        </p>
+                      ) : null}
+                      
+                      {/* Quality Breakdown */}
+                      {evidence.qualityScore?.components && (
+                        <div className="flex gap-4 text-xs text-muted-foreground">
+                          <span>Relevance: {Math.round(evidence.qualityScore.components.relevance * 100)}%</span>
+                          <span>Credibility: {Math.round(evidence.qualityScore.components.credibility * 100)}%</span>
+                          <span>Recency: {Math.round(evidence.qualityScore.components.recency * 100)}%</span>
+                          <span>Specificity: {Math.round(evidence.qualityScore.components.specificity * 100)}%</span>
+                        </div>
+                      )}
+                      
+                      {/* Citations and Source Link */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          {/* Show which sections cite this evidence */}
+                          {report.report?.sections && (
+                            <div className="flex flex-wrap gap-1">
+                              {report.report.sections
+                                .filter(section => section.citations?.includes(evidence.id))
+                                .map((section, sIdx) => (
+                                  <Badge key={sIdx} variant="outline" className="text-xs">
+                                    Cited in: {section.title}
+                                  </Badge>
+                                ))}
+                            </div>
+                          )}
+                        </div>
+                        
+                        {(evidence.url || evidence.source?.url) && (
+                          <Button 
+                            variant="link" 
+                            size="sm" 
+                            className="p-0 h-auto text-xs"
+                            asChild
                           >
-                            {Math.round(evidence.qualityScore.overall * 100)}%
-                          </Badge>
+                            <a href={evidence.url || evidence.source.url} target="_blank" rel="noopener noreferrer">
+                              View Source <ExternalLink className="ml-1 h-3 w-3" />
+                            </a>
+                          </Button>
                         )}
                       </div>
-                    </div>
-                    
-                    {/* Show which sections cite this evidence */}
-                    {report.report?.sections && (
-                      <div className="mt-2 flex flex-wrap gap-1">
-                        {report.report.sections
-                          .filter(section => section.citations?.includes(evidence.id))
-                          .map((section, sIdx) => (
-                            <Badge key={sIdx} variant="outline" className="text-xs">
-                              {section.title}
-                            </Badge>
-                          ))}
-                      </div>
-                    )}
-                  </div>
+                      
+                      {/* Author if available */}
+                      {evidence.metadata?.author && (
+                        <p className="text-xs text-muted-foreground">
+                          By {evidence.metadata.author}
+                        </p>
+                      )}
+                    </CardContent>
+                  </Card>
                 ))}
-                
-                {report.evidence?.length > 100 && (
-                  <div className="text-center py-4">
-                    <p className="text-sm text-muted-foreground">
-                      Showing 100 of {report.evidence.length} evidence pieces
-                    </p>
-                  </div>
-                )}
               </div>
             </CardContent>
           </Card>
