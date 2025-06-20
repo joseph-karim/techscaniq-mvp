@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { ArrowLeft, AlertTriangle } from 'lucide-react'
 import { LangGraphReport } from '@/components/reports/LangGraphReport'
 import { LangGraphPEReport } from '@/components/reports/LangGraphPEReport'
-import { loadLangGraphReport } from '@/services/langgraph-reports'
+import { loadLangGraphReportWithFallback } from '@/services/langgraph-reports'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
 export default function LangGraphReportView() {
@@ -24,7 +24,7 @@ export default function LangGraphReportView() {
 
       try {
         setLoading(true)
-        const data = await loadLangGraphReport(id)
+        const data = await loadLangGraphReportWithFallback(id)
         if (data) {
           setReport(data)
         } else {

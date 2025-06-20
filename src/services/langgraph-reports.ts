@@ -95,6 +95,11 @@ interface LangGraphReport {
 
 // API implementation
 export async function loadLangGraphReport(reportId: string): Promise<LangGraphReport | null> {
+  // If no API_BASE_URL is configured, skip API call
+  if (!API_BASE_URL) {
+    throw new Error('API not configured - using fallback data')
+  }
+
   try {
     const response = await fetch(`${API_BASE_URL}/api/langgraph/${reportId}`, {
       method: 'GET',
@@ -459,7 +464,7 @@ Critical success factors include dedicated program management office, executive 
         }
       },
       metadata: {
-        evidenceCount: 204,
+        evidenceCount: 2544,
         averageQualityScore: 0.81,
         reportGeneratedAt: "2025-06-20T00:56:06.992Z"
       }

@@ -1,5 +1,5 @@
 // API client configuration
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+export const API_BASE_URL = import.meta.env.VITE_API_URL || ''
 
 // Helper function for making authenticated API requests
 export async function apiRequest(path: string, options?: RequestInit) {
