@@ -1,5 +1,8 @@
 // API client configuration
-export const API_BASE_URL = import.meta.env.VITE_API_URL || ''
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 
+  (typeof window !== 'undefined' && window.location.hostname === 'scan.techscaniq.com' 
+    ? 'https://scan.techscaniq.com:3001'
+    : 'http://localhost:3001')
 
 // Helper function for making authenticated API requests
 export async function apiRequest(path: string, options?: RequestInit) {

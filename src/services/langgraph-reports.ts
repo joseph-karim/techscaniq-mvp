@@ -95,13 +95,15 @@ interface LangGraphReport {
 
 // API implementation
 export async function loadLangGraphReport(reportId: string): Promise<LangGraphReport | null> {
-  // If no API_BASE_URL is configured, skip API call
-  if (!API_BASE_URL) {
-    throw new Error('API not configured - using fallback data')
+  // Convert reportId to proper format if needed
+  let apiReportId = reportId;
+  if (reportId === 'cibc-adobe-sales-2024') {
+    // For demo, we might need to check if there's an actual UUID for this report
+    // For now, let the API handle it
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/langgraph/${reportId}`, {
+    const response = await fetch(`${API_BASE_URL}/api/langgraph/${apiReportId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

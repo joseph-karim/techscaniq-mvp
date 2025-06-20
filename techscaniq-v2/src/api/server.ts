@@ -27,6 +27,7 @@ fastify.register(cors, {
   origin: config.NODE_ENV === 'development' ? true : [
     'https://techscaniq.com',
     'https://app.techscaniq.com',
+    'https://scan.techscaniq.com',
   ],
   credentials: true,
 });
