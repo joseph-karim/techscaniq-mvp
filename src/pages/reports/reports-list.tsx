@@ -65,7 +65,7 @@ export default function ReportsListPage() {
   // Fetch scan requests
   useEffect(() => {
     async function fetchScanRequests() {
-      console.log('Fetching scan requests...', { user, userRole, isAdmin })
+      // Fetching scan requests based on user role
       try {
         let query = supabase
           .from('scan_requests')
@@ -74,7 +74,7 @@ export default function ReportsListPage() {
         // Filter based on user role
         if (!isAdmin) {
           // Regular users only see their own requests
-          console.log('Filtering by user ID:', user?.id)
+          // Regular users only see their own requests
           query = query.eq('requested_by', user?.id)
         }
         
@@ -82,10 +82,11 @@ export default function ReportsListPage() {
         
         if (error) throw error
         
-        console.log('Fetched scan requests:', data)
+        // Process fetched scan requests
         setScanRequests(data || [])
       } catch (error) {
-        console.error('Error fetching scan requests:', error)
+        // TODO: Add proper error handling
+        // Error fetching scan requests
       } finally {
         setLoading(false)
       }

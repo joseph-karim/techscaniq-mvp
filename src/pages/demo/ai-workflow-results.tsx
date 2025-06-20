@@ -54,10 +54,10 @@ export default function AIWorkflowResults() {
         if (!workflowError && workflows?.length > 0) {
           // Real data path - continue with existing logic
           // For now, we'll use mock data regardless to ensure demo works
-          console.log('Real workflow data available, but using mock for demo consistency')
+          // Real workflow data available, but using mock for demo consistency
         }
       } catch (realDataError) {
-        console.log('Real data not available, using demo data')
+        // Real data not available, using demo data
       }
 
       // Use comprehensive mock data based on our local Ring4 data
@@ -318,7 +318,8 @@ EXECUTION & TEAM (Weight: 20% | Score: 8.5/10)
       setWorkflowData(mockWorkflowData)
 
     } catch (err) {
-      console.error('Error loading workflow data:', err)
+      // TODO: Add proper error handling for workflow data loading
+      // Error loading workflow data
       setError(err instanceof Error ? err.message : 'Failed to load workflow data')
     } finally {
       setLoading(false)

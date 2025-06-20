@@ -7,6 +7,7 @@ Provides code analysis capabilities using Serena MCP tools.
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 from fastapi.responses import JSONResponse
 import logging
 import os
@@ -93,6 +94,9 @@ if os.getenv("ENVIRONMENT") == "production":
         TrustedHostMiddleware,
         allowed_hosts=allowed_hosts
     )
+    
+    # HTTPS redirect in production
+    app.add_middleware(HTTPSRedirectMiddleware)
 
 
 # Rate limiting middleware

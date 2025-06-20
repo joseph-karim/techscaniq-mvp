@@ -482,7 +482,7 @@ export function ExecutiveSummary({ data, citations = [], onCitationClick }: Exec
           citation={selectedCitation}
           onAddNote={(note) => {
             // Handle note addition - could be passed up to parent component
-            console.log('New note added:', note)
+            // TODO: Implement note persistence
           }}
           notes={[]} // Could be passed from parent component
           userRole="pe_user"

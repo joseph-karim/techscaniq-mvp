@@ -80,14 +80,11 @@ export default function AdminDashboardPage() {
           combinedScans.push(...realScansWithFlag)
         }
 
-        console.log('Loaded real data:', { 
-          scans: dbScans?.length || 0, 
-          reports: dbReports?.length || 0, 
-          workflows: dbWorkflows?.length || 0 
-        });
+        // Successfully loaded real data from database
 
       } catch (error) {
-        console.error('Error loading real data:', error);
+        // TODO: Add proper error handling for database queries
+        // Error loading real data
         // Continue with mock data only
       }
 

@@ -5,8 +5,8 @@ Provides HTTP API for code analysis using Serena MCP tools.
 Integrates with the LangGraph frontend worker.
 """
 
-from fastapi import APIRouter, HTTPException, BackgroundTasks
-from pydantic import BaseModel, Field
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
+from pydantic import BaseModel, Field, validator, conint, constr
 from typing import Dict, List, Optional, Any
 import asyncio
 import logging
@@ -15,8 +15,11 @@ from datetime import datetime
 import tempfile
 import shutil
 from pathlib import Path
+import re
+import os
 
 from ..services.mcp_client_service import mcp_client, with_mcp_connection
+from ..auth import verify_api_key
 from ..services.serena_tools import (
     AnalyzeCodeStructureTool,
     FindCodePatternsTool,
@@ -33,7 +36,7 @@ router = APIRouter(prefix="/api/code-analysis", tags=["code-analysis"])
 class CodeAnalysisRequest(BaseModel):
     """Request model for code analysis"""
     code: Dict[str, str] = Field(description="Dictionary mapping filenames to code content")
-    url: str = Field(description="Source URL of the code")
+    url: constr(regex=r'^https?://.*', max_length=500) = Field(description="Source URL of the code")
     options: Dict[str, bool] = Field(
         default_factory=lambda: {
             "includeSecurityScan": True,
@@ -42,6 +45,57 @@ class CodeAnalysisRequest(BaseModel):
         },
         description="Analysis options"
     )
+    
+    @validator('code')
+    def validate_code(cls, v):
+        """Validate code input"""
+        if not v:
+            raise ValueError("Code dictionary cannot be empty")
+        
+        # Validate file count
+        if len(v) > 100:
+            raise ValueError("Maximum 100 files allowed per analysis")
+        
+        # Validate each file
+        total_size = 0
+        for filename, code in v.items():
+            # Validate filename
+            if not filename or len(filename) > 255:
+                raise ValueError(f"Invalid filename: {filename}")
+            
+            # Check for path traversal attempts
+            if '..' in filename or filename.startswith('/'):
+                raise ValueError(f"Invalid filename path: {filename}")
+            
+            # Validate code size (max 1MB per file)
+            if len(code) > 1024 * 1024:
+                raise ValueError(f"File {filename} exceeds 1MB limit")
+            
+            total_size += len(code)
+        
+        # Total size limit (10MB)
+        if total_size > 10 * 1024 * 1024:
+            raise ValueError("Total code size exceeds 10MB limit")
+        
+        return v
+    
+    @validator('url')
+    def validate_url(cls, v):
+        """Validate URL"""
+        # Block localhost and private IPs in production
+        if os.getenv("ENVIRONMENT") == "production":
+            private_patterns = [
+                r'localhost',
+                r'127\.',
+                r'192\.168\.',
+                r'10\.',
+                r'172\.(1[6-9]|2[0-9]|3[0-1])\.'
+            ]
+            for pattern in private_patterns:
+                if re.search(pattern, v):
+                    raise ValueError("Cannot analyze private/local URLs in production")
+        
+        return v
 
 
 class SymbolInfo(BaseModel):
@@ -88,7 +142,7 @@ class CodeAnalysisResponse(BaseModel):
     metadata: Dict[str, Any]
 
 
-@router.post("/analyze", response_model=CodeAnalysisResponse)
+@router.post("/analyze", response_model=CodeAnalysisResponse, dependencies=[Depends(verify_api_key)])
 @with_mcp_connection
 async def analyze_code(request: CodeAnalysisRequest, background_tasks: BackgroundTasks):
     """

@@ -135,15 +135,15 @@ export default function RequestScanPage() {
   // Handle navigation after successful submission
   useEffect(() => {
     if (success) {
-      console.log('Success detected, setting up navigation...')
+      // Success detected, setting up navigation...
       const timeoutId = setTimeout(() => {
-        console.log('Navigating to /reports...')
+        // Navigating to /reports...
         navigate('/reports')
       }, 2000)
       
       // Cleanup timeout if component unmounts
       return () => {
-        console.log('Cleaning up navigation timeout')
+        // Cleaning up navigation timeout
         clearTimeout(timeoutId)
       }
     }
@@ -235,8 +235,8 @@ export default function RequestScanPage() {
       if (dbError) throw dbError
 
       // Also trigger via API for background processing
-      console.log('✅ Scan request created:', scanRequest.id)
-      console.log('🚀 Triggering background processing...')
+      // ✅ Scan request created successfully
+      // 🚀 Triggering background processing...
       
       // Call the API to start background processing
       const response = await fetch('/api/scans', {
@@ -259,10 +259,11 @@ export default function RequestScanPage() {
       })
       
       if (!response.ok) {
-        console.error('⚠️ Background processing initiation failed')
+        // ⚠️ Background processing initiation failed
+        // Don't throw error - scan is created, just background processing failed
         // Don't throw error - scan is created, just background processing failed
       } else {
-        console.log('✅ Background processing initiated successfully')
+        // ✅ Background processing initiated successfully
       }
       
       // Call the report orchestrator to start analysis
@@ -274,12 +275,14 @@ export default function RequestScanPage() {
       })
 
       if (reportError) {
-        console.error('⚠️ Report generation failed:', reportError)
+        // ⚠️ Report generation failed
+        // Don't throw error - scan is created, just report generation failed
+        // User can still see the scan in their list and it can be manually triggered
         // Don't throw error - scan is created, just report generation failed
         // User can still see the scan in their list and it can be manually triggered
       } else {
-        console.log('✅ Report generation initiated successfully')
-        console.log('📊 Report ID:', reportResult.reportId)
+        // ✅ Report generation initiated successfully
+        // 📊 Report ID available in reportResult.reportId
       }
       
       // Success
@@ -303,7 +306,8 @@ export default function RequestScanPage() {
       // Navigation will be handled by useEffect
     } catch (err) {
       setError('Failed to submit scan request. Please try again.')
-      console.error(err)
+      // TODO: Add proper error logging
+      // Error submitting scan request
     } finally {
       setIsSubmitting(false)
     }

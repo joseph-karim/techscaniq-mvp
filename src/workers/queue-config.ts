@@ -17,9 +17,9 @@ export const QUEUE_DEFINITIONS = {
   // Evidence collection queues
   'evidence-collection': {
     name: 'evidence-collection',
-    workerFile: 'evidence-collection-worker-v2.ts',
+    workerFile: 'evidence-collection-worker-crawl4ai.ts',
     concurrency: 3,
-    description: 'Basic evidence collection from web pages'
+    description: 'Modern evidence collection using Crawl4AI'
   },
   
   // Report generation queues (multiple approaches)

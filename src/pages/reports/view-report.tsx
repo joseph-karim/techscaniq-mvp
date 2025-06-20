@@ -331,51 +331,29 @@ export default function ViewReport() {
       try {
         const data = await fetchReportWithEvidence(id)
         if (data) {
-          console.log('Report data loaded:', {
-            hasReportData: !!data.report_data,
-            hasSections: !!data.report_data?.sections,
-            sectionsType: typeof data.report_data?.sections,
-            sectionKeys: data.report_data?.sections ? Object.keys(data.report_data.sections) : [],
-            topLevelKeys: Object.keys(data),
-            reportDataKeys: data.report_data ? Object.keys(data.report_data) : [],
-            citationCount: data.citations?.length || 0,
-            reportType: data.report_type,
-            // Log actual sections data
-            sectionsData: JSON.stringify(data.report_data?.sections, null, 2)
-          })
+          // Report data loaded successfully
           
           // Check if this is a thesis-aligned report and redirect
           if (data.report_type === 'thesis-aligned' || data.report_data?.thesis_type || data.report_data?.weighted_scores) {
-            console.log('Detected thesis-aligned report, redirecting...')
+            // Detected thesis-aligned report, redirecting...
             navigate(`/reports/thesis-aligned/${id}`, { replace: true })
             return
           }
           
           // Inject citations into report content
           if (data.citations && data.citations.length > 0 && data.report_data) {
-            console.log('Injecting citations into report content...', {
-              citationCount: data.citations.length,
-              sampleCitation: data.citations[0],
-              reportSections: data.report_data?.sections ? 
-                (Array.isArray(data.report_data.sections) ? 
-                  data.report_data.sections.map((s: any) => s.title) : 
-                  Object.keys(data.report_data.sections)) : 
-                []
-            })
+            // Injecting citations into report content...
             data.report_data = injectCitationsIntoReport(data.report_data, data.citations)
-            console.log('Citations injected successfully')
+            // Citations injected successfully
           } else {
-            console.log('No citations to inject:', {
-              hasCitations: !!data.citations,
-              citationLength: data.citations?.length || 0,
-              hasReportData: !!data.report_data
-            })
+            // No citations to inject
           }
           
           setReportData(data)
         }
       } catch (error) {
-        console.error('Error loading report:', error)
+        // TODO: Add proper error handling for report loading
+        // Error loading report
       } finally {
         setLoading(false)
       }
@@ -430,14 +408,7 @@ export default function ViewReport() {
   const generateSections = (): ScanReportSection[] => {
     if (!currentReport) return []
     
-    console.log('generateSections:', {
-      sectionsType: typeof currentReport.sections,
-      isArray: Array.isArray(currentReport.sections),
-      hasContent: !!currentReport.sections,
-      keys: typeof currentReport.sections === 'object' && !Array.isArray(currentReport.sections) ? Object.keys(currentReport.sections) : [],
-      // Log actual sections data
-      sectionsData: JSON.stringify(currentReport.sections, null, 2).substring(0, 500) + '...'
-    })
+    // Generate sections based on report format
     
     // Check if it's the new array format (like Ring4)
     if (Array.isArray(currentReport.sections)) {
@@ -651,16 +622,7 @@ export default function ViewReport() {
   }
 
   const renderSection = (sectionId: string) => {
-    console.log('renderSection called with:', {
-      sectionId,
-      sectionsType: typeof currentReport.sections,
-      isArray: Array.isArray(currentReport.sections),
-      hasSection: typeof currentReport.sections === 'object' && !Array.isArray(currentReport.sections) ? sectionId in currentReport.sections : false,
-      // Log sections keys if object
-      sectionKeys: typeof currentReport.sections === 'object' && !Array.isArray(currentReport.sections) ? Object.keys(currentReport.sections) : [],
-      // Check if sections is empty object
-      isEmptyObject: typeof currentReport.sections === 'object' && !Array.isArray(currentReport.sections) && Object.keys(currentReport.sections).length === 0
-    })
+    // Render section based on report format
     
     // Check if sections is an array (new format) or object (legacy format)
     if (Array.isArray(currentReport.sections)) {

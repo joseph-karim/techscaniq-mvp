@@ -751,7 +751,8 @@ export default function ReportPage() {
           citation={activeCitation}
           notes={[]}
           onAddNote={(note) => {
-            console.log('New note added:', note)
+            // TODO: Implement note persistence
+            // New note added
           }}
           userRole="pe_user"
           userName="Demo User"

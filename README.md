@@ -1,8 +1,8 @@
 [![CodeGuide](/codeguide-backdrop.svg)](https://codeguide.dev)
 
-# CodeGuide Vite + Supabase Starter
+# TechScanIQ - Modern Architecture (Post-Integration)
 
-A modern web application starter template built with Vite and React, featuring a beautiful UI and Supabase integration.
+A comprehensive technology scanning and analysis platform with secure, modern architecture featuring rate limiting, input validation, and Python backend integration.
 
 ## Tech Stack
 
@@ -116,6 +116,12 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 - 📱 Responsive Design
 - 🎭 Beautiful Animations with Framer Motion
 - 📝 Type-Safe Forms with React Hook Form and Zod
+- 🔒 Comprehensive Security Features
+- 🚦 Rate Limiting on All APIs
+- 🛡️ Input Validation and Sanitization
+- 🐍 Python Backend with FastAPI
+- 🤖 LangGraph v4 for Report Generation
+- 🕷️ Crawl4AI for Modern Web Scraping
 
 ## Project Structure
 
@@ -130,12 +136,47 @@ codeguide-vite-supabase/
 └── documentation/     # Generated documentation from CodeGuide
 ```
 
+## Current Architecture
+
+### Active Workers
+#### Evidence Collection
+- **Primary**: `evidence-collection-worker-crawl4ai.ts` - Modern web scraping with Crawl4AI
+- **Alternative**: `evidence-collection-worker-deep-simple.ts` - Simplified deep scraping
+
+#### Report Generation
+- **Current**: `report-generation-worker-langgraph-v4-backend.ts` - LangGraph v4 with Python backend + MCP integration
+
+### Scripts
+
+#### Development
+- `npm run worker:backend` - Start Python FastAPI backend
+- `npm run worker:evidence:active` - Start modern evidence collection
+- `npm run worker:report:active` - Start LangGraph v4 report generation
+- `npm run dev:modern` - Start complete modern stack
+
+#### Security Features
+- ✅ Rate limiting on all APIs (100 requests/15min)
+- ✅ Input validation for all scan URLs
+- ✅ Environment variable validation
+- ✅ Python backend security hardening
+- ✅ Secure headers implementation
+
+### Removed Legacy
+- ❌ All v2/v3 report workers removed
+- ❌ Legacy evidence collection workers removed
+- ❌ Deprecated package.json scripts removed
+- ❌ Dead code eliminated
+
 ## Available Scripts
 
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
 - `npm run lint` - Run ESLint
 - `npm run preview` - Preview production build
+- `npm run dev:modern` - Start complete modern stack with backend
+- `npm run test:all` - Run all tests
+- `npm run worker:backend` - Start Python backend
+- `npm run workers:modern` - Start modern workers
 
 ## Documentation Setup
 
