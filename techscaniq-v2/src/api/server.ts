@@ -11,10 +11,38 @@ import { verifyBearerToken, optionalAuth } from './middleware/auth';
 import { rateLimiters } from './middleware/rateLimit';
 
 // Initialize Redis for rate limiting
-const redis = new Redis({
-  host: config.REDIS_HOST,
-  port: config.REDIS_PORT,
-});
+let redis: Redis | null = null;
+
+if (!config.DISABLE_RATE_LIMITING) {
+  try {
+    if (config.REDIS_URL) {
+      redis = new Redis(config.REDIS_URL);
+    } else {
+      redis = new Redis({
+        host: config.REDIS_HOST,
+        port: config.REDIS_PORT,
+        retryStrategy: (times) => {
+          if (times > 3) {
+            console.warn('Redis connection failed after 3 attempts. Rate limiting disabled.');
+            return null;
+          }
+          return Math.min(times * 50, 2000);
+        },
+      });
+    }
+    
+    redis.on('error', (err: any) => {
+      console.warn('Redis connection error:', err.message);
+      if (err.code === 'ECONNREFUSED' || err.syscall === 'connect') {
+        console.warn('Redis not available. Rate limiting disabled.');
+        redis = null;
+      }
+    });
+  } catch (error) {
+    console.warn('Failed to initialize Redis:', error);
+    redis = null;
+  }
+}
 
 // Create Fastify instance
 const fastify = Fastify({
@@ -105,21 +133,27 @@ fastify.get('/api/health', {
 
 // Register route groups with authentication
 fastify.register(async function (fastify) {
-  // Add rate limiting
-  fastify.addHook('onRequest', rateLimiters.standard(redis));
+  // Add rate limiting if Redis is available
+  if (redis) {
+    fastify.addHook('onRequest', rateLimiters.standard(redis));
+  }
   
   // Research routes - require authentication
   fastify.register(async function (fastify) {
     // TEMPORARILY DISABLED FOR TESTING
     // fastify.addHook('onRequest', verifyBearerToken);
-    // fastify.addHook('onRequest', rateLimiters.perUser(redis));
+    if (redis) {
+      // fastify.addHook('onRequest', rateLimiters.perUser(redis));
+    }
     fastify.register(researchRoutes, { prefix: '/research' });
   }, { prefix: '/api' });
 
   // Evidence routes - optional authentication
   fastify.register(async function (fastify) {
     fastify.addHook('onRequest', optionalAuth);
-    fastify.addHook('onRequest', rateLimiters.relaxed(redis));
+    if (redis) {
+      fastify.addHook('onRequest', rateLimiters.relaxed(redis));
+    }
     fastify.register(evidenceRoutes, { prefix: '/evidence' });
   }, { prefix: '/api' });
 
@@ -127,7 +161,9 @@ fastify.register(async function (fastify) {
   fastify.register(async function (fastify) {
     // TEMPORARILY DISABLED FOR TESTING
     // fastify.addHook('onRequest', verifyBearerToken);
-    fastify.addHook('onRequest', rateLimiters.perUser(redis));
+    if (redis) {
+      fastify.addHook('onRequest', rateLimiters.perUser(redis));
+    }
     fastify.register(langgraphRoutes, { prefix: '/langgraph' });
   }, { prefix: '/api' });
 });
@@ -163,7 +199,9 @@ const gracefulShutdown = async () => {
   
   try {
     await fastify.close();
-    await redis.quit();
+    if (redis) {
+      await redis.quit();
+    }
     process.exit(0);
   } catch (error) {
     fastify.log.error({ error }, 'Error during shutdown');

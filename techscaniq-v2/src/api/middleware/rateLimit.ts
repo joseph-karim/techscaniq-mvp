@@ -7,10 +7,14 @@ interface RateLimitOptions {
   keyGenerator?: (req: any) => string; // Function to generate rate limit key
 }
 
-export function createRateLimiter(redis: Redis, options: RateLimitOptions) {
+export function createRateLimiter(redis: Redis | null, options: RateLimitOptions) {
   const { max, window, keyGenerator } = options;
 
   return async function rateLimitMiddleware(request: any, reply: any) {
+    // If Redis is not available, skip rate limiting
+    if (!redis) {
+      return;
+    }
     try {
       // Generate rate limit key
       const key = keyGenerator
@@ -50,32 +54,32 @@ export function createRateLimiter(redis: Redis, options: RateLimitOptions) {
 // Preset rate limiters
 export const rateLimiters = {
   // Strict limit for expensive operations
-  strict: (redis: Redis) => createRateLimiter(redis, {
+  strict: (redis: Redis | null) => createRateLimiter(redis, {
     max: 10,
     window: 3600, // 1 hour
   }),
 
   // Standard limit for API calls
-  standard: (redis: Redis) => createRateLimiter(redis, {
+  standard: (redis: Redis | null) => createRateLimiter(redis, {
     max: 100,
     window: 3600, // 1 hour
   }),
 
   // Relaxed limit for read operations
-  relaxed: (redis: Redis) => createRateLimiter(redis, {
+  relaxed: (redis: Redis | null) => createRateLimiter(redis, {
     max: 1000,
     window: 3600, // 1 hour
   }),
 
   // Per-user rate limiting
-  perUser: (redis: Redis) => createRateLimiter(redis, {
+  perUser: (redis: Redis | null) => createRateLimiter(redis, {
     max: 50,
     window: 3600, // 1 hour
     keyGenerator: (req) => `ratelimit:user:${req.user?.id || req.ip}`,
   }),
 
   // Per-API key rate limiting
-  perApiKey: (redis: Redis) => createRateLimiter(redis, {
+  perApiKey: (redis: Redis | null) => createRateLimiter(redis, {
     max: 500,
     window: 3600, // 1 hour
     keyGenerator: (req) => `ratelimit:apikey:${req.headers['x-api-key'] || req.ip}`,

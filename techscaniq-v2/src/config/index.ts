@@ -25,8 +25,10 @@ const configSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string(),
   
   // Redis
+  REDIS_URL: z.string().optional(),
   REDIS_HOST: z.string().default('localhost'),
   REDIS_PORT: z.coerce.number().default(6379),
+  DISABLE_RATE_LIMITING: z.coerce.boolean().default(false),
   
   // LangGraph/LangChain
   LANGCHAIN_API_KEY: z.string().optional(),
@@ -58,8 +60,10 @@ const parseConfig = () => {
       PERPLEXITY_API_KEY: process.env.PERPLEXITY_API_KEY,
       SUPABASE_URL: process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL,
       SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+      REDIS_URL: process.env.REDIS_URL,
       REDIS_HOST: process.env.REDIS_HOST,
       REDIS_PORT: process.env.REDIS_PORT,
+      DISABLE_RATE_LIMITING: process.env.DISABLE_RATE_LIMITING,
       LANGCHAIN_API_KEY: process.env.LANGGRAPH_API_KEY || process.env.LANGCHAIN_API_KEY,
       LANGCHAIN_ENDPOINT: process.env.LANGCHAIN_ENDPOINT,
       LANGCHAIN_TRACING_V2: process.env.LANGCHAIN_TRACING_V2,
