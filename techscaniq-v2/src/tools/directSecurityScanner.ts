@@ -60,7 +60,7 @@ export class DirectSecurityScanner {
         type: 'ssl',
         severity: 'medium',
         title: 'SSL Check Failed',
-        description: `Could not verify SSL configuration: ${error.message}`,
+        description: `Could not verify SSL configuration: ${(error as any).message}`,
       });
     }
     
@@ -152,7 +152,7 @@ export class DirectSecurityScanner {
         type: 'headers',
         severity: 'info',
         title: 'Header Check Error',
-        description: `Could not check security headers: ${error.message}`,
+        description: `Could not check security headers: ${(error as any).message}`,
       });
     }
     
@@ -377,7 +377,7 @@ export class DirectSecurityScanner {
         type: 'error',
         severity: 'info',
         title: 'Scan Error',
-        description: `Could not complete all security checks: ${error.message}`,
+        description: `Could not complete all security checks: ${(error as any).message}`,
       });
     }
     
@@ -440,7 +440,7 @@ export class DirectSecurityScanner {
       researchQuestionId: 'security-scan',
       pillarId: 'technical',
       source: {
-        type: 'tool',
+        type: 'web' as const,
         name: 'Direct Security Scanner',
         url,
         publishDate: new Date(),

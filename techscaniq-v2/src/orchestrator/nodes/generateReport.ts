@@ -230,16 +230,15 @@ export async function generateReportNode(state: ResearchState): Promise<Partial<
     // 6. Information Gathering Recommendations (if confidence is not high)
     if (confidenceLevel !== 'high' && infoGatheringRecommendations.length > 0) {
       const infoGatheringSection: ReportSection = {
+        id: 'info-gathering',
+        pillarId: 'recommendation',
         title: 'Recommended Information Gathering Activities',
         content: `Given the ${confidenceLevel} confidence level of our analysis (average evidence quality: ${avgQualityScore.toFixed(2)}), we recommend the following information gathering activities to strengthen the investment thesis:\n\n${infoGatheringRecommendations.join('\n\n')}\n\n**Note**: ${inferenceApproach}. Direct engagement with CIBC stakeholders will significantly improve the accuracy and confidence of our recommendations.`,
+        score: 70,
+        weight: 0.1,
         keyFindings: infoGatheringRecommendations.map(rec => rec.split(':')[1]?.trim() || rec),
-        evidence: [],
-        confidence: confidenceLevel as any,
-        limitations: [
-          `Current analysis based on ${highQualityCount} high-quality, ${mediumQualityCount} medium-quality, and ${lowQualityCount} low-quality evidence pieces`,
-          'Limited access to internal CIBC technology roadmaps and strategic plans',
-          'Absence of direct stakeholder input or validation'
-        ]
+        risks: [],
+        opportunities: [],
       };
       sections['info_gathering'] = infoGatheringSection;
     }

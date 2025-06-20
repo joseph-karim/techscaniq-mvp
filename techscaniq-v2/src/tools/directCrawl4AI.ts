@@ -174,7 +174,7 @@ export class DirectCrawl4AI {
         status: response.status,
       };
     } catch (error) {
-      console.error(`Failed to fetch ${url}:`, error.message);
+      console.error(`Failed to fetch ${url}:`, (error as any).message);
       throw error;
     }
   }
@@ -398,7 +398,7 @@ export class DirectCrawl4AI {
       return evidence ? [evidence] : [];
       
     } catch (error) {
-      console.error(`❌ Crawl4AI extraction failed for ${url}:`, error.message);
+      console.error(`❌ Crawl4AI extraction failed for ${url}:`, (error as any).message);
       return [];
     }
   }
@@ -435,7 +435,7 @@ export class DirectCrawl4AI {
           language: 'en',
           keywords: [],
           confidence: 0.85,
-        },
+        } as any,
         qualityScore: {
           overall: 0.85,
           components: {
@@ -453,7 +453,7 @@ export class DirectCrawl4AI {
       
       return evidence;
     } catch (error) {
-      console.error(`Failed to extract ${url}:`, error.message);
+      console.error(`Failed to extract ${url}:`, (error as any).message);
       return null;
     }
   }
