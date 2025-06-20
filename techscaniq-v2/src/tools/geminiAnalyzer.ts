@@ -20,7 +20,7 @@ export class GeminiAnalyzer {
   private model: any;
 
   constructor() {
-    this.genAI = new GoogleGenerativeAI(config.GOOGLE_AI_API_KEY);
+    this.genAI = new GoogleGenerativeAI(config.GOOGLE_API_KEY);
     this.model = this.genAI.getGenerativeModel({ 
       model: models.google.geminiFlash2,
       generationConfig: {

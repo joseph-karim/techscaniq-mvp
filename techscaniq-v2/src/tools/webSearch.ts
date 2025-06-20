@@ -32,7 +32,7 @@ export class WebSearchTool {
     this.serperApiKey = process.env.SERPER_API_KEY;
     this.bingApiKey = process.env.BING_SEARCH_API_KEY;
     this.perplexityApiKey = process.env.PERPLEXITY_API_KEY;
-    this.genAI = new GoogleGenerativeAI(config.GOOGLE_AI_API_KEY);
+    this.genAI = new GoogleGenerativeAI(config.GOOGLE_API_KEY);
   }
 
   async search(query: string, options: SearchOptions = {}): Promise<SearchResult[]> {
