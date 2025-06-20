@@ -62,64 +62,68 @@ services:
       paths:
         - techscaniq-v2/**
     rootDir: .
-    
-  - type: worker
-    name: techscaniq-workers
-    env: node
-    plan: pro  # $85/month - 4GB RAM, 2 CPU for intensive processing
-    buildCommand: cd techscaniq-v2 && npm install --legacy-peer-deps && npm run build
-    startCommand: cd techscaniq-v2 && npm run workers
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: LANGGRAPH_API_KEY
-        fromDatabase:
-          name: langgraph-secrets
-          property: api_key
-      - key: SUPABASE_URL
-        fromDatabase:
-          name: supabase-config
-          property: url
-      - key: SUPABASE_ANON_KEY
-        fromDatabase:
-          name: supabase-config
-          property: anon_key
-      - key: SUPABASE_SERVICE_ROLE_KEY
-        fromDatabase:
-          name: supabase-config
-          property: service_role_key
-      - key: LANGCHAIN_TRACING_V2
-        value: "true"
-      - key: LANGCHAIN_ENDPOINT
-        value: "https://api.smith.langchain.com"
-      - key: LANGCHAIN_PROJECT
-        value: "techscaniq-v2-production"
-      - key: ANTHROPIC_API_KEY
-        fromDatabase:
-          name: ai-keys
-          property: anthropic_key
-      - key: OPENAI_API_KEY
-        fromDatabase:
-          name: ai-keys
-          property: openai_key
-      - key: PERPLEXITY_API_KEY
-        fromDatabase:
-          name: ai-keys
-          property: perplexity_key
-      - key: GOOGLE_API_KEY
-        fromDatabase:
-          name: ai-keys
-          property: google_key
-      - key: REDIS_URL
-        fromDatabase:
-          name: redis-config
-          property: url
-    autoDeploy: true
-    buildFilter:
-      paths:
-        - techscaniq-v2/**
-    rootDir: .
 
-databases:
-  - name: redis-queue
-    plan: starter  # $7/month for queue management
+# Worker service disabled - using LangGraph instead of queue-based workers
+# Uncomment if you need to re-enable queue-based processing
+#  - type: worker
+#    name: techscaniq-workers
+#    env: node
+#    plan: pro  # $85/month - 4GB RAM, 2 CPU for intensive processing
+#    buildCommand: cd techscaniq-v2 && npm install --legacy-peer-deps && npm run build
+#    startCommand: cd techscaniq-v2 && npm run workers
+#    envVars:
+#      - key: NODE_ENV
+#        value: production
+#      - key: LANGGRAPH_API_KEY
+#        fromDatabase:
+#          name: langgraph-secrets
+#          property: api_key
+#      - key: SUPABASE_URL
+#        fromDatabase:
+#          name: supabase-config
+#          property: url
+#      - key: SUPABASE_ANON_KEY
+#        fromDatabase:
+#          name: supabase-config
+#          property: anon_key
+#      - key: SUPABASE_SERVICE_ROLE_KEY
+#        fromDatabase:
+#          name: supabase-config
+#          property: service_role_key
+#      - key: LANGCHAIN_TRACING_V2
+#        value: "true"
+#      - key: LANGCHAIN_ENDPOINT
+#        value: "https://api.smith.langchain.com"
+#      - key: LANGCHAIN_PROJECT
+#        value: "techscaniq-v2-production"
+#      - key: ANTHROPIC_API_KEY
+#        fromDatabase:
+#          name: ai-keys
+#          property: anthropic_key
+#      - key: OPENAI_API_KEY
+#        fromDatabase:
+#          name: ai-keys
+#          property: openai_key
+#      - key: PERPLEXITY_API_KEY
+#        fromDatabase:
+#          name: ai-keys
+#          property: perplexity_key
+#      - key: GOOGLE_API_KEY
+#        fromDatabase:
+#          name: ai-keys
+#          property: google_key
+#      - key: REDIS_URL
+#        fromDatabase:
+#          name: redis-config
+#          property: url
+#    autoDeploy: true
+#    buildFilter:
+#      paths:
+#        - techscaniq-v2/**
+#    rootDir: .
+
+# Redis database disabled - not needed when using LangGraph
+# Uncomment if you need to re-enable Redis for rate limiting or queues
+# databases:
+#   - name: redis-queue
+#     plan: starter  # $7/month for queue management
