@@ -20,7 +20,7 @@ const testCode = {
     import React, { useState, useEffect } from 'react';
     import axios from 'axios';
     
-    const API_KEY = 'sk-1234567890abcdef'; // Security issue
+    const API_KEY = process.env.API_KEY || 'test-key'; // Security issue for demo
     
     function App() {
       const [data, setData] = useState(null);
@@ -155,7 +155,7 @@ async function testSecurityDetection() {
     'vulnerable.js': `
       // Test various security issues
       const password = 'supersecret123';
-      const apiKey = 'sk-prod-abcdef123456';
+      const apiKey = process.env.PROD_API_KEY || 'test-prod-key';
       const secret_key = 'secret_production_key';
       
       function queryDatabase(userId) {

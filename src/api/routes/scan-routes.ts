@@ -77,17 +77,56 @@ router.post('/api/scans', async (req: any, res: any) => {
         })
       }
       
+      // Validate URL format
+      try {
+        const url = new URL(website_url)
+        if (!['http:', 'https:'].includes(url.protocol)) {
+          return res.status(400).json({
+            error: 'Website URL must use HTTP or HTTPS protocol',
+          })
+        }
+        
+        // Block localhost and private IPs in production
+        if (process.env.NODE_ENV === 'production') {
+          const hostname = url.hostname
+          if (
+            hostname === 'localhost' ||
+            hostname.startsWith('127.') ||
+            hostname.startsWith('192.168.') ||
+            hostname.startsWith('10.') ||
+            hostname.match(/^172\.(1[6-9]|2[0-9]|3[0-1])\./)
+          ) {
+            return res.status(400).json({
+              error: 'Cannot scan private or local addresses',
+            })
+          }
+        }
+      } catch (error) {
+        return res.status(400).json({
+          error: 'Invalid website URL format',
+        })
+      }
+      
+      // Sanitize string inputs
+      const sanitize = (str: string) => str?.trim().replace(/[<>'"]/g, '')
+      const sanitizedData = {
+        company_name: sanitize(company_name),
+        requestor_name: sanitize(requestor_name),
+        organization_name: sanitize(organization_name),
+        company_description: sanitize(company_description),
+      }
+      
       // Create scan request in database
       const { data: newScanRequest, error: dbError } = await getSupabase()
         .from('scan_requests')
         .insert({
-          company_name,
+          company_name: sanitizedData.company_name,
           website_url,
           primary_criteria,
           thesis_tags,
-          requestor_name,
-          organization_name,
-          company_description,
+          requestor_name: sanitizedData.requestor_name,
+          organization_name: sanitizedData.organization_name,
+          company_description: sanitizedData.company_description,
           investment_thesis_data,
           report_type: report_type || 'pe-due-diligence',
           metadata: metadata || {},

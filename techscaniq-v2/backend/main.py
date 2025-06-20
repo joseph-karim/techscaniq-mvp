@@ -4,11 +4,14 @@ TechScanIQ Backend API Server
 Provides code analysis capabilities using Serena MCP tools.
 """
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 import logging
 import os
+import time
+from collections import defaultdict
 from contextlib import asynccontextmanager
 from typing import Dict, Any
 import asyncio
@@ -56,20 +59,79 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Configure CORS
+# Rate limiting configuration
+request_counts = defaultdict(list)
+RATE_LIMIT_REQUESTS = 10
+RATE_LIMIT_WINDOW = 60  # seconds
+
+# Configure CORS - restrict in production
+allowed_origins = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://localhost:5174",
+]
+
+# Add production frontend URL if set
+if os.getenv("FRONTEND_URL"):
+    allowed_origins.append(os.getenv("FRONTEND_URL"))
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "http://localhost:5174",
-        os.getenv("FRONTEND_URL", "http://localhost:3000")
-    ],
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 
+# Trust only specific hosts in production
+if os.getenv("ENVIRONMENT") == "production":
+    allowed_hosts = ["localhost"]
+    if os.getenv("ALLOWED_HOSTS"):
+        allowed_hosts.extend(os.getenv("ALLOWED_HOSTS").split(","))
+    
+    app.add_middleware(
+        TrustedHostMiddleware,
+        allowed_hosts=allowed_hosts
+    )
+
+
+# Rate limiting middleware
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    # Skip rate limiting for health checks
+    if request.url.path in ["/", "/health", "/metrics"]:
+        return await call_next(request)
+    
+    client_ip = request.client.host
+    now = time.time()
+    
+    # Clean old requests
+    request_counts[client_ip] = [
+        req_time for req_time in request_counts[client_ip] 
+        if now - req_time < RATE_LIMIT_WINDOW
+    ]
+    
+    # Check rate limit
+    if len(request_counts[client_ip]) >= RATE_LIMIT_REQUESTS:
+        logger.warning(f"Rate limit exceeded for IP: {client_ip}")
+        raise HTTPException(status_code=429, detail="Rate limit exceeded")
+    
+    # Add current request
+    request_counts[client_ip].append(now)
+    
+    response = await call_next(request)
+    return response
+
+# Security headers middleware
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    return response
 
 # Global exception handler
 @app.exception_handler(Exception)
