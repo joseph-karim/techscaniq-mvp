@@ -3,7 +3,7 @@ services:
     name: techscaniq-api
     env: node
     plan: standard  # $25/month - 2GB RAM, 1 CPU for LangGraph processing
-    buildCommand: cd techscaniq-v2 && npm install && npm run build
+    buildCommand: cd techscaniq-v2 && npm install --legacy-peer-deps && npm run build
     startCommand: cd techscaniq-v2 && npm start
     healthCheckPath: /api/health
     envVars:
@@ -59,7 +59,7 @@ services:
     name: techscaniq-workers
     env: node
     plan: pro  # $85/month - 4GB RAM, 2 CPU for intensive processing
-    buildCommand: cd techscaniq-v2 && npm install && npm run build
+    buildCommand: cd techscaniq-v2 && npm install --legacy-peer-deps && npm run build
     startCommand: cd techscaniq-v2 && npm run workers
     envVars:
       - key: NODE_ENV
