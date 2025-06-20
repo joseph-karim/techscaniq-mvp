@@ -1,12 +1,7 @@
+import { env } from './config/environment'
+
 // API client configuration
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 
-  (typeof window !== 'undefined' && (
-    window.location.hostname === 'scan.techscaniq.com' 
-      ? 'https://techscaniq-mvp.onrender.com/api'
-      : window.location.hostname === 'localhost'
-      ? 'http://localhost:3000/api'
-      : 'https://techscaniq-mvp.onrender.com/api'
-  ))
+export const API_BASE_URL = env.API_URL
 
 // Helper function for making authenticated API requests
 export async function apiRequest(path: string, options?: RequestInit) {

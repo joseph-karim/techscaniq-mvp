@@ -33,6 +33,7 @@ const AdminScanRequestPage = lazy(() => import('@/pages/admin/admin-scan-request
 const AdminScanDetailsPage = lazy(() => import('@/pages/admin/admin-scan-details'))
 const AdminLangGraphReportPage = lazy(() => import('@/pages/admin/langgraph-report/[id]'))
 const GenerateLangGraphReport = lazy(() => import('@/pages/reports/GenerateLangGraphReport'))
+const CSPTestPage = lazy(() => import('@/pages/test/csp-test'))
 
 
 // Route configuration interface
@@ -277,6 +278,13 @@ export const routeConfig: RouteConfig[] = [
         element: <GenerateLangGraphReport />,
         label: 'Generate LangGraph Report',
         requireAdmin: false,
+        showInNav: false
+      },
+      {
+        path: 'test/csp-test',
+        element: <CSPTestPage />,
+        label: 'CSP Test',
+        requireAdmin: true,
         showInNav: false
       }
     ]

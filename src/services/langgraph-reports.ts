@@ -240,7 +240,7 @@ export async function loadLangGraphReportWithFallback(reportId: string): Promise
     'cibc-adobe-sales-2024': '/data/langgraph-reports/9f8e7d6c-5b4a-3210-fedc-ba9876543210.json'
   }
 
-  // For demo reports, always use local file
+  // For demo reports, always use local file first
   if (demoReports[reportId]) {
     try {
       console.log('Loading demo report from local file:', reportId)
@@ -257,16 +257,49 @@ export async function loadLangGraphReportWithFallback(reportId: string): Promise
 
   try {
     // For non-demo reports, try API
-    return await loadLangGraphReport(reportId)
+    console.log('Attempting to load report from API:', reportId)
+    console.log('API URL:', `${API_BASE_URL}/langgraph/${reportId}`)
+    
+    const report = await loadLangGraphReport(reportId)
+    console.log('Successfully loaded report from API')
+    return report
   } catch (error: any) {
     console.error('API failed for report:', reportId, error)
     
-    // Check if it's a CSP error
-    if (error.message?.includes('Content Security Policy') || error.message?.includes('Failed to fetch')) {
-      console.warn('CSP blocking API access. For production, ensure VITE_API_URL is set and CSP headers allow the API domain.')
+    // Detailed error analysis
+    if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
+      console.error('Network error - possible causes:')
+      console.error('1. CSP blocking the request')
+      console.error('2. CORS issue')
+      console.error('3. Network connectivity')
+      console.error('4. API server is down')
+      
+      // Check if we have a fallback for this report
+      if (demoReports[reportId]) {
+        console.warn('Falling back to local file due to API error')
+        try {
+          const response = await fetch(demoReports[reportId])
+          if (response.ok) {
+            return await response.json()
+          }
+        } catch (fallbackError) {
+          console.error('Fallback also failed:', fallbackError)
+        }
+      }
     }
     
-    // Re-throw the error
-    throw error
+    // Check if it's a CSP error
+    if (error.message?.includes('Content Security Policy') || 
+        (error.name === 'TypeError' && error.message === 'Failed to fetch')) {
+      console.warn('Possible CSP issue detected.')
+      console.warn('Current API_BASE_URL:', API_BASE_URL)
+      console.warn('To fix:')
+      console.warn('1. Ensure VITE_API_URL is set correctly in .env')
+      console.warn('2. Update CSP headers in netlify.toml to include the API domain')
+      console.warn('3. Check browser console for specific CSP violations')
+    }
+    
+    // Re-throw the error with more context
+    throw new Error(`Failed to load report ${reportId}: ${error.message}`)
   }
 }

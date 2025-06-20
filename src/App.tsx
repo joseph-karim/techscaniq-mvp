@@ -5,6 +5,8 @@ import { Spinner } from '@/components/ui/spinner'
 import { NotificationToast } from '@/components/ui/notification-toast'
 import { useAuth } from '@/lib/auth/auth-provider'
 import { AppRoutes } from '@/routes/AppRoutes'
+import { CSPDebugger } from '@/components/debug/CSPDebugger'
+import { setupCSPViolationLogger } from '@/lib/security/csp'
 
 function AppContent() {
   const { user } = useAuth()
@@ -54,9 +56,16 @@ function AppContent() {
 }
 
 function App() {
+  useEffect(() => {
+    // Set up CSP violation logging
+    setupCSPViolationLogger();
+  }, []);
+
   return (
     <AuthProvider>
       <AppContent />
+      {/* CSP Debugger in development mode */}
+      {import.meta.env.DEV && <CSPDebugger />}
     </AuthProvider>
   )
 }
