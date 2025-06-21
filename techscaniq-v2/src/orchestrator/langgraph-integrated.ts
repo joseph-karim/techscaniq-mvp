@@ -9,6 +9,12 @@ import { EvidenceExtractor } from './evidence-extractor';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
+// Import resilience utilities
+import { retryWithBackoff, retryModelInvocation } from '../utils/retry';
+import { CircuitBreaker, CircuitBreakerRegistry } from '../utils/circuit-breaker';
+import { enhanceErrorMessage, logErrorWithContext } from '../utils/error-helper';
+import { PipelineMonitor } from '../utils/pipeline-monitor';
+
 // Import nodes
 import { interpretThesisNode, generateQueriesNode, generateReportNode } from './nodes';
 
@@ -229,6 +235,8 @@ export const tools = [
 export function createDeepResearchNode(model: ChatOpenAI) {
   return async (state: ResearchState): Promise<Partial<ResearchState>> => {
     console.log('🔬 Starting Deep Research Phase (Perplexity Sonar Deep)...');
+    const monitor = PipelineMonitor.getInstance();
+    monitor.startPhase('deepResearch');
     
     const { thesis, researchQuestions, metadata } = state;
     const company = thesis.company;
@@ -332,12 +340,42 @@ export function createDeepResearchNode(model: ChatOpenAI) {
     
     console.log(`🔍 Executing ${deepSearchQueries.length} deep research queries...`);
     
+    // Create circuit breaker for search operations
+    const searchCircuitBreaker = CircuitBreakerRegistry.getBreaker('web-search', {
+      threshold: 5,
+      timeout: 120000,
+      resetTimeout: 60000
+    });
+    
     for (const query of deepSearchQueries) {
       try {
         console.log(`  📊 Researching: "${query}"`);
-        const results = await searchTool.search(query, { 
-          maxResults: 100, 
-          returnFullResponse: true
+        
+        // Use circuit breaker and retry logic for search
+        const results = await searchCircuitBreaker.execute(async () => {
+          return await retryWithBackoff(
+            async () => {
+              return await searchTool.search(query, { 
+                maxResults: 100, 
+                returnFullResponse: true
+              });
+            },
+            {
+              maxRetries: 3,
+              initialDelay: 2000,
+              retryIf: (error) => {
+                const message = error.message?.toLowerCase() || '';
+                // Don't retry auth errors
+                if (message.includes('unauthorized') || message.includes('api key')) {
+                  return false;
+                }
+                // Retry network and rate limit errors
+                return message.includes('network') || 
+                       message.includes('rate') || 
+                       message.includes('timeout');
+              }
+            }
+          );
         });
         
         // Extract evidence from results
@@ -349,12 +387,29 @@ export function createDeepResearchNode(model: ChatOpenAI) {
         
         console.log(`    ✅ Extracted ${extractedEvidence.length} evidence pieces`);
         evidence.push(...extractedEvidence);
-      } catch (error) {
-        console.error(`    ❌ Failed to research "${query}":`, error);
+        
+      } catch (error: any) {
+        const enhancedError = enhanceErrorMessage(error);
+        console.error(`    ❌ Failed to research "${query}": ${enhancedError}`);
+        
+        // Record error in monitor
+        monitor.recordError('deepResearch', enhancedError);
+        
+        // Log error context for debugging
+        logErrorWithContext(error, {
+          operation: 'deepResearch',
+          phase: 'search',
+          data: { query, company }
+        });
+        
+        // Continue with next query instead of failing completely
       }
     }
     
     console.log(`✅ Deep Research Phase complete: ${evidence.length} evidence pieces collected`);
+    
+    // End monitoring phase
+    monitor.endPhase('deepResearch', evidence.length > 0 ? 'completed' : 'failed', evidence.length);
     
     return {
       evidence: [...(state.evidence || []), ...evidence],
@@ -367,10 +422,159 @@ export function createDeepResearchNode(model: ChatOpenAI) {
   };
 }
 
+/**
+ * Perform heuristic analysis when AI models fail
+ * This provides basic pattern matching to ensure we always have some analysis
+ */
+function performHeuristicAnalysis(
+  evidence: Evidence[], 
+  thesis: any
+): { content: string } {
+  console.log('🔍 Performing heuristic analysis based on evidence patterns...');
+  
+  const company = thesis.company;
+  
+  // Basic pattern matching to identify key areas
+  const techKeywords = ['API', 'infrastructure', 'security', 'performance', 'integration', 
+                       'cloud', 'database', 'mobile', 'web', 'platform', 'system'];
+  const gapKeywords = ['challenge', 'limitation', 'need', 'requirement', 'opportunity',
+                      'problem', 'issue', 'gap', 'missing', 'lack', 'improve'];
+  const modernKeywords = ['legacy', 'outdated', 'old', 'manual', 'slow', 'inefficient'];
+  
+  // Analyze evidence
+  const techMentions = evidence.filter(e => 
+    techKeywords.some(keyword => 
+      e.content?.toLowerCase().includes(keyword.toLowerCase())
+    )
+  );
+  
+  const gapMentions = evidence.filter(e =>
+    gapKeywords.some(keyword =>
+      e.content?.toLowerCase().includes(keyword.toLowerCase())
+    )
+  );
+  
+  const modernizationNeeds = evidence.filter(e =>
+    modernKeywords.some(keyword =>
+      e.content?.toLowerCase().includes(keyword.toLowerCase())
+    )
+  );
+  
+  // Count specific technology mentions
+  const techCounts: Record<string, number> = {};
+  techKeywords.forEach(tech => {
+    const count = evidence.filter(e => 
+      e.content?.toLowerCase().includes(tech.toLowerCase())
+    ).length;
+    if (count > 0) {
+      techCounts[tech] = count;
+    }
+  });
+  
+  // Sort technologies by mention frequency
+  const topTechs = Object.entries(techCounts)
+    .sort(([,a], [,b]) => b - a)
+    .slice(0, 5)
+    .map(([tech]) => tech);
+  
+  // Generate basic analysis
+  const content = `
+Heuristic Analysis Results for ${company}:
+
+## Evidence Summary
+- Total evidence pieces analyzed: ${evidence.length}
+- Technology-related mentions: ${techMentions.length}
+- Gap/opportunity mentions: ${gapMentions.length}
+- Modernization indicators: ${modernizationNeeds.length}
+
+## Key Technology Areas Identified
+${topTechs.map(tech => `- ${tech}: ${techCounts[tech]} mentions`).join('\n')}
+
+## Recommended Analysis Areas
+${techMentions.length > 50 ? '1. **Technical Architecture Deep Dive** - High volume of technical mentions suggests complex infrastructure' : ''}
+${gapMentions.length > 30 ? '2. **Gap Analysis** - Multiple improvement opportunities identified' : ''}
+${modernizationNeeds.length > 20 ? '3. **Modernization Assessment** - Legacy system indicators detected' : ''}
+${evidence.some(e => e.content?.toLowerCase().includes('security')) ? '4. **Security Evaluation** - Security-related content found' : ''}
+${evidence.some(e => e.content?.toLowerCase().includes('api')) ? '5. **Integration Capabilities** - API mentions suggest integration opportunities' : ''}
+
+## Suggested Tools for Follow-up
+- technical_analysis: ${techMentions.length > 30 ? 'High' : 'Medium'} priority
+- crawl4ai_extractor: Extract detailed technical documentation
+- website_analyzer: General website analysis
+${gapMentions.length > 20 ? '- security_scanner: Multiple infrastructure concerns noted' : ''}
+${evidence.some(e => e.content?.toLowerCase().includes('api')) ? '- api_discovery: API integration opportunities' : ''}
+
+## Priority Focus Areas
+1. ${topTechs[0] || 'Technology'} infrastructure and implementation
+2. ${gapMentions.length > 30 ? 'Business process optimization opportunities' : 'System modernization potential'}
+3. ${evidence.some(e => e.content?.toLowerCase().includes('integration')) ? 'Integration and connectivity enhancements' : 'Performance and scalability improvements'}
+
+Note: This is a heuristic analysis performed due to AI model unavailability. 
+For more detailed insights, a full AI-powered analysis is recommended when services are restored.
+`;
+  
+  return { content };
+}
+
+/**
+ * Check the health of a phase and determine if we can proceed
+ */
+interface PhaseHealth {
+  phase: string;
+  status: 'healthy' | 'degraded' | 'failed';
+  evidenceCount: number;
+  errors: string[];
+  canProceed: boolean;
+}
+
+function checkPhaseHealth(state: ResearchState, phaseName: string): PhaseHealth {
+  const health: PhaseHealth = {
+    phase: phaseName,
+    status: 'healthy',
+    evidenceCount: state.evidence?.length || 0,
+    errors: [],
+    canProceed: true,
+  };
+  
+  // Check evidence quality
+  if (health.evidenceCount === 0) {
+    health.status = 'failed';
+    health.canProceed = false;
+    health.errors.push('No evidence collected');
+  } else if (health.evidenceCount < 100) {
+    health.status = 'degraded';
+    health.errors.push('Low evidence count - analysis may be limited');
+  }
+  
+  // Check for critical data
+  if (!state.thesis?.company) {
+    health.status = 'failed';
+    health.canProceed = false;
+    health.errors.push('Missing company information');
+  }
+  
+  // Check for metadata
+  if (!state.metadata) {
+    health.status = 'degraded';
+    health.errors.push('Missing metadata - some features may be limited');
+  }
+  
+  console.log(`📊 Phase Health Check - ${phaseName}:`, {
+    status: health.status,
+    evidenceCount: health.evidenceCount,
+    errors: health.errors,
+    canProceed: health.canProceed
+  });
+  
+  return health;
+}
+
 // Create analyze findings node - reviews deep research and plans targeted follow-up
 export function createAnalyzeFindingsNode(model: ChatOpenAI) {
   return async (state: ResearchState): Promise<Partial<ResearchState>> => {
     console.log('🧠 Analyzing Deep Research Findings...');
+    const monitor = PipelineMonitor.getInstance();
+    monitor.startPhase('analyzeFindings');
     
     const { thesis, evidence, metadata } = state;
     const company = thesis.company;
@@ -430,10 +634,97 @@ ${analysisContext}
 Evidence Summary:
 ${JSON.stringify(evidenceSummary, null, 2)}`);
     
-    const analysis = await model.invoke([
-      new SystemMessage('You are analyzing deep research findings to plan targeted follow-up investigations.'),
-      analysisPrompt,
-    ]);
+    // Enhanced error handling for analysis phase
+    let analysis: any;
+    const circuitBreaker = CircuitBreakerRegistry.getBreaker('analysis-model', {
+      threshold: 3,
+      timeout: 60000,
+      resetTimeout: 30000
+    });
+    
+    try {
+      // Level 1: Try with current model configuration using circuit breaker
+      analysis = await circuitBreaker.execute(async () => {
+        return await retryModelInvocation(
+          () => model.invoke([
+            new SystemMessage('You are analyzing deep research findings to plan targeted follow-up investigations.'),
+            analysisPrompt,
+          ]),
+          'primary-model',
+          { maxRetries: 2 }
+        );
+      });
+      
+    } catch (error: any) {
+      console.warn('❌ Analysis with primary model failed:', enhanceErrorMessage(error));
+      monitor.recordError('analyzeFindings', enhanceErrorMessage(error));
+      
+      logErrorWithContext(error, {
+        operation: 'createAnalyzeFindingsNode',
+        phase: 'primary-analysis',
+        data: { 
+          evidenceCount: evidence.length,
+          company: company 
+        }
+      });
+      
+      // Level 2: Retry with safe parameters
+      if (error.message?.includes('temperature')) {
+        try {
+          console.log('🔄 Retrying with default temperature...');
+          const safeModel = new ChatOpenAI({
+            modelName: model.modelName,
+            temperature: 1, // Use default
+            apiKey: process.env.OPENAI_API_KEY,
+          });
+          
+          analysis = await retryModelInvocation(
+            () => safeModel.invoke([
+              new SystemMessage('You are analyzing deep research findings to plan targeted follow-up investigations.'),
+              analysisPrompt,
+            ]),
+            'safe-model',
+            { maxRetries: 2 }
+          );
+        } catch (retryError: any) {
+          console.warn('❌ Retry with default temperature failed:', enhanceErrorMessage(retryError));
+        }
+      }
+      
+      // Level 3: Fallback to different model
+      if (!analysis && (error.message?.includes('model') || error.message?.includes('404'))) {
+        try {
+          console.log('🔄 Falling back to gpt-4...');
+          const fallbackModel = new ChatOpenAI({
+            modelName: 'gpt-4',
+            apiKey: process.env.OPENAI_API_KEY,
+          });
+          
+          analysis = await retryModelInvocation(
+            () => fallbackModel.invoke([
+              new SystemMessage('You are analyzing deep research findings to plan targeted follow-up investigations.'),
+              analysisPrompt,
+            ]),
+            'fallback-model',
+            { maxRetries: 2 }
+          );
+        } catch (fallbackError: any) {
+          console.warn('❌ Fallback model failed:', enhanceErrorMessage(fallbackError));
+          logErrorWithContext(fallbackError, {
+            operation: 'createAnalyzeFindingsNode',
+            phase: 'fallback-analysis',
+            data: { modelName: 'gpt-4' }
+          });
+        }
+      }
+      
+      // Level 4: Basic heuristic analysis
+      if (!analysis) {
+        console.warn('⚠️ All AI models failed, using heuristic analysis...');
+        monitor.recordFallback('analyzeFindings');
+        analysis = performHeuristicAnalysis(evidence, thesis);
+      }
+    }
     
     // Extract targeted research areas from analysis with intelligent parsing
     const targetedAreas: any = {
@@ -535,6 +826,10 @@ ${JSON.stringify(evidenceSummary, null, 2)}`);
     }
     
     console.log('📋 Analysis complete. Identified areas for targeted research:', targetedAreas);
+    
+    // End monitoring phase
+    const phaseStatus = analysis ? 'completed' : 'degraded';
+    monitor.endPhase('analyzeFindings', phaseStatus);
     
     return {
       metadata: {
@@ -1125,7 +1420,7 @@ Focus on:
 export function createIntegratedResearchGraph(enableCheckpointing: boolean = false) {
   const model = new ChatOpenAI({
     modelName: 'o4-mini-2025-04-16',
-    temperature: 0.2,
+    temperature: 1, // o4-mini models only support default temperature
     apiKey: process.env.OPENAI_API_KEY,
   });
   
@@ -1176,11 +1471,37 @@ export function createIntegratedResearchGraph(enableCheckpointing: boolean = fal
   workflow.addNode('evaluate_progress', createEvaluateProgressNode(model));
   workflow.addNode('generate_report', generateReportNode);
   
-  // Define edges
+  // Define edges with health checks
   (workflow as any).addEdge('__start__', 'interpret_thesis');
   (workflow as any).addEdge('interpret_thesis', 'generate_queries');
   (workflow as any).addEdge('generate_queries', 'deep_research');
-  (workflow as any).addEdge('deep_research', 'analyze_findings');
+  
+  // Add conditional edge after deep research to check health
+  (workflow as any).addConditionalEdges(
+    'deep_research',
+    (state: ResearchState) => {
+      const health = checkPhaseHealth(state, 'deep_research');
+      
+      if (!health.canProceed) {
+        console.error('❌ Cannot proceed from deep_research:', health.errors);
+        // Skip to report generation with partial results
+        return 'generate_report';
+      }
+      
+      if (health.status === 'degraded') {
+        console.warn('⚠️ Proceeding with degraded state:', health.errors);
+        // Add flag for simplified analysis
+        state.metadata = { ...state.metadata, degradedMode: true };
+      }
+      
+      return 'analyze_findings';
+    },
+    {
+      'analyze_findings': 'analyze_findings',
+      'generate_report': 'generate_report',
+    }
+  );
+  
   (workflow as any).addEdge('analyze_findings', 'gather_evidence');
   (workflow as any).addEdge('gather_evidence', 'evaluate_progress');
   
