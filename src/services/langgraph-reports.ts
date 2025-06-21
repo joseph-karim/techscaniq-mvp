@@ -341,8 +341,8 @@ export async function loadLangGraphReportWithFallback(reportId: string): Promise
         reportCache.set(reportId, data, 10 * 60 * 1000, 'fallback');
         return data;
       }
-    } catch (fallbackError) {
-      console.debug(`Fallback path ${path} failed:`, fallbackError.message);
+    } catch (fallbackError: any) {
+      console.debug(`Fallback path ${path} failed:`, fallbackError?.message || 'Unknown error');
     }
   }
 

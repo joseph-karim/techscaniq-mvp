@@ -1,0 +1,106 @@
+name: Sync Pipeline Reports
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'  # Every 15 minutes
+  workflow_dispatch:
+  push:
+    paths:
+      - 'techscaniq-v2/scripts/data/integrated-results/**'
+      - 'techscaniq-v2/data/integrated-results/**'
+
+jobs:
+  sync-reports:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Sync reports
+        run: |
+          echo "🔄 Starting report sync..."
+          npm run sync-reports
+          
+      - name: Generate report metadata
+        run: |
+          echo "📊 Generating metadata..."
+          npm run sync-reports:metadata > sync-report.json
+          
+      - name: Check for changes
+        id: check_changes
+        run: |
+          git add public/data/langgraph-reports/
+          if git diff --staged --quiet; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "No changes to commit"
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "Changes detected"
+          fi
+          
+      - name: Commit and push changes
+        if: steps.check_changes.outputs.has_changes == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git commit -m "chore: sync latest pipeline reports
+          
+          - Auto-synced from LangGraph pipeline
+          - Updated $(date -u '+%Y-%m-%d %H:%M:%S UTC')
+          - $(git diff --name-only HEAD~1 | wc -l) files updated
+          
+          🤖 Generated with [Claude Code](https://claude.ai/code)"
+          git push
+          
+      - name: Create deployment status
+        if: steps.check_changes.outputs.has_changes == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            try {
+              const metadata = JSON.parse(fs.readFileSync('sync-report.json', 'utf8'));
+              
+              core.info(`✅ Sync completed successfully`);
+              core.info(`📊 Total reports: ${metadata.totalReports || 0}`);
+              core.info(`🔄 Reports synced: ${metadata.syncedReports || 0}`);
+              core.info(`🕐 Last sync: ${metadata.lastSync || 'Unknown'}`);
+              
+              // Create a deployment status
+              github.rest.repos.createDeploymentStatus({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                deployment_id: process.env.GITHUB_SHA,
+                state: 'success',
+                description: `Reports synced: ${metadata.syncedReports || 0}`,
+                environment: 'production'
+              });
+            } catch (error) {
+              core.warning('Could not read sync metadata');
+            }
+            
+      - name: Notify on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            core.error('❌ Report sync failed');
+            github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: process.env.GITHUB_SHA,
+              state: 'failure',
+              description: 'Report sync failed',
+              environment: 'production'
+            });
