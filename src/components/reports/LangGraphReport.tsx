@@ -70,7 +70,7 @@ interface LangGraphReportProps {
         inferenceApproach?: string
         informationGatheringRecommendations?: string[]
       }
-    }
+    } | null
     metadata?: {
       evidenceCount: number
       averageQualityScore: number
@@ -92,6 +92,44 @@ export function LangGraphReport({ report }: LangGraphReportProps) {
     }
     setExpandedSections(newExpanded)
   }
+
+  // Extract report content from evidence when report field is null
+  const getReportContent = () => {
+    if (report.report) {
+      return report.report
+    }
+    
+    // Extract content from evidence when report is null
+    const reportEvidence = report.evidence.find(e => 
+      e.content.includes('Executive Summary') || 
+      e.content.includes('Comprehensive Summary')
+    )
+    
+    if (reportEvidence) {
+      const content = reportEvidence.content
+      const sections = content.split(/(?=\d+\.|###|\n\n[A-Z])/g).filter(s => s.trim().length > 50)
+      
+      return {
+        executiveSummary: sections[0] || content.substring(0, 1000) + '...',
+        recommendation: undefined, // No recommendation data in evidence
+        sections: sections.slice(1).map((section, index) => ({
+          title: section.match(/^[\d.]*\s*([^.\n]+)/)?.[1]?.trim() || `Section ${index + 1}`,
+          content: section.trim(),
+          confidence: 85,
+          citations: undefined
+        })),
+        metadata: {
+          confidenceLevel: 'High',
+          inferenceApproach: 'Evidence-based analysis',
+          informationGatheringRecommendations: undefined
+        }
+      }
+    }
+    
+    return null
+  }
+
+  const reportContent = getReportContent()
 
   // Create citation from evidence references
   const createCitation = (claim: string, evidenceIds: string[]): Citation => {
@@ -115,7 +153,7 @@ export function LangGraphReport({ report }: LangGraphReportProps) {
       claim,
       evidence: relevantEvidence,
       reasoning: 'Based on comprehensive analysis using LangGraph deep research',
-      confidence: report.report.recommendation?.confidence || 0,
+      confidence: reportContent?.recommendation?.confidence || 0,
       analyst: 'LangGraph AI Research System',
       reviewDate: new Date().toISOString(),
       methodology: 'Multi-source deep research with quality-based confidence scoring'
@@ -182,42 +220,42 @@ export function LangGraphReport({ report }: LangGraphReportProps) {
       )}
 
       {/* Investment Recommendation */}
-      {report.report.recommendation && (
+      {reportContent?.recommendation && (
         <TechScanCard variant="highlighted" className="space-y-4">
           <ReportSection
             title="Investment Recommendation"
-            icon={getDecisionIcon(report.report.recommendation.decision)}
+            icon={getDecisionIcon(reportContent.recommendation.decision)}
             className="pb-0"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="text-center">
-                  <p className="text-3xl font-bold font-space text-brand-black">{report.report.recommendation.decision}</p>
+                  <p className="text-3xl font-bold font-space text-brand-black">{reportContent.recommendation.decision}</p>
                   <p className="text-sm text-muted-foreground font-ibm">Decision</p>
                 </div>
                 <Separator orientation="vertical" className="h-12" />
                 <div className="text-center">
-                  <p className="text-3xl font-bold font-space text-brand-black">{report.report.recommendation.confidence}%</p>
+                  <p className="text-3xl font-bold font-space text-brand-black">{reportContent.recommendation.confidence}%</p>
                   <p className="text-sm text-muted-foreground font-ibm">Confidence</p>
                 </div>
               </div>
-              {report.report.recommendation.timeline && (
+              {reportContent.recommendation.timeline && (
                 <Badge variant="outline" className="text-sm font-space">
-                  Timeline: {report.report.recommendation.timeline}
+                  Timeline: {reportContent.recommendation.timeline}
                 </Badge>
               )}
             </div>
           </ReportSection>
 
           {/* Key Drivers */}
-          {report.report.recommendation.keyDrivers?.length > 0 && (
+          {reportContent.recommendation.keyDrivers?.length > 0 && (
             <div>
               <h4 className="font-semibold mb-2 flex items-center gap-2 font-space">
                 <CheckCircle className="h-4 w-4 text-success" />
                 Key Drivers
               </h4>
               <ul className="space-y-1">
-                {report.report.recommendation.keyDrivers.map((driver, i) => (
+                {reportContent.recommendation.keyDrivers.map((driver, i) => (
                   <li key={i} className="text-sm text-muted-foreground flex items-start gap-2 font-ibm">
                     <span className="text-success mt-1">•</span>
                     <span>{driver}</span>
@@ -228,14 +266,14 @@ export function LangGraphReport({ report }: LangGraphReportProps) {
           )}
 
           {/* Risks */}
-          {report.report.recommendation.risks?.length > 0 && (
+          {reportContent.recommendation.risks?.length > 0 && (
             <div>
               <h4 className="font-semibold mb-2 flex items-center gap-2 font-space">
                 <AlertTriangle className="h-4 w-4 text-error" />
                 Risks
               </h4>
               <ul className="space-y-1">
-                {report.report.recommendation.risks.map((risk, i) => (
+                {reportContent.recommendation.risks.map((risk, i) => (
                   <li key={i} className="text-sm text-muted-foreground flex items-start gap-2 font-ibm">
                     <span className="text-error mt-1">•</span>
                     <span>{risk}</span>
@@ -246,14 +284,14 @@ export function LangGraphReport({ report }: LangGraphReportProps) {
           )}
 
           {/* Next Steps */}
-          {report.report.recommendation.nextSteps?.length > 0 && (
+          {reportContent.recommendation.nextSteps?.length > 0 && (
             <div>
               <h4 className="font-semibold mb-2 flex items-center gap-2 font-space">
                 <Target className="h-4 w-4 text-brand-teal" />
                 Next Steps
               </h4>
               <ul className="space-y-1">
-                {report.report.recommendation.nextSteps.map((step, i) => (
+                {reportContent.recommendation.nextSteps.map((step, i) => (
                   <li key={i} className="text-sm text-muted-foreground flex items-start gap-2 font-ibm">
                     <span className="text-brand-teal mt-1">•</span>
                     <span>{step}</span>
@@ -266,13 +304,13 @@ export function LangGraphReport({ report }: LangGraphReportProps) {
       )}
 
       {/* Executive Summary */}
-      {report.report.executiveSummary && (
+      {reportContent?.executiveSummary && (
         <ReportSection
           title="Executive Summary"
           icon={<FileText className="h-5 w-5" />}
         >
           <p className="text-muted-foreground whitespace-pre-wrap font-ibm leading-relaxed">
-            {report.report.executiveSummary}
+            {reportContent.executiveSummary}
           </p>
         </ReportSection>
       )}
@@ -305,27 +343,27 @@ export function LangGraphReport({ report }: LangGraphReportProps) {
               />
             </div>
             
-            {report.report.metadata?.confidenceLevel && (
+            {reportContent?.metadata?.confidenceLevel && (
               <div>
                 <p className="text-sm font-medium mb-1 font-space">Confidence Level</p>
                 <Badge variant={
-                  report.report.metadata.confidenceLevel === 'high' ? 'default' :
-                  report.report.metadata.confidenceLevel === 'medium' ? 'secondary' :
+                  reportContent.metadata.confidenceLevel === 'high' ? 'default' :
+                  reportContent.metadata.confidenceLevel === 'medium' ? 'secondary' :
                   'destructive'
                 } className="font-space">
-                  {report.report.metadata.confidenceLevel
-                    ? report.report.metadata.confidenceLevel.charAt(0).toUpperCase() + 
-                      report.report.metadata.confidenceLevel.slice(1)
+                  {reportContent.metadata.confidenceLevel
+                    ? reportContent.metadata.confidenceLevel.charAt(0).toUpperCase() + 
+                      reportContent.metadata.confidenceLevel.slice(1)
                     : 'Unknown'}
                 </Badge>
               </div>
             )}
 
-            {report.report.metadata?.inferenceApproach && (
+            {reportContent?.metadata?.inferenceApproach && (
               <div>
                 <p className="text-sm font-medium mb-1 font-space">Analysis Approach</p>
                 <p className="text-sm text-muted-foreground font-ibm">
-                  {report.report.metadata.inferenceApproach}
+                  {reportContent.metadata.inferenceApproach}
                 </p>
               </div>
             )}
@@ -333,8 +371,8 @@ export function LangGraphReport({ report }: LangGraphReportProps) {
         </ReportSection>
 
         {/* Information Gathering Recommendations */}
-        {report.report.metadata?.informationGatheringRecommendations && 
-         report.report.metadata.informationGatheringRecommendations.length > 0 && (
+        {reportContent?.metadata?.informationGatheringRecommendations && 
+         reportContent.metadata.informationGatheringRecommendations.length > 0 && (
           <ReportSection
             title="Recommended Information Gathering"
             icon={<Shield className="h-5 w-5" />}
@@ -346,7 +384,7 @@ export function LangGraphReport({ report }: LangGraphReportProps) {
               dismissible={false}
             >
               <ul className="space-y-1 mt-2">
-                {report.report.metadata.informationGatheringRecommendations.map((rec, i) => (
+                {reportContent.metadata.informationGatheringRecommendations.map((rec, i) => (
                   <li key={i} className="text-sm flex items-start gap-2 font-ibm">
                     <span className="text-warning mt-1">•</span>
                     <span>{rec}</span>
@@ -359,13 +397,14 @@ export function LangGraphReport({ report }: LangGraphReportProps) {
       </div>
 
       {/* Report Sections */}
-      <ReportSection
-        title="Detailed Analysis"
-        subtitle="Click on sections to expand/collapse"
-        icon={<BarChart3 className="h-5 w-5" />}
-      >
-        <div className="space-y-4">
-          {report.report.sections.map((section, index) => (
+      {reportContent?.sections?.length ? (
+        <ReportSection
+          title="Detailed Analysis"
+          subtitle="Click on sections to expand/collapse"
+          icon={<BarChart3 className="h-5 w-5" />}
+        >
+          <div className="space-y-4">
+            {reportContent.sections.map((section, index) => (
             <TechScanCard key={index} variant="default" className="overflow-hidden">
               <div 
                 className="cursor-pointer hover:bg-brand-teal/5 transition-colors p-6 border-b border-gray-200"
@@ -424,6 +463,20 @@ export function LangGraphReport({ report }: LangGraphReportProps) {
           ))}
         </div>
       </ReportSection>
+      ) : (
+        <TechScanCard>
+          <ReportSection
+            title="Report Content Processing"
+            icon={<Info className="h-5 w-5" />}
+          >
+            <TechScanAlert
+              type="info"
+              title="Report content is being processed"
+              description="Evidence has been collected but the final report structure is still being generated. The raw content is available in the evidence sections below."
+            />
+          </ReportSection>
+        </TechScanCard>
+      )}
 
       {/* Evidence Summary */}
       <ReportSection

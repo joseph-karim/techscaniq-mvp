@@ -1,5 +1,6 @@
 // Service for loading LangGraph-generated reports
 import { API_BASE_URL } from '@/lib/api-client'
+import { reportCache } from './report-cache'
 
 interface LangGraphReport {
   thesis: {
@@ -93,8 +94,8 @@ interface LangGraphReport {
   }
 }
 
-// API implementation
-export async function loadLangGraphReport(reportId: string): Promise<LangGraphReport | null> {
+// Enhanced API implementation with retry logic
+export async function loadLangGraphReport(reportId: string, signal?: AbortSignal): Promise<LangGraphReport | null> {
   // Convert reportId to proper format if needed
   let apiReportId = reportId;
   if (reportId === 'cibc-adobe-sales-2024') {
@@ -109,6 +110,7 @@ export async function loadLangGraphReport(reportId: string): Promise<LangGraphRe
         'Content-Type': 'application/json',
       },
       credentials: 'include',
+      signal,
     })
 
     if (!response.ok) {
@@ -232,76 +234,206 @@ export async function listLangGraphReports(params?: {
   }
 }
 
-// Load with fallback to local file for demo reports
+/**
+ * Enhanced report loading with comprehensive error handling, retry logic, and caching
+ */
 export async function loadLangGraphReportWithFallback(reportId: string): Promise<LangGraphReport | null> {
-  // Check if we're dealing with a demo report that should use local file
+  console.log(`🔍 Loading report: ${reportId}`);
+  
+  // Check cache first
+  const cached = reportCache.get(reportId);
+  if (cached) {
+    return cached;
+  }
+
+  // Define fallback sources
   const demoReports: Record<string, string> = {
     '9f8e7d6c-5b4a-3210-fedc-ba9876543210': '/data/langgraph-reports/9f8e7d6c-5b4a-3210-fedc-ba9876543210.json',
     'cibc-adobe-sales-2024': '/data/langgraph-reports/9f8e7d6c-5b4a-3210-fedc-ba9876543210.json',
     'cibc-latest-2025-06-21': '/data/langgraph-reports/cibc-latest-2025-06-21.json',
     'cibc-adobe-integrated-2025-06-21': '/data/langgraph-reports/cibc-latest-2025-06-21.json'
+  };
+
+  const localReportPaths = [
+    `/data/langgraph-reports/${reportId}.json`,
+    `/data/langgraph-reports/cibc-latest-${reportId}.json`,
+    `/data/langgraph-reports/cibc-adobe-integrated-${reportId}.json`
+  ];
+
+  // Enhanced retry logic with exponential backoff
+  const maxRetries = 3;
+  const baseDelay = 1000; // 1 second
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`🌐 API attempt ${attempt}/${maxRetries} for report ${reportId}`);
+      
+      // Create abort controller with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000 + (attempt * 5000)); // Increasing timeout
+      
+      try {
+        const report = await loadLangGraphReport(reportId, controller.signal);
+        clearTimeout(timeoutId);
+        
+        if (report) {
+          console.log(`✅ Successfully loaded report ${reportId} from API`);
+          reportCache.set(reportId, report, 5 * 60 * 1000, 'api'); // Cache for 5 minutes
+          return report;
+        }
+      } catch (apiError: any) {
+        clearTimeout(timeoutId);
+        
+        // Handle specific error types
+        if (apiError.name === 'AbortError') {
+          console.warn(`⏰ API request timeout for report ${reportId} (attempt ${attempt})`);
+        } else if (apiError.message?.includes('Failed to fetch')) {
+          console.warn(`🚫 Network error for report ${reportId} (attempt ${attempt}):`, apiError.message);
+        } else {
+          console.error(`❌ API error for report ${reportId} (attempt ${attempt}):`, apiError.message);
+        }
+        
+        // Don't retry on the last attempt, fall through to fallbacks
+        if (attempt < maxRetries) {
+          const delay = baseDelay * Math.pow(2, attempt - 1);
+          console.log(`⏳ Waiting ${delay}ms before retry...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          continue;
+        }
+        
+        throw apiError;
+      }
+      
+    } catch (error: any) {
+      if (attempt === maxRetries) {
+        console.error(`💥 All API attempts failed for report ${reportId}`);
+        break; // Exit retry loop and try fallbacks
+      }
+    }
   }
 
-  // For demo reports, always use local file first
+  // Try predefined demo reports first
   if (demoReports[reportId]) {
+    console.log(`📁 Attempting to load demo report from: ${demoReports[reportId]}`);
     try {
-      console.log('Loading demo report from local file:', reportId)
-      const response = await fetch(demoReports[reportId])
+      const response = await fetch(demoReports[reportId]);
       if (response.ok) {
-        const data = await response.json()
-        console.log('Successfully loaded demo report from local file')
-        return data
+        const data = await response.json();
+        console.log(`✅ Successfully loaded demo report ${reportId} from local file`);
+        reportCache.set(reportId, data, 10 * 60 * 1000, 'local'); // Cache for 10 minutes
+        return data;
+      } else {
+        console.warn(`⚠️ Demo report file not found or inaccessible: ${response.status}`);
       }
     } catch (localError) {
-      console.error('Failed to load local demo file:', localError)
+      console.error(`❌ Failed to load demo report:`, localError);
     }
   }
 
-  try {
-    // For non-demo reports, try API
-    console.log('Attempting to load report from API:', reportId)
-    console.log('API URL:', `${API_BASE_URL}/langgraph/${reportId}`)
-    
-    const report = await loadLangGraphReport(reportId)
-    console.log('Successfully loaded report from API')
-    return report
-  } catch (error: any) {
-    console.error('API failed for report:', reportId, error)
-    
-    // Detailed error analysis
-    if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
-      console.error('Network error - possible causes:')
-      console.error('1. CSP blocking the request')
-      console.error('2. CORS issue')
-      console.error('3. Network connectivity')
-      console.error('4. API server is down')
-      
-      // Check if we have a fallback for this report
-      if (demoReports[reportId]) {
-        console.warn('Falling back to local file due to API error')
-        try {
-          const response = await fetch(demoReports[reportId])
-          if (response.ok) {
-            return await response.json()
-          }
-        } catch (fallbackError) {
-          console.error('Fallback also failed:', fallbackError)
-        }
+  // Try various local file paths as fallback
+  for (const path of localReportPaths) {
+    console.log(`📁 Attempting fallback path: ${path}`);
+    try {
+      const response = await fetch(path);
+      if (response.ok) {
+        const data = await response.json();
+        console.log(`✅ Successfully loaded report ${reportId} from fallback path: ${path}`);
+        reportCache.set(reportId, data, 10 * 60 * 1000, 'fallback');
+        return data;
       }
+    } catch (fallbackError) {
+      console.debug(`Fallback path ${path} failed:`, fallbackError.message);
     }
-    
-    // Check if it's a CSP error
-    if (error.message?.includes('Content Security Policy') || 
-        (error.name === 'TypeError' && error.message === 'Failed to fetch')) {
-      console.warn('Possible CSP issue detected.')
-      console.warn('Current API_BASE_URL:', API_BASE_URL)
-      console.warn('To fix:')
-      console.warn('1. Ensure VITE_API_URL is set correctly in .env')
-      console.warn('2. Update CSP headers in netlify.toml to include the API domain')
-      console.warn('3. Check browser console for specific CSP violations')
-    }
-    
-    // Re-throw the error with more context
-    throw new Error(`Failed to load report ${reportId}: ${error.message}`)
   }
+
+  // Final error with detailed diagnostics
+  console.error(`💥 Complete failure to load report ${reportId}`);
+  console.error('Diagnostics:');
+  console.error('- API_BASE_URL:', API_BASE_URL);
+  console.error('- Attempted paths:', localReportPaths);
+  console.error('- Demo paths:', Object.values(demoReports));
+  
+  // Provide detailed error message for debugging
+  const errorDetails = {
+    reportId,
+    apiUrl: `${API_BASE_URL}/langgraph/${reportId}`,
+    attemptedPaths: localReportPaths,
+    demoPath: demoReports[reportId],
+    timestamp: new Date().toISOString(),
+    cacheStats: reportCache.getStats()
+  };
+  
+  console.error('Error details:', errorDetails);
+  
+  throw new Error(`Failed to load report ${reportId} from all sources. Check console for detailed diagnostics.`);
+}
+
+/**
+ * Preload commonly accessed reports
+ */
+export async function preloadCommonReports(): Promise<void> {
+  const commonReports = [
+    'cibc-latest-2025-06-21',
+    '9f8e7d6c-5b4a-3210-fedc-ba9876543210'
+  ];
+  
+  console.log('🔄 Preloading common reports...');
+  
+  await Promise.allSettled(
+    commonReports.map(async (reportId) => {
+      try {
+        await loadLangGraphReportWithFallback(reportId);
+      } catch (error) {
+        console.warn(`Failed to preload report ${reportId}:`, error);
+      }
+    })
+  );
+}
+
+/**
+ * Health check for report loading system
+ */
+export async function checkReportSystemHealth(): Promise<{
+  apiHealthy: boolean;
+  localFilesAccessible: boolean;
+  cacheStats: any;
+  issues: string[];
+}> {
+  const issues: string[] = [];
+  let apiHealthy = false;
+  let localFilesAccessible = false;
+
+  // Test API health
+  try {
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), 5000);
+    
+    const response = await fetch(`${API_BASE_URL}/langgraph/health`, {
+      signal: controller.signal
+    });
+    apiHealthy = response.ok;
+    if (!apiHealthy) {
+      issues.push(`API health check failed: ${response.status} ${response.statusText}`);
+    }
+  } catch (error: any) {
+    issues.push(`API health check error: ${error.message}`);
+  }
+
+  // Test local file access
+  try {
+    const response = await fetch('/data/langgraph-reports/cibc-latest-2025-06-21.json');
+    localFilesAccessible = response.ok;
+    if (!localFilesAccessible) {
+      issues.push(`Local files not accessible: ${response.status}`);
+    }
+  } catch (error: any) {
+    issues.push(`Local file access error: ${error.message}`);
+  }
+
+  return {
+    apiHealthy,
+    localFilesAccessible,
+    cacheStats: reportCache.getStats(),
+    issues
+  };
 }
