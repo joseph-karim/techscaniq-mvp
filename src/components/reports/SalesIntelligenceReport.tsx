@@ -1,11 +1,17 @@
 import { useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { 
+  TechScanCard, 
+  ReportHeader, 
+  ReportSection, 
+  TechScanAlert, 
+  TechScanButton, 
+  ProgressBar, 
+  MetricCard,
+  TechScanChart
+} from '@/components/brand'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Progress } from '@/components/ui/progress'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Separator } from '@/components/ui/separator'
 import { 
   AlertTriangle,
@@ -114,10 +120,10 @@ export function SalesIntelligenceReport({ report }: SalesIntelligenceReportProps
 
   // Investment readiness metrics
   const readinessData = [
-    { metric: 'Digital Maturity', score: 75, benchmark: 65, color: '#10b981' },
-    { metric: 'Technology Investment', score: 85, benchmark: 70, color: '#3b82f6' },
-    { metric: 'Innovation Readiness', score: 70, benchmark: 60, color: '#8b5cf6' },
-    { metric: 'Platform Integration', score: 60, benchmark: 55, color: '#f59e0b' },
+    { metric: 'Digital Maturity', score: 75, benchmark: 65, color: '#00C2B2' },
+    { metric: 'Technology Investment', score: 85, benchmark: 70, color: '#2C2C2E' },
+    { metric: 'Innovation Readiness', score: 70, benchmark: 60, color: '#4ade80' },
+    { metric: 'Platform Integration', score: 60, benchmark: 55, color: '#fb923c' },
   ]
 
   // Value creation opportunities
@@ -140,93 +146,65 @@ export function SalesIntelligenceReport({ report }: SalesIntelligenceReportProps
   return (
     <div className="space-y-6">
       {/* Header */}
+      <ReportHeader
+        company={report.company}
+        reportType="sales-intelligence"
+        reportId={`sales-${Date.now()}`}
+        generatedAt={report.metadata?.reportGeneratedAt || new Date().toISOString()}
+        completionTime="Comprehensive Sales Intelligence Analysis"
+      />
+      
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
-            {report.company} - Adobe Sales Intelligence Report
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Comprehensive analysis of digital transformation opportunities
-          </p>
-        </div>
+        <p className="text-muted-foreground font-ibm">
+          Comprehensive analysis of digital transformation opportunities
+        </p>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
+          <TechScanButton variant="secondary" size="sm" icon={<Download className="h-4 w-4" />}>
             Export PDF
-          </Button>
-          <Button variant="outline" size="sm">
-            <ExternalLink className="h-4 w-4 mr-2" />
+          </TechScanButton>
+          <TechScanButton variant="secondary" size="sm" icon={<ExternalLink className="h-4 w-4" />}>
             Share
-          </Button>
+          </TechScanButton>
         </div>
       </div>
 
       {/* Key Metrics Summary */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Opportunity Score
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <p className="text-2xl font-bold text-electric-teal">{opportunityScore}%</p>
-              <TrendingUp className="h-5 w-5 text-electric-teal" />
-            </div>
-            <Progress value={opportunityScore} className="mt-2 h-2" />
-          </CardContent>
-        </Card>
+        <MetricCard
+          label="Opportunity Score"
+          value={opportunityScore}
+          format="percentage"
+          trend="up"
+          trendValue={12}
+          icon={<TrendingUp />}
+        />
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Risk Level
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <p className="text-2xl font-bold">{riskLevel}</p>
-              <Shield className={cn(
-                "h-5 w-5",
-                riskLevel === 'Low' ? 'text-green-600' : 
-                riskLevel === 'Medium' ? 'text-yellow-600' : 
-                'text-red-600'
-              )} />
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">Based on {report.metadata?.evidenceCount || 0} data points</p>
-          </CardContent>
-        </Card>
+        <MetricCard
+          label="Risk Level"
+          value={riskLevel}
+          format="text"
+          trend={riskLevel === 'Low' ? 'up' : riskLevel === 'Medium' ? 'neutral' : 'down'}
+          icon={<Shield className={cn(
+            "h-5 w-5",
+            riskLevel === 'Low' ? 'text-success' : 
+            riskLevel === 'Medium' ? 'text-warning' : 
+            'text-error'
+          )} />}
+        />
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Est. Opportunity
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <p className="text-2xl font-bold">$25M+</p>
-              <DollarSign className="h-5 w-5 text-green-600" />
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">Annual revenue potential</p>
-          </CardContent>
-        </Card>
+        <MetricCard
+          label="Evidence Points"
+          value={report.metadata?.evidenceCount || 0}
+          format="number"
+          icon={<Database />}
+        />
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Decision Timeline
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <p className="text-2xl font-bold">Q1 2025</p>
-              <Clock className="h-5 w-5 text-blue-600" />
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">Recommended engagement window</p>
-          </CardContent>
-        </Card>
+        <MetricCard
+          label="Confidence Level"
+          value={Math.round((report.metadata?.averageQualityScore || 0.8) * 100)}
+          format="percentage"
+          icon={<Brain />}
+        />
       </div>
 
       {/* Main Content Tabs */}

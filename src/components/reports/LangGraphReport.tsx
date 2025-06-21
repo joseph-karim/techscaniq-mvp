@@ -1,9 +1,6 @@
 import { useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { TechScanCard, ReportHeader, ReportSection, TechScanAlert, TechScanButton, ProgressBar } from '@/components/brand'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
 import { 
   TrendingUp, 
@@ -140,188 +137,182 @@ export function LangGraphReport({ report }: LangGraphReportProps) {
   }
 
   const getDecisionIcon = (decision: string) => {
-    if (!decision) return <Info className="h-5 w-5 text-blue-600" />
+    if (!decision) return <Info className="h-5 w-5 text-brand-gunmetal" />
     
     switch (decision && typeof decision === 'string' ? decision.toLowerCase() : '') {
       case 'strong buy':
       case 'buy':
-        return <TrendingUp className="h-5 w-5 text-green-600" />
+        return <TrendingUp className="h-5 w-5 text-success" />
       case 'hold':
-        return <Target className="h-5 w-5 text-yellow-600" />
+        return <Target className="h-5 w-5 text-warning" />
       case 'sell':
       case 'strong sell':
-        return <TrendingDown className="h-5 w-5 text-red-600" />
+        return <TrendingDown className="h-5 w-5 text-error" />
       default:
-        return <Info className="h-5 w-5 text-blue-600" />
+        return <Info className="h-5 w-5 text-brand-gunmetal" />
     }
   }
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-2xl flex items-center gap-2">
-                {report.thesis.company}
-                <Badge variant="outline" className="ml-2">
-                  {report.thesis.type === 'sales-intelligence' ? 'Sales Intelligence' : 'Investment Analysis'}
-                </Badge>
-              </CardTitle>
-              <CardDescription className="mt-1">
-                {report.thesis.website}
-              </CardDescription>
-            </div>
-            <div className="text-right">
-              <p className="text-sm text-muted-foreground">Generated with LangGraph</p>
-              {report.metadata?.reportGeneratedAt && (
-                <p className="text-sm text-muted-foreground">
-                  {new Date(report.metadata.reportGeneratedAt).toLocaleDateString()}
-                </p>
-              )}
-            </div>
+      <ReportHeader
+        company={report.thesis.company}
+        reportType={report.thesis.type === 'sales-intelligence' ? 'sales-intelligence' : 'pe-diligence'}
+        reportId={`langgraph-${Date.now()}`}
+        generatedAt={report.metadata?.reportGeneratedAt || new Date().toISOString()}
+        completionTime="Generated with LangGraph"
+      />
+
+      {/* Website Link */}
+      {report.thesis.website && (
+        <TechScanCard variant="default" className="p-4">
+          <div className="flex items-center gap-2">
+            <ExternalLink className="h-4 w-4 text-brand-teal" />
+            <a 
+              href={report.thesis.website}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-brand-teal hover:text-brand-teal/80 font-ibm"
+            >
+              {report.thesis.website}
+            </a>
           </div>
-        </CardHeader>
-      </Card>
+        </TechScanCard>
+      )}
 
       {/* Investment Recommendation */}
       {report.report.recommendation && (
-        <Card className="border-2 border-primary">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              {getDecisionIcon(report.report.recommendation.decision)}
-              Investment Recommendation
-              {getConfidenceBadge(report.report.recommendation.confidence)}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <TechScanCard variant="highlighted" className="space-y-4">
+          <ReportSection
+            title="Investment Recommendation"
+            icon={getDecisionIcon(report.report.recommendation.decision)}
+            className="pb-0"
+          >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="text-center">
-                  <p className="text-3xl font-bold">{report.report.recommendation.decision}</p>
-                  <p className="text-sm text-muted-foreground">Decision</p>
+                  <p className="text-3xl font-bold font-space text-brand-black">{report.report.recommendation.decision}</p>
+                  <p className="text-sm text-muted-foreground font-ibm">Decision</p>
                 </div>
                 <Separator orientation="vertical" className="h-12" />
                 <div className="text-center">
-                  <p className="text-3xl font-bold">{report.report.recommendation.confidence}%</p>
-                  <p className="text-sm text-muted-foreground">Confidence</p>
+                  <p className="text-3xl font-bold font-space text-brand-black">{report.report.recommendation.confidence}%</p>
+                  <p className="text-sm text-muted-foreground font-ibm">Confidence</p>
                 </div>
               </div>
               {report.report.recommendation.timeline && (
-                <Badge variant="outline" className="text-sm">
+                <Badge variant="outline" className="text-sm font-space">
                   Timeline: {report.report.recommendation.timeline}
                 </Badge>
               )}
             </div>
+          </ReportSection>
 
-            {/* Key Drivers */}
-            {report.report.recommendation.keyDrivers?.length > 0 && (
-              <div>
-                <h4 className="font-semibold mb-2 flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                  Key Drivers
-                </h4>
-                <ul className="space-y-1">
-                  {report.report.recommendation.keyDrivers.map((driver, i) => (
-                    <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                      <span className="text-green-600 mt-1">•</span>
-                      <span>{driver}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+          {/* Key Drivers */}
+          {report.report.recommendation.keyDrivers?.length > 0 && (
+            <div>
+              <h4 className="font-semibold mb-2 flex items-center gap-2 font-space">
+                <CheckCircle className="h-4 w-4 text-success" />
+                Key Drivers
+              </h4>
+              <ul className="space-y-1">
+                {report.report.recommendation.keyDrivers.map((driver, i) => (
+                  <li key={i} className="text-sm text-muted-foreground flex items-start gap-2 font-ibm">
+                    <span className="text-success mt-1">•</span>
+                    <span>{driver}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
-            {/* Risks */}
-            {report.report.recommendation.risks?.length > 0 && (
-              <div>
-                <h4 className="font-semibold mb-2 flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4 text-red-600" />
-                  Risks
-                </h4>
-                <ul className="space-y-1">
-                  {report.report.recommendation.risks.map((risk, i) => (
-                    <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                      <span className="text-red-600 mt-1">•</span>
-                      <span>{risk}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+          {/* Risks */}
+          {report.report.recommendation.risks?.length > 0 && (
+            <div>
+              <h4 className="font-semibold mb-2 flex items-center gap-2 font-space">
+                <AlertTriangle className="h-4 w-4 text-error" />
+                Risks
+              </h4>
+              <ul className="space-y-1">
+                {report.report.recommendation.risks.map((risk, i) => (
+                  <li key={i} className="text-sm text-muted-foreground flex items-start gap-2 font-ibm">
+                    <span className="text-error mt-1">•</span>
+                    <span>{risk}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
-            {/* Next Steps */}
-            {report.report.recommendation.nextSteps?.length > 0 && (
-              <div>
-                <h4 className="font-semibold mb-2 flex items-center gap-2">
-                  <Target className="h-4 w-4 text-blue-600" />
-                  Next Steps
-                </h4>
-                <ul className="space-y-1">
-                  {report.report.recommendation.nextSteps.map((step, i) => (
-                    <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                      <span className="text-blue-600 mt-1">•</span>
-                      <span>{step}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+          {/* Next Steps */}
+          {report.report.recommendation.nextSteps?.length > 0 && (
+            <div>
+              <h4 className="font-semibold mb-2 flex items-center gap-2 font-space">
+                <Target className="h-4 w-4 text-brand-teal" />
+                Next Steps
+              </h4>
+              <ul className="space-y-1">
+                {report.report.recommendation.nextSteps.map((step, i) => (
+                  <li key={i} className="text-sm text-muted-foreground flex items-start gap-2 font-ibm">
+                    <span className="text-brand-teal mt-1">•</span>
+                    <span>{step}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </TechScanCard>
       )}
 
       {/* Executive Summary */}
       {report.report.executiveSummary && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Executive Summary</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground whitespace-pre-wrap">
-              {report.report.executiveSummary}
-            </p>
-          </CardContent>
-        </Card>
+        <ReportSection
+          title="Executive Summary"
+          icon={<FileText className="h-5 w-5" />}
+        >
+          <p className="text-muted-foreground whitespace-pre-wrap font-ibm leading-relaxed">
+            {report.report.executiveSummary}
+          </p>
+        </ReportSection>
       )}
 
       {/* Evidence Quality and Information Gathering */}
       <div className="grid gap-6 md:grid-cols-2">
         {/* Evidence Quality Metrics */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Brain className="h-5 w-5" />
-              Research Quality Metrics
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <ReportSection
+          title="Research Quality Metrics"
+          icon={<Brain className="h-5 w-5" />}
+        >
+          <div className="space-y-4">
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm">Evidence Collected</span>
-                <span className="font-semibold">{report.metadata?.evidenceCount || report.evidence.length}</span>
+                <span className="text-sm font-ibm">Evidence Collected</span>
+                <span className="font-semibold font-space">{report.metadata?.evidenceCount || report.evidence.length}</span>
               </div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm">Average Quality Score</span>
-                <span className="font-semibold">
+                <span className="text-sm font-ibm">Average Quality Score</span>
+                <span className="font-semibold font-space">
                   {((report.metadata?.averageQualityScore || 0) * 100).toFixed(0)}%
                 </span>
               </div>
-              <Progress 
+              <ProgressBar 
                 value={(report.metadata?.averageQualityScore || 0) * 100} 
-                className="h-2"
+                max={100}
+                color="teal"
+                size="md"
+                label="Quality Score"
               />
             </div>
             
             {report.report.metadata?.confidenceLevel && (
               <div>
-                <p className="text-sm font-medium mb-1">Confidence Level</p>
+                <p className="text-sm font-medium mb-1 font-space">Confidence Level</p>
                 <Badge variant={
                   report.report.metadata.confidenceLevel === 'high' ? 'default' :
                   report.report.metadata.confidenceLevel === 'medium' ? 'secondary' :
                   'destructive'
-                }>
+                } className="font-space">
                   {report.report.metadata.confidenceLevel
                     ? report.report.metadata.confidenceLevel.charAt(0).toUpperCase() + 
                       report.report.metadata.confidenceLevel.slice(1)
@@ -332,95 +323,87 @@ export function LangGraphReport({ report }: LangGraphReportProps) {
 
             {report.report.metadata?.inferenceApproach && (
               <div>
-                <p className="text-sm font-medium mb-1">Analysis Approach</p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm font-medium mb-1 font-space">Analysis Approach</p>
+                <p className="text-sm text-muted-foreground font-ibm">
                   {report.report.metadata.inferenceApproach}
                 </p>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </ReportSection>
 
         {/* Information Gathering Recommendations */}
         {report.report.metadata?.informationGatheringRecommendations && 
          report.report.metadata.informationGatheringRecommendations.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5" />
-                Recommended Information Gathering
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Alert className="border-yellow-200 bg-yellow-50 dark:bg-yellow-900/20">
-                <AlertTriangle className="h-4 w-4 text-yellow-600" />
-                <AlertDescription>
-                  <p className="font-medium mb-2">
-                    Additional information recommended for higher confidence:
-                  </p>
-                  <ul className="space-y-1">
-                    {report.report.metadata.informationGatheringRecommendations.map((rec, i) => (
-                      <li key={i} className="text-sm flex items-start gap-2">
-                        <span className="text-yellow-600 mt-1">•</span>
-                        <span>{rec}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </AlertDescription>
-              </Alert>
-            </CardContent>
-          </Card>
+          <ReportSection
+            title="Recommended Information Gathering"
+            icon={<Shield className="h-5 w-5" />}
+          >
+            <TechScanAlert
+              type="warning"
+              title="Additional information recommended for higher confidence"
+              description=""
+              dismissible={false}
+            >
+              <ul className="space-y-1 mt-2">
+                {report.report.metadata.informationGatheringRecommendations.map((rec, i) => (
+                  <li key={i} className="text-sm flex items-start gap-2 font-ibm">
+                    <span className="text-warning mt-1">•</span>
+                    <span>{rec}</span>
+                  </li>
+                ))}
+              </ul>
+            </TechScanAlert>
+          </ReportSection>
         )}
       </div>
 
       {/* Report Sections */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Detailed Analysis</CardTitle>
-          <CardDescription>
-            Click on sections to expand/collapse
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <ReportSection
+        title="Detailed Analysis"
+        subtitle="Click on sections to expand/collapse"
+        icon={<BarChart3 className="h-5 w-5" />}
+      >
+        <div className="space-y-4">
           {report.report.sections.map((section, index) => (
-            <Card key={index} className="overflow-hidden">
-              <CardHeader 
-                className="cursor-pointer hover:bg-muted/50 transition-colors"
+            <TechScanCard key={index} variant="default" className="overflow-hidden">
+              <div 
+                className="cursor-pointer hover:bg-brand-teal/5 transition-colors p-6 border-b border-gray-200"
                 onClick={() => toggleSection(index)}
               >
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg flex items-center gap-2">
+                  <h3 className="text-lg font-medium flex items-center gap-2 font-space">
                     <ChevronRight 
-                      className={`h-4 w-4 transition-transform ${
+                      className={`h-4 w-4 transition-transform text-brand-teal ${
                         expandedSections.has(index) ? 'rotate-90' : ''
                       }`}
                     />
                     {section.title}
                     {section.confidence && getConfidenceBadge(section.confidence)}
-                  </CardTitle>
+                  </h3>
                   {section.citations && section.citations.length > 0 && (
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant="outline" className="text-xs font-space">
                       {section.citations.length} citations
                     </Badge>
                   )}
                 </div>
-              </CardHeader>
+              </div>
               {expandedSections.has(index) && (
-                <CardContent>
+                <div className="p-6">
                   <div className="prose prose-sm max-w-none">
-                    <p className="text-muted-foreground whitespace-pre-wrap">
+                    <p className="text-muted-foreground whitespace-pre-wrap font-ibm leading-relaxed">
                       {section.content}
                     </p>
                   </div>
                   {section.citations && section.citations.length > 0 && (
-                    <div className="mt-4 pt-4 border-t">
-                      <p className="text-sm font-medium mb-2">Citations:</p>
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                      <p className="text-sm font-medium mb-2 font-space">Citations:</p>
                       <div className="flex flex-wrap gap-2">
                         {section.citations.map((citationId, i) => (
                           <Badge
                             key={i}
                             variant="outline"
-                            className="cursor-pointer hover:bg-primary/10"
+                            className="cursor-pointer hover:bg-brand-teal/10 font-mono"
                             onClick={(e) => {
                               e.stopPropagation()
                               setSelectedCitation(createCitation(
@@ -435,92 +418,84 @@ export function LangGraphReport({ report }: LangGraphReportProps) {
                       </div>
                     </div>
                   )}
-                </CardContent>
+                </div>
               )}
-            </Card>
+            </TechScanCard>
           ))}
-        </CardContent>
-      </Card>
+        </div>
+      </ReportSection>
 
       {/* Evidence Summary */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Evidence Sources
-          </CardTitle>
-          <CardDescription>
-            {report.evidence.length} pieces of evidence collected
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2 max-h-96 overflow-y-auto">
-            {(report.evidence || []).slice(0, 20).map((evidence) => (
-              <div
-                key={evidence.id}
-                className="p-3 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors"
-                onClick={() => setSelectedCitation(createCitation(
-                  evidence.source?.name || 'Unknown Source',
-                  [evidence.id]
-                ))}
-              >
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium flex items-center gap-2">
-                    [{evidence.id}] {evidence.source?.name || 'Unknown Source'}
-                    {evidence.source?.url && (
-                      <ExternalLink className="h-3 w-3" />
-                    )}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-xs">
-                      Quality: {((evidence.qualityScore?.overall || 0) * 100).toFixed(0)}%
-                    </Badge>
-                    {evidence.metadata?.confidence && (
-                      <Badge variant="outline" className="text-xs">
-                        Confidence: {evidence.metadata.confidence}%
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                  {evidence.content || 'No content available'}
+      <ReportSection
+        title="Evidence Sources"
+        subtitle={`${report.evidence.length} pieces of evidence collected`}
+        icon={<FileText className="h-5 w-5" />}
+      >
+        <div className="space-y-2 max-h-96 overflow-y-auto">
+          {(report.evidence || []).slice(0, 20).map((evidence) => (
+            <TechScanCard
+              key={evidence.id}
+              variant="default"
+              hoverable={true}
+              className="p-3 cursor-pointer"
+              onClick={() => setSelectedCitation(createCitation(
+                evidence.source?.name || 'Unknown Source',
+                [evidence.id]
+              ))}
+            >
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium flex items-center gap-2 font-space">
+                  <span className="font-mono text-brand-teal">[{evidence.id}]</span>
+                  {evidence.source?.name || 'Unknown Source'}
+                  {evidence.source?.url && (
+                    <ExternalLink className="h-3 w-3 text-brand-teal" />
+                  )}
                 </p>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="text-xs font-space">
+                    Quality: {((evidence.qualityScore?.overall || 0) * 100).toFixed(0)}%
+                  </Badge>
+                  {evidence.metadata?.confidence && (
+                    <Badge variant="outline" className="text-xs font-space">
+                      Confidence: {evidence.metadata.confidence}%
+                    </Badge>
+                  )}
+                </div>
               </div>
-            ))}
-            {report.evidence.length > 20 && (
-              <p className="text-sm text-muted-foreground text-center py-2">
-                Showing 20 of {report.evidence.length} evidence sources
+              <p className="text-xs text-muted-foreground mt-1 line-clamp-2 font-ibm">
+                {evidence.content || 'No content available'}
               </p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+            </TechScanCard>
+          ))}
+          {report.evidence.length > 20 && (
+            <p className="text-sm text-muted-foreground text-center py-2 font-ibm">
+              Showing 20 of {report.evidence.length} evidence sources
+            </p>
+          )}
+        </div>
+      </ReportSection>
 
       {/* Actions */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Badge variant="outline">
-                Generated by LangGraph
-              </Badge>
-              <Badge variant="outline">
-                Deep Research Mode
-              </Badge>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline">
-                <Download className="mr-2 h-4 w-4" />
-                Export PDF
-              </Button>
-              <Button variant="outline">
-                <BarChart3 className="mr-2 h-4 w-4" />
-                View Analytics
-              </Button>
-            </div>
+      <TechScanCard variant="default" className="p-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="font-space">
+              Generated by LangGraph
+            </Badge>
+            <Badge variant="outline" className="font-space">
+              Deep Research Mode
+            </Badge>
           </div>
-        </CardContent>
-      </Card>
+          <div className="flex gap-2">
+            <TechScanButton variant="secondary" icon={<Download className="h-4 w-4" />}>
+              Export PDF
+            </TechScanButton>
+            <TechScanButton variant="secondary" icon={<BarChart3 className="h-4 w-4" />}>
+              View Analytics
+            </TechScanButton>
+          </div>
+        </div>
+      </TechScanCard>
 
       {/* Evidence Modal */}
       {selectedCitation && (

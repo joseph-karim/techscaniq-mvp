@@ -45,13 +45,34 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // TechScanIQ Brand Colors
+        // TechScanIQ Brand Colors - Primary Palette
+        "brand": {
+          "black": "#000000",
+          "white": "#FFFFFF",
+          "teal": "#00C2B2",
+          "gunmetal": "#2C2C2E",
+        },
+        
+        // Semantic Colors
+        "error": "#f87171",
+        "warning": "#fb923c",
+        "caution": "#facc15",
+        "success": "#4ade80",
+        
+        // Neutral Grays
+        "gray": {
+          50: "#f9fafb",
+          200: "#e5e7eb",
+          600: "#4b5563",
+          700: "#374151",
+          900: "#111827",
+        },
+        
+        // Legacy colors maintained for compatibility
         "brand-black": "#000000",
         "brand-white": "#FFFFFF", 
         "brand-digital-teal": "#00C2B2",
         "brand-gunmetal-gray": "#2C2C2E",
-        
-        // Legacy colors maintained for compatibility
         "deep-navy": "#0B1E40",
         "slate-gray": "#64748B", 
         "electric-teal": "#14B8A6",
@@ -59,8 +80,6 @@ export default {
         "risk-red": "#DC2626",
         "caution-amber": "#F59E0B",
         "neutral-gray": "#6B7280",
-        
-        // Alias brand colors to common names
         "gunmetal-gray": "#2C2C2E",
         "digital-teal": "#00C2B2",
       },
@@ -71,9 +90,11 @@ export default {
       },
       fontFamily: {
         sans: ["IBM Plex Sans", "system-ui", "sans-serif"],
-        heading: ["Space Grotesk", "system-ui", "sans-serif"],
-        mono: ["IBM Plex Mono", "monospace"],
+        "space": ["Space Grotesk", "system-ui", "sans-serif"],
+        "ibm": ["IBM Plex Sans", "system-ui", "sans-serif"],
+        "mono": ["IBM Plex Mono", "monospace"],
         // Legacy support
+        heading: ["Space Grotesk", "system-ui", "sans-serif"],
         grotesk: ["Space Grotesk", "system-ui", "sans-serif"],
       },
       fontSize: {

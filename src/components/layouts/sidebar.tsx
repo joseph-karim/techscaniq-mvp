@@ -1,7 +1,7 @@
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { BarChart3, FileText, Home, List, PanelLeft, Settings, PenSquare as SquarePen, Building2, TrendingUp, Activity, Briefcase, FileSearch } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
+import { TechScanButton } from '@/components/brand'
 import { Badge } from '@/components/ui/badge'
 import { useAuth } from '@/lib/auth/auth-provider'
 import { getNavigationRoutes } from '@/routes'
@@ -42,12 +42,12 @@ export function Sidebar({ collapsed, setCollapsed, isAdmin }: SidebarProps) {
   return (
     <aside
       className={cn(
-        'bg-deep-navy text-white transition-all duration-300',
+        'bg-brand-black text-brand-white transition-all duration-300',
         collapsed ? 'w-16' : 'w-64',
-        'fixed inset-y-0 left-0 z-10 hidden flex-col border-r border-slate-800 md:flex'
+        'fixed inset-y-0 left-0 z-10 hidden flex-col border-r border-brand-gunmetal md:flex'
       )}
     >
-      <div className="flex h-16 items-center justify-between border-b border-slate-800 px-4">
+      <div className="flex h-16 items-center justify-between border-b border-brand-gunmetal px-4">
         <Link to="/dashboard" className={cn('flex items-center gap-2', collapsed && 'justify-center')}>
           {!collapsed ? (
             <img src="/tech_scan_iq_logo_transparent_white_text.png" alt="TechScan IQ" className="h-8 w-auto" />
@@ -55,14 +55,14 @@ export function Sidebar({ collapsed, setCollapsed, isAdmin }: SidebarProps) {
             <img src="/Techscan Q.png" alt="TechScan IQ" className="h-8 w-8" />
           )}
         </Link>
-        <Button 
+        <TechScanButton 
           variant="ghost" 
-          size="icon" 
+          size="sm" 
           onClick={() => setCollapsed(!collapsed)}
-          className="hidden text-slate-400 hover:text-white hover:bg-slate-800 md:flex"
+          className="hidden text-gray-400 hover:text-brand-teal hover:bg-brand-gunmetal/50 md:flex p-2"
         >
           <PanelLeft className={cn('h-5 w-5 transition-transform', collapsed && 'rotate-180')} />
-        </Button>
+        </TechScanButton>
       </div>
       
       <div className="flex-1 overflow-auto">
@@ -91,9 +91,9 @@ export function Sidebar({ collapsed, setCollapsed, isAdmin }: SidebarProps) {
           {/* PE Section */}
           {isPE && navigationRoutes.some(route => route.requirePE) && (
             <>
-              <div className={cn('my-6 border-t border-gray-800', collapsed ? 'mx-2' : 'mx-4')} />
+              <div className={cn('my-6 border-t border-brand-gunmetal', collapsed ? 'mx-2' : 'mx-4')} />
               <div className="px-3 py-2">
-                <p className={collapsed ? 'sr-only' : 'mb-2 text-xs uppercase tracking-wider text-slate-500'}>
+                <p className={collapsed ? 'sr-only' : 'mb-2 text-xs uppercase tracking-wider text-gray-400 font-space'}>
                   Private Equity
                 </p>
               </div>
@@ -120,9 +120,9 @@ export function Sidebar({ collapsed, setCollapsed, isAdmin }: SidebarProps) {
           {/* Admin Section */}
           {isAdmin && navigationRoutes.some(route => route.requireAdmin) && (
             <>
-              <div className={cn('my-4 border-t border-slate-800', collapsed ? 'mx-2' : 'mx-4')} />
+              <div className={cn('my-4 border-t border-brand-gunmetal', collapsed ? 'mx-2' : 'mx-4')} />
               <div className="px-3 py-2">
-                <p className={collapsed ? 'sr-only' : 'mb-2 text-xs uppercase tracking-wider text-slate-500'}>
+                <p className={collapsed ? 'sr-only' : 'mb-2 text-xs uppercase tracking-wider text-gray-400 font-space'}>
                   Admin
                 </p>
               </div>
@@ -149,7 +149,7 @@ export function Sidebar({ collapsed, setCollapsed, isAdmin }: SidebarProps) {
         </nav>
       </div>
       
-      <div className="border-t border-slate-800 p-4">
+      <div className="border-t border-brand-gunmetal p-4">
         <NavItem
           to="/settings"
           icon={<Settings className="h-5 w-5" />}
@@ -159,15 +159,15 @@ export function Sidebar({ collapsed, setCollapsed, isAdmin }: SidebarProps) {
         />
         
         {!collapsed && (
-          <div className="mt-4 rounded-md bg-slate-800/50 p-3">
+          <div className="mt-4 rounded-md bg-brand-gunmetal/50 p-3">
             <div className="flex items-center">
-              <div className="mr-2 h-2 w-2 rounded-full bg-electric-teal"></div>
-              <span className="text-sm font-medium">
+              <div className="mr-2 h-2 w-2 rounded-full bg-brand-teal"></div>
+              <span className="text-sm font-medium font-space">
                 {user?.user_metadata.role === 'admin' ? 'Admin' : 
                  user?.user_metadata.role === 'pe' ? 'PE' : 'Investor'} Mode
               </span>
             </div>
-            <p className="mt-1 text-xs text-slate-400">
+            <p className="mt-1 text-xs text-gray-400 font-ibm">
               {user?.user_metadata.role === 'admin' 
                 ? 'You have advisor privileges' 
                 : user?.user_metadata.role === 'pe'
@@ -196,10 +196,10 @@ function NavItem({ to, icon, label, badge, collapsed, active }: NavItemProps) {
       to={to}
       className={() =>
         cn(
-          'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+          'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors font-ibm',
           active
-            ? 'bg-brand-digital-teal text-white'
-            : 'text-gray-400 hover:bg-gray-800/50 hover:text-white',
+            ? 'bg-brand-teal text-brand-white'
+            : 'text-gray-400 hover:bg-brand-gunmetal/50 hover:text-brand-teal',
           collapsed && 'justify-center px-2'
         )
       }
@@ -209,14 +209,14 @@ function NavItem({ to, icon, label, badge, collapsed, active }: NavItemProps) {
         <>
           <span className="flex-1">{label}</span>
           {badge && (
-            <Badge className="h-5 w-5 justify-center rounded-full bg-brand-digital-teal text-white p-0 text-xs">
+            <Badge className="h-5 w-5 justify-center rounded-full bg-brand-teal text-white p-0 text-xs font-space">
               {badge}
             </Badge>
           )}
         </>
       )}
       {collapsed && badge && (
-        <Badge className="absolute right-1 top-1 h-4 w-4 justify-center rounded-full bg-brand-digital-teal text-white p-0 text-[10px]">
+        <Badge className="absolute right-1 top-1 h-4 w-4 justify-center rounded-full bg-brand-teal text-white p-0 text-[10px] font-space">
           {badge}
         </Badge>
       )}
