@@ -451,15 +451,15 @@ export default function ScanReportPaginated() {
               <CardContent className="space-y-4">
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-green-600">85%</div>
+                    <div className="text-3xl font-bold text-signal-green">85%</div>
                     <p className="text-sm text-muted-foreground">Overall Score</p>
                   </div>
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-blue-600">12</div>
+                    <div className="text-3xl font-bold text-brand-teal">12</div>
                     <p className="text-sm text-muted-foreground">Technologies</p>
                   </div>
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-yellow-600">3</div>
+                    <div className="text-3xl font-bold text-caution-amber">3</div>
                     <p className="text-sm text-muted-foreground">Risk Areas</p>
                   </div>
                   <div className="text-center">
@@ -529,15 +529,15 @@ export default function ScanReportPaginated() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5 text-red-500" />
+                    <AlertTriangle className="h-5 w-5 text-risk-red" />
                     High Risk Issues
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-risk-red/5 rounded-lg">
                     <div>
-                      <p className="font-medium text-red-900">Dependency Vulnerabilities</p>
-                      <p className="text-sm text-red-700">2 high-severity security issues</p>
+                      <p className="font-medium text-risk-red">Dependency Vulnerabilities</p>
+                      <p className="text-sm text-risk-red/80">2 high-severity security issues</p>
                     </div>
                     <Badge variant="destructive">Critical</Badge>
                   </div>
@@ -554,24 +554,24 @@ export default function ScanReportPaginated() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <CheckCircle className="h-5 w-5 text-signal-green" />
                     Low Risk Areas
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-signal-green/5 rounded-lg">
                     <div>
-                      <p className="font-medium text-green-900">Code Quality</p>
-                      <p className="text-sm text-green-700">Strong test coverage and linting</p>
+                      <p className="font-medium text-signal-green">Code Quality</p>
+                      <p className="text-sm text-signal-green/80">Strong test coverage and linting</p>
                     </div>
-                                         <Badge variant="outline" className="text-green-700 border-green-300">Low</Badge>
+                                         <Badge variant="outline" className="text-signal-green border-signal-green/30">Low</Badge>
                   </div>
-                  <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-brand-teal/5 rounded-lg">
                     <div>
-                      <p className="font-medium text-blue-900">Architecture</p>
-                      <p className="text-sm text-blue-700">Well-structured microservices design</p>
+                      <p className="font-medium text-brand-teal">Architecture</p>
+                      <p className="text-sm text-brand-teal/80">Well-structured microservices design</p>
                     </div>
-                    <Badge variant="outline" className="text-blue-700">Low</Badge>
+                    <Badge variant="outline" className="text-brand-teal">Low</Badge>
                   </div>
                 </CardContent>
               </Card>
@@ -584,17 +584,17 @@ export default function ScanReportPaginated() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-3 gap-4 text-center">
-                  <div className="p-4 bg-red-100 rounded-lg">
-                    <div className="text-2xl font-bold text-red-600">2</div>
-                    <p className="text-sm text-red-800">High Impact, High Probability</p>
+                  <div className="p-4 bg-risk-red/10 rounded-lg">
+                    <div className="text-2xl font-bold text-risk-red">2</div>
+                    <p className="text-sm text-risk-red/80">High Impact, High Probability</p>
                   </div>
-                  <div className="p-4 bg-yellow-100 rounded-lg">
-                    <div className="text-2xl font-bold text-yellow-600">5</div>
-                    <p className="text-sm text-yellow-800">Medium Impact/Probability</p>
+                  <div className="p-4 bg-caution-amber/10 rounded-lg">
+                    <div className="text-2xl font-bold text-caution-amber">5</div>
+                    <p className="text-sm text-caution-amber/80">Medium Impact/Probability</p>
                   </div>
-                  <div className="p-4 bg-green-100 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">12</div>
-                    <p className="text-sm text-green-800">Low Impact, Low Probability</p>
+                  <div className="p-4 bg-signal-green/10 rounded-lg">
+                    <div className="text-2xl font-bold text-signal-green">12</div>
+                    <p className="text-sm text-signal-green/80">Low Impact, Low Probability</p>
                   </div>
                 </div>
               </CardContent>
@@ -740,11 +740,11 @@ export default function ScanReportPaginated() {
               <CardContent>
                 <div className="grid gap-4 md:grid-cols-3">
                   <div className="text-center p-4 border rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600 mb-2">Microservices</div>
+                    <div className="text-2xl font-bold text-brand-teal mb-2">Microservices</div>
                     <p className="text-sm text-muted-foreground">Service-oriented architecture with clear boundaries</p>
                   </div>
                   <div className="text-center p-4 border rounded-lg">
-                    <div className="text-2xl font-bold text-green-600 mb-2">RESTful APIs</div>
+                    <div className="text-2xl font-bold text-signal-green mb-2">RESTful APIs</div>
                     <p className="text-sm text-muted-foreground">Standard HTTP-based API design</p>
                   </div>
                   <div className="text-center p-4 border rounded-lg">
@@ -820,7 +820,7 @@ export default function ScanReportPaginated() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                                      <div className="text-center">
-                     <div className="text-3xl font-bold text-yellow-600 mb-2">
+                     <div className="text-3xl font-bold text-caution-amber mb-2">
                        <InlineCitation 
                          citationId="9" 
                          citation={mockCitations[8]}
@@ -858,7 +858,7 @@ export default function ScanReportPaginated() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between p-3 border rounded-lg">
                     <div className="flex items-center gap-3">
-                      <AlertTriangle className="h-4 w-4 text-yellow-500" />
+                      <AlertTriangle className="h-4 w-4 text-caution-amber" />
                       <div>
                         <p className="font-medium">Unused Variables</p>
                         <p className="text-sm text-muted-foreground">8 instances across 5 files</p>
@@ -878,13 +878,13 @@ export default function ScanReportPaginated() {
                   </div>
                   <div className="flex items-center justify-between p-3 border rounded-lg">
                     <div className="flex items-center gap-3">
-                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <CheckCircle className="h-4 w-4 text-signal-green" />
                       <div>
                         <p className="font-medium">Consistent Formatting</p>
                         <p className="text-sm text-muted-foreground">Prettier and ESLint properly configured</p>
                       </div>
                     </div>
-                    <Badge variant="outline" className="text-green-700">Good</Badge>
+                    <Badge variant="outline" className="text-signal-green">Good</Badge>
                   </div>
                 </div>
               </CardContent>
@@ -1001,11 +1001,11 @@ export default function ScanReportPaginated() {
               <CardContent>
                 <div className="grid gap-4 md:grid-cols-3">
                   <div className="text-center p-4 border rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600 mb-2">3-10</div>
+                    <div className="text-2xl font-bold text-brand-teal mb-2">3-10</div>
                     <p className="text-sm text-muted-foreground">Pod Replicas Range</p>
                   </div>
                   <div className="text-center p-4 border rounded-lg">
-                    <div className="text-2xl font-bold text-green-600 mb-2">70%</div>
+                    <div className="text-2xl font-bold text-signal-green mb-2">70%</div>
                     <p className="text-sm text-muted-foreground">CPU Scale Threshold</p>
                   </div>
                   <div className="text-center p-4 border rounded-lg">
@@ -1050,7 +1050,7 @@ export default function ScanReportPaginated() {
                          <span className="font-medium">1.8s</span>
                        </div>
                        <Progress value={85} className="h-2" />
-                       <p className="text-xs text-green-600 mt-1">Good (&lt; 2.5s)</p>
+                       <p className="text-xs text-signal-green mt-1">Good (&lt; 2.5s)</p>
                      </div>
                      <div>
                        <div className="flex justify-between text-sm mb-1">
@@ -1082,7 +1082,7 @@ export default function ScanReportPaginated() {
                          <span className="font-medium">0.08</span>
                        </div>
                        <Progress value={75} className="h-2" />
-                       <p className="text-xs text-yellow-600 mt-1">Needs improvement (&lt; 0.1)</p>
+                       <p className="text-xs text-caution-amber mt-1">Needs improvement (&lt; 0.1)</p>
                      </div>
                   </div>
                 </CardContent>
@@ -1164,7 +1164,7 @@ export default function ScanReportPaginated() {
                   </div>
                   <div className="flex items-center justify-between p-3 border rounded-lg">
                     <div className="flex items-center gap-3">
-                      <TrendingUp className="h-4 w-4 text-yellow-500" />
+                      <TrendingUp className="h-4 w-4 text-caution-amber" />
                       <div>
                         <p className="font-medium">Image Optimization</p>
                         <p className="text-sm text-muted-foreground">Large images without compression</p>
@@ -1174,13 +1174,13 @@ export default function ScanReportPaginated() {
                   </div>
                   <div className="flex items-center justify-between p-3 border rounded-lg">
                     <div className="flex items-center gap-3">
-                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <CheckCircle className="h-4 w-4 text-signal-green" />
                       <div>
                         <p className="font-medium">Caching Strategy</p>
                         <p className="text-sm text-muted-foreground">Redis caching properly implemented</p>
                       </div>
                     </div>
-                    <Badge variant="outline" className="text-green-700">Good</Badge>
+                    <Badge variant="outline" className="text-signal-green">Good</Badge>
                   </div>
                 </div>
               </CardContent>
@@ -1216,9 +1216,9 @@ export default function ScanReportPaginated() {
                       <div className="text-2xl font-bold text-yellow-600">5</div>
                       <p className="text-xs text-yellow-800">Medium</p>
                     </div>
-                    <div className="p-3 bg-blue-50 rounded-lg">
-                      <div className="text-2xl font-bold text-blue-600">12</div>
-                      <p className="text-xs text-blue-800">Low</p>
+                    <div className="p-3 bg-brand-teal/5 rounded-lg">
+                      <div className="text-2xl font-bold text-brand-teal">12</div>
+                      <p className="text-xs text-brand-teal/80">Low</p>
                     </div>
                   </div>
                 </CardContent>
@@ -1418,15 +1418,15 @@ export default function ScanReportPaginated() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5 text-red-500" />
+                    <AlertTriangle className="h-5 w-5 text-risk-red" />
                     Critical Priority
                   </CardTitle>
                   <CardDescription>Immediate action required</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <div className="p-4 border-l-4 border-red-500 bg-red-50">
-                    <h4 className="font-medium text-red-900 mb-2">Fix SQL Injection Vulnerability</h4>
-                    <p className="text-sm text-red-800 mb-2">
+                  <div className="p-4 border-l-4 border-risk-red bg-risk-red/5">
+                    <h4 className="font-medium text-risk-red mb-2">Fix SQL Injection Vulnerability</h4>
+                    <p className="text-sm text-risk-red/80 mb-2">
                       Implement parameterized queries and input validation for all user-facing endpoints.
                     </p>
                     <div className="flex gap-2">
@@ -1434,9 +1434,9 @@ export default function ScanReportPaginated() {
                       <Badge variant="outline">1-2 days</Badge>
                     </div>
                   </div>
-                  <div className="p-4 border-l-4 border-red-500 bg-red-50">
-                    <h4 className="font-medium text-red-900 mb-2">Update Vulnerable Dependencies</h4>
-                    <p className="text-sm text-red-800 mb-2">
+                  <div className="p-4 border-l-4 border-risk-red bg-risk-red/5">
+                    <h4 className="font-medium text-risk-red mb-2">Update Vulnerable Dependencies</h4>
+                    <p className="text-sm text-risk-red/80 mb-2">
                       Update lodash and axios to latest versions to patch known security vulnerabilities.
                     </p>
                     <div className="flex gap-2">
@@ -1450,15 +1450,15 @@ export default function ScanReportPaginated() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-yellow-500" />
+                    <Clock className="h-5 w-5 text-caution-amber" />
                     High Priority
                   </CardTitle>
                   <CardDescription>Address within 2 weeks</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <div className="p-4 border-l-4 border-yellow-500 bg-yellow-50">
-                    <h4 className="font-medium text-yellow-900 mb-2">Implement API Rate Limiting</h4>
-                    <p className="text-sm text-yellow-800 mb-2">
+                  <div className="p-4 border-l-4 border-caution-amber bg-caution-amber/5">
+                    <h4 className="font-medium text-caution-amber mb-2">Implement API Rate Limiting</h4>
+                    <p className="text-sm text-caution-amber/80 mb-2">
                       Add rate limiting to prevent abuse and improve API reliability.
                     </p>
                     <div className="flex gap-2">
@@ -1466,9 +1466,9 @@ export default function ScanReportPaginated() {
                       <Badge variant="outline">2-3 days</Badge>
                     </div>
                   </div>
-                  <div className="p-4 border-l-4 border-yellow-500 bg-yellow-50">
-                    <h4 className="font-medium text-yellow-900 mb-2">Optimize Database Queries</h4>
-                    <p className="text-sm text-yellow-800 mb-2">
+                  <div className="p-4 border-l-4 border-caution-amber bg-caution-amber/5">
+                    <h4 className="font-medium text-caution-amber mb-2">Optimize Database Queries</h4>
+                    <p className="text-sm text-caution-amber/80 mb-2">
                       Add indexes and optimize the 3 slowest queries identified in performance analysis.
                     </p>
                     <div className="flex gap-2">
@@ -1482,15 +1482,15 @@ export default function ScanReportPaginated() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-blue-500" />
+                    <TrendingUp className="h-5 w-5 text-brand-teal" />
                     Medium Priority
                   </CardTitle>
                   <CardDescription>Address within 1 month</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <div className="p-4 border-l-4 border-blue-500 bg-blue-50">
-                    <h4 className="font-medium text-blue-900 mb-2">Improve Documentation Coverage</h4>
-                    <p className="text-sm text-blue-800 mb-2">
+                  <div className="p-4 border-l-4 border-brand-teal bg-brand-teal/5">
+                    <h4 className="font-medium text-brand-teal mb-2">Improve Documentation Coverage</h4>
+                    <p className="text-sm text-brand-teal/80 mb-2">
                       Increase API documentation coverage from 65% to 85% minimum.
                     </p>
                     <div className="flex gap-2">
@@ -1498,9 +1498,9 @@ export default function ScanReportPaginated() {
                       <Badge variant="outline">1-2 weeks</Badge>
                     </div>
                   </div>
-                  <div className="p-4 border-l-4 border-blue-500 bg-blue-50">
-                    <h4 className="font-medium text-blue-900 mb-2">Implement Image Optimization</h4>
-                    <p className="text-sm text-blue-800 mb-2">
+                  <div className="p-4 border-l-4 border-brand-teal bg-brand-teal/5">
+                    <h4 className="font-medium text-brand-teal mb-2">Implement Image Optimization</h4>
+                    <p className="text-sm text-brand-teal/80 mb-2">
                       Add automatic image compression and WebP format support.
                     </p>
                     <div className="flex gap-2">
@@ -1533,17 +1533,17 @@ export default function ScanReportPaginated() {
                 <CardContent>
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                      <div className="w-2 h-2 bg-risk-red rounded-full"></div>
                       <span className="text-sm">Fix SQL injection vulnerability</span>
                       <Badge variant="destructive" className="ml-auto">Critical</Badge>
                     </div>
                     <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                      <div className="w-2 h-2 bg-risk-red rounded-full"></div>
                       <span className="text-sm">Update vulnerable dependencies</span>
                       <Badge variant="destructive" className="ml-auto">Critical</Badge>
                     </div>
                     <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                      <div className="w-2 h-2 bg-caution-amber rounded-full"></div>
                       <span className="text-sm">Implement API rate limiting</span>
                       <Badge variant="secondary" className="ml-auto">High</Badge>
                     </div>
@@ -1559,17 +1559,17 @@ export default function ScanReportPaginated() {
                 <CardContent>
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                      <div className="w-2 h-2 bg-caution-amber rounded-full"></div>
                       <span className="text-sm">Optimize database queries</span>
                       <Badge variant="secondary" className="ml-auto">High</Badge>
                     </div>
                     <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <div className="w-2 h-2 bg-brand-teal rounded-full"></div>
                       <span className="text-sm">Implement image optimization</span>
                       <Badge variant="outline" className="ml-auto">Medium</Badge>
                     </div>
                     <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <div className="w-2 h-2 bg-brand-teal rounded-full"></div>
                       <span className="text-sm">Add caching layers</span>
                       <Badge variant="outline" className="ml-auto">Medium</Badge>
                     </div>
@@ -1585,17 +1585,17 @@ export default function ScanReportPaginated() {
                 <CardContent>
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <div className="w-2 h-2 bg-brand-teal rounded-full"></div>
                       <span className="text-sm">Improve documentation coverage</span>
                       <Badge variant="outline" className="ml-auto">Medium</Badge>
                     </div>
                     <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <div className="w-2 h-2 bg-signal-green rounded-full"></div>
                       <span className="text-sm">Refactor complex functions</span>
                       <Badge variant="outline" className="ml-auto">Low</Badge>
                     </div>
                     <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <div className="w-2 h-2 bg-signal-green rounded-full"></div>
                       <span className="text-sm">Increase test coverage</span>
                       <Badge variant="outline" className="ml-auto">Low</Badge>
                     </div>
@@ -1621,7 +1621,7 @@ export default function ScanReportPaginated() {
                       <Badge variant="outline" className="ml-auto">Compliance</Badge>
                     </div>
                     <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <div className="w-2 h-2 bg-signal-green rounded-full"></div>
                       <span className="text-sm">Architecture modernization</span>
                       <Badge variant="outline" className="ml-auto">Strategic</Badge>
                     </div>

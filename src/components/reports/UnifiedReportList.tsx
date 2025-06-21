@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { TechScanButton } from '@/components/brand'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -49,11 +49,11 @@ const getReportIcon = (reportType: string): React.ReactNode => {
 const getStatusColor = (status: string): string => {
   switch (status) {
     case 'completed':
-      return 'bg-green-100 text-green-800 border-green-200'
+      return 'bg-signal-green/10 text-signal-green border-signal-green/20'
     case 'processing':
-      return 'bg-blue-100 text-blue-800 border-blue-200'
+      return 'bg-brand-teal/10 text-brand-teal border-brand-teal/20'
     case 'failed':
-      return 'bg-red-100 text-red-800 border-red-200'
+      return 'bg-risk-red/10 text-risk-red border-risk-red/20'
     default:
       return 'bg-gray-100 text-gray-800 border-gray-200'
   }
@@ -89,8 +89,8 @@ function RegularReportList({ reports, loading = false }: RegularReportListProps)
       <Card className="border-dashed">
         <CardContent className="p-8 text-center">
           <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="font-semibold text-lg mb-2">No reports yet</h3>
-          <p className="text-muted-foreground">
+          <h3 className="font-space font-semibold text-lg mb-2">No reports yet</h3>
+          <p className="text-muted-foreground font-ibm">
             Your reports will appear here once they're generated.
           </p>
         </CardContent>
@@ -109,7 +109,7 @@ function RegularReportList({ reports, loading = false }: RegularReportListProps)
                   {getReportIcon(report.report_type)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-sm truncate">
+                  <h3 className="font-space font-semibold text-sm truncate">
                     {report.title || `${report.company_name} ${report.report_type.replace(/-/g, ' ')}`}
                   </h3>
                   <div className="flex items-center gap-2 mt-1">
@@ -123,15 +123,15 @@ function RegularReportList({ reports, loading = false }: RegularReportListProps)
                   </div>
                 </div>
               </div>
-              <Button
+              <TechScanButton
                 variant="ghost"
                 size="sm"
                 onClick={() => handleViewReport(report.id)}
                 disabled={report.status !== 'completed'}
+                icon={<ChevronRight className="h-4 w-4" />}
               >
                 View
-                <ChevronRight className="h-4 w-4 ml-1" />
-              </Button>
+              </TechScanButton>
             </div>
           </CardContent>
         </Card>

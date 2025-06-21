@@ -9,6 +9,8 @@ interface TechScanAlertProps {
   description?: string;
   dismissible?: boolean;
   onDismiss?: () => void;
+  className?: string;
+  children?: React.ReactNode;
 }
 
 export function TechScanAlert({ 
@@ -16,24 +18,26 @@ export function TechScanAlert({
   title, 
   description,
   dismissible = true,
-  onDismiss
+  onDismiss,
+  className,
+  children
 }: TechScanAlertProps) {
   const [isVisible, setIsVisible] = useState(true);
 
   const typeConfig = {
     success: {
       icon: CheckCircle,
-      bgColor: 'bg-green-50',
+      bgColor: 'bg-signal-green/5',
       borderColor: 'border-green-200',
-      iconColor: 'text-green-600',
-      textColor: 'text-green-900',
+      iconColor: 'text-signal-green',
+      textColor: 'text-signal-green',
     },
     error: {
       icon: XCircle,
-      bgColor: 'bg-red-50',
+      bgColor: 'bg-risk-red/5',
       borderColor: 'border-red-200',
-      iconColor: 'text-red-600',
-      textColor: 'text-red-900',
+      iconColor: 'text-risk-red',
+      textColor: 'text-risk-red',
     },
     warning: {
       icon: AlertCircle,
@@ -70,7 +74,8 @@ export function TechScanAlert({
           className={cn(
             'rounded-lg border p-4',
             config.bgColor,
-            config.borderColor
+            config.borderColor,
+            className
           )}
         >
           <div className="flex items-start gap-3">
@@ -84,6 +89,7 @@ export function TechScanAlert({
                   {description}
                 </p>
               )}
+              {children}
             </div>
             {dismissible && (
               <button

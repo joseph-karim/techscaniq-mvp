@@ -37,13 +37,13 @@ export function MetricCard({
   const trendConfig = {
     up: {
       icon: TrendingUp,
-      color: 'text-green-600',
-      bgColor: 'bg-green-100',
+      color: 'text-signal-green',
+      bgColor: 'bg-signal-green/10',
     },
     down: {
       icon: TrendingDown,
-      color: 'text-red-600',
-      bgColor: 'bg-red-100',
+      color: 'text-risk-red',
+      bgColor: 'bg-risk-red/10',
     },
     neutral: {
       icon: Minus,

@@ -486,7 +486,7 @@ export function InvestmentThesisSelector({ value, onChange, showSavedTheses = tr
               
               {(selectedThesis as any).investorGoals && (
                 <div>
-                  <h5 className="text-sm font-medium text-blue-700 dark:text-blue-300">What the Investor Wants:</h5>
+                  <h5 className="text-sm font-medium text-brand-teal dark:text-brand-teal/80">What the Investor Wants:</h5>
                   <ul className="text-xs text-muted-foreground list-disc list-inside">
                     {(selectedThesis as any).investorGoals.map((goal: string, i: number) => (
                       <li key={i}>{goal}</li>
@@ -497,7 +497,7 @@ export function InvestmentThesisSelector({ value, onChange, showSavedTheses = tr
               
               {(selectedThesis as any).techDDFocus && (
                 <div>
-                  <h5 className="text-sm font-medium text-green-700 dark:text-green-300">Tech-DD Focus: {(selectedThesis as any).techDDFocus}</h5>
+                  <h5 className="text-sm font-medium text-signal-green dark:text-signal-green/80">Tech-DD Focus: {(selectedThesis as any).techDDFocus}</h5>
                   <ul className="text-xs text-muted-foreground list-disc list-inside">
                     {(selectedThesis as any).techDDDetails?.map((detail: string, i: number) => (
                       <li key={i}>{detail}</li>
@@ -643,7 +643,7 @@ export function InvestmentThesisSelector({ value, onChange, showSavedTheses = tr
                   <div className="text-sm text-muted-foreground">
                     Total Weight: {currentValue.criteria.reduce((sum, c) => sum + c.weight, 0)}%
                     {currentValue.criteria.reduce((sum, c) => sum + c.weight, 0) !== 100 && (
-                      <span className="text-red-500 ml-2">Must equal 100%</span>
+                      <span className="text-risk-red ml-2">Must equal 100%</span>
                     )}
                   </div>
                 </div>

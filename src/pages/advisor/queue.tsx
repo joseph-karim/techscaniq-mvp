@@ -430,7 +430,7 @@ function ScanStatusBadge({ status }: ScanStatusBadgeProps) {
       )
     case 'processing':
       return (
-        <Badge variant="outline" className="gap-1 text-blue-500">
+        <Badge variant="outline" className="gap-1 text-brand-teal">
           <Clock className="h-3 w-3 animate-spin" />
           Processing
         </Badge>
@@ -451,14 +451,14 @@ function ScanStatusBadge({ status }: ScanStatusBadgeProps) {
       )
     case 'complete':
       return (
-        <Badge variant="outline" className="gap-1 text-green-500">
+        <Badge variant="outline" className="gap-1 text-signal-green">
           <Clock className="h-3 w-3" />
           Complete
         </Badge>
       )
     case 'error':
       return (
-        <Badge variant="outline" className="gap-1 text-red-500">
+        <Badge variant="outline" className="gap-1 text-risk-red">
           <Clock className="h-3 w-3" />
           Error
         </Badge>

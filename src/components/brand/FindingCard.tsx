@@ -20,10 +20,10 @@ export function FindingCard({
   const typeConfig = {
     critical: {
       icon: XCircle,
-      bgColor: 'bg-red-50',
+      bgColor: 'bg-risk-red/5',
       borderColor: 'border-red-400',
-      iconColor: 'text-red-600',
-      titleColor: 'text-red-900',
+      iconColor: 'text-risk-red',
+      titleColor: 'text-risk-red',
     },
     warning: {
       icon: AlertCircle,
@@ -34,10 +34,10 @@ export function FindingCard({
     },
     success: {
       icon: CheckCircle,
-      bgColor: 'bg-green-50',
+      bgColor: 'bg-signal-green/5',
       borderColor: 'border-green-400',
-      iconColor: 'text-green-600',
-      titleColor: 'text-green-900',
+      iconColor: 'text-signal-green',
+      titleColor: 'text-signal-green',
     },
     info: {
       icon: Info,

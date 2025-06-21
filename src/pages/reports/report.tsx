@@ -276,8 +276,8 @@ export default function ReportPage() {
               {id}
             </Badge>
           </div>
-          <h1 className="text-3xl font-bold">{report.companyName}</h1>
-          <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+          <h1 className="text-3xl font-bold font-space">{report.companyName}</h1>
+          <div className="flex items-center space-x-2 text-sm text-muted-foreground font-ibm">
             <Globe className="h-4 w-4" />
             <a 
               href={report.websiteUrl} 
@@ -305,8 +305,8 @@ export default function ReportPage() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Tech Health Score</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-lg font-space">Tech Health Score</CardTitle>
+            <CardDescription className="font-ibm">
               Overall technical health assessment
             </CardDescription>
           </CardHeader>
@@ -320,8 +320,8 @@ export default function ReportPage() {
         
         <Card className="md:col-span-2">
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Risk Summary</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-lg font-space">Risk Summary</CardTitle>
+            <CardDescription className="font-ibm">
               Categorized risk assessment by severity
             </CardDescription>
           </CardHeader>
@@ -334,19 +334,19 @@ export default function ReportPage() {
       {/* Main report content */}
       <Tabs defaultValue="summary" className="space-y-4">
         <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="summary">Summary</TabsTrigger>
-          <TabsTrigger value="architecture">Architecture</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
-          <TabsTrigger value="code-quality">Code Quality</TabsTrigger>
-          <TabsTrigger value="thesis">Thesis Alignment</TabsTrigger>
+          <TabsTrigger value="summary" className="font-space">Summary</TabsTrigger>
+          <TabsTrigger value="architecture" className="font-space">Architecture</TabsTrigger>
+          <TabsTrigger value="security" className="font-space">Security</TabsTrigger>
+          <TabsTrigger value="code-quality" className="font-space">Code Quality</TabsTrigger>
+          <TabsTrigger value="thesis" className="font-space">Thesis Alignment</TabsTrigger>
         </TabsList>
         
         {/* Summary Tab */}
         <TabsContent value="summary" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Key Findings</CardTitle>
-              <CardDescription>
+              <CardTitle className="font-space">Key Findings</CardTitle>
+              <CardDescription className="font-ibm">
                 Most important insights from the technical due diligence
               </CardDescription>
             </CardHeader>
@@ -369,7 +369,7 @@ export default function ReportPage() {
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
-                          <h3 className="font-medium">{risk.title}</h3>
+                          <h3 className="font-medium font-space">{risk.title}</h3>
                           <Badge variant={
                             risk.severity === 'critical' ? 'destructive' :
                             risk.severity === 'high' ? 'destructive' :
@@ -379,7 +379,7 @@ export default function ReportPage() {
                             {risk.severity.toUpperCase()}
                           </Badge>
                         </div>
-                        <p className="mt-1 text-sm text-muted-foreground">
+                        <p className="mt-1 text-sm text-muted-foreground font-ibm">
                           {risk.id === 'finding-1' ? (
                             <>
                               Multiple API endpoints lack proper authentication and authorization controls, exposing{' '}
@@ -424,8 +424,8 @@ export default function ReportPage() {
         <TabsContent value="architecture" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>System Architecture</CardTitle>
-              <CardDescription>
+              <CardTitle className="font-space">System Architecture</CardTitle>
+              <CardDescription className="font-ibm">
                 {report.architecture.pattern} architecture pattern with {report.architecture.components.length} main components
               </CardDescription>
             </CardHeader>
@@ -435,20 +435,20 @@ export default function ReportPage() {
                   {/* This would be an interactive diagram in a real implementation */}
                   <div className="relative mx-auto h-[300px] w-[600px] max-w-full border border-dashed border-muted p-4">
                     <div className="flex h-full items-center justify-center">
-                      <p className="text-muted-foreground">Interactive Architecture Diagram</p>
+                      <p className="text-muted-foreground font-ibm">Interactive Architecture Diagram</p>
                     </div>
                   </div>
-                  <p className="mt-2 text-xs text-muted-foreground">Click on components to see details</p>
+                  <p className="mt-2 text-xs text-muted-foreground font-ibm">Click on components to see details</p>
                 </div>
               </div>
               
-              <h3 className="mb-4 text-lg font-medium">Component Details</h3>
+              <h3 className="mb-4 text-lg font-medium font-space">Component Details</h3>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {report.architecture.components.map((component) => (
                   <Card key={component.name} className={component.issues > 0 ? 'border-orange-200' : ''}>
                     <CardHeader className="p-4 pb-2">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-base">{component.name}</CardTitle>
+                        <CardTitle className="text-base font-space">{component.name}</CardTitle>
                         {component.issues > 0 && (
                           <Badge variant="outline" className="text-orange-500">
                             {component.issues} issue{component.issues > 1 ? 's' : ''}
@@ -457,7 +457,7 @@ export default function ReportPage() {
                       </div>
                     </CardHeader>
                     <CardContent className="p-4 pt-0 text-sm">
-                      <p><span className="text-muted-foreground">Technology:</span> {component.technology}</p>
+                      <p className="font-ibm"><span className="text-muted-foreground">Technology:</span> {component.technology}</p>
                     </CardContent>
                   </Card>
                 ))}
@@ -470,25 +470,25 @@ export default function ReportPage() {
         <TabsContent value="security" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Security Assessment</CardTitle>
-              <CardDescription>
+              <CardTitle className="font-space">Security Assessment</CardTitle>
+              <CardDescription className="font-ibm">
                 Analysis of security posture and identified vulnerabilities
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex flex-col gap-6 md:flex-row">
                 <div className="flex-1">
-                  <h3 className="mb-2 text-lg font-medium">Security Posture</h3>
-                  <p className="mb-4 text-sm text-muted-foreground">
-                    Overall security score: <span className="font-medium">{report.security.overallScore}%</span>
+                  <h3 className="mb-2 text-lg font-medium font-space">Security Posture</h3>
+                  <p className="mb-4 text-sm text-muted-foreground font-ibm">
+                    Overall security score: <span className="font-medium font-space">{report.security.overallScore}%</span>
                   </p>
                   
                   <div className="space-y-3">
                     {report.security.categories.map((category) => (
                       <div key={category.name} className="space-y-1">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium">{category.name}</span>
-                          <span className="text-sm">{category.score}%</span>
+                          <span className="text-sm font-medium font-space">{category.name}</span>
+                          <span className="text-sm font-space">{category.score}%</span>
                         </div>
                         <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                           <div
@@ -507,8 +507,8 @@ export default function ReportPage() {
                 
                 <div className="flex-1">
                   <div className="mb-2 flex items-center justify-between">
-                    <h3 className="text-lg font-medium">Vulnerabilities</h3>
-                    <Badge variant="outline">CVSS Scored</Badge>
+                    <h3 className="text-lg font-medium font-space">Vulnerabilities</h3>
+                    <Badge variant="outline" className="font-space">CVSS Scored</Badge>
                   </div>
                   
                   <div className="space-y-3">
@@ -530,7 +530,7 @@ export default function ReportPage() {
                               vuln.severity === 'medium' ? 'text-yellow-600 dark:text-yellow-400' :
                               'text-green-600 dark:text-green-400'
                             }`} />
-                            <span className="font-medium">{vuln.name}</span>
+                            <span className="font-medium font-space">{vuln.name}</span>
                           </div>
                           <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                             vuln.cvss >= 9.0 ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' :
@@ -554,29 +554,29 @@ export default function ReportPage() {
         <TabsContent value="code-quality" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Code Quality & DevOps Maturity</CardTitle>
-              <CardDescription>
+              <CardTitle className="font-space">Code Quality & DevOps Maturity</CardTitle>
+              <CardDescription className="font-ibm">
                 Assessment of development practices and code quality metrics
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid gap-6 md:grid-cols-2">
                 <div>
-                  <h3 className="mb-4 text-lg font-medium">Code Quality Metrics</h3>
+                  <h3 className="mb-4 text-lg font-medium font-space">Code Quality Metrics</h3>
                   
                   <div className="space-y-4">
                     {report.codeQuality.metrics.map((metric) => (
                       <div key={metric.name} className="space-y-2">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium">{metric.name}</span>
-                            <Badge variant="outline" className={
+                            <span className="text-sm font-medium font-space">{metric.name}</span>
+                            <Badge variant="outline" className={`${
                               metric.score >= metric.benchmark ? 'text-green-500' : 'text-orange-500'
-                            }>
+                            } font-space`}>
                               {metric.score >= metric.benchmark ? 'Meets' : 'Below'} benchmark
                             </Badge>
                           </div>
-                          <span className="text-sm font-medium">{metric.score}%</span>
+                          <span className="text-sm font-medium font-space">{metric.score}%</span>
                         </div>
                         
                         <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
@@ -589,7 +589,7 @@ export default function ReportPage() {
                         </div>
                         
                         <div className="flex justify-end">
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-xs text-muted-foreground font-ibm">
                             Benchmark: {metric.benchmark}%
                           </span>
                         </div>
@@ -599,16 +599,16 @@ export default function ReportPage() {
                 </div>
                 
                 <div>
-                  <h3 className="mb-4 text-lg font-medium">DevOps Practices</h3>
+                  <h3 className="mb-4 text-lg font-medium font-space">DevOps Practices</h3>
                   <div className="rounded-md border">
                     <div className="flex items-center justify-between border-b p-3">
-                      <span className="font-medium">DevOps Maturity Score</span>
+                      <span className="font-medium font-space">DevOps Maturity Score</span>
                       <div className="flex items-center gap-2">
-                        <span className="font-medium">{report.devOps.maturityScore}%</span>
+                        <span className="font-medium font-space">{report.devOps.maturityScore}%</span>
                         <Badge variant={
                           report.devOps.maturityScore >= 80 ? 'default' :
                           report.devOps.maturityScore >= 60 ? 'secondary' : 'outline'
-                        }>
+                        } className="font-space">
                           {report.devOps.maturityScore >= 80 ? 'Excellent' :
                            report.devOps.maturityScore >= 60 ? 'Good' :
                            report.devOps.maturityScore >= 40 ? 'Fair' : 'Poor'}
@@ -620,13 +620,13 @@ export default function ReportPage() {
                       <ul className="grid gap-2">
                         {report.devOps.practices.map((practice) => (
                           <li key={practice.name} className="flex items-center justify-between">
-                            <span className="text-sm">{practice.name}</span>
+                            <span className="text-sm font-ibm">{practice.name}</span>
                             {practice.implemented ? (
-                              <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                              <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 font-space">
                                 Implemented
                               </Badge>
                             ) : (
-                              <Badge variant="outline" className="bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300">
+                              <Badge variant="outline" className="bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300 font-space">
                                 Not Implemented
                               </Badge>
                             )}
@@ -636,13 +636,13 @@ export default function ReportPage() {
                     </div>
                   </div>
                   
-                  <h3 className="mb-2 mt-6 text-lg font-medium">Language Distribution</h3>
+                  <h3 className="mb-2 mt-6 text-lg font-medium font-space">Language Distribution</h3>
                   <div className="space-y-2">
                     {report.codeQuality.languages.map((lang) => (
                       <div key={lang.name} className="space-y-1">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm">{lang.name}</span>
-                          <span className="text-sm">{lang.percentage}%</span>
+                          <span className="text-sm font-ibm">{lang.name}</span>
+                          <span className="text-sm font-space">{lang.percentage}%</span>
                         </div>
                         <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                           <div
@@ -663,74 +663,74 @@ export default function ReportPage() {
         <TabsContent value="thesis" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Investment Thesis Alignment</CardTitle>
-              <CardDescription>
+              <CardTitle className="font-space">Investment Thesis Alignment</CardTitle>
+              <CardDescription className="font-ibm">
                 Analysis of how the technical stack and practices align with your investment criteria
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex flex-col items-center rounded-lg border bg-muted/20 p-6">
-                <h3 className="text-lg font-medium">Overall Thesis Alignment</h3>
+                <h3 className="text-lg font-medium font-space">Overall Thesis Alignment</h3>
                 <div className="my-4 h-32 w-32 rounded-full border-8 border-primary flex items-center justify-center">
                   <div className="text-center">
-                    <span className="text-3xl font-bold">{report.thesisAlignment.overall}%</span>
+                    <span className="text-3xl font-bold font-space">{report.thesisAlignment.overall}%</span>
                   </div>
                 </div>
                 <div className="mt-2 flex items-center gap-6">
                   <div className="flex items-center gap-1 text-sm">
                     <div className="h-3 w-3 rounded-full bg-green-500"></div>
-                    <span>{report.thesisAlignment.enablers.length} Enablers</span>
+                    <span className="font-ibm">{report.thesisAlignment.enablers.length} Enablers</span>
                   </div>
                   <div className="flex items-center gap-1 text-sm">
                     <div className="h-3 w-3 rounded-full bg-red-500"></div>
-                    <span>{report.thesisAlignment.blockers.length} Blockers</span>
+                    <span className="font-ibm">{report.thesisAlignment.blockers.length} Blockers</span>
                   </div>
                   <div className="flex items-center gap-1 text-sm">
                     <div className="h-3 w-3 rounded-full bg-gray-500"></div>
-                    <span>{report.thesisAlignment.neutral.length} Neutral</span>
+                    <span className="font-ibm">{report.thesisAlignment.neutral.length} Neutral</span>
                   </div>
                 </div>
               </div>
               
               <div className="space-y-4">
                 <div>
-                  <h3 className="mb-3 flex items-center text-lg font-medium text-green-600">
+                  <h3 className="mb-3 flex items-center text-lg font-medium text-green-600 font-space">
                     <ThumbsUp className="mr-2 h-5 w-5" />
                     Enablers
                   </h3>
                   
                   {report.thesisAlignment.enablers.map((item, index) => (
                     <div key={index} className="mb-4 rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-900 dark:bg-green-950">
-                      <h4 className="font-medium">{item.criterion}</h4>
-                      <p className="mt-1 text-sm">{item.explanation}</p>
+                      <h4 className="font-medium font-space">{item.criterion}</h4>
+                      <p className="mt-1 text-sm font-ibm">{item.explanation}</p>
                     </div>
                   ))}
                 </div>
                 
                 <div>
-                  <h3 className="mb-3 flex items-center text-lg font-medium text-red-600">
+                  <h3 className="mb-3 flex items-center text-lg font-medium text-red-600 font-space">
                     <ThumbsDown className="mr-2 h-5 w-5" />
                     Blockers
                   </h3>
                   
                   {report.thesisAlignment.blockers.map((item, index) => (
                     <div key={index} className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-900 dark:bg-red-950">
-                      <h4 className="font-medium">{item.criterion}</h4>
-                      <p className="mt-1 text-sm">{item.explanation}</p>
+                      <h4 className="font-medium font-space">{item.criterion}</h4>
+                      <p className="mt-1 text-sm font-ibm">{item.explanation}</p>
                     </div>
                   ))}
                 </div>
                 
                 <div>
-                  <h3 className="mb-3 flex items-center text-lg font-medium text-gray-600">
+                  <h3 className="mb-3 flex items-center text-lg font-medium text-gray-600 font-space">
                     <Info className="mr-2 h-5 w-5" />
                     Neutral Factors
                   </h3>
                   
                   {report.thesisAlignment.neutral.map((item, index) => (
                     <div key={index} className="mb-4 rounded-lg border p-4">
-                      <h4 className="font-medium">{item.criterion}</h4>
-                      <p className="mt-1 text-sm">{item.explanation}</p>
+                      <h4 className="font-medium font-space">{item.criterion}</h4>
+                      <p className="mt-1 text-sm font-ibm">{item.explanation}</p>
                     </div>
                   ))}
                 </div>

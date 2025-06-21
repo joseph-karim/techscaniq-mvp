@@ -1,18 +1,16 @@
 import { useState } from 'react'
 import { 
-  TechScanCard, 
   ReportHeader, 
-  ReportSection, 
-  TechScanAlert, 
   TechScanButton, 
-  ProgressBar, 
-  MetricCard,
-  TechScanChart
+  MetricCard
 } from '@/components/brand'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Separator } from '@/components/ui/separator'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { 
   AlertTriangle,
   ArrowRight,
@@ -22,12 +20,10 @@ import {
   Target,
   TrendingUp,
   Shield,
-  DollarSign,
   Cloud,
   ChevronRight,
   Brain,
   Briefcase,
-  Clock,
   Download,
   Database,
 } from 'lucide-react'
@@ -181,8 +177,8 @@ export function SalesIntelligenceReport({ report }: SalesIntelligenceReportProps
 
         <MetricCard
           label="Risk Level"
-          value={riskLevel}
-          format="text"
+          value={0}
+          format="number"
           trend={riskLevel === 'Low' ? 'up' : riskLevel === 'Medium' ? 'neutral' : 'down'}
           icon={<Shield className={cn(
             "h-5 w-5",
@@ -238,7 +234,7 @@ export function SalesIntelligenceReport({ report }: SalesIntelligenceReportProps
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6 space-y-4">
+              <div className="bg-brand-teal/5 dark:bg-brand-teal/10 border border-brand-teal/20 dark:border-brand-teal/30 rounded-lg p-6 space-y-4">
                 <div className="grid gap-3">
                   <div className="flex items-start gap-3">
                     <Badge variant="outline" className="mt-0.5 whitespace-nowrap">Value Proposition</Badge>
@@ -322,8 +318,8 @@ export function SalesIntelligenceReport({ report }: SalesIntelligenceReportProps
                   <PolarGrid />
                   <PolarAngleAxis dataKey="metric" />
                   <PolarRadiusAxis angle={90} domain={[0, 100]} />
-                  <Radar name={report.company} dataKey="score" stroke="#10b981" fill="#10b981" fillOpacity={0.6} />
-                  <Radar name="Industry Benchmark" dataKey="benchmark" stroke="#6366f1" fill="#6366f1" fillOpacity={0.3} />
+                  <Radar name={report.company} dataKey="score" stroke="#10B981" fill="#10B981" fillOpacity={0.6} />
+                  <Radar name="Industry Benchmark" dataKey="benchmark" stroke="#00C2B2" fill="#00C2B2" fillOpacity={0.3} />
                   <Tooltip />
                   <Legend />
                 </RadarChart>
@@ -496,8 +492,8 @@ export function SalesIntelligenceReport({ report }: SalesIntelligenceReportProps
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="current" fill="#6366f1" name="Current State" />
-                  <Bar dataKey="potential" fill="#10b981" name="With Adobe" />
+                  <Bar dataKey="current" fill="#00C2B2" name="Current State" />
+                  <Bar dataKey="potential" fill="#10B981" name="With Adobe" />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -560,7 +556,7 @@ export function SalesIntelligenceReport({ report }: SalesIntelligenceReportProps
                   <Card>
                     <CardHeader>
                       <div className="flex items-start gap-4">
-                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-600 text-white font-bold text-xl">
+                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-teal text-white font-bold text-xl">
                           2
                         </div>
                         <div className="flex-1">
@@ -637,8 +633,8 @@ export function SalesIntelligenceReport({ report }: SalesIntelligenceReportProps
 
         {/* Action Plan */}
         <TabsContent value="action" className="space-y-6">
-          <Alert className="bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800">
-            <CheckCircle className="h-4 w-4 text-green-600" />
+          <Alert className="bg-signal-green/5 border-signal-green/20 dark:bg-signal-green/10 dark:border-signal-green/30">
+            <CheckCircle className="h-4 w-4 text-signal-green" />
             <AlertDescription>
               <strong>Recommended Action:</strong> Schedule executive briefing with {report.company} leadership to present 
               Adobe Experience Cloud vision aligned with their strategic initiatives.
@@ -656,7 +652,7 @@ export function SalesIntelligenceReport({ report }: SalesIntelligenceReportProps
               <CardContent>
                 <ul className="space-y-3">
                   <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600 mt-0.5" />
+                    <CheckCircle className="h-4 w-4 text-signal-green mt-0.5" />
                     <div>
                       <p className="font-medium text-sm">Executive Briefing</p>
                       <p className="text-xs text-muted-foreground">
@@ -665,7 +661,7 @@ export function SalesIntelligenceReport({ report }: SalesIntelligenceReportProps
                     </div>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600 mt-0.5" />
+                    <CheckCircle className="h-4 w-4 text-signal-green mt-0.5" />
                     <div>
                       <p className="font-medium text-sm">Discovery Workshop</p>
                       <p className="text-xs text-muted-foreground">
@@ -674,7 +670,7 @@ export function SalesIntelligenceReport({ report }: SalesIntelligenceReportProps
                     </div>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600 mt-0.5" />
+                    <CheckCircle className="h-4 w-4 text-signal-green mt-0.5" />
                     <div>
                       <p className="font-medium text-sm">Proof of Value</p>
                       <p className="text-xs text-muted-foreground">
@@ -696,7 +692,7 @@ export function SalesIntelligenceReport({ report }: SalesIntelligenceReportProps
               <CardContent>
                 <ul className="space-y-3">
                   <li className="flex items-start gap-2">
-                    <Briefcase className="h-4 w-4 text-blue-600 mt-0.5" />
+                    <Briefcase className="h-4 w-4 text-brand-teal mt-0.5" />
                     <div>
                       <p className="font-medium text-sm">Chief Digital Officer</p>
                       <p className="text-xs text-muted-foreground">
@@ -705,7 +701,7 @@ export function SalesIntelligenceReport({ report }: SalesIntelligenceReportProps
                     </div>
                   </li>
                   <li className="flex items-start gap-2">
-                    <Briefcase className="h-4 w-4 text-blue-600 mt-0.5" />
+                    <Briefcase className="h-4 w-4 text-brand-teal mt-0.5" />
                     <div>
                       <p className="font-medium text-sm">CMO / Head of Marketing</p>
                       <p className="text-xs text-muted-foreground">
@@ -714,7 +710,7 @@ export function SalesIntelligenceReport({ report }: SalesIntelligenceReportProps
                     </div>
                   </li>
                   <li className="flex items-start gap-2">
-                    <Briefcase className="h-4 w-4 text-blue-600 mt-0.5" />
+                    <Briefcase className="h-4 w-4 text-brand-teal mt-0.5" />
                     <div>
                       <p className="font-medium text-sm">CTO / Head of IT</p>
                       <p className="text-xs text-muted-foreground">
@@ -745,7 +741,7 @@ export function SalesIntelligenceReport({ report }: SalesIntelligenceReportProps
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-white font-bold">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-teal text-white font-bold">
                     2
                   </div>
                   <div className="flex-1">
@@ -767,7 +763,7 @@ export function SalesIntelligenceReport({ report }: SalesIntelligenceReportProps
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-600 text-white font-bold">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-signal-green text-white font-bold">
                     4
                   </div>
                   <div className="flex-1">
@@ -808,7 +804,7 @@ export function SalesIntelligenceReport({ report }: SalesIntelligenceReportProps
                 <Card>
                   <CardContent className="p-4">
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-green-600">
+                      <div className="text-2xl font-bold text-signal-green">
                         {report.metadata?.evidenceSummary?.highQualityCount || 
                          report.evidence?.filter(e => (e.qualityScore?.overall || 0) > 0.85).length || 0}
                       </div>
@@ -819,7 +815,7 @@ export function SalesIntelligenceReport({ report }: SalesIntelligenceReportProps
                 <Card>
                   <CardContent className="p-4">
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-blue-600">
+                      <div className="text-2xl font-bold text-brand-teal">
                         {Math.round((report.metadata?.evidenceSummary?.averageQuality || 0.78) * 100)}%
                       </div>
                       <p className="text-xs text-muted-foreground">Avg Quality</p>

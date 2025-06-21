@@ -22,9 +22,9 @@ export function ProgressBar({
   
   const colorClasses = {
     teal: 'bg-brand-teal',
-    green: 'bg-green-400',
-    yellow: 'bg-yellow-400',
-    red: 'bg-red-400',
+    green: 'bg-signal-green',
+    yellow: 'bg-caution-amber',
+    red: 'bg-risk-red',
   };
   
   const sizeClasses = {

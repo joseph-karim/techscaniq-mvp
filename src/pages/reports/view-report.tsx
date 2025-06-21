@@ -173,9 +173,9 @@ const ExecutiveScoreCard = ({
 
                 {/* Investment recommendation */}
                 {recommendation && (
-                  <div className="bg-white rounded-lg p-4 border border-blue-200">
+                  <div className="bg-white rounded-lg p-4 border border-brand-teal/20">
                     <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                      <Target className="h-4 w-4 text-blue-600" />
+                      <Target className="h-4 w-4 text-brand-teal" />
                       Investment Implication
                     </h4>
                     <p className="text-sm text-gray-700 leading-relaxed">{recommendation}</p>
@@ -202,18 +202,18 @@ const ExecutiveInsightsSidebar = ({
   return (
     <div className="space-y-6">
       {/* Executive Summary Card */}
-      <Card className="bg-gradient-to-br from-blue-50 to-indigo-100 border-blue-200 shadow-lg">
+      <Card className="bg-gradient-to-br from-brand-teal/5 to-brand-teal/10 border-brand-teal/20 shadow-lg">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
-            <Star className="h-5 w-5 text-blue-600" />
+            <Star className="h-5 w-5 text-brand-teal" />
             Executive Highlights
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {reportData?.investment_rationale && (
-            <div className="p-3 bg-white rounded-lg border border-blue-200 shadow-sm">
+            <div className="p-3 bg-white rounded-lg border border-brand-teal/20 shadow-sm">
               <div className="flex items-center gap-2 mb-2">
-                <TrendingUp className="h-4 w-4 text-blue-600" />
+                <TrendingUp className="h-4 w-4 text-brand-teal" />
                 <span className="text-sm font-semibold text-gray-900">Investment Thesis</span>
               </div>
               <p className="text-xs text-gray-700 leading-relaxed">
@@ -222,9 +222,9 @@ const ExecutiveInsightsSidebar = ({
             </div>
           )}
           {reportData?.executive_summary && (
-            <div className="p-3 bg-white rounded-lg border border-blue-200 shadow-sm">
+            <div className="p-3 bg-white rounded-lg border border-brand-teal/20 shadow-sm">
               <div className="flex items-center gap-2 mb-2">
-                <Info className="h-4 w-4 text-blue-600" />
+                <Info className="h-4 w-4 text-brand-teal" />
                 <span className="text-sm font-semibold text-gray-900">Executive Summary</span>
               </div>
               <p className="text-xs text-gray-700 leading-relaxed">
@@ -248,7 +248,7 @@ const ExecutiveInsightsSidebar = ({
             <Button 
               variant="ghost" 
               size="sm" 
-              className="w-full justify-start hover:bg-blue-50 text-left"
+              className="w-full justify-start hover:bg-brand-teal/5 text-left"
               onClick={() => onNavigate('investment-thesis-framework')}
             >
               <ArrowRight className="h-3 w-3 mr-2" />
@@ -257,7 +257,7 @@ const ExecutiveInsightsSidebar = ({
             <Button 
               variant="ghost" 
               size="sm" 
-              className="w-full justify-start hover:bg-blue-50 text-left"
+              className="w-full justify-start hover:bg-brand-teal/5 text-left"
               onClick={() => onNavigate('technical-health-score')}
             >
               <ArrowRight className="h-3 w-3 mr-2" />
@@ -266,7 +266,7 @@ const ExecutiveInsightsSidebar = ({
             <Button 
               variant="ghost" 
               size="sm" 
-              className="w-full justify-start hover:bg-blue-50 text-left"
+              className="w-full justify-start hover:bg-brand-teal/5 text-left"
               onClick={() => onNavigate('investment-recommendation')}
             >
               <ArrowRight className="h-3 w-3 mr-2" />
@@ -275,7 +275,7 @@ const ExecutiveInsightsSidebar = ({
             <Button 
               variant="ghost" 
               size="sm" 
-              className="w-full justify-start hover:bg-blue-50 text-left"
+              className="w-full justify-start hover:bg-brand-teal/5 text-left"
               onClick={() => onNavigate('required-investment')}
             >
               <ArrowRight className="h-3 w-3 mr-2" />

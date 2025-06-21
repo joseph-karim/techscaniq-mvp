@@ -257,7 +257,7 @@ export function ExecutiveReportNavigation({
             )}>
               {section.icon}
             </div>
-            <span>{section.title}</span>
+            <span className="font-ibm">{section.title}</span>
           </div>
         </button>
         
@@ -276,7 +276,7 @@ export function ExecutiveReportNavigation({
       <div key={category} className="mb-4">
         <button
           onClick={() => toggleCategory(category)}
-          className="w-full flex items-center justify-between px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+          className="w-full flex items-center justify-between px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors font-space"
         >
           <span>{categories[category].title}</span>
           {expandedCategories[category] ? (
@@ -299,10 +299,10 @@ export function ExecutiveReportNavigation({
     <nav className={cn("w-80 bg-white border-r border-gray-200 dark:bg-gray-900 dark:border-gray-700", className)}>
       <div className="p-6">
         <div className="mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 font-space">
             Executive Assessment Report
           </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 font-ibm">
             Investor-aligned comprehensive analysis
           </p>
         </div>

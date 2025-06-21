@@ -10,7 +10,7 @@ export function useAnimatedNumber(
   useEffect(() => {
     const stepTime = 16; // ~60fps
     const totalSteps = duration / stepTime;
-    const increment = (endValue - startValue) / totalSteps;
+    // const increment = (endValue - startValue) / totalSteps;
     let currentStep = 0;
 
     const timer = setInterval(() => {

@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { AlertCircle, CheckCircle2, Clock, FileText, Hourglass, Eye } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { TechScanButton } from '@/components/brand'
 import { formatDate } from '@/lib/utils'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
@@ -63,16 +63,16 @@ export function RecentScansTable({ showAll = false }: RecentScansTableProps) {
       <table className="w-full">
         <thead>
           <tr className="bg-muted/50">
-            <th className="whitespace-nowrap px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+            <th className="whitespace-nowrap px-4 py-3 text-left text-sm font-space font-medium text-muted-foreground">
               Company
             </th>
-            <th className="whitespace-nowrap px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+            <th className="whitespace-nowrap px-4 py-3 text-left text-sm font-space font-medium text-muted-foreground">
               Status
             </th>
-            <th className="whitespace-nowrap px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+            <th className="whitespace-nowrap px-4 py-3 text-left text-sm font-space font-medium text-muted-foreground">
               Date
             </th>
-            <th className="whitespace-nowrap px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+            <th className="whitespace-nowrap px-4 py-3 text-left text-sm font-space font-medium text-muted-foreground">
               Actions
             </th>
           </tr>
@@ -81,7 +81,7 @@ export function RecentScansTable({ showAll = false }: RecentScansTableProps) {
           {scans.map((scan) => (
             <tr key={scan.id} className="border-t">
               <td className="px-4 py-3">
-                <div className="font-medium">{scan.company_name}</div>
+                <div className="font-ibm font-medium">{scan.company_name}</div>
               </td>
               <td className="px-4 py-3">
                 <ScanStatusBadge status={scan.status as Scan['status']} />
@@ -90,8 +90,8 @@ export function RecentScansTable({ showAll = false }: RecentScansTableProps) {
                 {formatDate(scan.created_at)}
               </td>
               <td className="px-4 py-3">
-                <Button 
-                  variant="outline" 
+                <TechScanButton 
+                  variant="secondary" 
                   size="sm" 
                   asChild
                 >
@@ -111,7 +111,7 @@ export function RecentScansTable({ showAll = false }: RecentScansTableProps) {
                       {scan.status === 'error' ? 'Scan Error' : 'Report Not Ready'}
                     </span>
                   )}
-                </Button>
+                </TechScanButton>
               </td>
             </tr>
           ))}
@@ -136,28 +136,28 @@ export function ScanStatusBadge({ status }: ScanStatusBadgeProps) {
       )
     case 'processing':
       return (
-        <Badge variant="outline" className="gap-1 text-blue-500">
+        <Badge variant="outline" className="gap-1 text-brand-teal">
           <Hourglass className="h-3 w-3" />
           Processing
         </Badge>
       )
     case 'awaiting_review':
       return (
-        <Badge variant="outline" className="gap-1 text-yellow-500">
+        <Badge variant="outline" className="gap-1 text-caution-amber">
           <AlertCircle className="h-3 w-3" />
           Awaiting Review
         </Badge>
       )
     case 'complete':
       return (
-        <Badge variant="outline" className="gap-1 text-green-500">
+        <Badge variant="outline" className="gap-1 text-signal-green">
           <CheckCircle2 className="h-3 w-3" />
           Complete
         </Badge>
       )
     case 'error':
       return (
-        <Badge variant="outline" className="gap-1 text-red-500">
+        <Badge variant="outline" className="gap-1 text-risk-red">
           <AlertCircle className="h-3 w-3" />
           Error
         </Badge>

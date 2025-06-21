@@ -42,7 +42,7 @@ export function TechScanChart({
   return (
     <div className={cn('w-full', className)}>
       <ResponsiveContainer width="100%" height={height}>
-        {type === 'line' && (
+        {type === 'line' ? (
           <LineChart {...chartProps}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
             <XAxis dataKey={xAxisKey} {...commonAxisProps} />
@@ -72,9 +72,7 @@ export function TechScanChart({
               />
             )}
           </LineChart>
-        )}
-
-        {type === 'bar' && (
+        ) : type === 'bar' ? (
           <BarChart {...chartProps}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
             <XAxis dataKey={xAxisKey} {...commonAxisProps} />
@@ -98,9 +96,7 @@ export function TechScanChart({
               />
             )}
           </BarChart>
-        )}
-
-        {type === 'pie' && (
+        ) : (
           <PieChart>
             <Pie
               data={data}

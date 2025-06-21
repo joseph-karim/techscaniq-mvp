@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, PlusCircle } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { TechScanButton } from '@/components/brand'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { TechHealthScoreGauge } from '@/components/dashboard/tech-health-score-gauge'
@@ -23,8 +23,8 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
         <div>
-          <h1 className="text-3xl font-heading font-medium tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-space font-medium tracking-tight">Dashboard</h1>
+          <p className="text-muted-foreground font-ibm">
             {isAdmin 
               ? 'Welcome to the admin dashboard - review and manage technical due diligence scans' 
               : 'Welcome to TechScan IQ - AI-powered technical due diligence for investors'
@@ -33,17 +33,17 @@ export default function DashboardPage() {
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
           {isAdmin ? (
-            <Button className="bg-brand-digital-teal hover:bg-brand-digital-teal/90 font-medium" asChild>
+            <TechScanButton variant="primary" asChild>
               <Link to="/advisor/queue">
                 Review Pending Scans
               </Link>
-            </Button>
+            </TechScanButton>
           ) : (
-            <Button className="bg-brand-digital-teal hover:bg-brand-digital-teal/90 font-medium" asChild>
+            <TechScanButton variant="primary" icon={<PlusCircle className="h-4 w-4" />} asChild>
               <Link to="/scans/request">
-                <PlusCircle className="mr-2 h-4 w-4" /> Request Scan
+                Request Scan
               </Link>
-            </Button>
+            </TechScanButton>
           )}
         </div>
       </div>
@@ -51,8 +51,8 @@ export default function DashboardPage() {
       {!hasScans ? (
         <Card className="border-dashed">
           <CardHeader>
-            <CardTitle>Get Started with TechScan IQ</CardTitle>
-            <CardDescription>
+            <CardTitle className="font-space">Get Started with TechScan IQ</CardTitle>
+            <CardDescription className="font-ibm">
               Request your first technical due diligence scan to see insights here
             </CardDescription>
           </CardHeader>
@@ -63,15 +63,15 @@ export default function DashboardPage() {
                 alt="Empty dashboard" 
                 className="mb-4 h-40 w-40 opacity-20" 
               />
-              <h3 className="mb-2 text-xl font-semibold">No scans yet</h3>
-              <p className="mb-4 text-muted-foreground">
+              <h3 className="mb-2 text-xl font-semibold font-space">No scans yet</h3>
+              <p className="mb-4 text-muted-foreground font-ibm">
                 Start your first technical due diligence scan to get insights on your target company's tech stack, architecture, security, and code quality.
               </p>
-              <Button className="bg-electric-teal hover:bg-electric-teal/90" asChild>
+              <TechScanButton variant="primary" icon={<PlusCircle className="h-4 w-4" />} asChild>
                 <Link to="/scans/request">
-                  <PlusCircle className="mr-2 h-4 w-4" /> Request Your First Scan
+                  Request Your First Scan
                 </Link>
-              </Button>
+              </TechScanButton>
             </div>
           </CardContent>
         </Card>
@@ -83,54 +83,54 @@ export default function DashboardPage() {
           className="space-y-4"
         >
           <TabsList className="bg-slate-100 dark:bg-slate-800/50">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="scans">Recent Scans</TabsTrigger>
-            <TabsTrigger value="findings">Key Findings</TabsTrigger>
-            {isAdmin && <TabsTrigger value="queue">Review Queue</TabsTrigger>}
+            <TabsTrigger value="overview" className="font-space">Overview</TabsTrigger>
+            <TabsTrigger value="scans" className="font-space">Recent Scans</TabsTrigger>
+            <TabsTrigger value="findings" className="font-space">Key Findings</TabsTrigger>
+            {isAdmin && <TabsTrigger value="queue" className="font-space">Review Queue</TabsTrigger>}
           </TabsList>
           
           <TabsContent value="overview" className="space-y-4">
             {isAdmin ? (
-              <Card className="bg-electric-teal/5 border-electric-teal">
+              <Card className="bg-brand-teal/5 border-brand-teal">
                 <CardHeader className="pb-2">
-                  <CardTitle>Admin Dashboard Overview</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="font-space">Admin Dashboard Overview</CardTitle>
+                  <CardDescription className="font-ibm">
                     Monitor the status of all technical due diligence scans
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="grid gap-4 md:grid-cols-3">
                     <div className="flex flex-col gap-1 rounded-lg border p-4">
-                      <div className="text-sm text-muted-foreground">Scans Awaiting Review</div>
+                      <div className="text-sm text-muted-foreground font-ibm">Scans Awaiting Review</div>
                       <div className="flex items-center gap-2">
-                        <div className="text-3xl font-bold">3</div>
-                        <Badge className="bg-caution-amber">Action Needed</Badge>
+                        <div className="text-3xl font-bold font-space">3</div>
+                        <Badge className="bg-caution-amber font-space">Action Needed</Badge>
                       </div>
-                      <Button size="sm" variant="link" className="mt-1 justify-start p-0" asChild>
+                      <TechScanButton size="sm" variant="ghost" className="mt-1 justify-start p-0" icon={<ArrowRight className="h-3 w-3" />} asChild>
                         <Link to="/advisor/queue">
-                          View Queue <ArrowRight className="ml-1 h-3 w-3" />
+                          View Queue
                         </Link>
-                      </Button>
+                      </TechScanButton>
                     </div>
                     
                     <div className="flex flex-col gap-1 rounded-lg border p-4">
-                      <div className="text-sm text-muted-foreground">Scans Completed Today</div>
-                      <div className="text-3xl font-bold">5</div>
-                      <Button size="sm" variant="link" className="mt-1 justify-start p-0" asChild>
+                      <div className="text-sm text-muted-foreground font-ibm">Scans Completed Today</div>
+                      <div className="text-3xl font-bold font-space">5</div>
+                      <TechScanButton size="sm" variant="ghost" className="mt-1 justify-start p-0" icon={<ArrowRight className="h-3 w-3" />} asChild>
                         <Link to="/advisor/queue?status=complete">
-                          View Completed <ArrowRight className="ml-1 h-3 w-3" />
+                          View Completed
                         </Link>
-                      </Button>
+                      </TechScanButton>
                     </div>
                     
                     <div className="flex flex-col gap-1 rounded-lg border p-4">
-                      <div className="text-sm text-muted-foreground">Average Review Time</div>
-                      <div className="text-3xl font-bold">32m</div>
-                      <Button size="sm" variant="link" className="mt-1 justify-start p-0" asChild>
+                      <div className="text-sm text-muted-foreground font-ibm">Average Review Time</div>
+                      <div className="text-3xl font-bold font-space">32m</div>
+                      <TechScanButton size="sm" variant="ghost" className="mt-1 justify-start p-0" icon={<ArrowRight className="h-3 w-3" />} asChild>
                         <Link to="/analytics">
-                          View Analytics <ArrowRight className="ml-1 h-3 w-3" />
+                          View Analytics
                         </Link>
-                      </Button>
+                      </TechScanButton>
                     </div>
                   </div>
                 </CardContent>
@@ -139,12 +139,12 @@ export default function DashboardPage() {
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 <Card className="col-span-1 border-slate-200 shadow-sm dark:border-slate-800">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Tech Health Score</CardTitle>
-                                          <Button variant="link" size="sm" className="text-electric-teal" asChild>
+                    <CardTitle className="text-sm font-medium font-space">Tech Health Score</CardTitle>
+                      <TechScanButton variant="ghost" size="sm" className="text-brand-teal" icon={<ArrowRight className="h-4 w-4" />} asChild>
                         <Link to="/reports/scan-1">
-                          View Latest <ArrowRight className="ml-1 h-4 w-4" />
+                          View Latest
                         </Link>
-                      </Button>
+                      </TechScanButton>
                   </CardHeader>
                   <CardContent>
                     <TechHealthScoreGauge score={7.8} grade="B" />
@@ -153,12 +153,12 @@ export default function DashboardPage() {
                 
                 <Card className="col-span-1 border-slate-200 shadow-sm dark:border-slate-800 md:col-span-2">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Risk Summary</CardTitle>
-                    <Button variant="link" size="sm" className="text-electric-teal" asChild>
+                    <CardTitle className="text-sm font-medium font-space">Risk Summary</CardTitle>
+                    <TechScanButton variant="ghost" size="sm" className="text-brand-teal" icon={<ArrowRight className="h-4 w-4" />} asChild>
                       <Link to="/reports/scan-1">
-                        View Details <ArrowRight className="ml-1 h-4 w-4" />
+                        View Details
                       </Link>
-                    </Button>
+                    </TechScanButton>
                   </CardHeader>
                   <CardContent>
                     <RiskSummaryCards />
@@ -170,8 +170,8 @@ export default function DashboardPage() {
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               <Card className="col-span-1 border-slate-200 shadow-sm dark:border-slate-800 md:col-span-2">
                 <CardHeader>
-                  <CardTitle>Recent Scans</CardTitle>
-                  <CardDescription>Your last 5 technical due diligence scans</CardDescription>
+                  <CardTitle className="font-space">Recent Scans</CardTitle>
+                  <CardDescription className="font-ibm">Your last 5 technical due diligence scans</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <RecentScansTable />
@@ -180,8 +180,8 @@ export default function DashboardPage() {
               
               <Card className="col-span-1 border-slate-200 shadow-sm dark:border-slate-800">
                 <CardHeader>
-                  <CardTitle>Key Findings</CardTitle>
-                  <CardDescription>Critical insights from recent scans</CardDescription>
+                  <CardTitle className="font-space">Key Findings</CardTitle>
+                  <CardDescription className="font-ibm">Critical insights from recent scans</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <KeyFindings />
@@ -193,8 +193,8 @@ export default function DashboardPage() {
           <TabsContent value="scans">
             <Card className="border-slate-200 shadow-sm dark:border-slate-800">
               <CardHeader>
-                <CardTitle>All Scans</CardTitle>
-                <CardDescription>A complete history of your technical due diligence scans</CardDescription>
+                <CardTitle className="font-space">All Scans</CardTitle>
+                <CardDescription className="font-ibm">A complete history of your technical due diligence scans</CardDescription>
               </CardHeader>
               <CardContent>
                 <RecentScansTable showAll />
@@ -205,8 +205,8 @@ export default function DashboardPage() {
           <TabsContent value="findings">
             <Card className="border-slate-200 shadow-sm dark:border-slate-800">
               <CardHeader>
-                <CardTitle>All Findings</CardTitle>
-                <CardDescription>Comprehensive list of findings across all scans</CardDescription>
+                <CardTitle className="font-space">All Findings</CardTitle>
+                <CardDescription className="font-ibm">Comprehensive list of findings across all scans</CardDescription>
               </CardHeader>
               <CardContent>
                 <KeyFindings showAll />
@@ -218,34 +218,34 @@ export default function DashboardPage() {
             <TabsContent value="queue">
               <Card className="border-slate-200 shadow-sm dark:border-slate-800">
                 <CardHeader>
-                  <CardTitle>Pending Reviews</CardTitle>
-                  <CardDescription>Scans awaiting your review and approval</CardDescription>
+                  <CardTitle className="font-space">Pending Reviews</CardTitle>
+                  <CardDescription className="font-ibm">Scans awaiting your review and approval</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="mb-6 space-y-4">
                     {[1, 2, 3].map((i) => (
                       <div key={i} className="flex items-center justify-between rounded-lg border p-4 transition-colors hover:bg-muted/40">
                         <div>
-                          <h3 className="font-medium">{['DevSecOps Solutions', 'FinTech Express', 'DataViz Pro'][i-1]}</h3>
-                          <p className="text-sm text-muted-foreground">
+                          <h3 className="font-medium font-space">{['DevSecOps Solutions', 'FinTech Express', 'DataViz Pro'][i-1]}</h3>
+                          <p className="text-sm text-muted-foreground font-ibm">
                             Requested {['4 hours', '2 days', '3 days'][i-1]} ago by {['John Investor', 'Sarah Wilson', 'Michael Chen'][i-1]}
                           </p>
                         </div>
-                        <Button className="bg-electric-teal hover:bg-electric-teal/90" size="sm" asChild>
+                        <TechScanButton size="sm" variant="primary" asChild>
                           <Link to={`/advisor/review/scan-${i+1}`}>
                             Review Now
                           </Link>
-                        </Button>
+                        </TechScanButton>
                       </div>
                     ))}
                   </div>
                   
                   <div className="flex justify-center">
-                    <Button variant="outline" asChild>
+                    <TechScanButton variant="secondary" asChild>
                       <Link to="/advisor/queue">
                         View All Pending Reviews
                       </Link>
-                    </Button>
+                    </TechScanButton>
                   </div>
                 </CardContent>
               </Card>

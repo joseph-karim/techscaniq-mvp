@@ -113,9 +113,9 @@ export default function AdminDashboardPage() {
   
   const getPriorityColor = (priority?: Scan['status'] | string) => {
     switch (priority) {
-      case 'urgent': return 'bg-red-50 text-red-600 border-red-200'
+      case 'urgent': return 'bg-risk-red/5 text-risk-red border-risk-red/20'
       case 'high': return 'bg-orange-50 text-orange-600 border-orange-200'
-      case 'medium': return 'bg-blue-50 text-blue-600 border-blue-200'
+      case 'medium': return 'bg-brand-teal/5 text-brand-teal border-brand-teal/20'
       default: return 'bg-gray-50 text-gray-600 border-gray-200'
     }
   }
@@ -153,12 +153,12 @@ export default function AdminDashboardPage() {
         <Card>
           <CardContent className="p-8">
             <div className="flex items-center space-x-2">
-              <Clock className="h-10 w-10 rounded-lg bg-blue-100 p-2 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" />
+              <Clock className="h-10 w-10 rounded-lg bg-brand-teal/10 p-2 text-brand-teal dark:bg-brand-teal/20 dark:text-brand-teal" />
               <div>
                 <p className="text-sm text-muted-foreground">Pending Requests</p>
                 <div className="flex items-baseline space-x-2">
                   <h2 className="text-3xl font-bold">{scanStats.pendingRequests}</h2>
-                  <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-blue-50 text-blue-600">
+                  <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-brand-teal/5 text-brand-teal">
                     New
                   </span>
                 </div>
@@ -187,12 +187,12 @@ export default function AdminDashboardPage() {
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center space-x-2">
-              <Eye className="h-10 w-10 rounded-lg bg-yellow-100 p-2 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400" />
+              <Eye className="h-10 w-10 rounded-lg bg-caution-amber/10 p-2 text-caution-amber dark:bg-caution-amber/20 dark:text-caution-amber" />
               <div>
                 <p className="text-sm text-muted-foreground">Awaiting Review</p>
                 <div className="flex items-baseline space-x-2">
                   <h2 className="text-3xl font-bold">{scanStats.awaitingReview}</h2>
-                  <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-yellow-50 text-yellow-600">
+                  <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-caution-amber/5 text-caution-amber">
                     Ready
                   </span>
                 </div>
@@ -204,12 +204,12 @@ export default function AdminDashboardPage() {
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center space-x-2">
-              <CheckCircle2 className="h-10 w-10 rounded-lg bg-green-100 p-2 text-green-600 dark:bg-green-900/30 dark:text-green-400" />
+              <CheckCircle2 className="h-10 w-10 rounded-lg bg-signal-green/10 p-2 text-signal-green dark:bg-signal-green/20 dark:text-signal-green" />
               <div>
                 <p className="text-sm text-muted-foreground">Completed Today</p>
                 <div className="flex items-baseline space-x-2">
                   <h2 className="text-3xl font-bold">{scanStats.completedToday}</h2>
-                  <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-green-50 text-green-600">
+                  <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-signal-green/5 text-signal-green">
                     +3
                   </span>
                 </div>
@@ -350,40 +350,40 @@ export default function AdminDashboardPage() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                      <div className="h-2 w-2 rounded-full bg-signal-green"></div>
                       <span className="text-sm font-medium font-sans">Claude 4 Opus</span>
                     </div>
-                    <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-green-50 text-green-600">
+                    <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-signal-green/5 text-signal-green">
                       Active
                     </span>
                   </div>
                   
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                      <div className="h-2 w-2 rounded-full bg-signal-green"></div>
                       <span className="text-sm font-medium font-sans">GPT-4 Turbo</span>
                     </div>
-                    <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-green-50 text-green-600">
+                    <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-signal-green/5 text-signal-green">
                       Active
                     </span>
                   </div>
                   
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                      <div className="h-2 w-2 rounded-full bg-signal-green"></div>
                       <span className="text-sm font-medium font-sans">Gemini-Pro</span>
                     </div>
-                    <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-green-50 text-green-600">
+                    <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-signal-green/5 text-signal-green">
                       Active
                     </span>
                   </div>
                   
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="h-2 w-2 rounded-full bg-yellow-500"></div>
+                      <div className="h-2 w-2 rounded-full bg-caution-amber"></div>
                       <span className="text-sm font-medium font-sans">Data Collection API</span>
                     </div>
-                    <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-yellow-50 text-yellow-600">
+                    <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-caution-amber/5 text-caution-amber">
                       Degraded
                     </span>
                   </div>
@@ -400,10 +400,10 @@ export default function AdminDashboardPage() {
 
           {/* Recent Errors Section */}
           {recentErrors.length > 0 && (
-            <Card className="border-red-200 bg-red-50/50">
+            <Card className="border-risk-red/20 bg-risk-red/5">
               <CardHeader>
                 <div className="flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5 text-red-600" />
+                  <AlertTriangle className="h-5 w-5 text-risk-red" />
                   <CardTitle>Recent Collection Failures</CardTitle>
                 </div>
                 <CardDescription>
@@ -426,7 +426,7 @@ export default function AdminDashboardPage() {
                             {error.collection_type} collection • {formatDate(error.created_at)}
                           </p>
                           {error.metadata?.error && (
-                            <p className="text-xs text-red-600 font-mono mt-1">
+                            <p className="text-xs text-risk-red font-mono mt-1">
                               {error.metadata.error}
                             </p>
                           )}
@@ -600,19 +600,19 @@ export default function AdminDashboardPage() {
                   </p>
                   <div className="grid gap-3 mb-4">
                     <div className="flex items-center gap-2 text-sm">
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      <CheckCircle2 className="h-4 w-4 text-signal-green" />
                       <span>Evidence Collection Pipeline - View all 9 collection tools</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      <CheckCircle2 className="h-4 w-4 text-signal-green" />
                       <span>AI Analysis Configuration - Claude 4 Opus integration</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      <CheckCircle2 className="h-4 w-4 text-signal-green" />
                       <span>Prompt Management - Edit and test AI prompts</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      <CheckCircle2 className="h-4 w-4 text-signal-green" />
                       <span>Edge Function Monitoring - Real-time performance metrics</span>
                     </div>
                   </div>

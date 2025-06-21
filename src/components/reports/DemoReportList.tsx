@@ -100,20 +100,20 @@ export function DemoReportList({ showDemoReports, userRole }: DemoReportListProp
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <Badge variant="outline" className="bg-orange-100 text-orange-800 border-orange-300">
+                    <Badge variant="outline" className="bg-orange-100 text-orange-800 border-orange-300 font-space">
                       <Award className="h-3 w-3 mr-1" />
                       Demo
                     </Badge>
-                    <Badge variant="secondary" className="text-xs">
+                    <Badge variant="secondary" className="text-xs font-space">
                       {report.report_type.replace(/-/g, ' ')}
                     </Badge>
                   </div>
-                  <h3 className="font-semibold text-sm truncate">{report.title}</h3>
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <h3 className="font-semibold text-sm truncate font-space">{report.title}</h3>
+                  <p className="text-sm text-muted-foreground mt-1 font-ibm">
                     {report.company_name} • {formatDate(report.created_at)}
                   </p>
                   {report.description && (
-                    <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
+                    <p className="text-xs text-muted-foreground mt-2 line-clamp-2 font-ibm">
                       {report.description}
                     </p>
                   )}

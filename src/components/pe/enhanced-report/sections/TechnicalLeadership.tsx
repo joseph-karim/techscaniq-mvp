@@ -127,11 +127,11 @@ export function TechnicalLeadership({ data }: TechnicalLeadershipProps) {
                 <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <CardTitle className="text-lg flex items-center gap-2">
+                <CardTitle className="text-lg flex items-center gap-2 font-space">
                   {member.name}
-                  {isFounder && <Badge className="bg-purple-100 text-purple-800">Founder</Badge>}
+                  {isFounder && <Badge className="bg-purple-100 text-purple-800 font-space">Founder</Badge>}
                 </CardTitle>
-                <CardDescription className="flex items-center gap-2">
+                <CardDescription className="flex items-center gap-2 font-ibm">
                   {member.role} • {member.tenure}
                   {getRiskIcon(member.riskLevel)}
                 </CardDescription>
@@ -140,10 +140,10 @@ export function TechnicalLeadership({ data }: TechnicalLeadershipProps) {
             
             <div className="flex items-center gap-3">
               <div className="text-right">
-                <div className="text-sm font-medium">
+                <div className="text-sm font-medium font-space">
                   Confidence: {member.confidence}%
                 </div>
-                <div className={cn("text-sm", getRiskColor(member.riskLevel))}>
+                <div className={cn("text-sm font-ibm", getRiskColor(member.riskLevel))}>
                   Risk: {member.riskLevel}
                 </div>
               </div>
@@ -157,11 +157,11 @@ export function TechnicalLeadership({ data }: TechnicalLeadershipProps) {
         
         {isExpanded && (
           <CardContent className="space-y-4">
-            <p className="text-sm leading-relaxed">{member.background}</p>
+            <p className="text-sm leading-relaxed font-ibm">{member.background}</p>
             
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <h4 className="font-medium mb-2 flex items-center gap-2">
+                <h4 className="font-medium mb-2 flex items-center gap-2 font-space">
                   <Star className="h-4 w-4" />
                   Key Strengths
                 </h4>
@@ -169,31 +169,31 @@ export function TechnicalLeadership({ data }: TechnicalLeadershipProps) {
                   {member.strengths.map((strength, idx) => (
                     <li key={idx} className="flex items-start gap-2 text-sm">
                       <span className="mt-1 h-1.5 w-1.5 rounded-full bg-green-600" />
-                      <span>{strength}</span>
+                      <span className="font-ibm">{strength}</span>
                     </li>
                   ))}
                 </ul>
               </div>
               
               <div>
-                <h4 className="font-medium mb-2 flex items-center gap-2">
+                <h4 className="font-medium mb-2 flex items-center gap-2 font-space">
                   <Briefcase className="h-4 w-4" />
                   Experience
                 </h4>
                 <div className="space-y-1 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Years:</span>
-                    <span>{member.experience.years}+</span>
+                    <span className="text-muted-foreground font-ibm">Years:</span>
+                    <span className="font-space">{member.experience.years}+</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Companies:</span>
-                    <span>{member.experience.companies.length}</span>
+                    <span className="text-muted-foreground font-ibm">Companies:</span>
+                    <span className="font-space">{member.experience.companies.length}</span>
                   </div>
                   <div>
-                    <span className="text-muted-foreground">Domains:</span>
+                    <span className="text-muted-foreground font-ibm">Domains:</span>
                     <div className="flex flex-wrap gap-1 mt-1">
                       {member.experience.domains.map((domain, idx) => (
-                        <Badge key={idx} variant="outline" className="text-xs">
+                        <Badge key={idx} variant="outline" className="text-xs font-space">
                           {domain}
                         </Badge>
                       ))}
@@ -204,11 +204,11 @@ export function TechnicalLeadership({ data }: TechnicalLeadershipProps) {
             </div>
             
             <div>
-              <h4 className="font-medium mb-1 flex items-center gap-2">
+              <h4 className="font-medium mb-1 flex items-center gap-2 font-space">
                 <GraduationCap className="h-4 w-4" />
                 Education
               </h4>
-              <p className="text-sm text-muted-foreground">{member.education}</p>
+              <p className="text-sm text-muted-foreground font-ibm">{member.education}</p>
             </div>
           </CardContent>
         )}
@@ -219,8 +219,8 @@ export function TechnicalLeadership({ data }: TechnicalLeadershipProps) {
   return (
     <div id="technical-leadership" className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold">Founding Team & Technical Leadership</h2>
-        <p className="text-muted-foreground">
+        <h2 className="text-2xl font-bold font-space">Founding Team & Technical Leadership</h2>
+        <p className="text-muted-foreground font-ibm">
           Assessment of {data.companyName}'s leadership capabilities and team composition
         </p>
       </div>
@@ -228,33 +228,33 @@ export function TechnicalLeadership({ data }: TechnicalLeadershipProps) {
       {/* Overall Assessment */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 font-space">
             <Users className="h-5 w-5" />
             Leadership Overview
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="font-ibm">
             High-level assessment of technical leadership strength
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3 mb-4">
             <div className="text-center">
-              <div className={cn("text-3xl font-bold", getScoreColor(data.leadershipScore))}>
+              <div className={cn("text-3xl font-bold font-space", getScoreColor(data.leadershipScore))}>
                 {data.leadershipScore}%
               </div>
-              <p className="text-sm text-muted-foreground">Leadership Score</p>
+              <p className="text-sm text-muted-foreground font-ibm">Leadership Score</p>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold">{data.teamSize}</div>
-              <p className="text-sm text-muted-foreground">Team Size</p>
+              <div className="text-3xl font-bold font-space">{data.teamSize}</div>
+              <p className="text-sm text-muted-foreground font-ibm">Team Size</p>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold">{data.founders.length}</div>
-              <p className="text-sm text-muted-foreground">Founders</p>
+              <div className="text-3xl font-bold font-space">{data.founders.length}</div>
+              <p className="text-sm text-muted-foreground font-ibm">Founders</p>
             </div>
           </div>
           
-          <p className="text-sm leading-relaxed">{data.overallAssessment}</p>
+          <p className="text-sm leading-relaxed font-ibm">{data.overallAssessment}</p>
         </CardContent>
       </Card>
 
@@ -266,8 +266,8 @@ export function TechnicalLeadership({ data }: TechnicalLeadershipProps) {
         >
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Founding Team</CardTitle>
-              <CardDescription>
+              <CardTitle className="font-space">Founding Team</CardTitle>
+              <CardDescription className="font-ibm">
                 Analysis of founder backgrounds and technical expertise
               </CardDescription>
             </div>
@@ -292,8 +292,8 @@ export function TechnicalLeadership({ data }: TechnicalLeadershipProps) {
         >
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Key Technical Leaders</CardTitle>
-              <CardDescription>
+              <CardTitle className="font-space">Key Technical Leaders</CardTitle>
+              <CardDescription className="font-ibm">
                 Senior technical team members and their capabilities
               </CardDescription>
             </div>
@@ -308,7 +308,7 @@ export function TechnicalLeadership({ data }: TechnicalLeadershipProps) {
             {data.keyTechnicalLeaders.length > 0 ? (
               data.keyTechnicalLeaders.map((leader, index) => renderTeamMember(leader, index))
             ) : (
-              <p className="text-center text-muted-foreground py-4">
+              <p className="text-center text-muted-foreground py-4 font-ibm">
                 No additional technical leaders identified beyond founders
               </p>
             )}
@@ -324,11 +324,11 @@ export function TechnicalLeadership({ data }: TechnicalLeadershipProps) {
         >
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 font-space">
                 <AlertTriangle className="h-5 w-5 text-yellow-600" />
                 Leadership Gaps & Risks
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="font-ibm">
                 Identified gaps in technical leadership and recommendations
               </CardDescription>
             </div>
@@ -344,17 +344,17 @@ export function TechnicalLeadership({ data }: TechnicalLeadershipProps) {
               <Card key={index} className="border-l-4 border-l-yellow-500">
                 <CardContent className="pt-4">
                   <div className="flex items-start justify-between mb-2">
-                    <h4 className="font-medium">{gap.area}</h4>
-                    <Badge className={getSeverityColor(gap.severity)}>
+                    <h4 className="font-medium font-space">{gap.area}</h4>
+                    <Badge className={cn(getSeverityColor(gap.severity), "font-space")}>
                       {gap.severity}
                     </Badge>
                   </div>
-                  <p className="text-sm text-muted-foreground mb-2">{gap.description}</p>
-                  <div className="text-sm">
-                    <strong>Recommendation:</strong> {gap.recommendation}
+                  <p className="text-sm text-muted-foreground mb-2 font-ibm">{gap.description}</p>
+                  <div className="text-sm font-ibm">
+                    <strong className="font-space">Recommendation:</strong> {gap.recommendation}
                   </div>
-                  <div className="text-sm text-muted-foreground mt-1">
-                    <strong>Timeframe:</strong> {gap.timeframe}
+                  <div className="text-sm text-muted-foreground mt-1 font-ibm">
+                    <strong className="font-space">Timeframe:</strong> {gap.timeframe}
                   </div>
                 </CardContent>
               </Card>
@@ -371,11 +371,11 @@ export function TechnicalLeadership({ data }: TechnicalLeadershipProps) {
         >
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 font-space">
                 <TrendingUp className="h-5 w-5 text-green-600" />
                 Strategic Recommendations
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="font-ibm">
                 Actions to strengthen technical leadership
               </CardDescription>
             </div>
@@ -390,8 +390,8 @@ export function TechnicalLeadership({ data }: TechnicalLeadershipProps) {
             <ul className="space-y-2">
               {data.recommendations.map((recommendation, index) => (
                 <li key={index} className="flex items-start gap-2">
-                  <Badge className="mt-0.5">{index + 1}</Badge>
-                  <span className="text-sm">{recommendation}</span>
+                  <Badge className="mt-0.5 font-space">{index + 1}</Badge>
+                  <span className="text-sm font-ibm">{recommendation}</span>
                 </li>
               ))}
             </ul>

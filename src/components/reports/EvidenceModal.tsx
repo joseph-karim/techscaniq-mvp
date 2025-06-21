@@ -28,6 +28,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+// import { TechScanButton } from '@/components/brand'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
@@ -107,15 +108,15 @@ export function EvidenceModal({
   }
 
   const getConfidenceBadgeColor = (confidence: number) => {
-    if (confidence >= 90) return 'bg-green-100 text-green-800 border-green-200'
-    if (confidence >= 70) return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-    return 'bg-red-100 text-red-800 border-red-200'
+    if (confidence >= 90) return 'bg-signal-green/10 text-signal-green border-signal-green/20'
+    if (confidence >= 70) return 'bg-caution-amber/10 text-caution-amber border-caution-amber/20'
+    return 'bg-risk-red/10 text-risk-red border-risk-red/20'
   }
 
   const getNoteTypeColor = (type: EvidenceNote['type']) => {
     switch (type) {
-      case 'correction': return 'bg-red-100 text-red-800 border-red-200'
-      case 'additional_info': return 'bg-blue-100 text-blue-800 border-blue-200'
+      case 'correction': return 'bg-risk-red/10 text-risk-red border-risk-red/20'
+      case 'additional_info': return 'bg-brand-teal/10 text-brand-teal border-brand-teal/20'
       case 'question': return 'bg-purple-100 text-purple-800 border-purple-200'
       case 'clarification': return 'bg-orange-100 text-orange-800 border-orange-200'
       default: return 'bg-gray-100 text-gray-800 border-gray-200'
@@ -124,9 +125,9 @@ export function EvidenceModal({
 
   const getStatusColor = (status: EvidenceNote['status']) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-      case 'reviewed': return 'bg-blue-100 text-blue-800 border-blue-200'
-      case 'incorporated': return 'bg-green-100 text-green-800 border-green-200'
+      case 'pending': return 'bg-caution-amber/10 text-caution-amber border-caution-amber/20'
+      case 'reviewed': return 'bg-brand-teal/10 text-brand-teal border-brand-teal/20'
+      case 'incorporated': return 'bg-signal-green/10 text-signal-green border-signal-green/20'
       default: return 'bg-gray-100 text-gray-800 border-gray-200'
     }
   }
@@ -137,7 +138,7 @@ export function EvidenceModal({
         {/* Fixed Header */}
         <DialogHeader className="px-6 py-4 border-b bg-gray-50 flex-shrink-0">
           <DialogTitle className="flex items-center text-xl">
-            <Brain className="mr-2 h-5 w-5 text-blue-600" />
+            <Brain className="mr-2 h-5 w-5 text-brand-teal" />
             Evidence Analysis
           </DialogTitle>
           <DialogDescription>
@@ -155,7 +156,7 @@ export function EvidenceModal({
               <TabsTrigger value="notes" className="relative">
                 Notes & Corrections
                 {notes.length > 0 && (
-                  <span className="ml-1 bg-blue-100 text-blue-800 text-xs px-1.5 py-0.5 rounded-full">
+                  <span className="ml-1 bg-brand-teal/10 text-brand-teal text-xs px-1.5 py-0.5 rounded-full">
                     {notes.length}
                   </span>
                 )}
@@ -203,9 +204,9 @@ export function EvidenceModal({
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-sm text-muted-foreground">Evidence Quality</p>
-                            <p className="text-2xl font-bold text-green-600">High</p>
+                            <p className="text-2xl font-bold text-signal-green">High</p>
                           </div>
-                          <TrendingUp className="h-8 w-8 text-green-600" />
+                          <TrendingUp className="h-8 w-8 text-signal-green" />
                         </div>
                       </CardContent>
                     </Card>
@@ -215,11 +216,11 @@ export function EvidenceModal({
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-sm text-muted-foreground">Source Diversity</p>
-                            <p className="text-2xl font-bold text-blue-600">
+                            <p className="text-2xl font-bold text-brand-teal">
                               {new Set(citation.evidence.map(e => e.type)).size}
                             </p>
                           </div>
-                          <Database className="h-8 w-8 text-blue-600" />
+                          <Database className="h-8 w-8 text-brand-teal" />
                         </div>
                       </CardContent>
                     </Card>
@@ -258,7 +259,7 @@ export function EvidenceModal({
               <TabsContent value="evidence" className="mt-0">
                 <div className="space-y-4">
                   {citation.evidence.map((evidence) => (
-                    <Card key={evidence.id} className="border-l-4 border-l-blue-500">
+                    <Card key={evidence.id} className="border-l-4 border-l-brand-teal">
                       <CardHeader 
                         className="cursor-pointer"
                         onClick={() => setExpandedEvidence(
@@ -389,8 +390,8 @@ export function EvidenceModal({
                                 <div
                                   className={cn(
                                     "h-full transition-all",
-                                    citation.confidence >= 90 ? "bg-green-500" :
-                                    citation.confidence >= 70 ? "bg-yellow-500" : "bg-red-500"
+                                    citation.confidence >= 90 ? "bg-signal-green" :
+                                    citation.confidence >= 70 ? "bg-caution-amber" : "bg-risk-red"
                                   )}
                                   style={{ width: `${citation.confidence}%` }}
                                 />
@@ -403,12 +404,12 @@ export function EvidenceModal({
                           </div>
                         </div>
 
-                        <div className="bg-blue-50 p-4 rounded-lg">
+                        <div className="bg-brand-teal/5 p-4 rounded-lg">
                           <div className="flex items-start gap-2">
-                            <Info className="h-4 w-4 text-blue-600 mt-0.5" />
+                            <Info className="h-4 w-4 text-brand-teal mt-0.5" />
                             <div className="text-sm">
-                              <p className="font-medium text-blue-900 mb-1">Confidence Factors:</p>
-                              <ul className="text-blue-800 space-y-1">
+                              <p className="font-medium text-brand-teal mb-1">Confidence Factors:</p>
+                              <ul className="text-brand-teal/80 space-y-1">
                                 <li>• Multiple independent evidence sources</li>
                                 <li>• Direct access to technical systems</li>
                                 <li>• Verified through team interviews</li>

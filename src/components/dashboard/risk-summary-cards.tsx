@@ -8,7 +8,7 @@ const riskData = [
     count: 1, 
     icon: Zap, 
     label: 'Critical', 
-    color: 'text-risk-red bg-red-50 dark:bg-red-950/30 dark:text-red-400',
+    color: 'text-risk-red bg-risk-red/5 dark:bg-risk-red/10 dark:text-risk-red',
     description: 'Key vulnerability in payment system'
   },
   { 
@@ -16,7 +16,7 @@ const riskData = [
     count: 3, 
     icon: AlertTriangle, 
     label: 'High', 
-    color: 'text-orange-500 bg-orange-50 dark:bg-orange-950/30 dark:text-orange-400',
+    color: 'text-caution-amber bg-caution-amber/5 dark:bg-caution-amber/10 dark:text-caution-amber',
     description: 'Security and data concerns'
   },
   { 
@@ -24,7 +24,7 @@ const riskData = [
     count: 8, 
     icon: Bug, 
     label: 'Medium', 
-    color: 'text-caution-amber bg-yellow-50 dark:bg-yellow-950/30 dark:text-yellow-400',
+    color: 'text-caution-amber bg-caution-amber/5 dark:bg-caution-amber/10 dark:text-caution-amber',
     description: 'Performance and scaling issues'
   },
   { 
@@ -32,7 +32,7 @@ const riskData = [
     count: 15, 
     icon: Info, 
     label: 'Low', 
-    color: 'text-signal-green bg-green-50 dark:bg-green-950/30 dark:text-green-400',
+    color: 'text-signal-green bg-signal-green/5 dark:bg-signal-green/10 dark:text-signal-green',
     description: 'Technical debt and minor bugs'
   },
 ]
@@ -74,12 +74,12 @@ function RiskCard({ risk }: RiskCardProps) {
           <Icon className="h-4 w-4" />
         </div>
         
-        <div className="text-2xl font-bold">{risk.count}</div>
+        <div className="text-2xl font-bold font-space">{risk.count}</div>
       </div>
       
       <div className="mt-2 w-full text-center">
-        <div className="text-sm font-medium">{risk.label}</div>
-        <div className="mt-1 text-xs text-muted-foreground line-clamp-1">
+        <div className="text-sm font-medium font-space">{risk.label}</div>
+        <div className="mt-1 text-xs text-muted-foreground line-clamp-1 font-ibm">
           {risk.description}
         </div>
       </div>

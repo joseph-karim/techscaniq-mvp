@@ -158,7 +158,7 @@ export function LangGraphReport({ report }: LangGraphReportProps) {
       {/* Header */}
       <ReportHeader
         company={report.thesis.company}
-        reportType={report.thesis.type === 'sales-intelligence' ? 'sales-intelligence' : 'pe-diligence'}
+        reportType={report.thesis.type === 'sales-intelligence' ? 'sales-intelligence' : 'pe-due-diligence'}
         reportId={`langgraph-${Date.now()}`}
         generatedAt={report.metadata?.reportGeneratedAt || new Date().toISOString()}
         completionTime="Generated with LangGraph"

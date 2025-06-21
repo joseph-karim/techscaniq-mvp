@@ -38,7 +38,7 @@ export const TechScanInput = forwardRef<HTMLInputElement, TechScanInputProps>(
           />
         </div>
         {error && (
-          <p className="mt-2 text-sm text-red-400 font-ibm">{error}</p>
+          <p className="mt-2 text-sm text-risk-red font-ibm">{error}</p>
         )}
       </div>
     );

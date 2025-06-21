@@ -37,19 +37,19 @@ interface ScanRequest {
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case 'completed': return 'bg-green-500'
-    case 'in-progress': return 'bg-blue-500'
-    case 'pending': return 'bg-yellow-500'
-    case 'failed': return 'bg-red-500'
+    case 'completed': return 'bg-signal-green'
+    case 'in-progress': return 'bg-brand-teal'
+    case 'pending': return 'bg-caution-amber'
+    case 'failed': return 'bg-risk-red'
     default: return 'bg-gray-500'
   }
 }
 
 const getHealthScoreColor = (score: number | null) => {
   if (score === null) return 'text-muted-foreground'
-  if (score >= 80) return 'text-green-600'
-  if (score >= 60) return 'text-yellow-600'
-  return 'text-red-600'
+  if (score >= 80) return 'text-signal-green'
+  if (score >= 60) return 'text-caution-amber'
+  return 'text-risk-red'
 }
 
 export default function ReportsListPage() {
@@ -187,7 +187,7 @@ export default function ReportsListPage() {
               </div>
               <div className="flex items-center gap-2">
                 <Badge className="bg-purple-500">Demo</Badge>
-                <Badge className="bg-green-500">Completed</Badge>
+                <Badge className="bg-signal-green">Completed</Badge>
               </div>
             </div>
           </CardHeader>
@@ -199,7 +199,7 @@ export default function ReportsListPage() {
               
               <div className="grid grid-cols-3 gap-4 rounded-lg border p-3">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">9.5</div>
+                  <div className="text-2xl font-bold text-signal-green">9.5</div>
                   <p className="text-xs text-muted-foreground">Opportunity Score</p>
                 </div>
                 <div className="text-center">
@@ -207,7 +207,7 @@ export default function ReportsListPage() {
                   <p className="text-xs text-muted-foreground">Grade</p>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">95%</div>
+                  <div className="text-2xl font-bold text-signal-green">95%</div>
                   <p className="text-xs text-muted-foreground">Confidence</p>
                 </div>
               </div>
@@ -249,7 +249,7 @@ export default function ReportsListPage() {
               </div>
               <div className="flex items-center gap-2">
                 <Badge className="bg-purple-500">Demo</Badge>
-                <Badge className="bg-green-500">Completed</Badge>
+                <Badge className="bg-signal-green">Completed</Badge>
               </div>
             </div>
           </CardHeader>
@@ -261,7 +261,7 @@ export default function ReportsListPage() {
               
               <div className="grid grid-cols-3 gap-4 rounded-lg border p-3">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">8.5</div>
+                  <div className="text-2xl font-bold text-signal-green">8.5</div>
                   <p className="text-xs text-muted-foreground">Opportunity Score</p>
                 </div>
                 <div className="text-center">
@@ -269,7 +269,7 @@ export default function ReportsListPage() {
                   <p className="text-xs text-muted-foreground">Grade</p>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">85%</div>
+                  <div className="text-2xl font-bold text-signal-green">85%</div>
                   <p className="text-xs text-muted-foreground">Confidence</p>
                 </div>
               </div>
@@ -311,7 +311,7 @@ export default function ReportsListPage() {
               </div>
               <div className="flex items-center gap-2">
                 <Badge className="bg-electric-teal">LangGraph AI</Badge>
-                <Badge className="bg-green-500">Completed</Badge>
+                <Badge className="bg-signal-green">Completed</Badge>
               </div>
             </div>
           </CardHeader>
@@ -323,7 +323,7 @@ export default function ReportsListPage() {
               
               <div className="grid grid-cols-3 gap-4 rounded-lg border p-3">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">9.5</div>
+                  <div className="text-2xl font-bold text-signal-green">9.5</div>
                   <p className="text-xs text-muted-foreground">Opportunity Score</p>
                 </div>
                 <div className="text-center">
@@ -331,7 +331,7 @@ export default function ReportsListPage() {
                   <p className="text-xs text-muted-foreground">Grade</p>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">95%</div>
+                  <div className="text-2xl font-bold text-signal-green">95%</div>
                   <p className="text-xs text-muted-foreground">Confidence</p>
                 </div>
               </div>
@@ -372,7 +372,7 @@ export default function ReportsListPage() {
               </div>
               <div className="flex items-center gap-2">
                 <Badge className="bg-purple-500">Demo</Badge>
-                <Badge className="bg-green-500">Completed</Badge>
+                <Badge className="bg-signal-green">Completed</Badge>
               </div>
             </div>
           </CardHeader>
@@ -384,7 +384,7 @@ export default function ReportsListPage() {
               
               <div className="grid grid-cols-3 gap-4 rounded-lg border p-3">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">92</div>
+                  <div className="text-2xl font-bold text-signal-green">92</div>
                   <p className="text-xs text-muted-foreground">Health Score</p>
                 </div>
                 <div className="text-center">
@@ -392,7 +392,7 @@ export default function ReportsListPage() {
                   <p className="text-xs text-muted-foreground">Grade</p>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">95%</div>
+                  <div className="text-2xl font-bold text-signal-green">95%</div>
                   <p className="text-xs text-muted-foreground">AI Confidence</p>
                 </div>
               </div>
@@ -434,7 +434,7 @@ export default function ReportsListPage() {
               </div>
               <div className="flex items-center gap-2">
                 <Badge className="bg-purple-500">Demo</Badge>
-                <Badge className="bg-green-500">Completed</Badge>
+                <Badge className="bg-signal-green">Completed</Badge>
               </div>
             </div>
           </CardHeader>

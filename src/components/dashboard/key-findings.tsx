@@ -65,10 +65,10 @@ const categoryIcons = {
 
 // Severity colors mapping
 const severityColors = {
-  critical: 'text-white bg-red-500',
-  high: 'text-white bg-orange-500',
-  medium: 'text-white bg-yellow-500',
-  low: 'text-white bg-green-500',
+  critical: 'text-white bg-risk-red',
+  high: 'text-white bg-caution-amber',
+  medium: 'text-white bg-caution-amber',
+  low: 'text-white bg-signal-green',
 }
 
 interface KeyFindingsProps {
@@ -99,8 +99,8 @@ export function KeyFindings({ showAll = false }: KeyFindingsProps) {
               </div>
               
               <div className="flex-1 space-y-1">
-                <p className="font-medium leading-none">{finding.title}</p>
-                <p className="text-xs text-muted-foreground">
+                <p className="font-medium leading-none font-space">{finding.title}</p>
+                <p className="text-xs text-muted-foreground font-ibm">
                   {finding.company} • {finding.category.charAt(0).toUpperCase() + finding.category.slice(1)}
                 </p>
               </div>
@@ -110,7 +110,7 @@ export function KeyFindings({ showAll = false }: KeyFindingsProps) {
       })}
       
       {!showAll && (
-        <Link to="/reports" className="block text-center text-sm text-primary hover:underline">
+        <Link to="/reports" className="block text-center text-sm text-primary hover:underline font-ibm">
           View all findings
         </Link>
       )}

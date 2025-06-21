@@ -36,10 +36,10 @@ function ReportHeader({ reportType, reportId, onDownload, onShare }: ReportHeade
   return (
     <div className="flex items-center justify-between mb-6">
       <div>
-        <h1 className="text-2xl font-bold">
+        <h1 className="text-2xl font-bold font-space">
           {reportTypeLabels[reportType as keyof typeof reportTypeLabels] || reportType}
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Report ID: {reportId}</p>
+        <p className="text-sm text-muted-foreground mt-1 font-ibm">Report ID: {reportId}</p>
       </div>
       <div className="flex items-center gap-2">
         <Button variant="outline" size="sm" onClick={onDownload}>
@@ -99,7 +99,7 @@ export function UnifiedReportViewer({
       case 'investment-analysis':
         return <LangGraphReportContent data={reportData} />
       default:
-        return <div>Unknown report type</div>
+        return <div className="font-ibm">Unknown report type</div>
     }
   }
 
@@ -110,8 +110,8 @@ export function UnifiedReportViewer({
         <Alert className="mb-4 border-orange-200 bg-orange-50">
           <Info className="h-4 w-4" />
           <AlertDescription>
-            <Badge variant="outline" className="mr-2 bg-orange-100 text-orange-800">Demo</Badge>
-            This is a demonstration report for sales and training purposes.
+            <Badge variant="outline" className="mr-2 bg-orange-100 text-orange-800 font-space">Demo</Badge>
+            <span className="font-ibm">This is a demonstration report for sales and training purposes.</span>
           </AlertDescription>
         </Alert>
       )}
