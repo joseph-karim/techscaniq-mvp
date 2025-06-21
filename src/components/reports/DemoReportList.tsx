@@ -47,11 +47,21 @@ const getReportIcon = (reportType: string): React.ReactNode => {
 export function DemoReportList({ showDemoReports, userRole }: DemoReportListProps) {
   const demoReports: DemoReport[] = [
     {
+      id: 'cibc-latest-2025-06-21',
+      company_name: 'CIBC',
+      report_type: 'sales-intelligence',
+      title: 'CIBC Adobe Sales Intelligence - Latest LangGraph Report',
+      description: 'Comprehensive analysis with 1,262 evidence pieces from LangGraph pipeline resilience test',
+      created_at: '2025-06-21T02:53:27Z',
+      status: 'completed',
+      isDemo: true
+    },
+    {
       id: 'demo-cibc-adobe-2024',
       company_name: 'CIBC',
       report_type: 'sales-intelligence',
-      title: 'CIBC Adobe Sales Intelligence 2024',
-      description: 'Comprehensive analysis of Adobe adoption opportunities at CIBC',
+      title: 'CIBC Adobe Sales Intelligence 2024 (Legacy)',
+      description: 'Previous demo report - replaced by latest LangGraph report',
       created_at: '2024-01-15T10:30:00Z',
       status: 'completed',
       isDemo: true
@@ -84,8 +94,17 @@ export function DemoReportList({ showDemoReports, userRole }: DemoReportListProp
   }
 
   const handleViewDemo = (reportId: string) => {
-    // Open in new tab to preserve current state
-    window.open(`/admin/reports/${reportId}`, '_blank')
+    // Route to appropriate admin page based on report type
+    if (reportId.startsWith('cibc-latest-') || reportId.startsWith('cibc-adobe-integrated-')) {
+      // Use LangGraph report route for new CIBC reports
+      window.open(`/admin/langgraph-report/${reportId}`, '_blank')
+    } else if (reportId === 'demo-cibc-adobe-2024') {
+      // Use sales intelligence route for legacy CIBC report
+      window.open(`/admin/sales-intelligence/cibc`, '_blank')
+    } else {
+      // Default behavior for other demo reports
+      window.open(`/admin/reports/${reportId}`, '_blank')
+    }
   }
 
   return (

@@ -237,7 +237,9 @@ export async function loadLangGraphReportWithFallback(reportId: string): Promise
   // Check if we're dealing with a demo report that should use local file
   const demoReports: Record<string, string> = {
     '9f8e7d6c-5b4a-3210-fedc-ba9876543210': '/data/langgraph-reports/9f8e7d6c-5b4a-3210-fedc-ba9876543210.json',
-    'cibc-adobe-sales-2024': '/data/langgraph-reports/9f8e7d6c-5b4a-3210-fedc-ba9876543210.json'
+    'cibc-adobe-sales-2024': '/data/langgraph-reports/9f8e7d6c-5b4a-3210-fedc-ba9876543210.json',
+    'cibc-latest-2025-06-21': '/data/langgraph-reports/cibc-latest-2025-06-21.json',
+    'cibc-adobe-integrated-2025-06-21': '/data/langgraph-reports/cibc-latest-2025-06-21.json'
   }
 
   // For demo reports, always use local file first
