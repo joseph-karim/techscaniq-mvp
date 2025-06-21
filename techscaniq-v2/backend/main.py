@@ -18,6 +18,7 @@ from typing import Dict, Any
 import asyncio
 
 from .api import code_analysis
+from .api import langgraph_routes
 from .services.mcp_client_service import mcp_client
 
 # Configure logging
@@ -152,6 +153,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 # Include routers
 app.include_router(code_analysis.router)
+app.include_router(langgraph_routes.router)
 
 
 # Root endpoint
@@ -164,7 +166,9 @@ async def root():
         "status": "running",
         "endpoints": {
             "code_analysis": "/api/code-analysis",
-            "health": "/api/code-analysis/health"
+            "langgraph_reports": "/api/langgraph",
+            "health": "/api/code-analysis/health",
+            "langgraph_health": "/api/langgraph/health"
         }
     }
 

@@ -300,17 +300,17 @@ export default function ReportsListPage() {
           <CardHeader>
             <div className="flex items-start justify-between">
               <div className="space-y-1">
-                <CardTitle className="text-xl font-heading">CIBC - Sales Intelligence Report (LangGraph)</CardTitle>
+                <CardTitle className="text-xl font-heading">CIBC - Sales Intelligence Report (Latest LangGraph)</CardTitle>
                 <CardDescription className="flex items-center gap-2">
                   <Building2 className="h-4 w-4" />
                   Adobe Experience Cloud
                   <span className="text-muted-foreground">•</span>
                   <Calendar className="h-4 w-4" />
-                  Demo Report
+                  June 21, 2025
                 </CardDescription>
               </div>
               <div className="flex items-center gap-2">
-                <Badge className="bg-electric-teal">LangGraph AI</Badge>
+                <Badge className="bg-electric-teal">Latest Pipeline</Badge>
                 <Badge className="bg-signal-green">Completed</Badge>
               </div>
             </div>
@@ -318,7 +318,7 @@ export default function ReportsListPage() {
           <CardContent>
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                Deep research analysis identifying $60M+ digital transformation opportunity with Adobe Experience Cloud
+                Latest LangGraph pipeline analysis with comprehensive evidence gathering - identifies $60M+ digital transformation opportunity
               </p>
               
               <div className="grid grid-cols-3 gap-4 rounded-lg border p-3">
@@ -338,11 +338,11 @@ export default function ReportsListPage() {
 
               <div className="flex items-center justify-between pt-2">
                 <div className="text-sm text-muted-foreground">
-                  Industry: Financial Services • Evidence: 2,544 pieces
+                  Industry: Financial Services • Evidence: 1,262 pieces
                 </div>
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" asChild>
-                    <Link to="/admin/langgraph-report/9f8e7d6c-5b4a-3210-fedc-ba9876543210">
+                    <Link to={isAdmin ? "/admin/langgraph-report/cibc-latest-2025-06-21" : "/reports/langgraph/cibc-latest-2025-06-21"}>
                       <Eye className="mr-2 h-4 w-4" />
                       View Report
                     </Link>

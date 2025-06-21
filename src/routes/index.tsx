@@ -125,6 +125,12 @@ export const routeConfig: RouteConfig[] = [
         showInNav: false
       },
       {
+        path: 'reports/langgraph/:id',
+        element: <AdminLangGraphReportPage />,
+        label: 'LangGraph Report',
+        showInNav: false
+      },
+      {
         path: 'analytics',
         element: <AnalyticsPage />,
         label: 'Analytics',

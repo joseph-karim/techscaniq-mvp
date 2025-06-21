@@ -36,7 +36,11 @@
     "worker:evidence:deep": "tsx src/workers/evidence-collection-worker-deep-simple.ts",
     "worker:report:active": "tsx src/workers/report-generation-worker-langgraph-v4-backend.ts",
     "worker:report:langgraph:backend": "tsx src/workers/report-generation-worker-langgraph-v4-backend.ts",
-    "workers:modern": "concurrently \"npm run worker:evidence:active\" \"npm run worker:report:active\""
+    "workers:modern": "concurrently \"npm run worker:evidence:active\" \"npm run worker:report:active\"",
+    "sync-reports": "node scripts/sync-reports.cjs sync",
+    "sync-reports:watch": "node scripts/sync-reports.cjs watch",
+    "sync-reports:metadata": "node scripts/sync-reports.cjs metadata",
+    "pipeline:sync": "npm run sync-reports"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.53.0",

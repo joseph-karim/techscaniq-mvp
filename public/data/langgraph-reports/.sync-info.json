@@ -1,0 +1,10 @@
+{
+  "lastSync": "2025-06-21T04:20:44.501Z",
+  "totalReports": 7,
+  "syncedReports": 7,
+  "sourceDirs": [
+    "./techscaniq-v2/scripts/data/integrated-results",
+    "./techscaniq-v2/data/integrated-results"
+  ],
+  "targetDir": "./public/data/langgraph-reports"
+}
